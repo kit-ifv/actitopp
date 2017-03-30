@@ -1,0 +1,17 @@
+paramname;in;out;alternative;contextIdentifier
+beruf_erwerbstaetig;yes;no;no;default
+beruf_schueler;yes;no;no;default
+beruf_azubi;yes;no;no;default
+alter_10bis17;yes;no;no;default
+alter_18bis25;yes;no;no;default
+alter_26bis35;yes;no;no;default
+alter_36bis50;yes;no;no;default
+anztage_w;yes;no;no;person
+1;no;yes;yes;person
+2;no;yes;yes;person
+3;no;yes;yes;person
+4;no;yes;yes;person
+5;no;yes;yes;person
+6;no;yes;yes;person
+7;no;yes;yes;person
+0;no;yes;yes;person
