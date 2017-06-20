@@ -12,7 +12,7 @@ public class ExampleActiTopp {
 	public static void main(String[] args) {
 		
 		ActitoppPerson testperson = new ActitoppPerson(
-				99, 	// PersIndex
+				10, 	// PersIndex
 				0, 		// Kinder 0-10
 				1, 		// Kinder unter 18
 				55, 	// Alter
@@ -38,3 +38,12 @@ public class ExampleActiTopp {
 	}
 
 }
+
+
+/*
+ * 
+ * 12, 	// Alter
+ * 5, 		// Beruf
+ * 
+ */
+

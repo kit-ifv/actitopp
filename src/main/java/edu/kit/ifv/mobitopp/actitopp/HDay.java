@@ -18,7 +18,6 @@ public class HDay
 	
 	private HWeekPattern pattern;
   private int weekday;
-  private Map<Integer, HTour> toursmap;
   private List<HTour> tours;
     
    
@@ -56,11 +55,6 @@ public class HDay
 	  return tours;
 	}
   
-  public Map<Integer, HTour> getTours_NEW()
-	{
-		assert toursmap != null : "Tourliste nicht initilaisiert";
-	  return toursmap;
-	}
   
   public void addTour(HTour tour)
   {

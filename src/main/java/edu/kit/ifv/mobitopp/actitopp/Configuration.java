@@ -16,8 +16,8 @@ public class Configuration {
  * 
  * 		erlaubte Konfigurationen:
  * 
- * 		MOP					=	Nutzung der Parameterschätzungen des MOP 2004-2013
- * 		Stuttgart		=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
+ * 		mop					=	Nutzung der Parameterschätzungen des MOP 2004-2013
+ * 		stuttgart		=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
  */
 	
 	public static final String parameterset = "mop";
@@ -158,7 +158,7 @@ public class Configuration {
  */
   
 	//ganzzahlige Prozentangabe, um die Bevölkerunssynthese nur für einen bestimmten Anteil der Bevölkerung durchzuführen
-	public static final int percent_bevsynthese = 10;	
+	public static final int percent_bevsynthese = 1;	
 	
 	// steuert, alle wieviele Datensätze das Logging für die actiTopp Log-Dateien aktiviert wird
 	public static final int anzexportds = 20000;
