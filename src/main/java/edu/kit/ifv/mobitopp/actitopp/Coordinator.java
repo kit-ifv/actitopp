@@ -553,6 +553,7 @@ public class Coordinator
 		      // Speichere Ergebnisse ab
 		      currentActivity.setDuration(step.getChosenTime());
 		      currentActivity.setEstimatedTripTime(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
+		      if (currentActivity.isActivityLastinTour()) currentActivity.setEstimatedTripTimeAfterActivity(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
   			}
   		}
     }
@@ -625,6 +626,7 @@ public class Coordinator
   		      // Speichere Ergebnisse ab
   		      currentActivity.setDuration(step.getChosenTime());
   		      currentActivity.setEstimatedTripTime(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
+  		      if (currentActivity.isActivityLastinTour()) currentActivity.setEstimatedTripTimeAfterActivity(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
           }
         }
       }

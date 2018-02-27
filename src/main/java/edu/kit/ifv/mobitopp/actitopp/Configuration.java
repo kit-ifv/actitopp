@@ -16,14 +16,15 @@ public class Configuration {
  * 
  * 		erlaubte Konfigurationen:
  * 
- * 		mop					=	Nutzung der Parameterschätzungen des MOP 2004-2013
- * 		stuttgart		=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
+ * 		mopv10					=	Nutzung der Parameterschätzungen des MOP 2004-2013 (actiTopp Version 1.0)
+ * 		mopv11					= Nutzung der Parameterschätzungen des MOP 2004-2013 (actiTopp Version 1.1)
+ * 		stuttgart				=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
  */
 	
-	public static final String parameterset = "mop";
+	public static final String parameterset = "mopv10";
 	
 	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
-  public static final String[] flowlist_intials =
+  public static final String[] flowlist_initials =
   { 		
   		"1A", "1B", "1C", "1D", "1E", "1F", 
   		"2A", 
@@ -42,7 +43,7 @@ public class Configuration {
 	
   
   //Angaben der Stufen, die Listen mit Häufigkeitsverteilungen verwenden
-  public static final String[] timedistributions_intials =
+  public static final String[] timedistributions_initials =
   { 
   		"7K", "7L", "7M", "7N", "7O", 
   		"8C", "8E", "8K", 

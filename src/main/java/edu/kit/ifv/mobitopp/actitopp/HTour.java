@@ -173,7 +173,7 @@ public class HTour
         {       	
             sum += act.getDuration() + act.getEstimatedTripTime();
         }
-        sum+= Configuration.FIXED_TRIP_TIME_ESTIMATOR;
+        sum+= getActivity(getHighestActivityIndex()).getEstimatedTripTimeAfterActivity();
         
         return sum;
     }
@@ -228,6 +228,12 @@ public class HTour
     	
     }
     
+    /**
+     *
+     * Gibt den Index der erste Aktivität der Tour zurück
+     * 
+     * @return
+     */
     public int getLowestActivityIndex()
     {
         int min = +99;
@@ -239,6 +245,13 @@ public class HTour
         return min;
     }
     
+    
+    /**
+    *
+    * Gibt den Index der letzten Aktivität der Tour zurück
+    * 
+    * @return
+    */
     public int getHighestActivityIndex()
     {
         int max = -99;
@@ -253,6 +266,7 @@ public class HTour
         return max;
     }
 
+    
     public int getAmountOfActivities()
     {
     	return getActivities().size();

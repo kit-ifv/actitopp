@@ -26,6 +26,12 @@ public class HActivity
   private int starttime 					= -1;
   private int estimatedTripTime 	= -1;
   
+  /*
+   * erwartete Wegezeit nach der Aktivität
+   * nur relevant, falls Aktivität die letzte auf der Tour ist.
+   */
+  private int estimatedTripTimeAfterActivity = -1;
+  
   private byte mobiToppActType		= -1;
            
 
@@ -164,6 +170,24 @@ public class HActivity
 		this.estimatedTripTime = estimatedTripTime;
 	}
 
+	/**
+	 * @return the estimatedTripTimeAfterActivity
+	 */
+	public int getEstimatedTripTimeAfterActivity() 
+	{
+		assert estimatedTripTimeAfterActivity != -1 : "estimatedTripTimeAfterActivity ist zum Zugriffszeitpunkt nicht initialisiert // nur bei letzter Aktivität in Tour gesetzt";
+		return estimatedTripTimeAfterActivity;
+	}
+
+	/**
+	 * @param estimatedTripTimeAfterActivity the estimatedTripTimeAfterActivity to set
+	 */
+	public void setEstimatedTripTimeAfterActivity(int estimatedTripTimeAfterActivity) 
+	{
+		assert estimatedTripTimeAfterActivity>0 && isActivityLastinTour() : "zu setzende Wegzeit ist nicht größer 0 oder Aktivität ist nicht die letzte in der Tour";
+		this.estimatedTripTimeAfterActivity = estimatedTripTimeAfterActivity;
+	}
+
 	public byte getMobiToppActType() 
 	{
 		assert Configuration.ACTIVITY_TYPES_mobiTopp.contains(mobiToppActType) : "ungültige Aktivität - nicht in ACTIVITYTYPES_mobiTopp enthalten"; 
@@ -263,6 +287,71 @@ public class HActivity
 	public boolean isActivityLastinTour()
 	{
 		return getTour().getHighestActivityIndex()==getIndex();
+	}
+	
+	
+	/**
+	 * 
+	 * Bestimmt, ob vor der Aktivität ein Arbeitspendelweg von Zuhause stattfindet.
+	 * Wird im Modellverlauf zur besseren Bestimmung von default-Wegezeiten genutzt
+	 * Kann nur sicher belegt werden, ...
+	 * 	... wenn es die erste Aktivität der Tour ist
+	 *  ... der Zweck "W" ist
+	 *  ... die Person eine Arbeitspendelentfernung hat
+	 * 
+	 * @return
+	 */
+	public boolean hasWorkCommutingTripbeforeActivity()
+	{
+		return ((isActivityFirstinTour() && getType()=='W' && (getPerson().getCommutingdistance_work() != 0.0)) ? true : false); 
+	}
+	
+	/**
+	 * 	 
+	 * Bestimmt, ob nach der Aktivität ein Arbeitspendelweg nach Zuhause stattfindet.
+	 * Wird im Modellverlauf zur besseren Bestimmung von default-Wegezeiten genutzt
+	 * Kann nur sicher belegt werden, ...
+	 * 	... wenn es die letzte Aktivität der Tour ist
+	 *  ... der Zweck "W" ist
+	 *  ... die Person eine Arbeitspendelentfernung hat
+	 * 
+	 * @return
+	 */
+	public boolean hasWorkCommutingTripAfterActivity()
+	{
+		return ((isActivityLastinTour() && getType()=='W' && (getPerson().getCommutingdistance_work() != 0.0)) ? true : false); 
+	}
+	
+	/**
+	 * 
+	 * Bestimmt, ob vor der Aktivität ein Bildungspendelweg von Zuhause stattfindet.
+	 * Wird im Modellverlauf zur besseren Bestimmung von default-Wegezeiten genutzt
+	 * Kann nur sicher belegt werden, ...
+	 * 	... wenn es die erste Aktivität der Tour ist
+	 *  ... der Zweck "E" ist
+	 *  ... die Person eine Bildungspendelentfernung hat
+	 *  
+	 * @return
+	 */
+	public boolean hasEducationCommutingTripbeforeActivity()
+	{
+		return ((isActivityFirstinTour() && getType()=='E' && (getPerson().getCommutingdistance_education() != 0.0)) ? true : false); 
+	}
+	
+	/**
+	 * 	 
+	 * Bestimmt, ob nach der Aktivität ein Bildungspendelweg nach Zuhause stattfindet.
+	 * Wird im Modellverlauf zur besseren Bestimmung von default-Wegezeiten genutzt
+	 * Kann nur sicher belegt werden, ...
+	 * 	... wenn es die letzte Aktivität der Tour ist
+	 *  ... der Zweck "E" ist
+	 *  ... die Person eine Bildungspendelentfernung hat
+	 * 
+	 * @return
+	 */
+	public boolean hasEducationCommutingTripAfterActivity()
+	{
+		return ((isActivityLastinTour() && getType()=='E' && (getPerson().getCommutingdistance_education() != 0.0)) ? true : false); 
 	}
 	
 	/**

@@ -55,7 +55,7 @@ public class CSVModelFlowListsLoader
 
         if (in)
         {
-            assert (splitted[4].equals("default") || splitted[4].equals("person") || splitted[4].equals("day") || splitted[4].equals("tour") || splitted[4].equals("activity")) : "wrong Reference Value for InputParamMap - " + splitted[4] + " - SourceLocation: " + input;
+            assert (splitted[4].equals("default") || splitted[4].equals("person") || splitted[4].equals("day") || splitted[4].equals("tour") || splitted[4].equals("activity")) : "wrong Reference Value for InputParamMap - " + splitted[1] + " - " + splitted[4] + " - SourceLocation: " + input;
             inParamMap.put(paramName,splitted[4]);
         }
 

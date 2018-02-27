@@ -131,7 +131,7 @@ public class ModelFileBase
   private void initFlowLists() throws FileNotFoundException, IOException
   {
   	// Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
-    String[] toInitialize = Configuration.flowlist_intials;
+    String[] toInitialize = Configuration.flowlist_initials;
 
     // Initialisierung der Listen aller Stufen
     for (String s : toInitialize)
@@ -181,7 +181,7 @@ public class ModelFileBase
   private void initTimeDistributionLists() throws FileNotFoundException, IOException
   {
   	// Angabe der Stufen, die Zeitverteilungen verwenden
-    String[] toInitialize = Configuration.timedistributions_intials;
+    String[] toInitialize = Configuration.timedistributions_initials;
     
     // Angabe der maximalen Kategorie-Indizes
     int[] toInitializeMaxIndizes = Configuration.timeDistributions_MaxIndizes;

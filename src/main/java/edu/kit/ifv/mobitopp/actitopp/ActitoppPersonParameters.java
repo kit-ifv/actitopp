@@ -249,6 +249,71 @@ public enum ActitoppPersonParameters {
 			return actitoppPerson.getNumberofcarsinhousehold();
 		}
 	},	
+	
+	/*
+	 * Pendeln 0-5 Kilometer
+	 */	
+	pendeln_0bis5km("pendeln_0bis5km") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
+			return ((commute_distance > 0 && commute_distance <= 5) ? 1.0 : 0.0);
+		}
+	},	
+	
+	/*
+	 * Pendeln 5-10 Kilometer
+	 */	
+	pendeln_5bis10km("pendeln_5bis10km") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
+			return ((commute_distance > 5 && commute_distance <= 10) ? 1.0 : 0.0);
+		}
+	},	
+	
+	/*
+	 * Pendeln 10-20 Kilometer
+	 */	
+	pendeln_10bis20km("pendeln_10bis20km") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
+			return ((commute_distance > 10 && commute_distance <= 20) ? 1.0 : 0.0);
+		}
+	},	
+	
+	/*
+	 * Pendeln 20-50 Kilometer
+	 */	
+	pendeln_20bis50km("pendeln_20bis50km") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
+			return ((commute_distance > 20 && commute_distance <= 50) ? 1.0 : 0.0);
+		}
+	},	
+	
+	/*
+	 * Pendeln über 50 Kilometer
+	 */	
+	pendeln_ueber50km("pendeln_ueber50km") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
+			return ((commute_distance > 50) ? 1.0 : 0.0);
+		}
+	},	
 		
 	/*
 	 * Anzahl Arbeitstage (Stufe 1A)

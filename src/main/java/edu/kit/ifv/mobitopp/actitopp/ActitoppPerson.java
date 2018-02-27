@@ -28,6 +28,10 @@ public class ActitoppPerson
 	private int areatype;
 	private int numberofcarsinhousehold;	
 	
+	// Pendeldistanzen sind als Default = 0, das heißt nicht verfügbar oder Person pendelt nicht
+	private double commutingdistance_work = 0.0;
+	private double commutingdistance_education = 0.0;
+	
 	
 	/**
 	 * Konstruktor zum Erstellen einer Person
@@ -63,6 +67,48 @@ public class ActitoppPerson
 		this.attributes = new HashMap<String, Double>();
 		
 		}
+	
+	
+	/**
+	 * Konstruktor zum Erstellen einer Person
+	 * 
+	 * @param PersIndex
+	 * @param children0_10
+	 * @param children_u18
+	 * @param age
+	 * @param employment
+	 * @param gender
+	 * @param areatype
+	 * @param numberofcarsinhousehold
+	 * @param commutingdistance_work
+	 * @param commutingdistance_education
+	 */
+	public ActitoppPerson(
+			int PersIndex,
+			int children0_10,
+			int children_u18,
+			int age,
+			int employment,
+			int gender,
+			int areatype,
+			int numberofcarsinhousehold,
+			double commutingdistance_work,
+			double commutingdistance_education
+	) {
+		this.PersIndex = PersIndex;
+		this.children0_10 = children0_10;
+		this.children_u18 = children_u18;
+		this.age = age;
+		this.employment = employment;
+		this.gender = gender;
+		this.areatype = areatype;
+		this.numberofcarsinhousehold = numberofcarsinhousehold;  
+		this.setCommutingdistance_work(commutingdistance_work);
+		this.setCommutingdistance_education(commutingdistance_education);
+		
+		this.attributes = new HashMap<String, Double>();
+		
+		}	
 
 	
   /**
@@ -199,6 +245,39 @@ public class ActitoppPerson
 	public void setNumberofcarsinhousehold(int numberofcarsinhousehold) {
 		this.numberofcarsinhousehold = numberofcarsinhousehold;
 	}
+	
+	
+	/**
+	 * @return the commutingdistance_work
+	 */
+	public double getCommutingdistance_work() {
+		return commutingdistance_work;
+	}
+
+
+	/**
+	 * @param commutingdistance_work the commutingdistance_work to set
+	 */
+	public void setCommutingdistance_work(double commutingdistance_work) {
+		this.commutingdistance_work = commutingdistance_work;
+	}
+
+
+	/**
+	 * @return the commutingdistance_education
+	 */
+	public double getCommutingdistance_education() {
+		return commutingdistance_education;
+	}
+
+
+	/**
+	 * @param commutingdistance_education the commutingdistance_education to set
+	 */
+	public void setCommutingdistance_education(double commutingdistance_education) {
+		this.commutingdistance_education = commutingdistance_education;
+	}
+	
 
 	/**
 	 * @param attributes spezifischesAttribut für Map
@@ -255,6 +334,11 @@ public class ActitoppPerson
 		message.append("\n - Pkw im HH : ");
 		message.append(getNumberofcarsinhousehold());		
 
+		message.append("\n - Pendeldistanz Arbeiten : ");
+		message.append(getCommutingdistance_work());		
+		
+		message.append("\n - Pendeldistanz Bildung : ");
+		message.append(getCommutingdistance_education());		
 		
 		return message.toString();
 	}
@@ -318,5 +402,8 @@ public class ActitoppPerson
     }
     return false;
 	}
+
+
+
 	
 }
