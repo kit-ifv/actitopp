@@ -552,8 +552,7 @@ public class Coordinator
 		     
 		      // Speichere Ergebnisse ab
 		      currentActivity.setDuration(step.getChosenTime());
-		      currentActivity.setEstimatedTripTime(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
-		      if (currentActivity.isActivityLastinTour()) currentActivity.setEstimatedTripTimeAfterActivity(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
+		      currentActivity.calculateAndSetTripTimes();
   			}
   		}
     }
@@ -625,8 +624,7 @@ public class Coordinator
   		     
   		      // Speichere Ergebnisse ab
   		      currentActivity.setDuration(step.getChosenTime());
-  		      currentActivity.setEstimatedTripTime(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
-  		      if (currentActivity.isActivityLastinTour()) currentActivity.setEstimatedTripTimeAfterActivity(Configuration.FIXED_TRIP_TIME_ESTIMATOR);
+  		      currentActivity.calculateAndSetTripTimes();
           }
         }
       }
@@ -1556,6 +1554,7 @@ public class Coordinator
     // Auf die untere Grenze kommt noch die Zeit für den Startweg der aktuellen Tour dazu
     lowerbound += Configuration.FIXED_TRIP_TIME_ESTIMATOR;
     
+    
     // Die obere Grenze wird auf maximal 23.59 Uhr nachts gesetzt für den Startzeitpunkt der Tour
     upperbound = Math.min(upperbound, 1439);
     
@@ -1834,7 +1833,7 @@ public class Coordinator
     	assert duration1>0 : "Fehler - keine Home-Aktivität zu Beginn möglich!";
     	if (duration1>0)
     	{
-    		pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, duration1, 0, 0));
+    		pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, duration1, 0));
     	}
     	
     	// Durchlaufe alle Aktivitäten in der Woche - bis auf die letzte
@@ -1854,7 +1853,7 @@ public class Coordinator
     			// Füge Heimaktivität in Liste hinzu
     			if (duration2>0)
     			{
-    				pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration2, ende_tour%1440, Configuration.FIXED_TRIP_TIME_ESTIMATOR));
+    				pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration2, ende_tour%1440));
     			}
     		}
     	}
@@ -1869,13 +1868,13 @@ public class Coordinator
     		// Bestimme zugehörigen Tag zu der Heimaktivität
     		int day = (int) ende_lastTour/1440;
     		// Füge Heimaktivität in Liste hinzu
-    		pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration3, ende_lastTour%1440, Configuration.FIXED_TRIP_TIME_ESTIMATOR));
+    		pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration3, ende_lastTour%1440));
     	}
   	}
   	// In diesem Fall ist die Aktivitätenliste komplett leer - erzeuge eine Heimaktivität für die ganze Woche
     else
     {
-    	pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, 10080, 0, 0));
+    	pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, 10080, 0));
     }
   }
   

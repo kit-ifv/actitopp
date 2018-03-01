@@ -296,11 +296,23 @@ public class HWeekPattern
   	for (int i=0 ; i< listenkopie.size() ; i++)
   	{
   		HActivity act = listenkopie.get(i);   		
-  		if (act.getEstimatedTripTime()!=0)
+  		if (!act.isHomeActivity() && act.getEstimatedTripTime()!=0)
   		{
-  			System.out.println(i + " Weg : Start " + act.getTripStartTimeWeekContext() + " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTime()));
+  			System.out.println(i 		+ " Weg : Start " + act.getTripStartTimeWeekContext() 
+  															+ " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTime())
+  															+ " Dauer " + act.getEstimatedTripTime()
+  												);
   		}
+  		
   		System.out.println(i + " Akt : " + act);
+  		
+  		if (!act.isHomeActivity() && act.getEstimatedTripTimeAfterActivity()!=0)
+  		{
+  			System.out.println(i 		+ " Weg (letzer in Tour) : Start " + act.getTripStartTimeAfterActivityWeekContext() 
+  															+ " Ende " + (act.getTripStartTimeAfterActivityWeekContext()+act.getEstimatedTripTimeAfterActivity())
+  															+ " Dauer " + act.getEstimatedTripTimeAfterActivity()
+  												);
+  		}
   	}
   }
   

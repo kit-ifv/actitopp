@@ -1,4 +1,6 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp.demo;
+
+import edu.kit.ifv.mobitopp.actitopp.*;
 
 public class ExampleActiTopp {
 	
@@ -11,8 +13,8 @@ public class ExampleActiTopp {
 	 */
 	public static void main(String[] args) {
 
-/*
- 
+
+
 		ActitoppPerson testperson = new ActitoppPerson(
 				10, 	// PersIndex
 				0, 		// Kinder 0-10
@@ -24,7 +26,7 @@ public class ExampleActiTopp {
 				2			// Pkw im HH
 				);		
 		System.out.println(testperson);
-			
+					
 		try 
 		{
 			testperson.generateSchedule(fileBase, randomgenerator);
@@ -36,8 +38,7 @@ public class ExampleActiTopp {
 		
 		//testperson.getweekPattern().printOutofHomeActivitiesList();
 		testperson.getWeekPattern().printAllActivitiesList();
-
-*/		
+	
 		
 		
 		
@@ -54,7 +55,7 @@ public class ExampleActiTopp {
 				0.0		// Pendeldistanz zu Bildungszwecken in Kilometern (0 falls kein Pendeln)
 				);		
 		System.out.println(testperson2);
-			
+					
 		try 
 		{
 			testperson2.generateSchedule(fileBase, randomgenerator);
@@ -77,12 +78,3 @@ public class ExampleActiTopp {
 	}
 
 }
-
-
-/*
- * 
- * 12, 	// Alter
- * 5, 		// Beruf
- * 
- */
-

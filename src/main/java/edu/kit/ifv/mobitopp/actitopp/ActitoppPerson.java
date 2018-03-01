@@ -278,6 +278,45 @@ public class ActitoppPerson
 		this.commutingdistance_education = commutingdistance_education;
 	}
 	
+	/**
+	 * 
+	 * @return the commutingduration_work [min]
+	 */
+	public int getCommutingDuration_work()
+	{
+		// mittlere Pendelgeschwindigkeit in km/h wird je gruppierter Pendelentfernung festgelegt
+		// die mittleren Geschwindigkeiten wurden über alle Pendelwege des MOP 2004-2013 ermittelt
+		double commutingspeed_work;
+		if 			(commutingdistance_work>0  && commutingdistance_work <= 5)  commutingspeed_work = 16;
+		else if (commutingdistance_work>5  && commutingdistance_work <= 10) commutingspeed_work = 29;
+		else if (commutingdistance_work>10 && commutingdistance_work <= 20) commutingspeed_work = 38;
+		else if (commutingdistance_work>20 && commutingdistance_work <= 50) commutingspeed_work = 51;
+		else if (commutingdistance_work>50) 																commutingspeed_work = 67;
+		else																																commutingspeed_work = 32;
+		
+		return (int) Math.round((commutingdistance_work/commutingspeed_work)*60);
+	}
+	
+	
+	/**
+	 * 
+	 * @return the commutingduration_education [min]
+	 */
+	public int getCommutingDuration_education()
+	{
+		// mittlere Pendelgeschwindigkeit in km/h wird je gruppierter Pendelentfernung festgelegt
+		// die mittleren Geschwindigkeiten wurden über alle Pendelwege des MOP 2004-2013 ermittelt
+		double commutingspeed_education;
+		if 			(commutingdistance_education>0  && commutingdistance_education <= 5)  commutingspeed_education = 12;
+		else if (commutingdistance_education>5  && commutingdistance_education <= 10) commutingspeed_education = 21;
+		else if (commutingdistance_education>10 && commutingdistance_education <= 20) commutingspeed_education = 28;
+		else if (commutingdistance_education>20 && commutingdistance_education <= 50) commutingspeed_education = 40;
+		else if (commutingdistance_education>50) 																			commutingspeed_education = 55;
+		else																																					commutingspeed_education = 21;
+		
+		return (int) Math.round((commutingdistance_work/commutingspeed_education)*60);
+	}
+	
 
 	/**
 	 * @param attributes spezifischesAttribut für Map

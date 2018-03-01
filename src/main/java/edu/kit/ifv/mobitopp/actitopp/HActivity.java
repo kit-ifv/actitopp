@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.omg.CORBA.ACTIVITY_COMPLETED;
 /**
  * 
  * @author Tim Hilgert
@@ -77,6 +79,7 @@ public class HActivity
 	 * @param starttime
 	 * @param estimatedTripTime
 	 */
+	@Deprecated
 	public HActivity(HDay parent, char ActType, int duration, int starttime, int estimatedTripTime)
 	{
 		assert parent!=null : "Tag nicht initialisiert";
@@ -87,7 +90,24 @@ public class HActivity
 		setEstimatedTripTime(estimatedTripTime);    	
 	}
 	
-	
+
+	/**
+	 * 
+	 * Konstruktor (wird für Home-Aktivitäten genutzt)
+	 * 
+	 * @param parent
+	 * @param ActType
+	 * @param duration
+	 * @param starttime
+	 */
+	public HActivity(HDay parent, char ActType, int duration, int starttime)
+	{
+		assert parent!=null : "Tag nicht initialisiert";
+		this.day = parent;
+	  setType(ActType);
+		setDuration(duration);
+		setStartTime(starttime);   	
+	}
 
     
 	public HTour getTour() 
@@ -164,7 +184,7 @@ public class HActivity
 		return estimatedTripTime;
 	}
 
-	public void setEstimatedTripTime(int estimatedTripTime) 
+	private void setEstimatedTripTime(int estimatedTripTime) 
 	{
 		assert estimatedTripTime>0 || (estimatedTripTime==0 && getType()=='H') : "zu setzende Wegzeit ist nicht größer 0";
 		this.estimatedTripTime = estimatedTripTime;
@@ -182,9 +202,9 @@ public class HActivity
 	/**
 	 * @param estimatedTripTimeAfterActivity the estimatedTripTimeAfterActivity to set
 	 */
-	public void setEstimatedTripTimeAfterActivity(int estimatedTripTimeAfterActivity) 
+	private void setEstimatedTripTimeAfterActivity(int estimatedTripTimeAfterActivity) 
 	{
-		assert estimatedTripTimeAfterActivity>0 && isActivityLastinTour() : "zu setzende Wegzeit ist nicht größer 0 oder Aktivität ist nicht die letzte in der Tour";
+		assert (estimatedTripTimeAfterActivity==0 && !isActivityLastinTour()) || (estimatedTripTimeAfterActivity>0 && isActivityLastinTour()) : "zu setzende Wegzeit muss 0 (bei nicht letzter Aktivität in Tour) oder größer 0 (bei letzter Aktivität in der Tour) sein";
 		this.estimatedTripTimeAfterActivity = estimatedTripTimeAfterActivity;
 	}
 
@@ -317,7 +337,7 @@ public class HActivity
 	 * 
 	 * @return
 	 */
-	public boolean hasWorkCommutingTripAfterActivity()
+	public boolean hasWorkCommutingTripafterActivity()
 	{
 		return ((isActivityLastinTour() && getType()=='W' && (getPerson().getCommutingdistance_work() != 0.0)) ? true : false); 
 	}
@@ -349,7 +369,7 @@ public class HActivity
 	 * 
 	 * @return
 	 */
-	public boolean hasEducationCommutingTripAfterActivity()
+	public boolean hasEducationCommutingTripafterActivity()
 	{
 		return ((isActivityLastinTour() && getType()=='E' && (getPerson().getCommutingdistance_education() != 0.0)) ? true : false); 
 	}
@@ -456,6 +476,16 @@ public class HActivity
 		return getStartTimeWeekContext() - getEstimatedTripTime();
 	}
 	
+	public int getTripStartTimeAfterActivity()
+	{
+		return getEndTime();
+	}
+	
+	public int getTripStartTimeAfterActivityWeekContext()
+	{
+		return getEndTimeWeekContext();
+	}
+	
 	/**
 	 * 
 	 * Mean-Time-Berechnung
@@ -492,6 +522,28 @@ public class HActivity
 		}
 		assert meantimecategory!=-99 : "Konnte Kategorie nicht ermitteln!";
 		return meantimecategory;
+	}
+	
+	/**
+	 * 
+	 * Berechnet mittlere Wegzeiten je nach Aktivität und setzt TripTime Werte
+	 * 
+	 */
+	public void calculateAndSetTripTimes()
+	{
+    int actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
+    int actualTripTime_afterTrip = isActivityLastinTour() ? Configuration.FIXED_TRIP_TIME_ESTIMATOR : 0;
+
+    // Verbessere die Annahme der Wegezeit, falls ein Pendelweg vorliegt
+    if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_work();
+    if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
+    
+    // Verbessere die Annahme der Wegzeit auf dem letzten Weg der Tour nach der Aktivität, falls Pendelweg vorliegt
+    if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_work();
+    if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_education();
+    	
+		setEstimatedTripTime(actualTripTime_beforeTrip);
+    setEstimatedTripTimeAfterActivity(actualTripTime_afterTrip);		
 	}
 	
 	/**
