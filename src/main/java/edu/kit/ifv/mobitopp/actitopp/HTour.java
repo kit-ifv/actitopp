@@ -244,7 +244,7 @@ public class HTour
         assert min<=0 : "minimaler AktIndex der Tour ist größer 0 - index: " + min;
         return min;
     }
-    
+       
     
     /**
     *
@@ -266,6 +266,27 @@ public class HTour
         return max;
     }
 
+    /**
+     * 
+     * Gibt die erste Aktivität der Tour zurück
+     * 
+     * @return
+     */
+    public HActivity getFirstActivityInTour()
+    {
+    	return getActivity(getLowestActivityIndex());    	
+    }
+    
+    /**
+     * 
+     * Gibt die letzte Aktivität der Tour zurück
+     * 
+     * @return
+     */
+    public HActivity getLastActivityInTour()
+    {
+    	return getActivity(getHighestActivityIndex());    	
+    }
     
     public int getAmountOfActivities()
     {

@@ -56,7 +56,10 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getEmployment() == 2) ? 1.0 : 0.0);
+			int employmentType = actitoppPerson.getEmployment();
+	    double returnvalue = 0.0;
+	    if (employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue = 1.0;
+	    return returnvalue;
 		}
 	},
 	beruf_ohneerwerb("beruf_ohneerwerb") 
@@ -74,7 +77,7 @@ public enum ActitoppPersonParameters {
 		{
 			int employmentType = actitoppPerson.getEmployment();
 	    double returnvalue = 0.0;
-	    if (employmentType == 40 || employmentType == 41 || employmentType == 42) returnvalue = 1.0;
+	    if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42) returnvalue = 1.0;
 	    return returnvalue;
 		}
 	},
@@ -93,7 +96,7 @@ public enum ActitoppPersonParameters {
 		{
 			int employmentType = actitoppPerson.getEmployment();
 			double returnvalue = 0.0;
-		  if (employmentType == 40 || employmentType == 41 || employmentType == 42 || employmentType == 5) returnvalue = 1.0;
+		  if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42 || employmentType == 5) returnvalue = 1.0;
 		  return returnvalue;
 		}
 	},
@@ -102,7 +105,10 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getEmployment() == 1 || actitoppPerson.getEmployment() == 2) ? 1.0 : 0.0);
+			int employmentType = actitoppPerson.getEmployment();
+	    double returnvalue = 0.0;
+	    if (employmentType == 1 || employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue = 1.0;
+	    return returnvalue;
 		}
 	},
 	beruf_rentner("beruf_rentner") 

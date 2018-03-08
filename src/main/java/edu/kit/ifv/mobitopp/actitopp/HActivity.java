@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.omg.CORBA.ACTIVITY_COMPLETED;
 /**
  * 
  * @author Tim Hilgert
@@ -544,6 +542,16 @@ public class HActivity
     	
 		setEstimatedTripTime(actualTripTime_beforeTrip);
     setEstimatedTripTimeAfterActivity(actualTripTime_afterTrip);		
+	}
+	
+	public boolean tripBeforeActivityisScheduled()
+	{
+		return this.estimatedTripTime!=-1;
+	}
+	
+	public boolean tripAfterActivityisScheduled()
+	{
+		return this.estimatedTripTimeAfterActivity!=-1;
 	}
 	
 	/**

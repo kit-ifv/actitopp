@@ -294,7 +294,8 @@ public class ActitoppPerson
 		else if (commutingdistance_work>50) 																commutingspeed_work = 67;
 		else																																commutingspeed_work = 32;
 		
-		return (int) Math.round((commutingdistance_work/commutingspeed_work)*60);
+		// Mindestdauer jedes Wegs: 1 Minute
+		return (int) Math.max(1, Math.round((commutingdistance_work/commutingspeed_work)*60));
 	}
 	
 	
@@ -314,7 +315,8 @@ public class ActitoppPerson
 		else if (commutingdistance_education>50) 																			commutingspeed_education = 55;
 		else																																					commutingspeed_education = 21;
 		
-		return (int) Math.round((commutingdistance_work/commutingspeed_education)*60);
+		// Mindestdauer jedes Wegs: 1 Minute
+		return (int) Math.max(1, Math.round((commutingdistance_education/commutingspeed_education)*60));
 	}
 	
 

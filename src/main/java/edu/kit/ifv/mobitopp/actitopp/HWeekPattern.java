@@ -308,7 +308,7 @@ public class HWeekPattern
   		
   		if (!act.isHomeActivity() && act.getEstimatedTripTimeAfterActivity()!=0)
   		{
-  			System.out.println(i 		+ " Weg (letzer in Tour) : Start " + act.getTripStartTimeAfterActivityWeekContext() 
+  			System.out.println(i 		+ " Weg (letzter in Tour) : Start " + act.getTripStartTimeAfterActivityWeekContext() 
   															+ " Ende " + (act.getTripStartTimeAfterActivityWeekContext()+act.getEstimatedTripTimeAfterActivity())
   															+ " Dauer " + act.getEstimatedTripTimeAfterActivity()
   												);

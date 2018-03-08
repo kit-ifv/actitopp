@@ -121,6 +121,8 @@ public class Coordinator
     
     executeStep6("6A");
     
+    createTripTimesforActivities();
+    
     executeStep7DC("7A", 'W');
     executeStep7DC("7B", 'E');
     executeStep7DC("7C", 'L');
@@ -155,7 +157,7 @@ public class Coordinator
     executeStep10JK();
     */			
     
-    // Variante 2 zur Generierung der Startzeiten
+    // Variante 2 zur Generierung der Startzeiten - bevorzugt
     
     executeStep10DC("10M", 1);
     executeStep10MC("10N", 1);
@@ -552,7 +554,6 @@ public class Coordinator
 		     
 		      // Speichere Ergebnisse ab
 		      currentActivity.setDuration(step.getChosenTime());
-		      currentActivity.calculateAndSetTripTimes();
   			}
   		}
     }
@@ -624,7 +625,6 @@ public class Coordinator
   		     
   		      // Speichere Ergebnisse ab
   		      currentActivity.setDuration(step.getChosenTime());
-  		      currentActivity.calculateAndSetTripTimes();
           }
         }
       }
@@ -697,7 +697,8 @@ public class Coordinator
 	 * @param id
 	 * @throws InvalidPatternException
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10B(String id) throws InvalidPatternException
 	{
 	  // STEP 10b: determine time class for the start of a work/edu tour
@@ -739,7 +740,8 @@ public class Coordinator
 	 * @param id
 	 * @throws InvalidPatternException
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10C(String id) throws  InvalidPatternException
 	{
 	    // Step 10c: exact start time for the work/edu tour
@@ -787,7 +789,8 @@ public class Coordinator
 	 * @param id
 	 * @throws InvalidPatternException
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10D(String id) throws InvalidPatternException
 	{
 	    // STEP 10d: determine time class for the start of all other main tours
@@ -830,7 +833,8 @@ public class Coordinator
 	 * @param id
 	 * @throws InvalidPatternException
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10E(String id) throws InvalidPatternException
 	{
 		// Step 10e: exact start time for other main tours
@@ -877,7 +881,8 @@ public class Coordinator
 	 * 
 	 * @throws InvalidPatternException
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10GH() throws InvalidPatternException
 	{
     // Step 10g and Step10h: determine start time class for tours PRIOR to main tour and determine the exact start time
@@ -946,7 +951,8 @@ public class Coordinator
 	 * 
 	 * @throws InvalidPatternException
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10JK() throws InvalidPatternException
   {
   	// Step 10j and Step 10k: determine start time class for tours POST to main tour and determine the exact start time
@@ -1261,13 +1267,11 @@ public class Coordinator
 	    
 		// Obergrenze 1 - bisher festgelegte "verbrauchte" Zeiten am Tag
 			int totalMainActivityTime = 0;
-			// Alle Hauptaktivitäten + zugehörige Wege
+			// Alle Hauptaktivitäten + zugehörige Wege + letzter Weg am Ende der Tour
 		    for (HTour tour : day.getTours())
 		    {
-		    	totalMainActivityTime += tour.getActivity(0).getDuration() + tour.getActivity(0).getEstimatedTripTime();
+		    	totalMainActivityTime += tour.getActivity(0).getDuration() + tour.getActivity(0).getEstimatedTripTime() + tour.getLastActivityInTour().getEstimatedTripTimeAfterActivity();
 		    }
-		    // Addiere zusätzlich noch die Wege am Ende jeder Tour wieder nach Hause
-		    totalMainActivityTime = totalMainActivityTime + (day.getAmountOfTours() * Configuration.FIXED_TRIP_TIME_ESTIMATOR);
 		    // Obergrenze 1
 		    int remainingTimeUpperBound = 1440 - totalMainActivityTime;
 	    
@@ -1292,55 +1296,6 @@ public class Coordinator
 	
 	}
 
-
-	/**
-	 * 
-	 * limits the logit alternatives for step10b and calculates upper and lower bounds
-	 * 
-	 * @param day
-	 * @param tour
-	 * @param modelstep
-	 * @throws InvalidPatternException
-	 */
-	private void modifyAlternativesForStep10B(HDay day, HTour tour, DefaultDCModelStep modelstep) throws InvalidPatternException
-	{
-		// Bestimme die Grenzen auf Basis bereits festgelegter Aktivitätszeiten
-    int bounds[] = calculateStartingBoundsForMainTours(day, true);
-    int lowerbound = bounds[0];
-    int upperbound = bounds[1];
-
-    // Prüfe, ob die Tour im Standard-Startzeitraum liegt
-    boolean tourInStdStartTime = false;
-
-    double val = tour.getAttributesMap().get("default_start_cat_yes");
-    tourInStdStartTime = (val >= 1.0) ? true : false;
-
-    if (tourInStdStartTime)
-    {
-    	int default_start_category = (int) person.getAttributefromMap("main_tours_default_start_cat");
-    	// Standard-Startzeitraum liegt innerhalb der Grenzen
-    	if (default_start_category >= lowerbound && default_start_category<= upperbound)
-    	{
-    		lowerbound = default_start_category;
-    		upperbound = default_start_category;
-    	}
-    	// Standard-Startzeitraum liegt unterhalb der Untergrenze
-    	if (default_start_category < lowerbound)
-    	{
-    		// lowerbound = lowerbound;
-    		upperbound = lowerbound;
-    	}
-    	// Standard-Startzeitraum liegt oberhalb der Obergrenze
-    	if (default_start_category < lowerbound)
-    	{
-    		lowerbound = upperbound;
-    		// upperbound = upperbound;
-    	}
-    }
-    // Schränke die Alternativen entsprechend der Grenzen ein
-    modelstep.limitAlternatives(lowerbound, upperbound);
-	
-	}
 
 	/**
 	 * 
@@ -1418,6 +1373,58 @@ public class Coordinator
 	
 	
 	
+	/**
+	 * 
+	 * limits the logit alternatives for step10b and calculates upper and lower bounds
+	 * 
+	 * @param day
+	 * @param tour
+	 * @param modelstep
+	 * @throws InvalidPatternException
+	 */
+	@Deprecated
+	private void modifyAlternativesForStep10B(HDay day, HTour tour, DefaultDCModelStep modelstep) throws InvalidPatternException
+	{
+		// Bestimme die Grenzen auf Basis bereits festgelegter Aktivitätszeiten
+	  int bounds[] = calculateStartingBoundsForMainTours(day, true);
+	  int lowerbound = bounds[0];
+	  int upperbound = bounds[1];
+	
+	  // Prüfe, ob die Tour im Standard-Startzeitraum liegt
+	  boolean tourInStdStartTime = false;
+	
+	  double val = tour.getAttributesMap().get("default_start_cat_yes");
+	  tourInStdStartTime = (val >= 1.0) ? true : false;
+	
+	  if (tourInStdStartTime)
+	  {
+	  	int default_start_category = (int) person.getAttributefromMap("main_tours_default_start_cat");
+	  	// Standard-Startzeitraum liegt innerhalb der Grenzen
+	  	if (default_start_category >= lowerbound && default_start_category<= upperbound)
+	  	{
+	  		lowerbound = default_start_category;
+	  		upperbound = default_start_category;
+	  	}
+	  	// Standard-Startzeitraum liegt unterhalb der Untergrenze
+	  	if (default_start_category < lowerbound)
+	  	{
+	  		// lowerbound = lowerbound;
+	  		upperbound = lowerbound;
+	  	}
+	  	// Standard-Startzeitraum liegt oberhalb der Obergrenze
+	  	if (default_start_category < lowerbound)
+	  	{
+	  		lowerbound = upperbound;
+	  		// upperbound = upperbound;
+	  	}
+	  }
+	  // Schränke die Alternativen entsprechend der Grenzen ein
+	  modelstep.limitAlternatives(lowerbound, upperbound);
+	
+	}
+
+
+
 	/**
    * 
    * Bestimmt die Ober- und Untergrenze der Startzeiten für Touren
@@ -1527,6 +1534,7 @@ public class Coordinator
    * @return
    * @throws InvalidPatternException
    */
+  @Deprecated
   private int[] calculateStartingBoundsForMainTours(HDay day, boolean categories) throws InvalidPatternException
   {
   	// lowerbound startet mit 0 - upperbound mit 1619 (2h59 nachts nächster Tag)
@@ -1614,6 +1622,7 @@ public class Coordinator
 	 * @return
 	 * @throws InvalidPatternException
 	 */
+  @Deprecated
 	private int[] calculateStartingBoundsForPreTours(HDay day, HTour tour, boolean categories) throws InvalidPatternException
 	{  
 		HTour previousTour = tour.getPreviousTour();
@@ -1716,6 +1725,7 @@ public class Coordinator
 	 * @return
 	 * @throws InvalidPatternException
 	 */
+  @Deprecated
 	private int[] calculateStartingBoundsForPostTours(HDay day, HTour tour, boolean categories) throws InvalidPatternException
 	{		
 		HTour previousTour = tour.getPreviousTour();
@@ -1784,6 +1794,27 @@ public class Coordinator
 
  
   /**
+   * 
+   * Festlegung von Default-Wegzeiten für alle Aktivitäten
+   * 
+   */
+  private void createTripTimesforActivities() 
+  {
+    for (HDay day : pattern.getDays())
+    {
+      for (HTour tour : day.getTours())
+      {
+      	for (HActivity act : tour.getActivities())
+        {
+      		act.calculateAndSetTripTimes();
+        }
+      }
+    }	
+	}
+
+
+
+	/**
    * 
    * Erstellt Startzeiten für jede Aktivität
    * 
