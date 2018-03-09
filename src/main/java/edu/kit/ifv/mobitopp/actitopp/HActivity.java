@@ -544,6 +544,11 @@ public class HActivity
     setEstimatedTripTimeAfterActivity(actualTripTime_afterTrip);		
 	}
 	
+	public boolean isScheduled()
+	{
+		return this.duration!=-1 && this.starttime!=-1 && this.type !='x';
+	}
+	
 	public boolean tripBeforeActivityisScheduled()
 	{
 		return this.estimatedTripTime!=-1;

@@ -1,6 +1,5 @@
 package edu.kit.ifv.mobitopp.actitopp.demo;
 
-import java.io.InputStream;
 import java.util.HashMap;
 
 import edu.kit.ifv.mobitopp.actitopp.*;
@@ -130,10 +129,10 @@ public class ExampleActiTopp {
 	 */
 	public static void createAndModelMultiplePersons_Example()
 	{
-		CSVPersonInputReader loader = new CSVPersonInputReader();
-		try (InputStream input = ModelFileBase.class.getResourceAsStream("demo/Demopersonen2.csv"))
-		{
-			HashMap<Number, ActitoppPerson> personmap = loader.loadInput(input);
+		try
+		{			
+			CSVPersonInputReader loader = new CSVPersonInputReader(ModelFileBase.class.getResourceAsStream("demo/Demopersonen.csv"));
+			HashMap<Number, ActitoppPerson> personmap = loader.loadInput();
 			
 			for (Number key : personmap.keySet())
 			{
@@ -171,8 +170,8 @@ public class ExampleActiTopp {
 			}
 				
 			// Output als CSV-Datei
-			CSVActivityExportWriter exportwriter = new CSVActivityExportWriter();
-			exportwriter.exportActivityData(personmap, "D:/DemoActivityList.csv");
+			CSVExportWriter exportwriter = new CSVExportWriter("D:/DemoTripList.csv");
+			exportwriter.exportTripData(personmap);
 			
 			System.out.println("all persons processed!");	
 			
