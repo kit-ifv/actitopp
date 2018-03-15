@@ -137,7 +137,7 @@ public class ExampleActiTopp {
 			for (Number key : personmap.keySet())
 			{
 				ActitoppPerson actperson = personmap.get(key);
-				// System.out.println(actperson);
+				System.out.println(actperson);
 				// System.out.println(actperson.getPersIndex());
 				
 				
@@ -165,7 +165,7 @@ public class ExampleActiTopp {
 	        }
 		    }
 				
-				//actperson.getWeekPattern().printAllActivitiesList();
+				actperson.getWeekPattern().printAllActivitiesList();
 				 
 			}
 				

@@ -45,15 +45,15 @@ public class CSVExportWriter
 			{
 				ActitoppPerson actperson = personmap.get(key);
 	  		
-	  		// Füge alle Aktivitäten hinzu
+	  		// Weginformation aus Aktivitätsdaten herauslesen
 	  		for (HActivity act : actperson.getWeekPattern().getAllActivities())
 	  		{
-	  			if (act.tripBeforeActivityisScheduled())
+	  			if (act.tripBeforeActivityisScheduled() && act.getEstimatedTripTime()>0)
 	  			{
 	    			writer.append(writeTripBeforeActivity(act));
 	    			writer.flush();
 	  			}
-	  			if (act.tripAfterActivityisScheduled())
+	  			if (act.tripAfterActivityisScheduled() && act.getEstimatedTripTimeAfterActivity()>0)
 	  			{
 	    			writer.append(writeTripAfterActivity(act));
 	    			writer.flush();
