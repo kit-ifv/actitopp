@@ -16,12 +16,24 @@ public class Configuration {
  * 
  * 		erlaubte Konfigurationen:
  * 
- * 		mopv10					=	Nutzung der Parameterschätzungen des MOP 2004-2013 (actiTopp Version 1.0)
- * 		mopv11					= Nutzung der Parameterschätzungen des MOP 2004-2013 (actiTopp Version 1.1)
+ * 		mopv10					=	Nutzung der Parameterschätzungen des MOP 2004-2013 (nur für actiTopp Version 1.0)
+ * 		mopv11					= Nutzung der Parameterschätzungen des MOP 2004-2013 (ab actiTopp Version 1.1)
  * 		stuttgart				=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
  */
 	
-	public static final String parameterset = "mopv10";
+	public static final String parameterset = "mopv11";
+	
+	
+	
+/*
+ * 	Zu Vergleichszwecken und zur Demonstration der notwendigen Koordinierung bei der Modellierung einer Woche
+ * 	Zeigen der Qualität von actiTopp kann die Modellierung auch unkoordiniert durchgeführt werden.
+ * 	Das bedeutet, dass Schritt 8A nicht angewendet wird (standarddauer ist immer 0) und damit in Schritt 8B immer das volle Alternativenset zur Verfügung steht.
+ * 	
+ */
+	public static boolean coordinated_modelling = true;	
+	
+	
 	
 	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
   public static final String[] flowlist_initials =

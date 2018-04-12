@@ -18,9 +18,9 @@ public class ExampleActiTopp {
 		
 		// createAndModelOnePerson_Example1();
 
-		// createAndModelOnePerson_Example2();
+		createAndModelOnePerson_Example2();
 		
-		createAndModelMultiplePersons_Example();
+		// createAndModelMultiplePersons_Example();
 		
 	}
 	

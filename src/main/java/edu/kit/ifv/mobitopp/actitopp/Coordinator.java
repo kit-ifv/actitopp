@@ -474,6 +474,10 @@ public class Coordinator
 
   	    // Eigenschaft abspeichern
   	    currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
+  	    
+  	    // Bei unkoordinierter Modellierung ohne Stabilitätsaspekte wird der Wert immer mit 0 überschrieben!
+  	    if (!Configuration.coordinated_modelling) currentActivity.addAttributetoMap("standarddauer", 0.0d);
+  	    
       }
     }
 	}
@@ -497,8 +501,8 @@ public class Coordinator
   		for (HTour currentTour : currentDay.getTours())
   		{
   			boolean running=false;
-  			if (id.equals("8B") && currentTour.getIndex()==0) running=true;
-  			if (id.equals("8D") && currentTour.getIndex()!=0) running=true;
+  			if (id.equals("8B") && currentTour.getIndex()==0) running=true; // 8B gilt nur für Haupttouren (TourIndex=0)
+  			if (id.equals("8D") && currentTour.getIndex()!=0) running=true;	// 8D gilt nur für NICHT-Haupttouren (TourIndex!=0)
   				
   			if (running)
   			{
@@ -548,7 +552,8 @@ public class Coordinator
 		      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
 		      DefaultMCModelStep step = new DefaultMCModelStep(id + (int) chosenTimeCategory, this);
 		      step.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-		      step.setModifyDTDAfterStep(true);
+		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+		      step.setModifyDTDAfterStep(Configuration.coordinated_modelling);
 		      step.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
 		      step.doStep();
 		     
@@ -619,7 +624,8 @@ public class Coordinator
           	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
   		      DefaultMCModelStep step = new DefaultMCModelStep(id + (int) chosenTimeCategory, this);
   		      step.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-  		      step.setModifyDTDAfterStep(true);
+  		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+  		      step.setModifyDTDAfterStep(Configuration.coordinated_modelling);
   		      step.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
   		      step.doStep();
   		     
@@ -1096,7 +1102,8 @@ public class Coordinator
         DefaultMCModelStep step = new DefaultMCModelStep(stepID, this);
         char mainActivityTypeInTour = currentTour.getActivity(0).getType();
         step.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenStartCategory);
-        step.setModifyDTDAfterStep(true);
+        // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+	      step.setModifyDTDAfterStep(Configuration.coordinated_modelling);
         //step.setOutPropertyName("tourStartTime");
         step.setDTDTypeToUse(INDICATOR_TOUR_STARTTIMES);
         int[] bounds = calculateStartingBoundsForTours(currentDay, currentTour, false);
@@ -1164,7 +1171,8 @@ public class Coordinator
 	          DefaultMCModelStep mcstep = new DefaultMCModelStep(stepID, this);
 	          char mainActivityTypeInTour = currentTour.getActivity(0).getType();
 	          mcstep.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenHomeTimeCategory);
-	          mcstep.setModifyDTDAfterStep(true);
+	          // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+	  	      mcstep.setModifyDTDAfterStep(Configuration.coordinated_modelling);
 	          //step.setOutPropertyName("tourStartTime");
 	          mcstep.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
 	          int[] mcbounds = calculateBoundsForHomeTime(currentDay, currentTour, false);
