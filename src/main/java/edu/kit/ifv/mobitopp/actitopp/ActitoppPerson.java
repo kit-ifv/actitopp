@@ -13,6 +13,9 @@ import java.util.Map;
 public class ActitoppPerson
 {
 	
+	//zugehöriger Haushalt
+	private ActiToppHousehold household;
+	
 	// Enthält alle Attribute, die nicht direkt über Variablen ausgelesen werden können
 	private Map<String, Double> attributes;
 	
@@ -22,11 +25,7 @@ public class ActitoppPerson
 	
 	private int age;
 	private int gender;
-	private int children0_10;
-	private int children_u18;
 	private int employment;
-	private int areatype;
-	private int numberofcarsinhousehold;	
 	
 	// Pendeldistanzen sind als Default = 0, das heißt nicht verfügbar oder Person pendelt nicht
 	private double commutingdistance_work = 0.0;
@@ -55,14 +54,24 @@ public class ActitoppPerson
 			int areatype,
 			int numberofcarsinhousehold
 	) {
-		this.PersIndex = PersIndex;
-		this.children0_10 = children0_10;
-		this.children_u18 = children_u18;
-		this.age = age;
-		this.employment = employment;
-		this.gender = gender;
-		this.areatype = areatype;
-		this.numberofcarsinhousehold = numberofcarsinhousehold;  
+		
+		/*
+		 * Zur Abwärtskompatibilität können Personen nach wie vor ohne Haushaltsbezug erstellt
+		 * werden. Es wird intern allerdings ein Haushaltsobjekt erzeugt, um den Variablenzugriff
+		 * auf Haushaltsvariablen einheitlich nach außen einheitlich zu gestalten.
+		 */
+		this.household = new ActiToppHousehold(
+				PersIndex, 
+				children0_10, 
+				children_u18, 
+				areatype, 
+				numberofcarsinhousehold
+		);
+				
+		this.setPersIndex(PersIndex);
+		this.setAge(age);
+		this.setEmployment(employment);
+		this.setGender(gender);  
 		
 		this.attributes = new HashMap<String, Double>();
 		
@@ -70,7 +79,7 @@ public class ActitoppPerson
 	
 	
 	/**
-	 * Konstruktor zum Erstellen einer Person
+	 * Konstruktor zum Erstellen einer Person - mit Pendelentfernung
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -95,16 +104,36 @@ public class ActitoppPerson
 			double commutingdistance_work,
 			double commutingdistance_education
 	) {
-		this.PersIndex = PersIndex;
-		this.children0_10 = children0_10;
-		this.children_u18 = children_u18;
-		this.age = age;
-		this.employment = employment;
-		this.gender = gender;
-		this.areatype = areatype;
-		this.numberofcarsinhousehold = numberofcarsinhousehold;  
+		
+		this(PersIndex,children0_10,children_u18,age,employment,gender,areatype,numberofcarsinhousehold);
+		
 		this.setCommutingdistance_work(commutingdistance_work);
 		this.setCommutingdistance_education(commutingdistance_education);
+		}	
+	
+	/**
+	 * Konstruktor zum Erstellen einer Person mit Haushaltskontext
+	 * 
+	 * @param household
+	 * @param PersIndex
+	 * @param age
+	 * @param employment
+	 * @param gender
+	 */
+	public ActitoppPerson(
+			ActiToppHousehold household,
+			int PersIndex,
+			int age,
+			int employment,
+			int gender
+	) {
+
+		this.household = household;
+		
+		this.setPersIndex(PersIndex);
+		this.setAge(age);
+		this.setEmployment(employment);
+		this.setGender(gender);
 		
 		this.attributes = new HashMap<String, Double>();
 		
@@ -112,6 +141,35 @@ public class ActitoppPerson
 
 	
   /**
+	 * Konstruktor zum Erstellen einer Person mit Haushaltskontext & Pendelentfernung
+	 * 
+	 * @param household
+	 * @param PersIndex
+	 * @param age
+	 * @param employment
+	 * @param gender
+	 * @param commutingdistance_work
+	 * @param commutingdistance_education
+	 */
+	public ActitoppPerson(
+			ActiToppHousehold household,
+			int PersIndex,
+			int age,
+			int employment,
+			int gender,
+			double commutingdistance_work,
+			double commutingdistance_education
+	) {
+		
+		this(household,PersIndex,age,employment,gender);
+		
+		this.setCommutingdistance_work(commutingdistance_work);
+		this.setCommutingdistance_education(commutingdistance_education);
+	
+		}
+
+
+	/**
 	 * @return the weekPattern
 	 */
 	public HWeekPattern getWeekPattern() {
@@ -132,6 +190,14 @@ public class ActitoppPerson
 	 */
 	public void setPersIndex(int persIndex) {
 		PersIndex = persIndex;
+	}
+
+
+	/**
+	 * @return the household
+	 */
+	public ActiToppHousehold getHousehold() {
+		return household;
 	}
 
 
@@ -168,38 +234,6 @@ public class ActitoppPerson
 
 
 	/**
-	 * @return the children0_10
-	 */
-	public int getChildren0_10() {
-		return children0_10;
-	}
-
-
-	/**
-	 * @param children0_10 the children0_10 to set
-	 */
-	public void setChildren0_10(int children0_10) {
-		this.children0_10 = children0_10;
-	}
-
-
-	/**
-	 * @return the children_u18
-	 */
-	public int getChildren_u18() {
-		return children_u18;
-	}
-
-
-	/**
-	 * @param children_u18 the children_u18 to set
-	 */
-	public void setChildren_u18(int children_u18) {
-		this.children_u18 = children_u18;
-	}
-
-
-	/**
 	 * @return the employment
 	 */
 	public int getEmployment() {
@@ -216,18 +250,25 @@ public class ActitoppPerson
 
 
 	/**
-	 * @return the areatype
+	 * @return the children0_10
 	 */
-	public int getAreatype() {
-		return areatype;
+	public int getChildren0_10() {
+		return getHousehold().getChildren0_10();
+	}
+
+	/**
+	 * @return the children_u18
+	 */
+	public int getChildren_u18() {
+		return getHousehold().getChildren_u18();
 	}
 
 
 	/**
-	 * @param areatype the areatype to set
+	 * @return the areatype
 	 */
-	public void setAreatype(int areatype) {
-		this.areatype = areatype;
+	public int getAreatype() {
+		return getHousehold().getAreatype();
 	}
 
 
@@ -235,16 +276,9 @@ public class ActitoppPerson
 	 * @return the numberofcarsinhousehold
 	 */
 	public int getNumberofcarsinhousehold() {
-		return numberofcarsinhousehold;
+		return getHousehold().getNumberofcarsinhousehold();
 	}
 
-
-	/**
-	 * @param numberofcarsinhousehold the numberofcarsinhousehold to set
-	 */
-	public void setNumberofcarsinhousehold(int numberofcarsinhousehold) {
-		this.numberofcarsinhousehold = numberofcarsinhousehold;
-	}
 	
 	
 	/**
@@ -351,15 +385,9 @@ public class ActitoppPerson
 
   	message.append("\n Personeninformationen");
   	
-		message.append("\n - Nummer : ");
+		message.append("\n - PersIndex : ");
 		message.append(PersIndex);
-		
-		message.append("\n - Anzahl Kinder 0-10 : ");
-		message.append(getChildren0_10());
-		
-		message.append("\n - Anzahl Kinder unter 18 : ");
-		message.append(getChildren_u18());
-		
+				
 		message.append("\n - Alter : ");
 		message.append(getAge());
 
@@ -369,17 +397,14 @@ public class ActitoppPerson
 		message.append("\n - Geschlecht : ");
 		message.append(getGender());
 		
-		message.append("\n - Raumtyp : ");
-		message.append(getAreatype());
-		
-		message.append("\n - Pkw im HH : ");
-		message.append(getNumberofcarsinhousehold());		
-
 		message.append("\n - Pendeldistanz Arbeiten : ");
 		message.append(getCommutingdistance_work());		
 		
 		message.append("\n - Pendeldistanz Bildung : ");
 		message.append(getCommutingdistance_education());		
+		
+		message.append("\n - Haushaltsebene ");
+		message.append(getHousehold());
 		
 		return message.toString();
 	}
