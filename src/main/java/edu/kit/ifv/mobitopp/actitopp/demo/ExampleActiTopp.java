@@ -18,9 +18,9 @@ public class ExampleActiTopp {
 		
 		// createAndModelOnePerson_Example1();
 
-		createAndModelOnePerson_Example2();
+		// createAndModelOnePerson_Example2();
 		
-		// createAndModelMultiplePersons_Example();
+		createAndModelMultiplePersons_Example();
 		
 	}
 	
@@ -170,8 +170,11 @@ public class ExampleActiTopp {
 			}
 				
 			// Output als CSV-Datei
-			CSVExportWriter exportwriter = new CSVExportWriter("D:/DemoTripList.csv");
-			exportwriter.exportTripData(personmap);
+			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
+			tripwriter.exportTripData(personmap);
+			
+			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
+			activitywriter.exportActivityData(personmap);
 			
 			System.out.println("all persons processed!");	
 			

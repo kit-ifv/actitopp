@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven'
 
 group = 'edu.kit.ifv.mobitopp'
-version = '0.1'
+version = '1.x'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'

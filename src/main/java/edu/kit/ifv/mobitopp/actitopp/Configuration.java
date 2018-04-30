@@ -18,10 +18,11 @@ public class Configuration {
  * 
  * 		mopv10					=	Nutzung der Parameterschätzungen des MOP 2004-2013 (nur für actiTopp Version 1.0)
  * 		mopv11					= Nutzung der Parameterschätzungen des MOP 2004-2013 (ab actiTopp Version 1.1)
+ * 		mopv13					= Nutzung der Parameterschätzungen des MOP 2004-2013 (inkl. gemeinsame Aktivitäten - ab actiTopp Version 1.3)
  * 		stuttgart				=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
  */
 	
-	public static final String parameterset = "mopv11";
+	public static final String parameterset = "mopv13";
 	
 	
 	
@@ -50,6 +51,7 @@ public class Configuration {
   		"10A",
   		"10B", "10D", "10G", "10J",
   		"10M", "10O", "10Q", "10S",
+  		"11", /* Stufe 11 ist erst ab actiTopp 1.3 verfügbar*/
   		"98A", "98B", "98C"
   };
 	

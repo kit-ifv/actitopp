@@ -36,7 +36,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("ID;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text");
+	  	writer.append("ID;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
@@ -75,7 +75,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("ID;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck");
+	  	writer.append("ID;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
@@ -127,7 +127,9 @@ public class CSVExportWriter
 		// Dauer
 		rueckgabe += act.getDuration() + ";";
 		// Zweck
-		rueckgabe += act.getType() + "";
+		rueckgabe += act.getType() + ";";
+		// joint Status
+		rueckgabe += act.getJointStatus() + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		
@@ -162,7 +164,9 @@ public class CSVExportWriter
 		// Dauer
 		rueckgabe += act.getEstimatedTripTime() + ";";
 		// Zweck
-		rueckgabe += act.getType() + "";
+		rueckgabe += act.getType() + ";";
+		// jointStatus
+		rueckgabe += act.getJointStatus() + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		
@@ -197,7 +201,9 @@ public class CSVExportWriter
 		// Dauer
 		rueckgabe += act.getEstimatedTripTimeAfterActivity() + ";";
 		// Zweck ist hier immer HOME, da letzter Weg in Tour nach Hause
-		rueckgabe += "H" + "";
+		rueckgabe += "H" + ";";
+		// jointStatus - aktuell immer 4 (keine Gemeinsamkeit, da Gemeinsamkeiten bei NachHause Wegen noch nicht modelliert werden!
+		rueckgabe += "4" + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		

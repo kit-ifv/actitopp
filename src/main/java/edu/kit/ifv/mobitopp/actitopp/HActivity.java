@@ -26,6 +26,8 @@ public class HActivity
   private int starttime 					= -1;
   private int estimatedTripTime 	= -1;
   
+  private int jointStatus					= -1;
+  
   /*
    * erwartete Wegezeit nach der Aktivität
    * nur relevant, falls Aktivität die letzte auf der Tour ist.
@@ -67,27 +69,6 @@ public class HActivity
 	    setType(type);
 	}  
 	
-	/**
-	 * 
-	 * Konstruktor (wird für Home-Aktivitäten genutzt)
-	 * 
-	 * @param parent
-	 * @param ActType
-	 * @param duration
-	 * @param starttime
-	 * @param estimatedTripTime
-	 */
-	@Deprecated
-	public HActivity(HDay parent, char ActType, int duration, int starttime, int estimatedTripTime)
-	{
-		assert parent!=null : "Tag nicht initialisiert";
-		this.day = parent;
-	  setType(ActType);
-		setDuration(duration);
-		setStartTime(starttime);
-		setEstimatedTripTime(estimatedTripTime);    	
-	}
-	
 
 	/**
 	 * 
@@ -104,7 +85,8 @@ public class HActivity
 		this.day = parent;
 	  setType(ActType);
 		setDuration(duration);
-		setStartTime(starttime);   	
+		setStartTime(starttime);
+		setJointStatus(4);
 	}
 
     
@@ -176,6 +158,16 @@ public class HActivity
 		this.starttime = starttime;
 	}
 
+	public int getJointStatus() {
+		assert jointStatus!=-1 : "jointStatus not set";
+		return jointStatus;
+	}
+
+	public void setJointStatus(int jointStatus) {
+		assert jointStatus>=1 && jointStatus<=4 : "invalid value for jointStatus - actual value: " + jointStatus;
+		this.jointStatus = jointStatus;
+	}
+
 	public int getEstimatedTripTime() 
 	{
 		assert estimatedTripTime != -1 : "EstimatedTripTime ist zum Zugriffszeitpunkt nicht initialisiert";
@@ -217,9 +209,6 @@ public class HActivity
 		assert Configuration.ACTIVITY_TYPES_mobiTopp.contains(mobiToppActType) : "ungültige Aktivität - nicht in ACTIVITYTYPES_mobiTopp enthalten"; 
 		this.mobiToppActType = mobiToppActType;
 	}
-
-	
-	
 	
 	/**
    * Sortiert eine Liste mit Aktivitäten chronologisch im Wochenverlauf
@@ -293,7 +282,9 @@ public class HActivity
 		return 	"Start " + getStartTimeWeekContext() + 
 				" Ende " + getEndTimeWeekContext() + 
 				" Dauer: " + getDuration() + 
-				" Typ: " + getType() + " (" + getMobiToppActType() + ")";
+				" Typ: " + getType() + " (" + getMobiToppActType() + ")" + 
+				" jointStatus: " + getJointStatus()
+				;
 	}
 
 
@@ -546,7 +537,7 @@ public class HActivity
 	
 	public boolean isScheduled()
 	{
-		return this.duration!=-1 && this.starttime!=-1 && this.type !='x';
+		return this.duration!=-1 && this.starttime!=-1 && this.type!='x' && this.jointStatus!=-1;
 	}
 	
 	public boolean tripBeforeActivityisScheduled()

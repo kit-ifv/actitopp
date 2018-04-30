@@ -54,6 +54,14 @@ public enum HActivityParameters {
 	/*
 	 * Dauer Aktivität
 	 */
+	dauer_akt("dauer_akt") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			return act.getDuration();
+		}
+	},	
 	dauer_akt_1bis14("dauer_akt_1bis14") 
 	{
 		@Override
@@ -404,8 +412,72 @@ public enum HActivityParameters {
 		}
 	},
 	
-	
-	
+	/*
+	 * Akt Startzeit
+	 */
+	start_stunde_akt_0_5("start_stunde_akt_0_5") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=0 && startzeit_stunde_akt<=5) ? 1.0 : 0.0);
+		}
+	},	
+	start_stunde_akt_6_8("start_stunde_akt_6_8") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=6 && startzeit_stunde_akt<=8) ? 1.0 : 0.0);
+		}
+	},	
+	start_stunde_akt_10_12("start_stunde_akt_10_12") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=10 && startzeit_stunde_akt<=12) ? 1.0 : 0.0);
+		}
+	},	
+	start_stunde_akt_13_15("start_stunde_akt_13_15") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=13 && startzeit_stunde_akt<=15) ? 1.0 : 0.0);
+		}
+	},	
+	start_stunde_akt_16_18("start_stunde_akt_16_18") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=16 && startzeit_stunde_akt<=18) ? 1.0 : 0.0);
+		}
+	},
+	start_stunde_akt_19_21("start_stunde_akt_19_21") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=19 && startzeit_stunde_akt<=21) ? 1.0 : 0.0);
+		}
+	},	
+	start_stunde_akt_22_23("start_stunde_akt_22_23") 
+	{
+		@Override
+		public double getAttribute(HActivity act) 
+		{
+			int startzeit_stunde_akt = act.getStartTime()/60;
+			return ((startzeit_stunde_akt>=22 && startzeit_stunde_akt<=23) ? 1.0 : 0.0);
+		}
+	},	
 	
 	;
 		

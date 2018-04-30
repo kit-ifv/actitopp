@@ -4,6 +4,7 @@ package edu.kit.ifv.mobitopp.actitopp;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.ToIntFunction;
 
 
 /**
@@ -166,11 +167,14 @@ public class Coordinator
     executeStep10DC("10Q", 3);
     executeStep10MC("10R", 3);
     executeStep10ST();
+    
+   	// Erstelle Startzeiten für jede Aktivität 
+    createStartTimesforActivities();
+
+    executeStep11("11");
+    
 					 
     // Finalisierung der Wochenaktivitätenpläne 
-
-  	// 1) Erstelle Startzeiten für jede Aktivität 
-    createStartTimesforActivities();
     
     // 2) Erstelle eine Liste mit allen Aktivitäten der Woche
     List<HActivity> allModeledActivities = pattern.getAllOutofHomeActivities();    	
@@ -1189,7 +1193,39 @@ public class Coordinator
     }
 	}    
     
-    
+	/**
+	 * 
+	 * @param id
+	 */
+	private void executeStep11(String id)
+	{
+    // STEP 11 - Decision on joint activities
+    for (HDay currentDay : pattern.getDays())
+    {
+    	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgeführt
+    	if (currentDay.isHomeDay())
+      {
+      	continue;
+      }
+      
+      for (HTour currentTour : currentDay.getTours())
+      {
+        for (HActivity currentActivity : currentTour.getActivities())
+        {
+        	// AttributeLookup erzeugen
+      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
+        	
+    	    // Step-Objekt erzeugen
+    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+    	    step.doStep();
+
+          // Status festlegen
+    	    currentActivity.setJointStatus(Integer.parseInt(step.getAlternativeChosen()));
+        }
+      }
+    }
+	}
+
     
     
 	/**
