@@ -45,6 +45,9 @@ public class CSVPersonInputReader
 	 * 
 	 * Methode zum Einlesen von Personendaten
 	 * 
+	 * Expected input format:
+	 * PersIndex;anzahlkinder_u10;anzahlkinder_u18;alter_in_jahren;Beruf;SEX;Raumtyp_mobiTopp;PKWHH;pendeldistanz_arbeiten;pendeldistanz_bildung
+	 * 
 	 * @return
 	 * @throws FileNotFoundException
 	 * @throws IOException
@@ -107,6 +110,9 @@ public class CSVPersonInputReader
 	/**
 	 * 
 	 * Methode zum Einlesen von Personendaten inkl. Haushaltskontext
+	 * 
+	 * Expected input format:
+	 * HHIndex;persnrinHH;PersIndex;alter_in_jahren;Beruf;SEX;pendeldistanz_arbeiten;pendeldistanz_bildung
 	 * 
 	 * @return
 	 * @throws FileNotFoundException

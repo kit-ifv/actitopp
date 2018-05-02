@@ -45,6 +45,9 @@ public class CSVHouseholdInputReader
 	 * 
 	 * Methode zum Einlesen von Haushaltsdaten
 	 * 
+	 * Expected input format:
+	 * HHIndex;anzahlkinder_u10;anzahlkinder_u18;Raumtyp_mobiTopp;PKWHH
+	 * 
 	 * @return
 	 * @throws FileNotFoundException
 	 * @throws IOException
