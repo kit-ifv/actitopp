@@ -200,7 +200,24 @@ public class ActitoppPerson
 		return household;
 	}
 
-
+	/**
+	 * 
+	 * @return the personnr in the household
+	 */
+	public int getPersNrinHousehold() {
+		
+		int result=-1;
+		Map<Integer, ActitoppPerson> tmpmap = this.getHousehold().getHouseholdmembers();
+		
+		for (Map.Entry<Integer, ActitoppPerson> tmpmapentry: tmpmap.entrySet()) {
+			if (tmpmapentry.getValue().equals(this)) result = tmpmapentry.getKey();
+		}
+		
+		assert result!=-1: "Person does not exist in this household";
+		return result;
+	}
+	
+	
 	/**
 	 * @return the age
 	 */

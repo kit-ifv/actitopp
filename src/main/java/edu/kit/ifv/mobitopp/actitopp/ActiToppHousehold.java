@@ -60,6 +60,15 @@ public class ActiToppHousehold {
 	
 	/**
 	 * 
+	 * @param persnrinhousehold
+	 * @return the person in the household
+	 */
+	public ActitoppPerson getHouseholdMember(int persnrinhousehold) {
+		return  this.getHouseholdmembers().get(persnrinhousehold);
+	}
+	
+	/**
+	 * 
 	 * Fügt dem Haushalt eine neue Person mit der übergebenen Nummer hinzu
 	 * 
 	 * @param member

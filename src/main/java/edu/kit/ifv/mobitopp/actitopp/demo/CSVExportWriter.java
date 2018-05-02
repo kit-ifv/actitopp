@@ -36,7 +36,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
+	  	writer.append("HHIndex;PersNr;PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
@@ -75,7 +75,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("PersIndex;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
+	  	writer.append("HHIndex;PersNr;PersIndex;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
@@ -112,7 +112,11 @@ public class CSVExportWriter
 		
 		String rueckgabe="";
 		
-		// ID
+		// HHIndex
+		rueckgabe += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
+		// PersNr
+		rueckgabe += act.getPerson().getPersNrinHousehold() + ";";
+		// PersIndex
 		rueckgabe += act.getPerson().getPersIndex() + ";";
 		// WOTAG
 		rueckgabe += act.getWeekDay() + ";";
@@ -149,7 +153,11 @@ public class CSVExportWriter
 	
 		String rueckgabe="";
 		
-		// ID
+		// HHIndex
+		rueckgabe += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
+		// PersNr
+		rueckgabe += act.getPerson().getPersNrinHousehold() + ";";
+		// PersIndex
 		rueckgabe += act.getPerson().getPersIndex() + ";";
 		// WOTAG
 		rueckgabe += act.getWeekDay() + ";";
@@ -186,7 +194,11 @@ public class CSVExportWriter
 				
 		String rueckgabe="";
 		
-		// ID
+		// HHIndex
+		rueckgabe += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
+		// PersNr
+		rueckgabe += act.getPerson().getPersNrinHousehold() + ";";
+		// PersIndex
 		rueckgabe += act.getPerson().getPersIndex() + ";";
 		// WOTAG
 		rueckgabe += act.getWeekDay() + ";";
