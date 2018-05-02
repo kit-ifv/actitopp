@@ -1,6 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +59,19 @@ public class ActiToppHousehold {
 	public Map<Integer, ActitoppPerson> getHouseholdmembers() {
 		return householdmembers;
 	}
+
+	/**
+	 * @return the householdmembers
+	 */
+	public List<ActitoppPerson> getHouseholdmembersasList() {
+		List<ActitoppPerson> tmpliste = new ArrayList<ActitoppPerson>();
+		
+		for (Map.Entry<Integer, ActitoppPerson> tmpmapentry: getHouseholdmembers().entrySet()) {
+			tmpliste.add(tmpmapentry.getValue());
+		}
+		
+		return tmpliste;
+	}
 	
 	/**
 	 * 
@@ -64,7 +79,9 @@ public class ActiToppHousehold {
 	 * @return the person in the household
 	 */
 	public ActitoppPerson getHouseholdMember(int persnrinhousehold) {
-		return  this.getHouseholdmembers().get(persnrinhousehold);
+		ActitoppPerson tmpperson = this.getHouseholdmembers().get(persnrinhousehold);
+		assert tmpperson!=null : "Person does not exist in this household!";
+		return tmpperson;
 	}
 	
 	/**

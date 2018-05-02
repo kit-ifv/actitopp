@@ -2,7 +2,10 @@ package edu.kit.ifv.mobitopp.actitopp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -213,7 +216,7 @@ public class ActitoppPerson
 			if (tmpmapentry.getValue().equals(this)) result = tmpmapentry.getKey();
 		}
 		
-		assert result!=-1: "Person does not exist in this household";
+		assert result!=-1: "Person does not exist in this household or has no PersNr in this household";
 		return result;
 	}
 	
@@ -427,6 +430,37 @@ public class ActitoppPerson
 	}
 	
 	/**
+   * Sortiert eine Liste mit Personen absteigend nach deren wahrscheinlichem Anteil an gemeinsamen Aktivitäten
+   * 
+   * @param personListe
+   */
+  public static void sortPersonListOnProbabilityofJointActions_DESC(List<ActitoppPerson> personList)
+  {
+  	assert personList != null : "Liste zum Sortieren ist leer";
+  	
+      Collections.sort(personList, new Comparator<ActitoppPerson>()
+      {
+        @Override
+        public int compare(ActitoppPerson person1, ActitoppPerson person2)
+        {   
+          if(person1.getprobableShareofJointActions() < person2.getprobableShareofJointActions())
+          {
+            return +1;
+          }
+          else if(person1.getprobableShareofJointActions() == person2.getprobableShareofJointActions())
+          {
+          	return 0;
+          }
+          else
+          {
+          	return -1;
+          }
+        }
+      }
+      );
+  }
+	
+	/**
 	 * Methode erzeugt Wochenaktivitätenplan für Person
 	 * 
 	 * @param modelbase
@@ -456,6 +490,27 @@ public class ActitoppPerson
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 
+	 * Methode bestimmt den möglichen Anteil gemeinsamer Aktivitäten an allen Aktivitäten der Person
+	 * Dient zum Bestimmen der Reihenfolge der Modellierung (für gemeinsame Aktivitäten)
+	 * 
+	 * @return
+	 */
+	public double getprobableShareofJointActions() {
+		
+//TODO: Enhancing method in general!
+		
+		double result=-1;
+		
+		if (this.getEmployment()==1) result=0.1;
+		if (this.getEmployment()!=1) result=0.5;
+		
+		return result;
+	}
+	
+	
 	
 	/**
 	 * 
