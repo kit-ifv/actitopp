@@ -36,7 +36,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("ID;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
+	  	writer.append("PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
@@ -75,7 +75,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("ID;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
+	  	writer.append("PersIndex;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
