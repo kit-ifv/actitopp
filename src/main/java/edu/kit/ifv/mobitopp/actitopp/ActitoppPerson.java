@@ -2,11 +2,13 @@ package edu.kit.ifv.mobitopp.actitopp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * 
@@ -33,6 +35,10 @@ public class ActitoppPerson
 	// Pendeldistanzen sind als Default = 0, das heißt nicht verfügbar oder Person pendelt nicht
 	private double commutingdistance_work = 0.0;
 	private double commutingdistance_education = 0.0;
+	
+	
+  private List<HActivity> jointActivitiesforConsideration;
+
 	
 	
 	/**
@@ -77,6 +83,7 @@ public class ActitoppPerson
 		this.setGender(gender);  
 		
 		this.attributes = new HashMap<String, Double>();
+		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
 		
 		}
 	
@@ -139,6 +146,7 @@ public class ActitoppPerson
 		this.setGender(gender);
 		
 		this.attributes = new HashMap<String, Double>();
+		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
 		
 		}	
 
@@ -469,12 +477,13 @@ public class ActitoppPerson
 	 */
 	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPatternException 
 	{
+		
 		// Erzeuge ein leeres Default-Pattern
 		weekPattern = new HWeekPattern(this);
 		
 		// Erzeuge einen Coordinator zum Modellablauf
 		Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
-		
+	
 		// Erzeuge den Schedule
 		try 
 		{
@@ -489,6 +498,7 @@ public class ActitoppPerson
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 	
 	/**
@@ -508,6 +518,23 @@ public class ActitoppPerson
 		if (this.getEmployment()!=1) result=0.5;
 		
 		return result;
+	}
+	
+  /**
+   * 
+   * @return
+   */
+  public List<HActivity> getAllJointActivitiesforConsideration()
+  {
+  	return jointActivitiesforConsideration;
+  }
+  
+	/**
+	 * 
+	 * @param act
+	 */
+	public void addJointActivityforConsideration(HActivity act){
+		jointActivitiesforConsideration.add(act);
 	}
 	
 	

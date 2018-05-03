@@ -27,7 +27,7 @@ public class HActivity
   private int estimatedTripTime 	= -1;
   
   private int jointStatus					= -1;
-  
+
   /*
    * erwartete Wegezeit nach der Aktivität
    * nur relevant, falls Aktivität die letzte auf der Tour ist.
@@ -89,6 +89,25 @@ public class HActivity
 		setJointStatus(4);
 	}
 
+	/**
+	 * 
+	 * Konstruktor (wird für zu berücksichtigende gemeinsame Aktivitäten genutzt)
+	 * 
+	 * Wird aktuell nicht genutzt, da Referenzen auf die entsprechenden Aktivitäten übergeben werden und keine Kopien erzeugt werden.
+	 *
+	 * @param ActType
+	 * @param duration
+	 * @param starttime
+	 * @param jointStatus
+	 */
+	@Deprecated
+	public HActivity(char ActType, int duration, int starttime, int jointStatus, int triptime, int triptimeafteractivity)
+	{
+		this(null, ActType, duration, starttime);
+		this.jointStatus = jointStatus;
+		this.estimatedTripTime = triptime;
+		this.estimatedTripTimeAfterActivity = triptimeafteractivity;
+	}
     
 	public HTour getTour() 
 	{
@@ -281,9 +300,9 @@ public class HActivity
 	{
 		return 	"Start " + getStartTimeWeekContext() + 
 				" Ende " + getEndTimeWeekContext() + 
-				" Dauer: " + getDuration() + 
-				" Typ: " + getType() + " (" + getMobiToppActType() + ")" + 
-				" jointStatus: " + getJointStatus()
+				" Dauer: " + this.duration + 
+				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
+				" jointStatus: " + this.jointStatus
 				;
 	}
 
@@ -440,7 +459,8 @@ public class HActivity
 		}
 		else
 		{
-			daynumber = getTour().getDay().getIndex();
+			//daynumber = getTour().getDay().getIndex();
+			daynumber = getDay().getIndex();
 		}
 		return daynumber;
 	}

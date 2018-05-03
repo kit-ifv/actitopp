@@ -12,8 +12,9 @@ public class HWeekPattern
 {  
 	private ActitoppPerson person;
   private List<HDay> days;
+  
   private List<HActivity> homeactivitities;
-
+  
   /**
    * 
    * Konstruktor
@@ -23,6 +24,7 @@ public class HWeekPattern
   {
   	this.person = person;
     homeactivitities = new ArrayList<HActivity>();
+    
     
     days = new ArrayList<HDay>();
     for (int i=0; i<7; i++) 
@@ -118,7 +120,12 @@ public class HWeekPattern
   {
   	return homeactivitities;
   }
+
   
+  /**
+   * 
+   * @return
+   */
   public List<HActivity> getAllActivities()
   {
   	List<HActivity> tmpliste = new ArrayList<HActivity>();
@@ -324,5 +331,6 @@ public class HWeekPattern
 		assert act.getType()=='H' : "keine Heimaktivität";
 		homeactivitities.add(act);
 	}
+
 	
 }

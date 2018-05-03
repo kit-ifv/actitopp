@@ -174,7 +174,7 @@ public class HDay
   			index = tour.getIndex();
   		}
   	}
-  	assert index>=0 : "maximaler AktIndex der Tour ist kleiner 0 - index: " + index;
+  	assert index>=0 : "maximaler  TourIndex des Tages ist kleiner 0 - index: " + index;
   	return index;
   }
 
@@ -189,7 +189,7 @@ public class HDay
   			index = tour.getIndex();
   		}
   	}
-  	assert index<=0 : "minimaler AktIndex der Tour ist größer 0 - index: " + index;
+  	assert index<=0 : "minimaler TourIndex des Tages ist größer 0 - index: " + index;
   	return index;
   }
   

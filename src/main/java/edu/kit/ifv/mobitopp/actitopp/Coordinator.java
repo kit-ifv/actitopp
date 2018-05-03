@@ -3,7 +3,10 @@ package edu.kit.ifv.mobitopp.actitopp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -94,12 +97,6 @@ public class Coordinator
   public void executeModel() throws FileNotFoundException, IOException, InvalidPatternException
   {
   	
- 	
-  	if (person.getPersIndex()==5600)
-  	{
-  		System.out.println("");
-  	}
-  	
   	// Durchführung der Modellschritte
   
     executeStep1("1A", "anztage_w");
@@ -171,6 +168,9 @@ public class Coordinator
     createStartTimesforActivities();
 
     executeStep11("11");
+    
+    // Bestimme, welche gemeinsamen Wege/Aktivitäten welche anderen Personen beeinflussen
+    generateJointActionsforOtherPersons();
     
 					 
     // Finalisierung der Wochenaktivitätenpläne 
@@ -1951,6 +1951,57 @@ public class Coordinator
     	pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, 10080, 0));
     }
   }
+  
+	private void generateJointActionsforOtherPersons() {
+
+		for (HActivity tmpactivity : pattern.getAllOutofHomeActivities()) {
+			// Falls die Aktivität gemeinsam ist, muss sie in das Pattern der anderen Personen eingefügt werden
+			if (tmpactivity.getJointStatus()!=4) {
+				
+				//TODO Hier Code einfügen, der bestimmt mit welcher weiteren Person die Aktivität durchgeführt wird
+				/*
+				 * Vereinfachung: Zufällige Auswahl einer anderen Person aus dem Haushalt
+				 */
+				
+				// Erstelle Map mit allen anderen Personennummern im Haushalt, die noch nicht modelliert wurden und wähle zufällig eine
+				Map<Integer,ActitoppPerson> otherunmodeledpersinhh = person.getHousehold().getHouseholdmembers();				
+				List<Integer> keyValues = new ArrayList<>(otherunmodeledpersinhh.keySet());
+				for (Integer key : keyValues) 
+				{
+					ActitoppPerson tmpperson = otherunmodeledpersinhh.get(key);
+					if (tmpperson.getWeekPattern()!=null || tmpperson.getPersIndex()==person.getPersIndex()) 
+					{
+						otherunmodeledpersinhh.remove(key);
+					}
+				}
+				
+				
+				if (otherunmodeledpersinhh.size()>0)
+				{
+					// Wähle eine zufällige Nummer der verbleibenden Personen
+					List<Integer> keys = new ArrayList<Integer>(otherunmodeledpersinhh.keySet());
+					Integer randomkey = keys.get(new Random().nextInt(keys.size()));
+					
+					// Aktivität zur Berücksichtigung bei anderer Person aufnehmen
+					ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);
+					//HWeekPattern otherpattern = otherunmodeledpersinhh.get(randomkey).getWeekPattern();
+					
+					otherperson.addJointActivityforConsideration(tmpactivity);
+	/*						new HActivity(
+									otherpattern.getDay(tmpactivity.getIndexDay()), 
+									tmpactivity.getType(), 
+									tmpactivity.getDuration(),
+									tmpactivity.getStartTime(), 
+									tmpactivity.getJointStatus(),
+									tmpactivity.getEstimatedTripTime(),
+									tmpactivity.getEstimatedTripTimeAfterActivity(),
+									person.getPersIndex()
+							)
+					);
+*/				}
+			}
+		}
+	}
   
 
   /**

@@ -34,6 +34,12 @@ public class Configuration {
  */
 	public static boolean coordinated_modelling = true;	
 	
+/*
+ * Berücksichtigung von gemeinsamen Wegen und Aktivitäten auf Haushaltsbasis
+ * 	
+ */
+	public static boolean model_joint_actions = true;
+	
 	
 	
 	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
@@ -185,7 +191,7 @@ public class Configuration {
  */
 	
 	// steuert die Ausgabe von Log in Modellschritten
-	public static final boolean debugenabled = false;
+	public static boolean debugenabled = false;
 
 
 
