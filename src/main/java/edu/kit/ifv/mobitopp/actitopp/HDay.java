@@ -103,6 +103,18 @@ public class HDay
   			" Haupttour: " + getMainTourType(); 	
   }
     
+	public String printDayPattern()
+	{
+		String result="Day " + getIndex() + " // ";
+		
+		for (HActivity tmpact : getAllActivitiesoftheDay())
+		{
+			result = result + " " + tmpact.getIndex() + " " + tmpact.getType(); 
+			if (tmpact.isActivityLastinTour()) result = result + " //";		
+		}
+		return result;
+	}
+	
 	
   /**
    * 
@@ -113,6 +125,22 @@ public class HDay
   public boolean isHomeDay()
   {
   	return (getAmountOfTours()==0);
+  }
+  
+  /**
+   * 
+   * Liste mit allen Akivititäten des Tages
+   * 
+   * @return
+   */
+  public List<HActivity> getAllActivitiesoftheDay()
+  {
+  	List<HActivity> allactivities = new ArrayList<HActivity>();
+  	for (HTour tmptour : this.getTours())
+  	{
+  		allactivities.addAll(tmptour.getActivities());
+  	}
+  	return allactivities;
   }
     
   /**
@@ -223,9 +251,64 @@ public class HDay
   	assert indextour != null : "Tour konnte nicht gefunden werden - Index: " + index;
   	return indextour;
   }  
-
   
-  public int getAmountOfTours()
+  
+  /**
+   * 
+   * Prüft, ob Tour existiert
+   * 
+   * @param index
+   * @return
+   */
+  public boolean existsTour(int index)
+  {
+  	boolean result = false;
+  	HTour indextour = null;
+  	for (HTour tour : this.tours)
+  	{
+  		if (tour.getIndex()==index)
+  		{
+  			indextour = tour;
+  		}
+  	}
+  	if (indextour != null) result=true;
+  	return result;
+  }  
+  
+  
+  /**
+   * 
+   * Prüft, ob Aktivität existiert
+   * 
+   * @param index
+   * @return
+   */
+  public boolean existsActivity(int tourindex, int activityindex)
+  {
+  	boolean result = false;  	
+  	if (existsTour(tourindex)) 
+  	{
+  		HActivity indexact = null;
+    	for (HActivity act : getTour(tourindex).getActivities())
+    	{
+    		if (act.getIndex()==activityindex)
+    		{
+    			indexact = act;
+    		}
+    	}
+    	if (indexact != null) result=true;
+  	}  	
+  	return result;
+  }  
+  
+  public boolean existsActivityTypeforActivity(int tourindex, int activityindex)
+	{
+		boolean result = false;
+		if (existsActivity(tourindex, activityindex) && getTour(tourindex).getActivity(activityindex).activitytypeisScheduled()) result=true;		
+		return result;
+	}
+
+	public int getAmountOfTours()
   {
   	assert tours != null : "Tourliste nicht initilaisiert";
       return tours.size();

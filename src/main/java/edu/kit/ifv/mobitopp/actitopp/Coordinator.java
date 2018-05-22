@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
 
 /**
  * 
@@ -99,6 +97,8 @@ public class Coordinator
   	
   	// Durchführung der Modellschritte
   
+  	addJointActivitiestoPattern();
+  	
     executeStep1("1A", "anztage_w");
     executeStep1("1B", "anztage_e");
     executeStep1("1C", "anztage_l");
@@ -196,7 +196,78 @@ public class Coordinator
     checkOverlappingActivities(pattern);
 
   }
-
+  
+  
+  /**
+   * 
+   * Fügt alle gemeinsamen Aktivitäten in das Pattern ein
+   * 
+   */
+  private void addJointActivitiestoPattern()
+  {
+  	if(Configuration.model_joint_actions)
+		{
+			for (HActivity tmpjointact : person.getAllJointActivitiesforConsideration())
+  		{
+				// Infos für die neue, gemeinsame Akt
+				int indexday = tmpjointact.getIndexDay();
+				int tourindex = tmpjointact.getTour().getIndex();
+				
+				int activityindex = tmpjointact.getIndex();
+				char activitytype = tmpjointact.getType();
+				int activityduration = tmpjointact.getDuration();
+				int activitystarttime = tmpjointact.getStartTime();
+				int activityjointStatus = tmpjointact.getJointStatus();
+				int activitytripdurationbefore = tmpjointact.getEstimatedTripTimeBeforeActivity();
+				
+								
+        // Hole Referenz auf Tour oder füge die Tour in das Pattern ein, falls sie noch nicht existiert
+        HDay currentDay = pattern.getDay(indexday);
+        
+        HTour oneTour;
+				if (currentDay.existsTour(tourindex)==false)
+				{
+					oneTour = new HTour(currentDay, tourindex);
+					currentDay.addTour(oneTour);
+				}
+				else
+				{
+					oneTour = currentDay.getTour(tourindex);
+				}
+                  
+        // Füge die Aktivität in das Pattern ein
+				HActivity activity = null;
+				
+				
+				switch(activityjointStatus)
+				{
+					// Weg davor und Aktivität werden gemeinsam durchgeführt
+					case 1:
+					{
+						activity = new HActivity(oneTour, activityindex, activitytype, activityduration, activitystarttime, activityjointStatus, activitytripdurationbefore);
+						break;
+					}
+					// Nur Aktivität wird gemeinsam durchgeführt
+					case 2:
+					{
+						activity = new HActivity(oneTour, activityindex, activitytype, activityduration, activitystarttime, activityjointStatus);
+						break;
+					}		
+					// Weg davor wird gemeinsam durchgeführt
+					case 3:
+					{
+						activity = new HActivity(oneTour, activityindex, activitystarttime, activityjointStatus, activitytripdurationbefore);
+						break;
+					}
+				}
+				
+				
+				assert activity!=null : "Aktivität wurde nicht erzeugt";
+        oneTour.addActivity(activity);
+  		}
+		}
+  }
+  
     
 
   /**
@@ -226,24 +297,53 @@ public class Coordinator
     // STEP 2A Main tour and main activity
     for (HDay currentDay : pattern.getDays())
     {
-    	// AttributeLookup erzeugen
-  		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
-    	
-	    // Step-Objekt erzeugen
-	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
-	    step.doStep();
-	          
-	    char activityType = step.getAlternativeChosen().charAt(0);
-      if (activityType!='H')
-      {	
-        // Füge die Tour in das Pattern ein
-        HTour mainTour = new HTour(currentDay, 0);
-        currentDay.addTour(mainTour);
-                  
-        // Füge die Aktivität in das Pattern ein
-        HActivity activity = new HActivity(mainTour, 0, activityType);
-        mainTour.addActivity(activity);
-      }
+    	// Schritt wird ausgeführt, falls die Hauptaktivität noch nicht exisitiert oder noch keinen Aktivitätstyp hat
+    	if(!currentDay.existsActivityTypeforActivity(0,0))
+    	{
+      	// AttributeLookup erzeugen
+    		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
+      	
+  	    // Step-Objekt erzeugen
+  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+  	    
+  	    // Falls es schon Touren gibt, H als Aktivitätstyp ausschließen
+  	    if (currentDay.getAmountOfTours()>0)
+  	    {
+  	    	step.limitUpperBoundOnly(step.alternatives.size()-2);
+	    	}
+  	    
+  	    // Auswahl durchführen
+  	    step.doStep();
+  	    char activityType = step.getAlternativeChosen().charAt(0);
+    		
+  	    if (activityType!='H')
+        {	
+          // Füge die Tour in das Pattern ein, falls sie noch nicht existiert
+  	    	HTour mainTour = null;
+  	    	if (!currentDay.existsTour(0))
+          {
+          	mainTour = new HTour(currentDay, 0);
+          	currentDay.addTour(mainTour);
+          }
+  	    	else
+  	    	{
+  	    		mainTour = currentDay.getTour(0);
+  	    	}
+  	    	
+  	    	// Füge die Aktivität in das Pattern ein, falls sie noch nicht existiert
+  	    	HActivity activity = null;
+  	    	if (!currentDay.existsActivity(0,0))
+          {
+  	    		activity = new HActivity(mainTour, 0, activityType);
+            mainTour.addActivity(activity);
+          }
+  	    	else
+  	    	{
+  	    		activity = currentDay.getTour(0).getActivity(0);
+  	    		activity.setType(activityType);
+  	    	}
+        }
+    	}		    
     }
   }
   
@@ -266,18 +366,28 @@ public class Coordinator
     	
 	    // Step-Objekt erzeugen
 	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    
+	    // Mindesttourzahl festlegen, falls es schon Touren aus gemeinsamen Aktivitäten gibt
+	    int mindesttourzahl=0;
+	    if (id.equals("3A")) mindesttourzahl = currentDay.getLowestTourIndex() * -1;
+	    if (id.equals("3B")) mindesttourzahl = currentDay.getHighestTourIndex();
+	    
+	    // Alternativen limitieren basierend auf Mindestourzahl
+	    step.limitLowerBoundOnly(mindesttourzahl);
+	    
+	    // Entscheidung durchführen
 	    step.doStep();
             
-      // Erstelle die weiteren Touren an diesem Tag basierend auf der Entscheidung und füge Sie in das Pattern ein
+      // Erstelle die weiteren Touren an diesem Tag basierend auf der Entscheidung und füge Sie in das Pattern ein, falls sie noch nicht existieren
       for (int j = 1; j <= step.getDecision(); j++)
       {
       	HTour tour = null;
       	// 3A - Touren vor der Haupttour
-        if (id.equals("3A")) tour = new HTour(currentDay, (-1) * j);
+        if (id.equals("3A") && !currentDay.existsTour(-1*j)) tour = new HTour(currentDay, (-1) * j);
       	// 3B - Touren nach der Haupttour
-        if (id.equals("3B")) tour = new HTour(currentDay, (+1) * j);        
+        if (id.equals("3B") && !currentDay.existsTour(-1*j)) tour = new HTour(currentDay, (+1) * j);        
         
-        currentDay.addTour(tour);
+        if (tour!=null) currentDay.addTour(tour);
       }
     }
 	}
@@ -299,8 +409,12 @@ public class Coordinator
                      
       for (HTour currentTour : currentDay.getTours())
       {
-        // ignore main tour, as it is already created and has a main activity
-        if (currentTour.getIndex() != 0)
+        /*
+         * ignore several tours
+         * 	- main tours have a main acitivty
+         *  - others tours may have a main activity due to joint activities
+         */
+      	if(!currentDay.existsActivityTypeforActivity(currentTour.getIndex(),0))
         {
         	// AttributeLookup erzeugen
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
@@ -311,10 +425,19 @@ public class Coordinator
 
           // Speichere gewählte Entscheidung für weitere Verwendung
           char chosenActivityType = step.getAlternativeChosen().charAt(0);
-
-          //Erstelle für den gewählten Tourtyp die Hauptaktivität der Tour
-          HActivity activity = new HActivity(currentTour, 0, chosenActivityType);
-          currentTour.addActivity(activity);
+          
+  	    	// Füge die Aktivität in das Pattern ein, falls sie noch nicht existiert
+  	    	HActivity activity = null;
+  	    	if (!currentDay.existsActivity(currentTour.getIndex(),0))
+          {
+  	    		activity = new HActivity(currentTour, 0, chosenActivityType);
+  	    		currentTour.addActivity(activity);
+          }
+  	    	else
+  	    	{
+  	    		activity = currentTour.getActivity(0);
+  	    		activity.setType(chosenActivityType);
+  	    	}
         }
       }
     }
@@ -339,20 +462,30 @@ public class Coordinator
       	// AttributeLookup erzeugen
     		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
       	
-  	    // Step-Objekt erzeugen
+    	  // Step-Objekt erzeugen
   	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
-  	    step.doStep();
+    		
+  	    // Mindesaktzahl festlegen, falls es schon Aktivitäten aus gemeinsamen Aktivitäten gibt
+  	    int mindestaktzahl =0;
+  	    if (id.equals("5A")) mindestaktzahl = currentTour.getLowestActivityIndex() * -1;
+  	    if (id.equals("5B")) mindestaktzahl = currentTour.getHighestActivityIndex();
+  	    
+  	    // Alternativen limitieren basierend auf Mindesaktzahl
+  	    step.limitLowerBoundOnly(mindestaktzahl);
+  	    
+  	    // Entscheidung durchführen
+  	    step.doStep();    		
 
   	    // Erstelle die weiteren Aktivitäten in dieser Tour basierend auf der Entscheidung und füge Sie in das Pattern ein
         for (int j = 1; j <= step.getDecision(); j++)
         {
         	HActivity act = null;
-        	// 3A - Touren vor der Haupttour
-          if (id.equals("5A")) act = new HActivity(currentTour, (-1) * j);
-        	// 3B - Touren nach der Haupttour
-          if (id.equals("5B")) act = new HActivity(currentTour, (+1) * j);
+        	// 5A - Touren vor der Haupttour
+          if (id.equals("5A") && !currentDay.existsActivity(currentTour.getIndex(),-1*j)) act = new HActivity(currentTour, (-1) * j);
+        	// 5B - Touren nach der Haupttour
+          if (id.equals("5B") && !currentDay.existsActivity(currentTour.getIndex(),+1*j)) act = new HActivity(currentTour, (+1) * j);
           
-          currentTour.addActivity(act);
+          if (act!=null) currentTour.addActivity(act);
         }
       }
     }
@@ -378,7 +511,7 @@ public class Coordinator
         for (HActivity currentActivity : currentTour.getActivities())
         {
         	// only use activities whose type has not been decided yet
-          if (currentActivity.getIndex()!= 0)
+          if (!currentActivity.activitytypeisScheduled())
           {
           	// AttributeLookup erzeugen
         		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
@@ -1313,7 +1446,7 @@ public class Coordinator
 			// Alle Hauptaktivitäten + zugehörige Wege + letzter Weg am Ende der Tour
 		    for (HTour tour : day.getTours())
 		    {
-		    	totalMainActivityTime += tour.getActivity(0).getDuration() + tour.getActivity(0).getEstimatedTripTime() + tour.getLastActivityInTour().getEstimatedTripTimeAfterActivity();
+		    	totalMainActivityTime += tour.getActivity(0).getDuration() + tour.getActivity(0).getEstimatedTripTimeBeforeActivity() + tour.getLastActivityInTour().getEstimatedTripTimeAfterActivity();
 		    }
 		    // Obergrenze 1
 		    int remainingTimeUpperBound = 1440 - totalMainActivityTime;
@@ -1877,12 +2010,12 @@ public class Coordinator
               	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
               	if (act.isActivityFirstinTour())
               	{
-              		act.setStartTime(tour.getStartTime() + act.getEstimatedTripTime());
+              		act.setStartTime(tour.getStartTime() + act.getEstimatedTripTimeBeforeActivity());
               	}
               	// Ansonsten durch das Ende der vorherigen Aktivität
               	else
               	{
-              		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTime());
+              		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
               	}
               }
           }
@@ -1980,7 +2113,7 @@ public class Coordinator
 				{
 					// Wähle eine zufällige Nummer der verbleibenden Personen
 					List<Integer> keys = new ArrayList<Integer>(otherunmodeledpersinhh.keySet());
-					Integer randomkey = keys.get(new Random().nextInt(keys.size()));
+					Integer randomkey = keys.get(randomgenerator.getRandomPersonKey(keys.size()));
 					
 					// Aktivität zur Berücksichtigung bei anderer Person aufnehmen
 					ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);

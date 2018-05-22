@@ -190,9 +190,30 @@ public class DefaultDCModelStep extends AbsHModelStep
      */
     public void limitAlternatives(int from, int to)
     {
-        fromRangeLimiter = from;
-        toRangeLimiter = to;
+	    fromRangeLimiter = from;
+	    toRangeLimiter = to;
     }
+    
+		/**
+     * Limits the DC-process to a certain alternative upperBound. this method must be called before doStep() if necessary
+     * @param from
+     * @param to
+     */
+    public void limitUpperBoundOnly(int to)
+    {
+    	toRangeLimiter = to;
+    }
+    
+		/**
+     * Limits the DC-process to a certain alternative lowerBound. this method must be called before doStep() if necessary
+     * @param from
+     * @param to
+     */
+    public void limitLowerBoundOnly(int from)
+    {
+    	fromRangeLimiter = from;
+    }
+    
     
     /**
 		 * 

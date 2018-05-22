@@ -24,7 +24,13 @@ public class HActivity
   private char type								= 'x';
   private int duration 						= -1;
   private int starttime 					= -1;
-  private int estimatedTripTime 	= -1;
+  
+  
+  private HTrip tripbeforeactivity;
+  private HTrip tripafteractivity;
+  
+  
+//  private int estimatedTripTime 	= -1;
   
   private int jointStatus					= -1;
 
@@ -32,7 +38,7 @@ public class HActivity
    * erwartete Wegezeit nach der Aktivität
    * nur relevant, falls Aktivität die letzte auf der Tour ist.
    */
-  private int estimatedTripTimeAfterActivity = -1;
+//  private int estimatedTripTimeAfterActivity = -1;
   
   private byte mobiToppActType		= -1;
            
@@ -69,10 +75,65 @@ public class HActivity
 	    setType(type);
 	}  
 	
+	/**
+	 * 
+	 * Konstruktor für Aktivitäten, wo nur Akt gemeinsam durchgeführt wird
+	 *
+	 * @param parent
+	 * @param index
+	 * @param type
+	 * @param duration
+	 * @param starttime
+	 */
+	public HActivity(HTour parent, int index, char type, int duration, int starttime, int jointStatus)
+	{
+	    this(parent, index, type);
+	    setDuration(duration);
+	    setStartTime(starttime);
+	    setJointStatus(jointStatus);
+	}  
+	
+	/**
+	 * 
+	 * Konstruktor für Aktivitäten, wo Akt und Weg gemeinsam durchgeführt werden
+	 *
+	 * @param parent
+	 * @param index
+	 * @param type
+	 * @param duration
+	 * @param starttime
+	 * @param jointStatus
+	 * @param tripdurationbefore
+	 */
+	public HActivity(HTour parent, int index, char type, int duration, int starttime, int jointStatus, int tripdurationbefore)
+	{
+	    this(parent, index, type, duration, starttime, jointStatus);
+	    tripbeforeactivity = new HTrip(this, tripdurationbefore);
+	}  
+	
+	/**
+	 * 
+	 * Konstruktor für Aktivitäten, wo nur Weg dahin gemeinsam durchgeführt wird
+	 *
+	 * @param parent
+	 * @param index
+	 * @param starttime
+	 * @param jointStatus
+	 * @param tripdurationbefore
+	 */
+	public HActivity(HTour parent, int index, int starttime, int jointStatus, int tripdurationbefore)
+	{
+	    this(parent, index);
+	    setStartTime(starttime);
+	    setJointStatus(jointStatus);
+	    tripbeforeactivity = new HTrip(this, tripdurationbefore);
+	}  
+	
+	
 
 	/**
 	 * 
-	 * Konstruktor (wird für Home-Aktivitäten genutzt)
+	 * Konstruktor für Home-Aktivitäten 
 	 * 
 	 * @param parent
 	 * @param ActType
@@ -89,26 +150,8 @@ public class HActivity
 		setJointStatus(4);
 	}
 
-	/**
-	 * 
-	 * Konstruktor (wird für zu berücksichtigende gemeinsame Aktivitäten genutzt)
-	 * 
-	 * Wird aktuell nicht genutzt, da Referenzen auf die entsprechenden Aktivitäten übergeben werden und keine Kopien erzeugt werden.
-	 *
-	 * @param ActType
-	 * @param duration
-	 * @param starttime
-	 * @param jointStatus
-	 */
-	@Deprecated
-	public HActivity(char ActType, int duration, int starttime, int jointStatus, int triptime, int triptimeafteractivity)
-	{
-		this(null, ActType, duration, starttime);
-		this.jointStatus = jointStatus;
-		this.estimatedTripTime = triptime;
-		this.estimatedTripTimeAfterActivity = triptimeafteractivity;
-	}
-    
+
+
 	public HTour getTour() 
 	{
 		return tour;
@@ -143,7 +186,7 @@ public class HActivity
 
 	public char getType() 
 	{
-		assert Configuration.ACTIVITY_TYPES.contains(type) || type=='H' : "ungültige Aktivität - nicht intialisiert oder nicht in ACTIVITYTYPES enthalten";
+		assert Configuration.ACTIVITY_TYPES.contains(type) || type=='H' : "ungültige Aktivität - nicht intialisiert oder nicht in ACTIVITYTYPES enthalten aktueller Wert:" + type;
 		return type;
 	}
 
@@ -187,36 +230,37 @@ public class HActivity
 		this.jointStatus = jointStatus;
 	}
 
-	public int getEstimatedTripTime() 
+	public int getEstimatedTripTimeBeforeActivity() 
 	{
-		assert estimatedTripTime != -1 : "EstimatedTripTime ist zum Zugriffszeitpunkt nicht initialisiert";
-		return estimatedTripTime;
+		assert tripBeforeActivityisScheduled() : "Trip vor der Aktvitität ist zum Zugriffszeitpunkt nicht initialisiert";
+		int tmptriptimebefore = tripbeforeactivity.getTripduration();
+		return tmptriptimebefore;
 	}
-
+/*
 	private void setEstimatedTripTime(int estimatedTripTime) 
 	{
 		assert estimatedTripTime>0 || (estimatedTripTime==0 && getType()=='H') : "zu setzende Wegzeit ist nicht größer 0";
 		this.estimatedTripTime = estimatedTripTime;
 	}
-
+*/
 	/**
 	 * @return the estimatedTripTimeAfterActivity
 	 */
 	public int getEstimatedTripTimeAfterActivity() 
 	{
-		assert estimatedTripTimeAfterActivity != -1 : "estimatedTripTimeAfterActivity ist zum Zugriffszeitpunkt nicht initialisiert // nur bei letzter Aktivität in Tour gesetzt";
-		return estimatedTripTimeAfterActivity;
+		assert tripAfterActivityisScheduled() : "Trip nach der Aktvitität ist zum Zugriffszeitpunkt nicht initialisiert // nur bei letzter Aktivität in Tour gesetzt";
+		int tmptriptimeafter = tripafteractivity.getTripduration();
+		return tmptriptimeafter;
 	}
 
-	/**
-	 * @param estimatedTripTimeAfterActivity the estimatedTripTimeAfterActivity to set
-	 */
+/*
 	private void setEstimatedTripTimeAfterActivity(int estimatedTripTimeAfterActivity) 
 	{
 		assert (estimatedTripTimeAfterActivity==0 && !isActivityLastinTour()) || (estimatedTripTimeAfterActivity>0 && isActivityLastinTour()) : "zu setzende Wegzeit muss 0 (bei nicht letzter Aktivität in Tour) oder größer 0 (bei letzter Aktivität in der Tour) sein";
 		this.estimatedTripTimeAfterActivity = estimatedTripTimeAfterActivity;
 	}
-
+*/
+	
 	public byte getMobiToppActType() 
 	{
 		assert Configuration.ACTIVITY_TYPES_mobiTopp.contains(mobiToppActType) : "ungültige Aktivität - nicht in ACTIVITYTYPES_mobiTopp enthalten"; 
@@ -298,7 +342,8 @@ public class HActivity
   @Override
 	public String toString()
 	{
-		return 	"Start " + getStartTimeWeekContext() + 
+		return getIndexDay() + "/" + getTour().getIndex() + "/" + getIndex() + 	
+				" Start " + getStartTimeWeekContext() + 
 				" Ende " + getEndTimeWeekContext() + 
 				" Dauer: " + this.duration + 
 				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
@@ -395,6 +440,28 @@ public class HActivity
 
 	/**
 	 * 
+	 * Gibt an, ob es sich um die Hauptaktivität der Tour handelt
+	 * 
+	 * @return
+	 */
+	public boolean isMainActivityoftheTour()
+	{
+		return this.getIndex()==0;
+	}
+	
+	/**
+	 * 
+	 * Gibt an, ob es sich um die Hauptaktivität des Tages handelt
+	 * 
+	 * @return
+	 */
+	public boolean isMainActivityoftheDay()
+	{
+		return isMainActivityoftheTour() && getTour().isMainTouroftheDay();
+	}
+	
+	/**
+	 * 
 	 * Gibt die vorherige Aktivität auf der Tour zurück
 	 * 
 	 * @return
@@ -477,12 +544,14 @@ public class HActivity
 
 	public int getTripStartTime()
 	{
-		return getStartTime() - getEstimatedTripTime();
+		// return getStartTime() - getEstimatedTripTime();
+		return getStartTime() - tripbeforeactivity.getTripduration();
 	}
 
 	public int getTripStartTimeWeekContext()
 	{
-		return getStartTimeWeekContext() - getEstimatedTripTime();
+		// return getStartTimeWeekContext() - getEstimatedTripTime();
+		return getStartTimeWeekContext() - tripbeforeactivity.getTripduration();
 	}
 	
 	public int getTripStartTimeAfterActivity()
@@ -540,19 +609,31 @@ public class HActivity
 	 */
 	public void calculateAndSetTripTimes()
 	{
-    int actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
-    int actualTripTime_afterTrip = isActivityLastinTour() ? Configuration.FIXED_TRIP_TIME_ESTIMATOR : 0;
+		if (tripbeforeactivity==null)
+		{
+	    int actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
 
-    // Verbessere die Annahme der Wegezeit, falls ein Pendelweg vorliegt
-    if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_work();
-    if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
-    
-    // Verbessere die Annahme der Wegzeit auf dem letzten Weg der Tour nach der Aktivität, falls Pendelweg vorliegt
-    if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_work();
-    if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_education();
-    	
-		setEstimatedTripTime(actualTripTime_beforeTrip);
-    setEstimatedTripTimeAfterActivity(actualTripTime_afterTrip);		
+	    // Verbessere die Annahme der Wegezeit, falls ein Pendelweg vorliegt
+	    if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_work();
+	    if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
+	    
+			tripbeforeactivity = new HTrip(this, actualTripTime_beforeTrip);
+		}
+
+		if (tripafteractivity==null && isActivityLastinTour())
+		{
+	    int actualTripTime_afterTrip = isActivityLastinTour() ? Configuration.FIXED_TRIP_TIME_ESTIMATOR : 0;
+	    
+	    // Verbessere die Annahme der Wegzeit auf dem letzten Weg der Tour nach der Aktivität, falls Pendelweg vorliegt
+	    if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_work();
+	    if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_education();
+
+	    tripafteractivity = new HTrip(this, actualTripTime_afterTrip);
+		}
+
+		
+//    setEstimatedTripTime(actualTripTime_beforeTrip);
+//    setEstimatedTripTimeAfterActivity(actualTripTime_afterTrip);		
 	}
 	
 	public boolean isScheduled()
@@ -560,14 +641,19 @@ public class HActivity
 		return this.duration!=-1 && this.starttime!=-1 && this.type!='x' && this.jointStatus!=-1;
 	}
 	
+	public boolean activitytypeisScheduled()
+	{
+		return type!='x';
+	}
+	
 	public boolean tripBeforeActivityisScheduled()
 	{
-		return this.estimatedTripTime!=-1;
+		return tripbeforeactivity!=null && tripbeforeactivity.getTripduration()!=-1;
 	}
 	
 	public boolean tripAfterActivityisScheduled()
 	{
-		return this.estimatedTripTimeAfterActivity!=-1;
+		return tripafteractivity!=null && tripafteractivity.getTripduration()!=-1;
 	}
 	
 	/**

@@ -68,20 +68,20 @@ public class HTour
 
   public void addActivity(HActivity act)
   {
-  	assert act.getIndex()!=-99 : "Index der Tour nicht initialisiert";
+  	assert act.getIndex()!=-99 : "Index der Aktivität nicht initialisiert";
   	boolean actindexexisitiert = false;
   	for (HActivity tmpact : activities)
   	{
   		if (tmpact.getIndex() == act.getIndex()) actindexexisitiert = true;
   	}
-  	assert !actindexexisitiert : "Es gibt bereits eine Tour mit diesem Index";
+  	assert !actindexexisitiert : "Es gibt bereits eine Aktivität mit diesem Index";
   	activities.add(act);
   }
 
 	public int getIndex()
 	{
 		assert index != -99 : "Index nicht initilialisiert";
-	    return index;
+	  return index;
 	}
 
 
@@ -121,7 +121,7 @@ public class HTour
 	        public int compare(HTour o1, HTour o2)
 	        {
 	            if(o1.getIndex() < o2.getIndex()) return -1;
-	            if(o1.getIndex() >o2.getIndex()) return 1;
+	            if(o1.getIndex() > o2.getIndex()) return 1;
 	            return 0;
 	        }
 	    });
@@ -158,151 +158,163 @@ public class HTour
 		return starttime!=-1;
 	}
 	
-    
-    /**
-     * 
-     * Gibt die Tourduration inkl. default Trip times zurück
-     * (Dauer_Akt) + (Anz_Akt+1)*DefaultTripTime
-     * 
-     * @return
-     */
-    public int getTourDuration()
-    {
-        int sum = 0;
-        for(HActivity act : activities)
-        {       	
-            sum += act.getDuration() + act.getEstimatedTripTime();
-        }
-        sum+= getActivity(getHighestActivityIndex()).getEstimatedTripTimeAfterActivity();
-        
-        return sum;
-    }
-    
-    /**
-     * 
-     * Gibt die reine Aktivitätenzeit auf der Tour zurück
-     * 
-     * @return
-     */
-    public int getActDuration()
-    {
-        int sum = 0;
-        for(HActivity act : activities)
-        {       	
-            sum += act.getDuration();
-        }
-        
-        return sum;
-    }
-    
-    /**
-     * 
-     * Gibt die Endzeit der Tour zurück
-     * 
-     * @return
-     */
-    public int getEndTime()
-    {
-    	return getStartTime() + getTourDuration();
-    }
+	/**
+	 * 
+	 * Gibt an, ob es sich um die Haupttour des Tages handelt
+	 * 
+	 * @return
+	 */
+	public boolean isMainTouroftheDay()
+	{
+		return this.getIndex()==0;
+	}
 
-    /**
-     * 
-     * Gibt explizit die Aktivität mit dem gesuchten Index zurück
-     * 
-     * @param index
-     * @return
-     */
-    public HActivity getActivity(int index)
-    {
-      	HActivity indexact = null;
-      	for (HActivity activity : getActivities())
-    	{
-    		if (activity.getIndex()==index)
-    		{
-    			indexact = activity;
-    		}
-    	}
-    	assert indexact != null : "Aktivität konnte nicht gefunden werden";
-    	return indexact;
-    	
-    }
-    
-    /**
-     *
-     * Gibt den Index der erste Aktivität der Tour zurück
-     * 
-     * @return
-     */
-    public int getLowestActivityIndex()
-    {
-        int min = +99;
-        for(HActivity act : this.activities)
-        {
-            if(act.getIndex() < min) min = act.getIndex();
-        }
-        assert min<=0 : "minimaler AktIndex der Tour ist größer 0 - index: " + min;
-        return min;
-    }
-       
-    
-    /**
-    *
-    * Gibt den Index der letzten Aktivität der Tour zurück
-    * 
-    * @return
-    */
-    public int getHighestActivityIndex()
-    {
-        int max = -99;
-        for(HActivity act : this.activities)
-        {
-            if(act.getIndex() > max) 
-            {
-            	max = act.getIndex();
-            }
-        }
-        assert max>=0 : "maximaler AktIndex der Tour ist kleiner 0 - index: " + max;
-        return max;
-    }
+  
+  /**
+   * 
+   * Gibt die Tourduration inkl. default Trip times zurück
+   * (Dauer_Akt) + (Anz_Akt+1)*DefaultTripTime
+   * 
+   * @return
+   */
+  public int getTourDuration()
+  {
+      int sum = 0;
+      for(HActivity act : activities)
+      {       	
+          sum += act.getDuration() + act.getEstimatedTripTimeBeforeActivity();
+      }
+      sum+= getActivity(getHighestActivityIndex()).getEstimatedTripTimeAfterActivity();
+      
+      return sum;
+  }
+  
+  /**
+   * 
+   * Gibt die reine Aktivitätenzeit auf der Tour zurück
+   * 
+   * @return
+   */
+  public int getActDuration()
+  {
+      int sum = 0;
+      for(HActivity act : activities)
+      {       	
+          sum += act.getDuration();
+      }
+      
+      return sum;
+  }
+  
+  /**
+   * 
+   * Gibt die Endzeit der Tour zurück
+   * 
+   * @return
+   */
+  public int getEndTime()
+  {
+  	return getStartTime() + getTourDuration();
+  }
 
-    /**
-     * 
-     * Gibt die erste Aktivität der Tour zurück
-     * 
-     * @return
-     */
-    public HActivity getFirstActivityInTour()
-    {
-    	return getActivity(getLowestActivityIndex());    	
-    }
-    
-    /**
-     * 
-     * Gibt die letzte Aktivität der Tour zurück
-     * 
-     * @return
-     */
-    public HActivity getLastActivityInTour()
-    {
-    	return getActivity(getHighestActivityIndex());    	
-    }
-    
-    public int getAmountOfActivities()
-    {
-    	return getActivities().size();
-    }
+  /**
+   * 
+   * Gibt explizit die Aktivität mit dem gesuchten Index zurück
+   * 
+   * @param index
+   * @return
+   */
+  public HActivity getActivity(int index)
+  {
+    	HActivity indexact = null;
+    	for (HActivity activity : getActivities())
+  	{
+  		if (activity.getIndex()==index)
+  		{
+  			indexact = activity;
+  		}
+  	}
+  	assert indexact != null : "Aktivität konnte nicht gefunden werden";
+  	return indexact;
+  	
+  }
+  
+  
+  /**
+   *
+   * Gibt den Index der erste Aktivität der Tour zurück
+   * 
+   * @return
+   */
+  public int getLowestActivityIndex()
+  {
+      int min = +99;
+      for(HActivity act : this.activities)
+      {
+          if(act.getIndex() < min) min = act.getIndex();
+      }
+      assert min<=0 : "minimaler AktIndex der Tour ist größer 0 - index: " + min;
+      return min;
+  }
+     
+  
+  /**
+  *
+  * Gibt den Index der letzten Aktivität der Tour zurück
+  * 
+  * @return
+  */
+  public int getHighestActivityIndex()
+  {
+      int max = -99;
+      for(HActivity act : this.activities)
+      {
+          if(act.getIndex() > max) 
+          {
+          	max = act.getIndex();
+          }
+      }
+      assert max>=0 : "maximaler AktIndex der Tour ist kleiner 0 - index: " + max;
+      return max;
+  }
 
-    
-    public int getStartTimeWeekContext()
-    {
-    	return (1440*getDay().getIndex()) + getStartTime();
-    }
-    
-    public int getEndTimeWeekContext()
-    {
-    	return (1440*getDay().getIndex()) + getEndTime();
-    }
+  /**
+   * 
+   * Gibt die erste Aktivität der Tour zurück
+   * 
+   * @return
+   */
+  public HActivity getFirstActivityInTour()
+  {
+  	return getActivity(getLowestActivityIndex());    	
+  }
+  
+  /**
+   * 
+   * Gibt die letzte Aktivität der Tour zurück
+   * 
+   * @return
+   */
+  public HActivity getLastActivityInTour()
+  {
+  	return getActivity(getHighestActivityIndex());    	
+  }
+  
+  public int getAmountOfActivities()
+  {
+  	return getActivities().size();
+  }
+
+  
+  public int getStartTimeWeekContext()
+  {
+  	return (1440*getDay().getIndex()) + getStartTime();
+  }
+  
+  public int getEndTimeWeekContext()
+  {
+  	return (1440*getDay().getIndex()) + getEndTime();
+  }
 
 
 	/**

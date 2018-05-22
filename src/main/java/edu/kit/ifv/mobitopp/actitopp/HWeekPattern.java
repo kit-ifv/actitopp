@@ -47,7 +47,6 @@ public class HWeekPattern
     return days;
 	}
 
-
 	/**
    * 
    * Gibt den spezifischen Tag mit dem Index zurück
@@ -281,9 +280,9 @@ public class HWeekPattern
   	for (int i=0 ; i< listenkopie.size() ; i++)
   	{
   		HActivity act = listenkopie.get(i);   		
-  		if (act.getEstimatedTripTime()!=0)
+  		if (act.getEstimatedTripTimeBeforeActivity()!=0)
   		{
-  			System.out.println(i + " Weg : Start " + act.getTripStartTimeWeekContext() + " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTime()));
+  			System.out.println(i + " Weg : Start " + act.getTripStartTimeWeekContext() + " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTimeBeforeActivity()));
   		}
   		System.out.println(i + " Akt : " + act);
   	}
@@ -303,11 +302,11 @@ public class HWeekPattern
   	for (int i=0 ; i< listenkopie.size() ; i++)
   	{
   		HActivity act = listenkopie.get(i);   		
-  		if (!act.isHomeActivity() && act.getEstimatedTripTime()!=0)
+  		if (!act.isHomeActivity() && act.getEstimatedTripTimeBeforeActivity()!=0)
   		{
   			System.out.println(i 		+ " Weg : Start " + act.getTripStartTimeWeekContext() 
-  															+ " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTime())
-  															+ " Dauer " + act.getEstimatedTripTime()
+  															+ " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTimeBeforeActivity())
+  															+ " Dauer " + act.getEstimatedTripTimeBeforeActivity()
   												);
   		}
   		

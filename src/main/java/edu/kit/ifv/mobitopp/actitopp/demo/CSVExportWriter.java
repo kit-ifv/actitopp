@@ -48,7 +48,7 @@ public class CSVExportWriter
 	  		// Weginformation aus Aktivitätsdaten herauslesen
 	  		for (HActivity act : actperson.getWeekPattern().getAllActivities())
 	  		{
-	  			if (act.tripBeforeActivityisScheduled() && act.getEstimatedTripTime()>0)
+	  			if (act.tripBeforeActivityisScheduled() && act.getEstimatedTripTimeBeforeActivity()>0)
 	  			{
 	    			writer.append(writeTripBeforeActivity(act));
 	    			writer.flush();
@@ -170,7 +170,7 @@ public class CSVExportWriter
 		// abzeit_woche
 		rueckgabe += act.getTripStartTimeWeekContext() + ";";  
 		// Dauer
-		rueckgabe += act.getEstimatedTripTime() + ";";
+		rueckgabe += act.getEstimatedTripTimeBeforeActivity() + ";";
 		// Zweck
 		rueckgabe += act.getType() + ";";
 		// jointStatus

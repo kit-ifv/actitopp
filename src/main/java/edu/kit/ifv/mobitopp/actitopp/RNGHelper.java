@@ -70,6 +70,18 @@ public class RNGHelper {
   	return randomvalue;
   }
   
+  /**
+   * 
+   * Erzeugt eine ganzzahlige Zufallszahl für Personenwahl
+   * 
+   * @param bound
+   * @return
+   */
+  public int getRandomPersonKey(int bound)
+  {
+  	return rng.nextInt(bound);
+  }
+  
   
   /**
    * get random from range (from...to) with the specified "size" of the steps
