@@ -225,14 +225,14 @@ public class Coordinator
         HDay currentDay = pattern.getDay(indexday);
         
         HTour oneTour;
-				if (currentDay.existsTour(tourindex)==false)
+				if (currentDay.existsTour(tourindex))
 				{
-					oneTour = new HTour(currentDay, tourindex);
-					currentDay.addTour(oneTour);
+					oneTour = currentDay.getTour(tourindex);
 				}
 				else
 				{
-					oneTour = currentDay.getTour(tourindex);
+					oneTour = new HTour(currentDay, tourindex);
+					currentDay.addTour(oneTour);
 				}
                   
         // Füge die Aktivität in das Pattern ein
@@ -259,9 +259,7 @@ public class Coordinator
 						activity = new HActivity(oneTour, activityindex, activitystarttime, activityjointStatus, activitytripdurationbefore);
 						break;
 					}
-				}
-				
-				
+				}			
 				assert activity!=null : "Aktivität wurde nicht erzeugt";
         oneTour.addActivity(activity);
   		}
@@ -370,7 +368,7 @@ public class Coordinator
 	    // Mindesttourzahl festlegen, falls es schon Touren aus gemeinsamen Aktivitäten gibt
 	    int mindesttourzahl=0;
 	    if (id.equals("3A")) mindesttourzahl = currentDay.getLowestTourIndex() * -1;
-	    if (id.equals("3B")) mindesttourzahl = currentDay.getHighestTourIndex();
+	    if (id.equals("3B")) mindesttourzahl = currentDay.getHighestTourIndex() * +1;
 	    
 	    // Alternativen limitieren basierend auf Mindestourzahl
 	    step.limitLowerBoundOnly(mindesttourzahl);
@@ -410,9 +408,9 @@ public class Coordinator
       for (HTour currentTour : currentDay.getTours())
       {
         /*
-         * ignore several tours
-         * 	- main tours have a main acitivty
-         *  - others tours may have a main activity due to joint activities
+         * Ignoriere Touren, deren Hauptaktivität schon festgelegt ist
+         * 	- Hauptouren des Tages (siehe Schritt 2)
+         *  - andere Hauptaktivitäten, welche über gemeinsame Aktivität ins Pattern gekommen sind
          */
       	if(!currentDay.existsActivityTypeforActivity(currentTour.getIndex(),0))
         {
@@ -426,17 +424,19 @@ public class Coordinator
           // Speichere gewählte Entscheidung für weitere Verwendung
           char chosenActivityType = step.getAlternativeChosen().charAt(0);
           
-  	    	// Füge die Aktivität in das Pattern ein, falls sie noch nicht existiert
   	    	HActivity activity = null;
-  	    	if (!currentDay.existsActivity(currentTour.getIndex(),0))
+  	    	
+  	    	// Falls die Aktivität existiert wird nur deren Typ bestimmt
+  	    	if (currentDay.existsActivity(currentTour.getIndex(),0))
           {
-  	    		activity = new HActivity(currentTour, 0, chosenActivityType);
-  	    		currentTour.addActivity(activity);
-          }
-  	    	else
-  	    	{
   	    		activity = currentTour.getActivity(0);
   	    		activity.setType(chosenActivityType);
+          }
+  	    	// Erstelle die Aktivität mit entsprechendem Typ, falls Sie noch nicht exisitert
+  	    	else
+  	    	{ 	    		
+  	    		activity = new HActivity(currentTour, 0, chosenActivityType);
+  	    		currentTour.addActivity(activity);
   	    	}
         }
       }
@@ -468,7 +468,7 @@ public class Coordinator
   	    // Mindesaktzahl festlegen, falls es schon Aktivitäten aus gemeinsamen Aktivitäten gibt
   	    int mindestaktzahl =0;
   	    if (id.equals("5A")) mindestaktzahl = currentTour.getLowestActivityIndex() * -1;
-  	    if (id.equals("5B")) mindestaktzahl = currentTour.getHighestActivityIndex();
+  	    if (id.equals("5B")) mindestaktzahl = currentTour.getHighestActivityIndex() * +1;
   	    
   	    // Alternativen limitieren basierend auf Mindesaktzahl
   	    step.limitLowerBoundOnly(mindestaktzahl);

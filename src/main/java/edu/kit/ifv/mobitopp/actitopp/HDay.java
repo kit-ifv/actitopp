@@ -278,7 +278,7 @@ public class HDay
   
   /**
    * 
-   * Prüft, ob Aktivität existiert
+   * Prüft, ob Aktivität mit dem Tour- und Aktivitätsindex als Objekt existiert
    * 
    * @param index
    * @return
@@ -301,6 +301,15 @@ public class HDay
   	return result;
   }  
   
+  /**
+   * 
+   * Prüft ob für die Aktivität mit dem Tour- und Aktivitätsindex bereits ein Aktivitätstyp festgelegt wurde.
+   * Falls die Aktivität selbst noch nicht existiert, wird ebenfalls false zurückgegeben
+   * 
+   * @param tourindex
+   * @param activityindex
+   * @return
+   */
   public boolean existsActivityTypeforActivity(int tourindex, int activityindex)
 	{
 		boolean result = false;
