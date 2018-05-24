@@ -33,7 +33,7 @@ public class DefaultDCModelStep extends AbsHModelStep
     protected FileBaseParameterWeightLoader parameterLoader;  
     
     //restrict alternatives to a specific range
-    private int fromRangeLimiter;
+    private int fromRangeLimiter = 0;
     private int toRangeLimiter = -1;
     
     private boolean modifiedUtility;
@@ -130,8 +130,11 @@ public class DefaultDCModelStep extends AbsHModelStep
             chgUtilities[i] = utilities[fromRangeLimiter+i];
         }
         
-        // Nutzenbonus berechnen, falls gefordert
-        if(modifiedUtility) chgUtilities = addUtilityBonus(chgUtilities, utilityBonusTarget-fromRangeLimiter, utilityBonusPercentage);
+        // Nutzenbonus berechnen, falls gefordert und ZIelkategorie noch in der Alternativenmenge enthalten
+        if(modifiedUtility && utilityBonusTarget>=fromRangeLimiter && utilityBonusTarget<=toRangeLimiter) 
+        {
+        	chgUtilities = addUtilityBonus(chgUtilities, utilityBonusTarget-fromRangeLimiter, utilityBonusPercentage);
+        }
         
         // Wahrscheinlichkeiten berechnen
         double[] probabilities = choiceFunction.calculateProbabilities(chgUtilities);
@@ -212,6 +215,16 @@ public class DefaultDCModelStep extends AbsHModelStep
     public void limitLowerBoundOnly(int from)
     {
     	fromRangeLimiter = from;
+    }
+    
+    public int getUpperBound()
+    {
+    	return toRangeLimiter;
+    }
+    
+    public int getLowerBound()
+    {
+    	return fromRangeLimiter;
     }
     
     

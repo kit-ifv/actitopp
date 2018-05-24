@@ -166,9 +166,9 @@ public class CSVExportWriter
 		// anzeit_woche
 		rueckgabe += act.getStartTimeWeekContext() + ";"; 
 		// abzeit
-		rueckgabe += act.getTripStartTime() + ";";		
+		rueckgabe += act.getTripStartTimeBeforeActivity() + ";";		
 		// abzeit_woche
-		rueckgabe += act.getTripStartTimeWeekContext() + ";";  
+		rueckgabe += act.getTripStartTimeBeforeActivityWeekContext() + ";";  
 		// Dauer
 		rueckgabe += act.getEstimatedTripTimeBeforeActivity() + ";";
 		// Zweck

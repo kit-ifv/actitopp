@@ -530,11 +530,38 @@ public class ActitoppPerson
   }
   
 	/**
+	 * Fügt die Aktivität der Liste gemeinsamer Aktivitäten hinzu falls kein Konflikt vorliegt
 	 * 
 	 * @param act
 	 */
 	public void addJointActivityforConsideration(HActivity act){
-		jointActivitiesforConsideration.add(act);
+		// Prüfe, ob es bereits eine Aktivität in dem Zeitraum oder in der Tour gibt
+		boolean activityconflict = false;
+		for (HActivity tmpact : jointActivitiesforConsideration)
+		{
+			if(
+					(	tmpact.getWeekDay()					==	act.getWeekDay() && 
+						tmpact.getTour().getIndex() == 	act.getTour().getIndex() &&
+						tmpact.getIndex()						== 	act.getIndex()
+					) 
+					||
+					(
+						act.checkOverlappingtoOtherActivity(tmpact)
+					)
+				)
+			{
+				activityconflict = true;
+				System.err.println("Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");
+				System.err.println("aufzunehmende Akt: " + act);
+				System.err.println("existierende Akt: " + tmpact);
+				break;
+			}
+		}
+
+		if (!activityconflict) 
+		{
+			jointActivitiesforConsideration.add(act);
+		}
 	}
 	
 	

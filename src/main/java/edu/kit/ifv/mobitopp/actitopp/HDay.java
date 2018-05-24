@@ -340,6 +340,22 @@ public class HDay
       return totalTime;
   }
   
+  /**
+   * 
+   * Gibt die gesamte Wegzeit aller Touren an diesem Tag zurück
+   * 
+   * @return
+   */
+  public int getTotalAmountOfTripTime()
+  {
+    int totalTime = 0;
+    for(HTour tour: this.tours)
+    {
+        totalTime += tour.getTripDuration();
+    }
+    return totalTime;
+  }
+  
    
   /**
    * 

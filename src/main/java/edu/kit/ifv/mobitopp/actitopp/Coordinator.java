@@ -4,6 +4,7 @@ package edu.kit.ifv.mobitopp.actitopp;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -200,7 +201,8 @@ public class Coordinator
   
   /**
    * 
-   * Fügt alle gemeinsamen Aktivitäten in das Pattern ein
+   * Fügt alle gemeinsamen Aktivitäten, die über andere Personen an die aktuelle zugewiesen 
+   * worden sind in das Pattern ein bevor die eigentliche Modellierung beginnt
    * 
    */
   private void addJointActivitiestoPattern()
@@ -212,6 +214,8 @@ public class Coordinator
 				// Infos für die neue, gemeinsame Akt
 				int indexday = tmpjointact.getIndexDay();
 				int tourindex = tmpjointact.getTour().getIndex();
+				
+				int personindex_created = tmpjointact.getPerson().getPersIndex();
 				
 				int activityindex = tmpjointact.getIndex();
 				char activitytype = tmpjointact.getType();
@@ -261,6 +265,7 @@ public class Coordinator
 					}
 				}			
 				assert activity!=null : "Aktivität wurde nicht erzeugt";
+				activity.addAttributetoMap("CreatorPersonIndex", (double) personindex_created); 
         oneTour.addActivity(activity);
   		}
 		}
@@ -304,7 +309,7 @@ public class Coordinator
   	    // Step-Objekt erzeugen
   	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
   	    
-  	    // Falls es schon Touren gibt, H als Aktivitätstyp ausschließen
+  	    // Falls es schon Touren gibt (aus gemeinsamen Akt), H als Aktivitätstyp ausschließen
   	    if (currentDay.getAmountOfTours()>0)
   	    {
   	    	step.limitUpperBoundOnly(step.alternatives.size()-2);
@@ -383,7 +388,7 @@ public class Coordinator
       	// 3A - Touren vor der Haupttour
         if (id.equals("3A") && !currentDay.existsTour(-1*j)) tour = new HTour(currentDay, (-1) * j);
       	// 3B - Touren nach der Haupttour
-        if (id.equals("3B") && !currentDay.existsTour(-1*j)) tour = new HTour(currentDay, (+1) * j);        
+        if (id.equals("3B") && !currentDay.existsTour(+1*j)) tour = new HTour(currentDay, (+1) * j);        
         
         if (tour!=null) currentDay.addTour(tour);
       }
@@ -530,6 +535,27 @@ public class Coordinator
 
 	/**
 	 * 
+	 * Festlegung von Default-Wegzeiten für alle Aktivitäten
+	 * 
+	 */
+	private void createTripTimesforActivities() 
+	{
+	  for (HDay day : pattern.getDays())
+	  {
+	    for (HTour tour : day.getTours())
+	    {
+	    	for (HActivity act : tour.getActivities())
+	      {
+	    		act.calculateAndSetTripTimes();
+	      }
+	    }
+	  }	
+	}
+
+
+
+	/**
+	 * 
 	 * @param id
 	 * @param variablenname
 	 */
@@ -601,19 +627,22 @@ public class Coordinator
       	// Anwendung des Modellschritts nur auf Hauptaktivitäten
         HActivity currentActivity = currentTour.getActivity(0);
         
-        // AttributeLookup erzeugen
-    		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
-      	
-  	    // Step-Objekt erzeugen
-  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
-  	    step.doStep();
+        // Schritt wird nur durchgeführt, falls Dauer der Aktivität noch nicht feststeht
+        if(!currentActivity.durationisScheduled())
+        {
+        	// AttributeLookup erzeugen
+      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
+        	
+    	    // Step-Objekt erzeugen
+    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+    	    step.doStep();
 
-  	    // Eigenschaft abspeichern
-  	    currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
-  	    
-  	    // Bei unkoordinierter Modellierung ohne Stabilitätsaspekte wird der Wert immer mit 0 überschrieben!
-  	    if (!Configuration.coordinated_modelling) currentActivity.addAttributetoMap("standarddauer", 0.0d);
-  	    
+    	    // Eigenschaft abspeichern
+    	    currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
+    	    
+    	    // Bei unkoordinierter Modellierung ohne Stabilitätsaspekte wird der Wert immer mit 0 überschrieben!
+    	    if (!Configuration.coordinated_modelling) currentActivity.addAttributetoMap("standarddauer", 0.0d);
+        }
       }
     }
 	}
@@ -644,16 +673,29 @@ public class Coordinator
   			{
           HActivity currentActivity = currentTour.getActivity(0);
           
-          // AttributeLookup erzeugen
-      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
-        	
-    	    // Step-Objekt erzeugen
-    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
-    	    modifyAlternativesDueTo8A(currentActivity, step);  	    
-    	    step.doStep();
+          // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
+          if (!currentActivity.durationisScheduled())
+	        {
+	          // AttributeLookup erzeugen
+	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
+	        	
+	    	    // Step-Objekt erzeugen
+	    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    	    
+	    	    // Alternativen ggf. auf Standardzeitkategorie einschränken
+	    	    modifyAlternativesDueTo8A(currentActivity, step);  	    
+	    	    
+	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
+	    	    int loc_upperbound = calculateUpperBoundDurationTimeClassDueToPlannedDurations(currentDay);
+	    	    if (loc_upperbound <= step.getUpperBound()) step.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step.getLowerBound()) step.limitLowerBoundOnly(loc_upperbound); 
 
-    	    // Entscheidungsindex abspeichern
-    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step.getDecision()); 	
+	    	    // Wahlentscheidung durchführen
+	    	    step.doStep();
+	
+	    	    // Entscheidungsindex abspeichern
+	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step.getDecision()); 	
+	        }
   			}		
   		}
     }			
@@ -685,16 +727,27 @@ public class Coordinator
   			{
 		      HActivity currentActivity = currentTour.getActivity(0);
 		    
-		      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-		      DefaultMCModelStep step = new DefaultMCModelStep(id + (int) chosenTimeCategory, this);
-		      step.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-		      step.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-		      step.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-		      step.doStep();
-		     
-		      // Speichere Ergebnisse ab
-		      currentActivity.setDuration(step.getChosenTime());
+          // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
+          if (!currentActivity.durationisScheduled())
+	        {
+          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
+			      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
+			      DefaultMCModelStep step = new DefaultMCModelStep(id + (int) chosenTimeCategory, this);
+			      step.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
+			      
+			      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+			      step.setModifyDTDAfterStep(Configuration.coordinated_modelling);
+			      step.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
+			      
+			      // Limitiere die Obergrenze durch die noch verfügbare Zeit
+			      step.setRangeBounds(0, 1440 - (currentDay.getTotalAmountOfActivityTime() + currentDay.getTotalAmountOfTripTime()));
+			      
+			      // Wahlentscheidung durchführen
+			      step.doStep();
+			     
+			      // Speichere Ergebnisse ab
+			      currentActivity.setDuration(step.getChosenTime());
+	        }
   			}
   		}
     }
@@ -718,14 +771,20 @@ public class Coordinator
       {
         for (HActivity currentActivity : currentTour.getActivities())
         {
-          if (currentActivity.getIndex() != 0)
+        	// Schritt nur durchführen, falls keine Hauptaktivität und Dauer noch nicht festgelegt wurde
+          if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
           {
           	 // AttributeLookup erzeugen
         		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
           	
       	    // Step-Objekt erzeugen
       	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
-      	    modifyAlternativesForStep8J(currentDay, currentTour, step);
+      	    
+      	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
+	    	    int loc_upperbound = calculateUpperBoundDurationTimeClassDueToPlannedDurations(currentDay);
+	    	    if (loc_upperbound <= step.getUpperBound()) step.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step.getLowerBound()) step.limitLowerBoundOnly(loc_upperbound); 
+	    	    
       	    step.doStep();
 
       	    // Entscheidungsindex abspeichern
@@ -755,15 +814,23 @@ public class Coordinator
       {
         for (HActivity currentActivity : currentTour.getActivities())
         {
-          if (currentActivity.getIndex() != 0)
+        	// Schritt nur durchführen, falls keine Hauptaktivität und Dauer noch nicht festgelegt wurde
+          if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
           {
+          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
           	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
   		      DefaultMCModelStep step = new DefaultMCModelStep(id + (int) chosenTimeCategory, this);
   		      step.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
+  		      
   		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
   		      step.setModifyDTDAfterStep(Configuration.coordinated_modelling);
   		      step.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-  		      step.doStep();
+
+			      // Limitiere die Obergrenze durch die noch verfügbare Zeit
+			      step.setRangeBounds(0, 1440 - (currentDay.getTotalAmountOfActivityTime() + currentDay.getTotalAmountOfTripTime()));
+			      
+			      // Wahlentscheidung durchführen
+			      step.doStep();
   		     
   		      // Speichere Ergebnisse ab
   		      currentActivity.setDuration(step.getChosenTime());
@@ -1344,6 +1411,15 @@ public class Coordinator
       {
         for (HActivity currentActivity : currentTour.getActivities())
         {
+        	/* 
+        	 * Falls die Aktivität nicht von der Person selbst erzeugt wurde sondern von einer anderen Person stammt
+        	 * und als gemeinsame Aktivität übernommen wurde, wird der Schritt übersprungen
+        	 */
+        	if (currentActivity.getCreatorPersonIndex() != person.getPersIndex())
+        	{
+        		continue;
+        	}
+        	
         	// AttributeLookup erzeugen
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
         	
@@ -1405,7 +1481,7 @@ public class Coordinator
     	// Ermittle die Standard-Zeitkategorie für den Tag und den Zweck
       int timeCategory = activity.calculateMeanTimeCategory();
       	        
-      int from = timeCategory -1;
+      int from = timeCategory - 1;
       int to = timeCategory + 1;
         
       // Behandlung der Sonderfälle
@@ -1432,14 +1508,18 @@ public class Coordinator
 	 * 
 	 * max time class to be chosen= min(1440-totalDailyTripTime-durationOfMainActs, mainActDur-1))
 	 * 
+	 * Vereinfacht durch einheitlichere Methode calculateUpperBoundDurationTimeClassDueToPlannedDurations
+	 * 
 	 * @param day
 	 * @param acttour
 	 * @param step8j
 	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void modifyAlternativesForStep8J(HDay day, HTour acttour, DefaultDCModelStep step8j)
 	{
-//TODO Optimierungspotential - die Aktivität darf nicht länger sein als die noch übrige Zeit - 
-//TODO nicht nur abhängig von den Hauptaktivitäten sondern auch den restlichen bisher festgelegten Aktivitäten
+		//Optimierungspotential - die Aktivität darf nicht länger sein als die noch übrige Zeit - 
+		//nicht nur abhängig von den Hauptaktivitäten sondern auch den restlichen bisher festgelegten Aktivitäten
 	    
 		// Obergrenze 1 - bisher festgelegte "verbrauchte" Zeiten am Tag
 			int totalMainActivityTime = 0;
@@ -1470,6 +1550,27 @@ public class Coordinator
 	    }
 	    step8j.limitAlternatives(0, maxTimeClass);
 	
+	}
+	
+	
+	private int calculateUpperBoundDurationTimeClassDueToPlannedDurations(HDay day)
+	{
+			// verbleibende Zeit am Tag für Aktivitäten
+			int remainingTimeonDay = 1440 - (day.getTotalAmountOfActivityTime() + day.getTotalAmountOfTripTime());
+			
+			// Obergrenze 2 (für NICHT-Hauptaktivitäten) - Aktivität muss kürzer sein als Hauptaktivität auf Tour 
+			// Tim (08.11.2016) - Obergrenzeinaktiv gesetzt, das heißt ohne Wirkung, da sonst zu kurze Aktivitäten
+			
+	    // Bestimme die daraus resultierende Zeitklasse
+	    int maxTimeClass = 0;
+	    for (int i = 1; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
+	    {
+	        if (remainingTimeonDay >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && remainingTimeonDay <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
+	        {
+	            maxTimeClass = i;
+	        }
+	    }  
+	    return maxTimeClass;
 	}
 
 
@@ -1812,15 +1913,8 @@ public class Coordinator
     if (previousTour != null)
     {
     	// Berechne den Endzeitpunkt der vorherigen Tour
-    	if (previousTour.isScheduled())
-    	{
-    		preTourTime = previousTour.getStartTime() + previousTour.getTourDuration();
-    	}
-// TODO if Bedingung rausnehmen - Tour sollte scheduled sein in diesem Schritt
-    	else
-    	{
-    		preTourTime = 0 + previousTour.getTourDuration();
-    	}
+    	preTourTime = previousTour.getStartTime() + previousTour.getTourDuration();
+
     	// Sonderbehandlung, wenn die Tour am Vortag stattgefunden hat
     	if(previousTour.getDay().getIndex()<tour.getDay().getIndex())
     	{
@@ -1917,7 +2011,6 @@ public class Coordinator
 		lowerbound = preTourTime;
 		
 	  // UpperBound berechnen
-//TODO Checken, ob korrekte Methode aufgerufen wird - ActivityTime oder Tourtime
     int totalRemainingActivityTime = day.getTotalAmountOfRemainingTourTime(tour);
     upperbound = 1619 - totalRemainingActivityTime;
     
@@ -1971,27 +2064,6 @@ public class Coordinator
  
   /**
    * 
-   * Festlegung von Default-Wegzeiten für alle Aktivitäten
-   * 
-   */
-  private void createTripTimesforActivities() 
-  {
-    for (HDay day : pattern.getDays())
-    {
-      for (HTour tour : day.getTours())
-      {
-      	for (HActivity act : tour.getActivities())
-        {
-      		act.calculateAndSetTripTimes();
-        }
-      }
-    }	
-	}
-
-
-
-	/**
-   * 
    * Erstellt Startzeiten für jede Aktivität
    * 
    */
@@ -2034,8 +2106,8 @@ public class Coordinator
   	if(allmodeledActivities.size()!=0)
   	{	
     	// Erstelle zunächst eine Home-Aktivität vor Beginn der ersten Tour
-    	int duration1 = allmodeledActivities.get(0).getTripStartTimeWeekContext();
-//TODO Ändern
+    	int duration1 = allmodeledActivities.get(0).getTripStartTimeBeforeActivityWeekContext();
+
     	// Es muss immer eine H-Akt zu Beginn möglich sein
     	assert duration1>0 : "Fehler - keine Home-Aktivität zu Beginn möglich!";
     	if (duration1>0)
@@ -2085,11 +2157,25 @@ public class Coordinator
     }
   }
   
-	private void generateJointActionsforOtherPersons() {
+  /**
+   * 
+   * Methode bestimmt, mit welchen anderen Personen, bisher im Haushalt noch nicht modellierten Personen
+   * gemeinsame Aktivitäten und Wege durchgeführt werden und fügt diese den Listen der Personen hinzu
+   * 
+   */
+	private void generateJointActionsforOtherPersons() 
+	{
 
-		for (HActivity tmpactivity : pattern.getAllOutofHomeActivities()) {
-			// Falls die Aktivität gemeinsam ist, muss sie in das Pattern der anderen Personen eingefügt werden
-			if (tmpactivity.getJointStatus()!=4) {
+		for (HActivity tmpactivity : pattern.getAllOutofHomeActivities()) 
+		{
+			/*
+			 * Aktivität in die Liste gemeinsamer Aktivitäten anderer Personen hinzufügen, falls
+			 * die Aktivität gemeinsam ist UND nicht von einer anderen Person ursprünglich erzeugt wurde (das heißt keine gemeinsame Aktivität 
+			 * des Ursprungs einer anderen Person ist)
+			 * 
+			 */
+			if (tmpactivity.getJointStatus()!=4 && tmpactivity.getCreatorPersonIndex()==person.getPersIndex()) 
+			{
 				
 				//TODO Hier Code einfügen, der bestimmt mit welcher weiteren Person die Aktivität durchgeführt wird
 				/*
@@ -2097,7 +2183,10 @@ public class Coordinator
 				 */
 				
 				// Erstelle Map mit allen anderen Personennummern im Haushalt, die noch nicht modelliert wurden und wähle zufällig eine
-				Map<Integer,ActitoppPerson> otherunmodeledpersinhh = person.getHousehold().getHouseholdmembers();				
+				Map<Integer,ActitoppPerson> otherunmodeledpersinhh = new HashMap<Integer, ActitoppPerson>();
+				// Füge zunächst alle Personen des Haushalts hinzu
+				otherunmodeledpersinhh.putAll(person.getHousehold().getHouseholdmembers());				
+				// Entferne nacheinander alle Personen, die bereits modelliert wurden (= WeekPattern haben) oder die Person selbst sind
 				List<Integer> keyValues = new ArrayList<>(otherunmodeledpersinhh.keySet());
 				for (Integer key : keyValues) 
 				{
@@ -2108,7 +2197,6 @@ public class Coordinator
 					}
 				}
 				
-				
 				if (otherunmodeledpersinhh.size()>0)
 				{
 					// Wähle eine zufällige Nummer der verbleibenden Personen
@@ -2117,21 +2205,8 @@ public class Coordinator
 					
 					// Aktivität zur Berücksichtigung bei anderer Person aufnehmen
 					ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);
-					//HWeekPattern otherpattern = otherunmodeledpersinhh.get(randomkey).getWeekPattern();
-					
 					otherperson.addJointActivityforConsideration(tmpactivity);
-	/*						new HActivity(
-									otherpattern.getDay(tmpactivity.getIndexDay()), 
-									tmpactivity.getType(), 
-									tmpactivity.getDuration(),
-									tmpactivity.getStartTime(), 
-									tmpactivity.getJointStatus(),
-									tmpactivity.getEstimatedTripTime(),
-									tmpactivity.getEstimatedTripTimeAfterActivity(),
-									person.getPersIndex()
-							)
-					);
-*/				}
+				}
 			}
 		}
 	}

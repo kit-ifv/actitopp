@@ -282,7 +282,7 @@ public class HWeekPattern
   		HActivity act = listenkopie.get(i);   		
   		if (act.getEstimatedTripTimeBeforeActivity()!=0)
   		{
-  			System.out.println(i + " Weg : Start " + act.getTripStartTimeWeekContext() + " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTimeBeforeActivity()));
+  			System.out.println(i + " Weg : Start " + act.getTripStartTimeBeforeActivityWeekContext() + " Ende " + (act.getTripStartTimeBeforeActivityWeekContext()+act.getEstimatedTripTimeBeforeActivity()));
   		}
   		System.out.println(i + " Akt : " + act);
   	}
@@ -304,15 +304,15 @@ public class HWeekPattern
   		HActivity act = listenkopie.get(i);   		
   		if (!act.isHomeActivity() && act.getEstimatedTripTimeBeforeActivity()!=0)
   		{
-  			System.out.println(i 		+ " Weg : Start " + act.getTripStartTimeWeekContext() 
-  															+ " Ende " + (act.getTripStartTimeWeekContext()+act.getEstimatedTripTimeBeforeActivity())
+  			System.out.println(i 		+ " Weg : Start " + act.getTripStartTimeBeforeActivityWeekContext() 
+  															+ " Ende " + (act.getTripStartTimeBeforeActivityWeekContext()+act.getEstimatedTripTimeBeforeActivity())
   															+ " Dauer " + act.getEstimatedTripTimeBeforeActivity()
   												);
   		}
   		
   		System.out.println(i + " Akt : " + act);
   		
-  		if (!act.isHomeActivity() && act.getEstimatedTripTimeAfterActivity()!=0)
+  		if (!act.isHomeActivity() && act.isActivityLastinTour())
   		{
   			System.out.println(i 		+ " Weg (letzter in Tour) : Start " + act.getTripStartTimeAfterActivityWeekContext() 
   															+ " Ende " + (act.getTripStartTimeAfterActivityWeekContext()+act.getEstimatedTripTimeAfterActivity())

@@ -342,13 +342,31 @@ public class HActivity
   @Override
 	public String toString()
 	{
-		return getIndexDay() + "/" + getTour().getIndex() + "/" + getIndex() + 	
-				" Start " + getStartTimeWeekContext() + 
-				" Ende " + getEndTimeWeekContext() + 
-				" Dauer: " + this.duration + 
-				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
-				" jointStatus: " + this.jointStatus
-				;
+  	String result="";
+  	
+  	if (isHomeActivity())
+  	{
+  		result= getIndexDay() + 	
+  				" Start " + getStartTimeWeekContext() + 
+  				" Ende " + getEndTimeWeekContext() + 
+  				" Dauer: " + this.duration + 
+  				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
+  				" jointStatus: " + this.jointStatus
+  				;  		
+  	}
+  	else
+  	{
+  		result= getIndexDay() + "/" + getTour().getIndex() + "/" + getIndex() + 	
+		  				" Start " + getStartTimeWeekContext() + 
+		  				" Ende " + getEndTimeWeekContext() + 
+		  				" Dauer: " + this.duration + 
+		  				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
+		  				" jointStatus: " + this.jointStatus + 
+		  				" Weg hin: " + getEstimatedTripTimeBeforeActivity() + 
+		  				(tripAfterActivityisScheduled() ? " Weg rück: " + getEstimatedTripTimeAfterActivity() : "")
+		  				;
+  	}
+		return result;
 	}
 
 
@@ -542,13 +560,13 @@ public class HActivity
 		return getStartTimeWeekContext() + getDuration();
 	}
 
-	public int getTripStartTime()
+	public int getTripStartTimeBeforeActivity()
 	{
 		// return getStartTime() - getEstimatedTripTime();
 		return getStartTime() - tripbeforeactivity.getTripduration();
 	}
 
-	public int getTripStartTimeWeekContext()
+	public int getTripStartTimeBeforeActivityWeekContext()
 	{
 		// return getStartTimeWeekContext() - getEstimatedTripTime();
 		return getStartTimeWeekContext() - tripbeforeactivity.getTripduration();
@@ -630,10 +648,6 @@ public class HActivity
 
 	    tripafteractivity = new HTrip(this, actualTripTime_afterTrip);
 		}
-
-		
-//    setEstimatedTripTime(actualTripTime_beforeTrip);
-//    setEstimatedTripTimeAfterActivity(actualTripTime_afterTrip);		
 	}
 	
 	public boolean isScheduled()
@@ -656,11 +670,27 @@ public class HActivity
 		return tripafteractivity!=null && tripafteractivity.getTripduration()!=-1;
 	}
 	
+	public boolean durationisScheduled()
+	{
+		return duration!=-1;
+	}
+	
 	/**
 	 * @param attributes spezifischesAttribut für Map
 	 */
 	public void addAttributetoMap(String name, Double value) {
+		assert !attributes.containsKey(name) : "Attribut ist bereits in Map enthalten!";
 		this.attributes.put(name, value);
+	}
+	
+	/**
+	 * Liefert gewünschtes Attribute aus der Map
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Double getAttributefromMap(String name) {
+		return this.attributes.get(name);
 	}
 
 
@@ -669,6 +699,57 @@ public class HActivity
 	 */
 	public Map<String, Double> getAttributesMap() {
 		return attributes;
+	}
+	
+	/**
+	 * Gibt den Personenindex der Person an, durch welche diese Aktivität erstmalig erstellt wurde
+	 * Bei gemeinsamen Aktivitäten, die von anderen Personen übernommen wurden entspricht dies dem Index 
+	 * der Person, die diese Akt erstmals festgelegt hat
+	 * 
+	 * @return
+	 */
+	public int getCreatorPersonIndex()
+	{
+		int result = -1;
+		if (attributes.containsKey("CreatorPersonIndex"))
+		{
+			result = getAttributefromMap("CreatorPersonIndex").intValue();
+		}
+		else
+		{
+			result = getPerson().getPersIndex();
+		}
+		assert result!=-1 : "CreatorPersonIndex konnte nicht bestimmt werden!";
+		return result;
+	}
+	
+	/**
+	 * Prüft, ob sich zwei Aktivitäten in ihren Zeitintervallen überlagern
+	 * 
+	 * @param tmpact
+	 * @return
+	 */
+	public boolean checkOverlappingtoOtherActivity(HActivity tmpact)
+	{
+		boolean result = false;
+		
+		// Zeitbelegung der aktuellen Aktivität ermitteln
+		int starttime = getTripStartTimeBeforeActivityWeekContext();
+		int endtime = getEndTimeWeekContext() + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : 0);
+		
+		// Zeitbelegung der anderen Aktivität ermitteln
+		int starttime_other = tmpact.getTripStartTimeBeforeActivityWeekContext();
+		int endtime_other = tmpact.getEndTimeWeekContext() + (tmpact.tripAfterActivityisScheduled() ? tmpact.getEstimatedTripTimeAfterActivity() : 0);
+		
+		if (
+					(starttime <= starttime_other && starttime_other <= endtime) ||
+					(starttime <= endtime_other   && endtime_other   <= endtime)
+			 )
+		{
+			result=true;
+		}
+		
+		return result;
 	}
 
 }

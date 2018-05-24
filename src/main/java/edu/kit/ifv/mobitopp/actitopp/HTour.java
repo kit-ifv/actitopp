@@ -179,14 +179,7 @@ public class HTour
    */
   public int getTourDuration()
   {
-      int sum = 0;
-      for(HActivity act : activities)
-      {       	
-          sum += act.getDuration() + act.getEstimatedTripTimeBeforeActivity();
-      }
-      sum+= getActivity(getHighestActivityIndex()).getEstimatedTripTimeAfterActivity();
-      
-      return sum;
+  	return getActDuration() + getTripDuration();
   }
   
   /**
@@ -197,13 +190,31 @@ public class HTour
    */
   public int getActDuration()
   {
-      int sum = 0;
-      for(HActivity act : activities)
-      {       	
-          sum += act.getDuration();
-      }
-      
-      return sum;
+    int sum = 0;
+    for(HActivity act : activities)
+    {       	
+      sum += (act.durationisScheduled() ? act.getDuration() : 0);
+    }
+    
+    return sum;
+  }
+  
+  /**
+   * 
+   * Gibt die reine Wegzeit auf der Tour zurück
+   *     
+   * @return
+   */
+  public int getTripDuration()
+  {
+    int sum = 0;
+    for(HActivity act : activities)
+    {
+    	sum += (act.tripBeforeActivityisScheduled() ? act.getEstimatedTripTimeBeforeActivity() : 0);
+    	sum += (act.tripAfterActivityisScheduled() ? act.getEstimatedTripTimeAfterActivity() : 0);    	
+    }
+    
+    return sum;
   }
   
   /**

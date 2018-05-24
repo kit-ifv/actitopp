@@ -73,8 +73,8 @@ public class DefaultMCModelStep extends AbsHModelStep
     public void printDecisionProcess(DiscreteTimeDistribution dtd)
     {
     	System.out.println("--------------- MC-Simulation @ " + this.id +" ---------------");
-        System.out.println("From" + this.lowerBoundLimiter + "| MIN in DTD: " + dtd.getStartPoint());
-        System.out.println("To" + this.upperBoundLimiter + "| MAX in DTD: " + dtd.getEndPoint());
+        System.out.println("From " + this.lowerBoundLimiter + "| MIN in DTD: " + dtd.getStartPoint());
+        System.out.println("To " + this.upperBoundLimiter + "| MAX in DTD: " + dtd.getEndPoint());
 //        for(int i = 0; i < dtd.getDistributionAsSum().length;i++)
 //        {
 //            System.out.println("Slot: " + (i+dtd.getStartPoint()) + "| P (sum) " + dtd.getDistributionAsSum()[i]);
