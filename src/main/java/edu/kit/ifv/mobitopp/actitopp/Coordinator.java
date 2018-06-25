@@ -134,13 +134,10 @@ public class Coordinator
     executeStep7MC("7O", 'T');
     
     executeStep8A("8A");
-    executeStep8_MainAct_DC("8B");
-    executeStep8_MainAct_MC("8C");
-    executeStep8_MainAct_DC("8D");
-    executeStep8_MainAct_MC("8E");
-    executeStep8_NonMainAct_DC("8J");
-    executeStep8_NonMainAct_MC("8K");
-    
+    executeStep8_MainAct("8B", "8C");
+    executeStep8_MainAct("8D", "8E");
+    executeStep8_NonMainAct("8J", "8K");
+
     executeStep9A("9A");
     
     executeStep10A("10A");
@@ -157,12 +154,11 @@ public class Coordinator
     
     // Variante 2 zur Generierung der Startzeiten - bevorzugt
     
-    executeStep10DC("10M", 1);
-    executeStep10MC("10N", 1);
-    executeStep10DC("10O", 2);
-    executeStep10MC("10P", 2);    
-    executeStep10DC("10Q", 3);
-    executeStep10MC("10R", 3);
+    createTourStartTimesDueToScheduledActivities();
+    
+    executeStep10("10M","10N", 1);
+    executeStep10("10O","10P", 2);
+    executeStep10("10Q","10R", 3);
     executeStep10ST();
     
    	// Erstelle Startzeiten für jede Aktivität 
@@ -266,7 +262,46 @@ public class Coordinator
 				}			
 				assert activity!=null : "Aktivität wurde nicht erzeugt";
 				activity.addAttributetoMap("CreatorPersonIndex", (double) personindex_created); 
-        oneTour.addActivity(activity);
+				
+				
+				/*
+				 *  Prüfe, ob Aktivität konfliktfrei einfügbar ist in das Pattern
+				 */
+				boolean konfliktfrei = true;
+				String reason="";
+				
+				// Aktivität mit diesem Index in dieser Tour existiert bereits
+				if (currentDay.existsActivity(oneTour.getIndex(), activityindex)) 
+				{
+					konfliktfrei=false;
+					reason = "Aktivität mit Index existiert bereits in Tour!";
+				}
+				
+				// Aktivität passt zeitlich nicht an diese Position
+				for (HActivity tmpact : currentDay.getAllActivitiesoftheDay())
+				{
+					if (
+							(tmpact.getTour().getIndex() > activity.getTour().getIndex() && tmpact.getStartTime() < activity.getStartTime())
+							||
+							(tmpact.getTour().getIndex() == activity.getTour().getIndex() && tmpact.getIndex() > activity.getIndex() && tmpact.getStartTime() < activity.getStartTime())
+						)
+					{
+						konfliktfrei = false;
+						reason = "Aktivität passt zeitlich nicht an diese Position!";
+						break;
+					}
+				}
+								
+				
+				if (konfliktfrei)
+				{
+					oneTour.addActivity(activity);
+				}
+				else
+				{
+					System.err.println("gemeinsame Aktivität konnte nicht eingefügt werden! // " + reason);
+					System.err.println("Aktivitiät Tag:" + currentDay.getIndex() + " Tour: " + activity.getTour().getIndex() + " Aktindex: " + activityindex + " Startzeit: " + activitystarttime);
+				}
   		}
 		}
   }
@@ -650,8 +685,188 @@ public class Coordinator
 
 	/**
 	 * 
+	 * @param id_dc
+	 * @param id_mc
+	 */
+	private void executeStep8_MainAct(String id_dc, String id_mc) throws InvalidPatternException
+	{
+		
+		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
+	  modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
+		
+	  for (HDay currentDay : pattern.getDays())
+	  {
+	  	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgeführt
+	  	if (currentDay.isHomeDay())
+	    {
+	    	continue;
+	    }
+		
+	  	// Anwendung des Modellschritts nur auf Hauptaktivitäten
+			for (HTour currentTour : currentDay.getTours())
+			{
+				boolean running=false;
+				if (id_dc.equals("8B") && currentTour.getIndex()==0) running=true;  // 8B gilt nur für Haupttouren (TourIndex=0)
+				if (id_dc.equals("8D") && currentTour.getIndex()!=0) running=true;	// 8D gilt nur für NICHT-Haupttouren (TourIndex!=0)
+					
+				if (running)
+				{
+	        HActivity currentActivity = currentTour.getActivity(0);
+	        
+	  	    /*
+	  	     * 
+	  	     * DC-Schritt (8B, 8D)
+	  	     * 
+	  	     */
+	        // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
+	        if (!currentActivity.durationisScheduled())
+	        {
+	          // AttributeLookup erzeugen
+	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
+	        	
+	    	    // Step-Objekt erzeugen
+	    	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
+	    	    
+	    	    // Alternativen ggf. auf Standardzeitkategorie einschränken
+	    	    modifyAlternativesDueTo8A(currentActivity, step_dc);  	    
+	    	    
+	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
+	    	    int maxduration = calculateMaxdurationDueToScheduledActivities(currentActivity);
+	    	    int loc_upperbound = getDurationTimeClassforExactDuration(maxduration);
+	    	   	   
+	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
+	
+	    	    // Wahlentscheidung durchführen
+	    	    step_dc.doStep();
+	
+	    	    // Entscheidungsindex abspeichern
+	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step_dc.getDecision()); 	
+	    	    
+	    	    /*
+	    	     * 
+	    	     * MC-Schritt (8C, 8E)
+	    	     * 
+	    	     */
+	    	    // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
+	          if (!currentActivity.durationisScheduled())
+		        {
+	          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
+				      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
+				      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
+				      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
+				      
+				      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+				      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
+				      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
+				      
+				      // Limitiere die Obergrenze durch die noch verfügbare Zeit
+				      step_mc.setRangeBounds(0, calculateMaxdurationDueToScheduledActivities(currentActivity));
+				      
+				      // Wahlentscheidung durchführen
+				      step_mc.doStep();
+				     
+				      // Speichere Ergebnisse ab
+				      currentActivity.setDuration(step_mc.getChosenTime());
+		        } 
+	        }
+				}		
+			}
+	  }
+	}
+
+
+
+	/**
+	 * 
+	 * @param id_dc
+	 * @param id_mc
+	 */
+	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPatternException
+	{
+		
+		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
+	  modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
+		
+	  for (HDay currentDay : pattern.getDays())
+	  {
+	  	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgeführt
+	  	if (currentDay.isHomeDay())
+	    {
+	    	continue;
+	    }
+		
+	  	for (HTour currentTour : currentDay.getTours())
+	    {
+	      for (HActivity currentActivity : currentTour.getActivities())
+	      {
+	  	    /*
+	  	     * 
+	  	     * DC-Schritt
+	  	     * 
+	  	     */
+	      	// Schritt nur durchführen, falls keine Hauptaktivität und Dauer noch nicht festgelegt wurde
+	        if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
+	        {   	     
+	          // AttributeLookup erzeugen
+	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
+	        	
+	    	    // Step-Objekt erzeugen
+	    	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
+	    	   
+	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
+	    	    int maxduration = calculateMaxdurationDueToScheduledActivities(currentActivity);
+	    	    int loc_upperbound = getDurationTimeClassforExactDuration(maxduration);
+	    		   
+	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
+	
+	    	    // Wahlentscheidung durchführen
+	    	    step_dc.doStep();
+	
+	    	    // Entscheidungsindex abspeichern
+	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step_dc.getDecision()); 	
+	    	    
+	    	    /*
+	    	     * 
+	    	     * MC-Schritt
+	    	     * 
+	    	     */
+	    	    // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
+	    	    if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
+	          {
+	          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
+	          	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
+	  		      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
+	  		      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
+	  		      
+	  		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+	  		      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
+	  		      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
+	
+				      // Limitiere die Obergrenze durch die noch verfügbare Zeit
+	  		      step_mc.setRangeBounds(0, calculateMaxdurationDueToScheduledActivities(currentActivity));
+				      
+				      // Wahlentscheidung durchführen
+	  		      step_mc.doStep();
+	  		     
+	  		      // Speichere Ergebnisse ab
+	  		      currentActivity.setDuration(step_mc.getChosenTime());
+	          }
+	        }
+				}		
+			}
+	  }
+	}
+
+
+
+	/**
+	 * 
 	 * @param id
 	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep8_MainAct_DC(String id)
 	{
 		for (HDay currentDay : pattern.getDays())
@@ -687,6 +902,7 @@ public class Coordinator
 	    	    
 	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
 	    	    int loc_upperbound = calculateUpperBoundDurationTimeClassDueToPlannedDurations(currentDay);
+	    	    	    	    
 	    	    if (loc_upperbound <= step.getUpperBound()) step.limitUpperBoundOnly(loc_upperbound); 
 	    	    if (loc_upperbound <= step.getLowerBound()) step.limitLowerBoundOnly(loc_upperbound); 
 
@@ -705,6 +921,8 @@ public class Coordinator
 	 * 
 	 * @param id
 	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep8_MainAct_MC(String id)
 	{
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
@@ -754,10 +972,13 @@ public class Coordinator
 	}
 	
 	
+	
 	/**
 	 * 
 	 * @param id
 	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep8_NonMainAct_DC(String id)
 	{
 		// STEP8J: TIME CLASS Step for OTHER activities
@@ -799,6 +1020,8 @@ public class Coordinator
 	 * 
 	 * @param id
 	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep8_NonMainAct_MC(String id)
 	{
 		// STEP 8K, determine other activities exact duration
@@ -1224,52 +1447,143 @@ public class Coordinator
     } 	
   }
 
-
-
+	/**
+	 * 
+	 * Legt die Startzeiten für Touren fest bei denen es bereits festgelegte Startzeiten für Aktivitäten gibt 
+	 * 
+	 */
+	private void createTourStartTimesDueToScheduledActivities()
+	{
+		for (HDay currentDay : pattern.getDays())
+	  {
+			// Falls zu wenig Touren oder ein Heimtag vorliegt, wird der Tag übersprungen
+	    if (currentDay.isHomeDay())
+	    {
+	    	continue;
+	    }
+	  	
+	    for (HTour currentTour : currentDay.getTours())
+	    {
+	    		    
+		  	// Führe Schritt nur für Touren aus, die noch keine festgelegte Startzeit haben
+		  	if (!currentTour.isScheduled())
+		    {
+		  		
+		  		// Prüfe, ob es eine Aktivität in der Tour gibt, deren Startzeit bereits festgelegt wurde (bspw. durch gemeinsame Aktivitäten
+		  		int startTimeDueToScheduledActivities=-1;
+		  		
+	  			int tripdurations=0;
+	  			int activitydurations=0;
+	  			
+		  		HActivity.sortActivityList(currentTour.getActivities());
+		  		for (HActivity tmpact : currentTour.getActivities())
+		  		{
+	
+		  			if (tmpact.startTimeisScheduled())
+		  			{
+		  				startTimeDueToScheduledActivities= tmpact.getTripStartTimeBeforeActivity() - tripdurations - activitydurations;
+		  				break;
+		  			}
+		  			else
+		  			{
+		  				tripdurations += tmpact.getEstimatedTripTimeBeforeActivity();
+		  				activitydurations += tmpact.getDuration();
+		  			}
+		  		}
+		  		
+		  		// Lege Startzeit fest falls durch bereits festgelegte Aktivitäten bestimmt 
+		  		if (startTimeDueToScheduledActivities!=-1)
+		  		{
+		  			currentTour.setStartTime(startTimeDueToScheduledActivities);   
+		  		}
+		    }
+	    }
+	  }
+	}
 
   /**
-   * 
-   * @param id
-   * @param tournrdestages
-   * @throws InvalidPatternException
-   */
-	private void executeStep10DC(String id, int tournrdestages) throws InvalidPatternException
+	 * 
+	 * @param id
+	 * @param tournrdestages
+	 * @throws InvalidPatternException
+	 */
+	private void executeStep10(String id_dc, String id_mc, int tournrdestages) throws InvalidPatternException
 	{
-	  // STEP 10m: determine time class for the start of the x tour of the day
+		// Step 10: exact start time for x tour of the day
+		modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
+			
+	  // STEP 10: determine time class for the start of the x tour of the day
 		for (HDay currentDay : pattern.getDays())
-    {
+	  {
 			// Falls zu wenig Touren oder ein Heimtag vorliegt, wird der Tag übersprungen
-      if (currentDay.isHomeDay()|| currentDay.getAmountOfTours()<tournrdestages)
-      {
-      	continue;
-      }
-    	
-      // Bestimme x-te Tour des Tages
-      HTour currentTour = currentDay.getTour(currentDay.getLowestTourIndex()+(tournrdestages-1));
-    	
-    	// Führe Schritt nur für Touren aus, die noch keine festgelegte Startzeit haben
-    	if (!currentTour.isScheduled())
-      {
+	    if (currentDay.isHomeDay()|| currentDay.getAmountOfTours()<tournrdestages)
+	    {
+	    	continue;
+	    }
+	  	
+	    // Bestimme x-te Tour des Tages
+	    HTour currentTour = currentDay.getTour(currentDay.getLowestTourIndex()+(tournrdestages-1));
+	  	
+	  	// Führe Schritt nur für Touren aus, die noch keine festgelegte Startzeit haben
+	  	if (!currentTour.isScheduled())
+	    {
+  		
+  			/*
+  			 * 
+  			 * DC-Schritt
+  			 * 
+  			 */
+  		
     		// AttributeLookup erzeugen
     		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
       	
   	    // Step-Objekt erzeugen
-  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+  	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
   	     		
         // Bestimme Ober- und Untergrenze und schränke Alternativenmenge ein
-        int bounds[] = calculateStartingBoundsForTours(currentDay, currentTour, true);
-  	    int lowerbound = bounds[0];
-  	    int upperbound = bounds[1];
-  	    step.limitAlternatives(lowerbound, upperbound);
+        int bounds_dc[] = calculateStartingBoundsForTours(currentTour, true);
+  	    int lowerbound = bounds_dc[0];
+  	    int upperbound = bounds_dc[1];
+  	    step_dc.limitAlternatives(lowerbound, upperbound);
   	    
   	    // Führe Entscheidungswahl durch
-  	    step.doStep();
+  	    step_dc.doStep();
 
   	    // Eigenschaft abspeichern
-  	    currentTour.addAttributetoMap("tourStartCat_index",(double) step.getDecision());
-  	  }	       
-    }
+  	    currentTour.addAttributetoMap("tourStartCat_index",(double) step_dc.getDecision());
+  	    
+  	    
+  	    /*
+  	     * 
+  	     * MC-Schritt
+  	     * 
+  	     */
+  	    
+  	    // Ermittle Entscheidung aus Schritt DC-Modellschritt  		
+        double chosenStartCategory = (double) currentTour.getAttributesMap().get("tourStartCat_index");
+        
+        // Vorbereitungen und Objekte erzeugen
+        String stepID = id_mc + (int) chosenStartCategory;
+        DefaultMCModelStep step_mc = new DefaultMCModelStep(stepID, this);
+        char mainActivityTypeInTour = currentTour.getActivity(0).getType();
+        step_mc.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenStartCategory);
+        // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+        step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
+        //step.setOutPropertyName("tourStartTime");
+        step_mc.setDTDTypeToUse(INDICATOR_TOUR_STARTTIMES);
+        int[] bounds_mc = calculateStartingBoundsForTours(currentTour, false);
+        step_mc.setRangeBounds(bounds_mc[0], bounds_mc[1]);
+        
+        // Entscheidung durchführen
+        step_mc.doStep();
+        
+        // Speichere Ergebnisse ab
+        int chosenStartTime = step_mc.getChosenTime();
+        currentTour.setStartTime(chosenStartTime);   	  		
+		  }	       
+	  }
 	}
+
 
 
 	/**
@@ -1278,6 +1592,56 @@ public class Coordinator
 	 * @param tournrdestages
 	 * @throws InvalidPatternException
 	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
+	private void executeStep10DC(String id, int tournrdestages) throws InvalidPatternException
+	{
+	  // STEP 10m: determine time class for the start of the x tour of the day
+		for (HDay currentDay : pattern.getDays())
+	  {
+			// Falls zu wenig Touren oder ein Heimtag vorliegt, wird der Tag übersprungen
+	    if (currentDay.isHomeDay()|| currentDay.getAmountOfTours()<tournrdestages)
+	    {
+	    	continue;
+	    }
+	  	
+	    // Bestimme x-te Tour des Tages
+	    HTour currentTour = currentDay.getTour(currentDay.getLowestTourIndex()+(tournrdestages-1));
+	  	
+	  	// Führe Schritt nur für Touren aus, die noch keine festgelegte Startzeit haben
+	  	if (!currentTour.isScheduled())
+	    {
+	  		// AttributeLookup erzeugen
+	  		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
+	    	
+		    // Step-Objekt erzeugen
+		    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+		     		
+	      // Bestimme Ober- und Untergrenze und schränke Alternativenmenge ein
+	      int bounds[] = calculateStartingBoundsForTours(currentDay, currentTour, true);
+		    int lowerbound = bounds[0];
+		    int upperbound = bounds[1];
+		    step.limitAlternatives(lowerbound, upperbound);
+		    
+		    // Führe Entscheidungswahl durch
+		    step.doStep();
+	
+		    // Eigenschaft abspeichern
+		    currentTour.addAttributetoMap("tourStartCat_index",(double) step.getDecision());
+		  }	       
+	  }
+	}
+
+
+
+	/**
+	 * 
+	 * @param id
+	 * @param tournrdestages
+	 * @throws InvalidPatternException
+	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
 	private void executeStep10MC(String id, int tournrdestages) throws InvalidPatternException
 	{
 		// Step 10n: exact start time for x tour of the day
@@ -1356,7 +1720,7 @@ public class Coordinator
 	    	    DefaultDCModelStep dcstep = new DefaultDCModelStep("10S", this, lookup);
 	    	     		
 	          // Bestimme Ober- und Untergrenze und schränke Alternativenmenge ein
-	          int dcbounds[] = calculateBoundsForHomeTime(currentDay, currentTour, true);
+	          int dcbounds[] = calculateBoundsForHomeTime(currentTour, true);
 	    	    int lowerbound = dcbounds[0];
 	    	    int upperbound = dcbounds[1];
 	    	    dcstep.limitAlternatives(lowerbound, upperbound);
@@ -1367,7 +1731,7 @@ public class Coordinator
 	    	    // Eigenschaft abspeichern
 	    	    int chosenHomeTimeCategory = dcstep.getDecision();
         	
-          // 10T
+	    	    // 10T
 	    	    
 	    	    // Vorbereitungen und Objekte erzeugen
 	          String stepID = "10T" + (int) chosenHomeTimeCategory;
@@ -1378,7 +1742,7 @@ public class Coordinator
 	  	      mcstep.setModifyDTDAfterStep(Configuration.coordinated_modelling);
 	          //step.setOutPropertyName("tourStartTime");
 	          mcstep.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-	          int[] mcbounds = calculateBoundsForHomeTime(currentDay, currentTour, false);
+	          int[] mcbounds = calculateBoundsForHomeTime(currentTour, false);
 	          mcstep.setRangeBounds(mcbounds[0], mcbounds[1]);
 	          
 	          // Entscheidung durchführen
@@ -1506,73 +1870,178 @@ public class Coordinator
 
 	/**
 	 * 
-	 * max time class to be chosen= min(1440-totalDailyTripTime-durationOfMainActs, mainActDur-1))
+	 * Bestimmt die Obergrenze für die Aktivitätendauern auf Basis bereits geplanter Aktivitäten.
 	 * 
-	 * Vereinfacht durch einheitlichere Methode calculateUpperBoundDurationTimeClassDueToPlannedDurations
-	 * 
-	 * @param day
-	 * @param acttour
-	 * @param step8j
+	 * @param act
+	 * @return
+	 * @throws InvalidPatternException
 	 */
-	@Deprecated
-	@SuppressWarnings({"unused"})
-	private void modifyAlternativesForStep8J(HDay day, HTour acttour, DefaultDCModelStep step8j)
+	private int calculateMaxdurationDueToScheduledActivities(HActivity act) throws InvalidPatternException
 	{
-		//Optimierungspotential - die Aktivität darf nicht länger sein als die noch übrige Zeit - 
-		//nicht nur abhängig von den Hauptaktivitäten sondern auch den restlichen bisher festgelegten Aktivitäten
-	    
-		// Obergrenze 1 - bisher festgelegte "verbrauchte" Zeiten am Tag
-			int totalMainActivityTime = 0;
-			// Alle Hauptaktivitäten + zugehörige Wege + letzter Weg am Ende der Tour
-		    for (HTour tour : day.getTours())
-		    {
-		    	totalMainActivityTime += tour.getActivity(0).getDuration() + tour.getActivity(0).getEstimatedTripTimeBeforeActivity() + tour.getLastActivityInTour().getEstimatedTripTimeAfterActivity();
-		    }
-		    // Obergrenze 1
-		    int remainingTimeUpperBound = 1440 - totalMainActivityTime;
-	    
-		// Obergrenze 2 - Aktivität muss kürzer sein als Hauptaktivität auf Tour 
+		// Suche die nächste nachfolgende Aktivität, deren Startzeit bereits festgelegt ist
+		HDay dayofact = act.getDay();
 		
-		    // Tim (08.11.2016) - Obergrenze default auf 99999 Minuten gesetzt, das heißt ohne Wirkung, da sonst zu kurze Aktivitäten)
-		    // int maxVNActTimeUpperBound = acttour.getActivity(0).getDuration() - 1;
-		    int maxVNActTimeUpperBound = 9999;
-	
-	    int maxTimeForActivity = Math.min(remainingTimeUpperBound, maxVNActTimeUpperBound);
-	
-	    // Bestimme die daraus resultierende Zeitklasse
-	    int maxTimeClass = 0;
-	    for (int i = 1; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
-	    {
-	        if (maxTimeForActivity >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && maxTimeForActivity <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
-	        {
-	            maxTimeClass = i;
-	        }
-	    }
-	    step8j.limitAlternatives(0, maxTimeClass);
-	
-	}
-	
-	
-	private int calculateUpperBoundDurationTimeClassDueToPlannedDurations(HDay day)
-	{
-			// verbleibende Zeit am Tag für Aktivitäten
-			int remainingTimeonDay = 1440 - (day.getTotalAmountOfActivityTime() + day.getTotalAmountOfTripTime());
-			
-			// Obergrenze 2 (für NICHT-Hauptaktivitäten) - Aktivität muss kürzer sein als Hauptaktivität auf Tour 
-			// Tim (08.11.2016) - Obergrenzeinaktiv gesetzt, das heißt ohne Wirkung, da sonst zu kurze Aktivitäten
-			
-	    // Bestimme die daraus resultierende Zeitklasse
-	    int maxTimeClass = 0;
-	    for (int i = 1; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
-	    {
-	        if (remainingTimeonDay >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && remainingTimeonDay <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
-	        {
-	            maxTimeClass = i;
-	        }
-	    }  
-	    return maxTimeClass;
-	}
+		HActivity last_act_scheduled = null;
+		HActivity next_act_scheduled = null;
 
+		for (HActivity tmpact : dayofact.getAllActivitiesoftheDay())
+		{
+			
+			// Suche nach letzter im Tagesverlauf bereits festgelegter Startzeit einer Aktivität
+			if(act.compareTo(tmpact)==-1)		// Findet alle früheren Aktivität als die Aktivität selbst	
+			{
+				//System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
+				if(tmpact.startTimeisScheduled() && (last_act_scheduled==null || tmpact.getStartTime()>last_act_scheduled.getStartTime())) last_act_scheduled = tmpact;
+			}	
+			
+			// Suche nach nächster im Tagesverlauf bereits festgelegter Startzeit einer Aktivität
+			if(act.compareTo(tmpact)==+1)
+			{
+				//System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
+				if(tmpact.startTimeisScheduled() && (next_act_scheduled==null || tmpact.getStartTime()<next_act_scheduled.getStartTime())) next_act_scheduled = tmpact;
+			}	
+		}
+				
+		// Addiere alle vorher festgelegten Weg- und Aktivitätendauern
+		int activitydurationsincelastscheduled = countActivityDurationsbetweenActivitiesofOneDay(last_act_scheduled, act);
+		int tripdurationssincelastscheduled = countTripDurationsbetweenActivitiesofOneDay(last_act_scheduled, act);
+		int activitydurationuntilnextscheduled = countActivityDurationsbetweenActivitiesofOneDay(act, next_act_scheduled);
+		int tripdurationsuntilnextscheduled = countTripDurationsbetweenActivitiesofOneDay(act, next_act_scheduled);
+		
+		int endtimelastscheduled=-1;
+		if (last_act_scheduled!=null)
+		{
+			endtimelastscheduled = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR); 
+		}
+		else
+		{
+			endtimelastscheduled = 0;
+		}
+		assert endtimelastscheduled!=-1 : "endtimelastscheduled konnte nicht bestimmt werden!";
+		
+		int starttimenextscheduled = (next_act_scheduled == null) ? 1440 : next_act_scheduled.getStartTime();
+		
+		// Bestimme obere und untere Schranken
+		int lowerbound = endtimelastscheduled + activitydurationsincelastscheduled + tripdurationssincelastscheduled;
+		int upperbound = starttimenextscheduled - activitydurationuntilnextscheduled - tripdurationsuntilnextscheduled;
+		
+		int maxduration = upperbound - lowerbound;
+    // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
+    if (upperbound<lowerbound)
+    {
+    	String errorMsg = "Duration Bounds incompatible Tour " + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+    	throw new InvalidPatternException(pattern, errorMsg);
+    }
+		
+		return maxduration;
+	
+	}
+	
+	private int getDurationTimeClassforExactDuration (int maxduration)
+	{
+    int timeClass=-1;
+		
+		// Bestimme die daraus resultierende Zeitklasse
+    for (int i = 0; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
+    {
+        if (maxduration >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && maxduration <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
+        {
+        	timeClass = i;
+        }
+    }  
+    assert timeClass!=-1 : "TimeClass konnte nicht bestimmt werden!";
+    return timeClass;
+	}
+	
+	/**
+	 * 
+	 * Bestimmt die Aktivitätendauern zwischen zwei Aktivitäten eines Tages
+	 * 
+	 * @param actfrom
+	 * @param actto
+	 * @return
+	 */
+	private int countActivityDurationsbetweenActivitiesofOneDay(HActivity actfrom, HActivity actto) 
+	{
+		int result=0;
+		List<HActivity> tagesaktliste;
+		if (actfrom==null)
+		{
+			tagesaktliste = actto.getDay().getAllActivitiesoftheDay();
+		}
+		else 
+		{
+			tagesaktliste = actfrom.getDay().getAllActivitiesoftheDay();
+		}
+		
+		for (HActivity tmpact : tagesaktliste)
+		{
+			// Suche alle Aktivitäten die zwischen from und to liegen und addiere die Aktivitätszeit auf das Ergebnis
+			if (	 (actfrom== null && actto!= null 																&& actto.compareTo(tmpact)<0)
+					|| (actfrom!= null && actto!= null && actfrom.compareTo(tmpact)>0	&& actto.compareTo(tmpact)<0)
+					|| (actfrom!= null && actto== null && actfrom.compareTo(tmpact)>0															)
+					)
+			{
+				if (tmpact.durationisScheduled())
+				{
+					result += tmpact.getDuration();
+				}
+				else
+				{
+					result += Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR;
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	 * Bestimmt die Wegdauern zwischen zwei Aktivitäten eines Tages
+	 * 
+	 * @param actfrom
+	 * @param actto
+	 * @return
+	 */
+	private int countTripDurationsbetweenActivitiesofOneDay(HActivity actfrom, HActivity actto) 
+	{
+		int result=0;		
+		List<HActivity> tagesaktliste;
+		if (actfrom==null)
+		{
+			tagesaktliste = actto.getDay().getAllActivitiesoftheDay();
+		}
+		else 
+		{
+			tagesaktliste = actfrom.getDay().getAllActivitiesoftheDay();
+		}
+		
+		for (HActivity tmpact : tagesaktliste)
+		{
+			// Suche alle Aktivitäten die zwischen from und to (inkl. to) liegen und addiere die Wegzeiten auf das Ergebnis
+			if (	 (actfrom== null && actto!= null 																  && actto.compareTo(tmpact)<=0)
+					|| (actfrom!= null && actto!= null && actfrom.compareTo(tmpact)>=0	&& actto.compareTo(tmpact)<=0)
+					|| (actfrom!= null && actto== null && actfrom.compareTo(tmpact)>=0															 )
+				 )
+			{
+				if (actto != null && actto.compareTo(tmpact)==0)
+				{
+					result += tmpact.getEstimatedTripTimeBeforeActivity();
+				}
+				else if (actfrom != null && actfrom.compareTo(tmpact)==0)
+				{
+					if (tmpact.isActivityLastinTour()) result += tmpact.getEstimatedTripTimeAfterActivity();
+				}
+				else
+				{
+					result += tmpact.getEstimatedTripTimeBeforeActivity();
+					if (tmpact.isActivityLastinTour()) result += tmpact.getEstimatedTripTimeAfterActivity();
+				}
+			}
+		}
+		return result;
+	}
+	
 
 	/**
 	 * 
@@ -1582,23 +2051,58 @@ public class Coordinator
 	 * @return
 	 * @throws InvalidPatternException
 	 */
-	private int[] calculateBoundsForHomeTime(HDay day, HTour tour, boolean categories) throws InvalidPatternException
+	private int[] calculateBoundsForHomeTime(HTour tour, boolean categories) throws InvalidPatternException
   {
+		HDay tourday = tour.getDay();
+		
   	// lowerbound startet mit 1 - upperbound mit 1440 (maximale Heimzeit)
     int lowerbound = 1;
     int upperbound = 1440;
     
     int lowercat = -1;
-    int uppercat = -1;
+    int uppercat = -1;   
     
-    // Upperbound bestimmt sich aus dem Ende der vorherigen Tour (= schon verbrauchte Zeit) - Dauer der verbleibenden Touren
-    upperbound = 1440 - day.getTour(tour.getIndex()-1).getEndTime();
+    // Bestimme obere Grenze basierend auf bereits festgelegten Startzeitpunkten der im weiteren Tagesverlauf folgenden Touren
+ 	  int tmptourdurations = 0;
+ 	  for (int i = tour.getIndex(); i <= tourday.getHighestTourIndex(); i++)
+ 	  {
+ 	  	HTour tmptour = tourday.getTour(i);
+ 	  	
+ 	  	// Sobald eine bereits geplante Tour gefunden wurde wird von diesem Punkt ausgegangen die obere Grenze berechnet
+ 	  	if (tmptour.isScheduled())
+ 	  	{
+ 	  		upperbound = tmptour.getStartTime() - tmptourdurations;
+ 	  		break;
+ 	  	}
+ 	  	// Sollte die Tour noch nicht verplant sein wird die Dauer der Tour in die Grenzenberechnung mit einbezogen
+ 	  	else
+ 	  	{
+ 	  		// +1 um jeweils nach der Tour noch eine Heimaktivität von min. einer Minute zu ermöglichen
+ 	  		tmptourdurations += tmptour.getTourDuration() + 1;
+ 	  	}
+ 	  	// Falls Schleife bis zur letzten Tour läuft gibt es keine festgelegten Startzeiten und die Obergrenze kann basierend auf den Tourdauern bestimmt werden
+ 	  	if (tmptour.getIndex()==tourday.getHighestTourIndex())
+ 	  	{
+ 	  		upperbound -= tmptourdurations;
+ 	  	}
+ 	  }
+ 	  
+ 	  // Upperbound wird zusätzlich durch das Ende der vorherigen Tour (= schon verbrauchte Zeit) bestimmt
+    upperbound -= tourday.getTour(tour.getIndex()-1).getEndTime();
     
-    // Gehe alle verbleibenden Touren des Tages durch und berücksichtige bereits feststehende Dauern für die Festlegung der Grenzen
-    for (int i = tour.getIndex(); i <= day.getHighestTourIndex(); i++)
-    {
-    	upperbound -= day.getTour(i).getTourDuration();
-    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
           
     // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
     if (upperbound<lowerbound)
@@ -1652,6 +2156,177 @@ public class Coordinator
 	
 	/**
 	 * 
+	 * Bestimmt die Ober- und Untergrenze der Startzeiten für Touren basierend auf möglichen schon festgelegten Startzeiten und Dauern
+	 * Boolean-Wert categories bestimmt, ob die Zeitkategorien oder die konkreten Grenzwerte zurückgegeben werden
+	 * 
+	 * @param categories
+	 * @param tour
+	 * @return
+	 * @throws InvalidPatternException
+	 */
+	private int[] calculateStartingBoundsForTours(HTour tour, boolean categories) throws InvalidPatternException
+	{
+		// lowerbound startet mit 1 - upperbound mit 1440 (0 Uhr nächster Tag)
+	  int lowerbound = 1;
+	  int upperbound = 1440;
+	  
+	  int lowercat = -1;
+	  int uppercat = -1;
+	  
+	  HDay tourday = tour.getDay();
+	          
+	  // Falls es sich nicht um die erste Tour des Tages handelt, wird lowerbound durch das Ende der vorhergehenden Tour bestimmt
+	  if (tour.getIndex() != tourday.getLowestTourIndex())
+	  {
+	  	lowerbound = tourday.getTour(tour.getIndex()-1).getEndTime() + 1;
+	  }
+	  
+	  
+	  // Bestimme obere Grenze basierend auf bereits festgelegten Startzeitpunkten der im weiteren Tagesverlauf folgenden Touren
+	  int tmptourdurations = 0;
+	  for (int i = tour.getIndex(); i <= tourday.getHighestTourIndex(); i++)
+	  {
+	  	HTour tmptour = tourday.getTour(i);
+	  	
+	  	// Sobald eine bereits geplante Tour gefunden wurde wird von diesem Punkt ausgegangen die obere Grenze berechnet
+	  	if (tmptour.isScheduled())
+	  	{
+	  		upperbound = tmptour.getStartTime() - tmptourdurations;
+	  		break;
+	  	}
+	  	// Sollte die Tour noch nicht verplant sein wird die Dauer der Tour in die Grenzenberechnung mit einbezogen
+	  	else
+	  	{
+	  		// +1 um jeweils nach der Tour noch eine Heimaktivität von min. einer Minute zu ermöglichen
+	  		tmptourdurations += tmptour.getTourDuration() + 1;
+	  	}
+	  	// Falls Schleife bis zur letzten Tour läuft gibt es keine festgelegten Startzeiten und die Obergrenze kann basierend auf den Tourdauern bestimmt werden
+	  	if (tmptour.getIndex()==tourday.getHighestTourIndex())
+	  	{
+	  		upperbound = upperbound - tmptourdurations;
+	  	}
+	  }
+	  
+	        
+	  // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
+	  if (upperbound<lowerbound)
+	  {
+	  	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+	  	throw new InvalidPatternException(pattern, errorMsg);
+	  }
+	
+	  // Zeitklassen für erste Tour des Tages
+	  if(categories && tour.getIndex()== tourday.getLowestTourIndex())
+	  {
+	    // Setze die Zeiten in Kategorien um
+	      for (int i=0; i<Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES; i++)
+	      {
+	      	if (lowerbound>=Configuration.MAIN_TOUR_START_TIMECLASSES_LB[i] && lowerbound<=Configuration.MAIN_TOUR_START_TIMECLASSES_UB[i])
+	      	{
+	      		lowercat =i;
+	      	}
+	      	if (upperbound>=Configuration.MAIN_TOUR_START_TIMECLASSES_LB[i] && upperbound<=Configuration.MAIN_TOUR_START_TIMECLASSES_UB[i])
+	      	{
+	      		uppercat =i;
+	      	}
+	      }
+	    }
+	
+	    // Zeitklassen für zweite und dritte Tour des Tages
+	  if(categories && tour.getIndex()!= tourday.getLowestTourIndex())
+	  {
+	    // Setze die Zeiten in Kategorien um
+	    for (int i=0; i<Configuration.NUMBER_OF_SECTHR_START_TIME_CLASSES ; i++)
+	    {
+	    	if (lowerbound>=Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] && lowerbound<=Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i])
+	    	{
+	    		lowercat =i;
+	    	}
+	    	if (upperbound>=Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] && upperbound<=Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i])
+	    	{
+	    		uppercat =i;
+	    	}
+	    }
+	  }
+	          
+	  // Fehlerbehandlung, falls Kategorien nicht gesetzt werden konnten
+	  if(categories)
+	  {
+	    if (uppercat==-1 || lowercat==-1)
+	    {
+	    	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+	    	throw new InvalidPatternException(pattern, errorMsg);
+	    }
+	  }
+	    
+	  int[] bounds = new int[2];
+	  if (categories)
+	  {
+	  	bounds[0] = lowercat;
+	  	bounds[1] = uppercat;
+	  }
+	  if (!categories)
+	  {
+	  	bounds[0] = lowerbound;
+	  	bounds[1] = upperbound;
+	  }
+	  return bounds;
+	}
+
+
+
+	/**
+	 * 
+	 * max time class to be chosen= min(1440-totalDailyTripTime-durationOfMainActs, mainActDur-1))
+	 * 
+	 * Vereinfacht durch einheitlichere Methode calculateUpperBoundDurationTimeClassDueToPlannedDurations
+	 * 
+	 * @param day
+	 * @param acttour
+	 * @param step8j
+	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
+	private void modifyAlternativesForStep8J(HDay day, HTour acttour, DefaultDCModelStep step8j)
+	{
+	  //Optimierungspotential - die Aktivität darf nicht länger sein als die noch übrige Zeit - 
+	  //nicht nur abhängig von den Hauptaktivitäten sondern auch den restlichen bisher festgelegten Aktivitäten
+	  
+		// Obergrenze 1 - bisher festgelegte "verbrauchte" Zeiten am Tag
+		int totalMainActivityTime = 0;
+		// Alle Hauptaktivitäten + zugehörige Wege + letzter Weg am Ende der Tour
+	    for (HTour tour : day.getTours())
+	    {
+	    	totalMainActivityTime += tour.getActivity(0).getDuration() + tour.getActivity(0).getEstimatedTripTimeBeforeActivity() + tour.getLastActivityInTour().getEstimatedTripTimeAfterActivity();
+	    }
+	    // Obergrenze 1
+	    int remainingTimeUpperBound = 1440 - totalMainActivityTime;
+	  
+	  // Obergrenze 2 - Aktivität muss kürzer sein als Hauptaktivität auf Tour 
+	
+	    // Tim (08.11.2016) - Obergrenze default auf 99999 Minuten gesetzt, das heißt ohne Wirkung, da sonst zu kurze Aktivitäten)
+	    // int maxVNActTimeUpperBound = acttour.getActivity(0).getDuration() - 1;
+	    int maxVNActTimeUpperBound = 9999;
+	
+	  int maxTimeForActivity = Math.min(remainingTimeUpperBound, maxVNActTimeUpperBound);
+	
+	  // Bestimme die daraus resultierende Zeitklasse
+	  int maxTimeClass = 0;
+	  for (int i = 1; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
+	  {
+	      if (maxTimeForActivity >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && maxTimeForActivity <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
+	      {
+	          maxTimeClass = i;
+	      }
+	  }
+	  step8j.limitAlternatives(0, maxTimeClass);
+	
+	}
+
+
+
+	/**
+	 * 
 	 * limits the logit alternatives for step10b and calculates upper and lower bounds
 	 * 
 	 * @param day
@@ -1702,6 +2377,29 @@ public class Coordinator
 
 
 
+	@Deprecated
+	private int calculateUpperBoundDurationTimeClassDueToPlannedDurations(HDay day)
+	{
+		// verbleibende Zeit am Tag für Aktivitäten
+		int remainingTimeonDay = 1440 - (day.getTotalAmountOfActivityTime() + day.getTotalAmountOfTripTime());
+		
+		// Obergrenze 2 (für NICHT-Hauptaktivitäten) - Aktivität muss kürzer sein als Hauptaktivität auf Tour 
+		// Tim (08.11.2016) - Obergrenzeinaktiv gesetzt, das heißt ohne Wirkung, da sonst zu kurze Aktivitäten
+		
+	  // Bestimme die daraus resultierende Zeitklasse
+	  int maxTimeClass = 0;
+	  for (int i = 1; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
+	  {
+	      if (remainingTimeonDay >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && remainingTimeonDay <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
+	      {
+	          maxTimeClass = i;
+	      }
+	  }  
+	  return maxTimeClass;
+	}
+
+
+
 	/**
    * 
    * Bestimmt die Ober- und Untergrenze der Startzeiten für Touren
@@ -1713,6 +2411,7 @@ public class Coordinator
    * @return
    * @throws InvalidPatternException
    */
+	@Deprecated
   private int[] calculateStartingBoundsForTours(HDay day, HTour tour, boolean categories) throws InvalidPatternException
   {
   	// lowerbound startet mit 1 - upperbound mit 1440 (0 Uhr nächster Tag)
@@ -1800,8 +2499,8 @@ public class Coordinator
     return bounds;
   }
   
-
-	/**
+  
+  /**
    * 
    * Bestimmt die Ober- und Untergrenze der Startzeiten für Haupttouren
    * Boolean-Wert categories bestimmt, ob die Zeitkategorien oder die konkreten Grenzwerte zurückgegeben werden
@@ -2063,6 +2762,93 @@ public class Coordinator
 
  
   /**
+	 * 
+	 * @param day
+	 * @param tour
+	 * @param categories
+	 * @return
+	 * @throws InvalidPatternException
+	 */
+	@Deprecated
+	@SuppressWarnings({"unused"})
+	private int[] calculateBoundsForHomeTime(HDay day, HTour tour, boolean categories) throws InvalidPatternException
+	{
+		// lowerbound startet mit 1 - upperbound mit 1440 (maximale Heimzeit)
+	  int lowerbound = 1;
+	  int upperbound = 1440;
+	  
+	  int lowercat = -1;
+	  int uppercat = -1;
+	  
+	  // Upperbound bestimmt sich aus dem Ende der vorherigen Tour (= schon verbrauchte Zeit) - Dauer der verbleibenden Touren
+	  upperbound = 1440 - day.getTour(tour.getIndex()-1).getEndTime();
+	  
+	  // Gehe alle verbleibenden Touren des Tages durch und berücksichtige bereits feststehende Dauern für die Festlegung der Grenzen
+	  for (int i = tour.getIndex(); i <= day.getHighestTourIndex(); i++)
+	  {
+	  	upperbound -= day.getTour(i).getTourDuration();
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	        
+	  // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
+	  if (upperbound<lowerbound)
+	  {
+	  	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+	  	throw new InvalidPatternException(pattern, errorMsg);
+	  }
+	
+	  // Zeitklassen falls erforderlich
+	  if(categories)
+	  {
+	    // Setze die Zeiten in Kategorien um
+	    for (int i=0; i<Configuration.NUMBER_OF_HOME_DURATION_CLASSES; i++)
+	    {
+	    	if (lowerbound>=Configuration.HOME_TIME_TIMECLASSES_LB[i] && lowerbound<=Configuration.HOME_TIME_TIMECLASSES_UB[i])
+	    	{
+	    		lowercat =i;
+	    	}
+	    	if (upperbound>=Configuration.HOME_TIME_TIMECLASSES_LB[i] && upperbound<=Configuration.HOME_TIME_TIMECLASSES_UB[i])
+	    	{
+	    		uppercat =i;
+	    	}
+	    }
+	  }
+	          
+	  // Fehlerbehandlung, falls Kategorien nicht gesetzt werden konnten
+	  if(categories)
+	  {
+	    if (uppercat==-1 || lowercat==-1)
+	    {
+	    	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+	    	throw new InvalidPatternException(pattern, errorMsg);
+	    }
+	  }
+	    
+	  int[] bounds = new int[2];
+	  if (categories)
+	  {
+	  	bounds[0] = lowercat;
+	  	bounds[1] = uppercat;
+	  }
+	  if (!categories)
+	  {
+	  	bounds[0] = lowerbound;
+	  	bounds[1] = upperbound;
+	  }
+	  return bounds;
+	}
+
+
+
+	/**
    * 
    * Erstellt Startzeiten für jede Aktivität
    * 
@@ -2126,7 +2912,7 @@ public class Coordinator
     			int start_next_tour = allmodeledActivities.get(i+1).getTour().getStartTimeWeekContext();
     			// Bestimme Puffer
     			int duration2 = start_next_tour - ende_tour;
-    			assert duration2>0 : "Fehler - keine Home-Aktivität nach Ende der Tour möglich!";
+    			assert duration2>0 : "Fehler - keine Home-Aktivität nach Ende der Tour möglich! - " + start_next_tour + " // " + ende_tour;
     			// Bestimme zugehörigen Tag zu der Heimaktivität
     			int day = (int) ende_tour/1440;
     			// Füge Heimaktivität in Liste hinzu

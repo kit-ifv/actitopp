@@ -321,6 +321,25 @@ public class HWeekPattern
   		}
   	}
   }
+	
+	
+	public void printJointActivitiesList()
+  {  	
+		List<HActivity> listenkopie = new ArrayList<HActivity>();
+		listenkopie = getAllActivities();
+		
+  	HActivity.sortActivityListInWeekOrder(listenkopie);
+
+  	System.out.println("");
+  	System.out.println(" -------------- LISTE gemeinsamer AKTIVITÄTEN --------------");
+  	System.out.println("");
+ 	
+  	for (int i=0 ; i< listenkopie.size() ; i++)
+  	{
+  		HActivity act = listenkopie.get(i);   		
+  		if (act.getJointStatus()!=4) System.out.println(i + " Akt : " + act + " // Creator: " + act.getCreatorPersonIndex()); 
+  	}
+  }
   
 	/**
 	 * 

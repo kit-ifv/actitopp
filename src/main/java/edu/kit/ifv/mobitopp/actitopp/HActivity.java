@@ -337,6 +337,35 @@ public class HActivity
           }
       });
   }
+  
+  /**
+   * Vergleicht zwei Aktivitäten in ihrer Reihenfolge
+   * 
+   * 0  - beide Aktivitäten sind gleich
+   * 1  - übergebene Aktivität liegt NACH der anderen Aktivität (höherer Tag, Tour oder Aktindex)
+   * -1 - übergebene Aktivität liegt VOR der anderen Aktivität
+   * 
+   * @param acttocompare
+   * @return
+   */
+  public int compareTo(HActivity acttocompare) {
+    int result=99;
+    if (acttocompare.getWeekDay() >  this.getWeekDay()) result = 1;
+    if (acttocompare.getWeekDay() <  this.getWeekDay()) result = -1;
+    if (acttocompare.getWeekDay() == this.getWeekDay())
+    {
+      if (acttocompare.getTour().getIndex() >  this.getTour().getIndex()) result = 1;
+      if (acttocompare.getTour().getIndex() <  this.getTour().getIndex()) result = -1;    	
+      if (acttocompare.getTour().getIndex() == this.getTour().getIndex())
+      {
+        if (acttocompare.getIndex() >  this.getIndex()) result = 1;
+        if (acttocompare.getIndex() <  this.getIndex()) result = -1;
+        if (acttocompare.getIndex() == this.getIndex()) result = 0;
+      } 
+    }
+    assert result!=99 : "Could not compare these two activities! - Act1: " + this + " - Act2: " + acttocompare;
+    return result;
+}
 
 
   @Override
@@ -673,6 +702,11 @@ public class HActivity
 	public boolean durationisScheduled()
 	{
 		return duration!=-1;
+	}
+	
+	public boolean startTimeisScheduled()
+	{
+		return starttime!=-1;
 	}
 	
 	/**

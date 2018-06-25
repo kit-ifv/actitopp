@@ -170,7 +170,10 @@ public class Configuration {
 	
 	// Konstante für die durchschnittliche Zeitbelegung eines Weges
 	public static final int FIXED_TRIP_TIME_ESTIMATOR = 20;
-
+	
+	// Konstante für die durchschnittliche Zeitbelegung einer Aktivität
+	public static final int FIXED_ACTIVITY_TIME_ESTIMATOR = 25;
+	
 
 /*
  * 

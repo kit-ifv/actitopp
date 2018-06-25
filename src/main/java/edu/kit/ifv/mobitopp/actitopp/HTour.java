@@ -63,7 +63,7 @@ public class HTour
   public List<HActivity> getActivities()
 	{
 		assert activities != null : "Aktivitätenliste nicht initialisiert";
-	    return activities;
+	  return activities;
 	}
 
   public void addActivity(HActivity act)
@@ -173,7 +173,6 @@ public class HTour
   /**
    * 
    * Gibt die Tourduration inkl. default Trip times zurück
-   * (Dauer_Akt) + (Anz_Akt+1)*DefaultTripTime
    * 
    * @return
    */
