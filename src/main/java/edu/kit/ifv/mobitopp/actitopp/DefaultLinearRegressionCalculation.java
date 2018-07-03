@@ -30,7 +30,9 @@ public class DefaultLinearRegressionCalculation {
 		// Parameter laden und in Map für diese Entscheidung kopieren
 		for (String key : fileBase.getLinearRegressionEstimates(regressionname).keySet())
 		{
-			estimatesMap.put(key, fileBase.getLinearRegressionEstimates(regressionname).get(key));
+			LinearRegressionEstimate vorlage = fileBase.getLinearRegressionEstimates(regressionname).get(key);
+			LinearRegressionEstimate estimate = new LinearRegressionEstimate(vorlage.getName(), vorlage.getEstimateValue(), vorlage.getContextIdentifier());
+			estimatesMap.put(key, estimate);
 		}
 		
 		// Attributwerte auslesen

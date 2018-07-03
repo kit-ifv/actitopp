@@ -776,8 +776,8 @@ public class HActivity
 		int endtime_other = tmpact.getEndTimeWeekContext() + (tmpact.tripAfterActivityisScheduled() ? tmpact.getEstimatedTripTimeAfterActivity() : 0);
 		
 		if (
-					(starttime <= starttime_other && starttime_other <= endtime) ||
-					(starttime <= endtime_other   && endtime_other   <= endtime)
+					(starttime < starttime_other && starttime_other < endtime) ||
+					(starttime < endtime_other   && endtime_other   < endtime)
 			 )
 		{
 			result=true;

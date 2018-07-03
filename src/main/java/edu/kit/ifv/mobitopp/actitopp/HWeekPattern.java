@@ -111,6 +111,16 @@ public class HWeekPattern
 	  return actList;
   }
   
+  public List<HActivity> getAllJointActivities()
+  {
+  	List<HActivity> tmpliste = new ArrayList<HActivity>();
+  	for (HActivity act : getAllActivities())
+  	{
+  		if (act.getJointStatus()!=4) tmpliste.add(act);
+  	}
+  	return tmpliste;
+  }
+  
   /**
    * 
    * @return
@@ -326,7 +336,7 @@ public class HWeekPattern
 	public void printJointActivitiesList()
   {  	
 		List<HActivity> listenkopie = new ArrayList<HActivity>();
-		listenkopie = getAllActivities();
+		listenkopie = getAllJointActivities();
 		
   	HActivity.sortActivityListInWeekOrder(listenkopie);
 
@@ -337,7 +347,7 @@ public class HWeekPattern
   	for (int i=0 ; i< listenkopie.size() ; i++)
   	{
   		HActivity act = listenkopie.get(i);   		
-  		if (act.getJointStatus()!=4) System.out.println(i + " Akt : " + act + " // Creator: " + act.getCreatorPersonIndex()); 
+  		System.out.println(i + " Akt : " + act + " // Creator: " + act.getCreatorPersonIndex()); 
   	}
   }
   

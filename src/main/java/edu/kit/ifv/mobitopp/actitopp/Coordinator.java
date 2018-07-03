@@ -98,7 +98,12 @@ public class Coordinator
   	
   	// Durchführung der Modellschritte
   
-  	addJointActivitiestoPattern();
+    // Gemeinsame Aktivitäten
+    if (Configuration.model_joint_actions) 
+    {
+    	addJointActivitiestoPattern();
+    }
+  	
   	
     executeStep1("1A", "anztage_w");
     executeStep1("1B", "anztage_e");
@@ -163,11 +168,15 @@ public class Coordinator
     
    	// Erstelle Startzeiten für jede Aktivität 
     createStartTimesforActivities();
-
-    executeStep11("11");
     
-    // Bestimme, welche gemeinsamen Wege/Aktivitäten welche anderen Personen beeinflussen
-    generateJointActionsforOtherPersons();
+    // Gemeinsame Aktivitäten
+    if (Configuration.model_joint_actions) 
+    {
+    	executeStep11("11");
+  		// Bestimme, welche gemeinsamen Wege/Aktivitäten welche anderen Personen beeinflussen
+  		generateJointActionsforOtherPersons();
+  		
+    }
     
 					 
     // Finalisierung der Wochenaktivitätenpläne 
@@ -203,6 +212,7 @@ public class Coordinator
    */
   private void addJointActivitiestoPattern()
   {
+  	//TODO doppelte Schleifenprüfung - auch in aufrufender Methode
   	if(Configuration.model_joint_actions)
 		{
 			for (HActivity tmpjointact : person.getAllJointActivitiesforConsideration())
@@ -300,7 +310,7 @@ public class Coordinator
 				else
 				{
 					System.err.println("gemeinsame Aktivität konnte nicht eingefügt werden! // " + reason);
-					System.err.println("Aktivitiät Tag:" + currentDay.getIndex() + " Tour: " + activity.getTour().getIndex() + " Aktindex: " + activityindex + " Startzeit: " + activitystarttime);
+					System.err.println("Aktivitiät Tag:" + currentDay.getIndex() + " Tour: " + activity.getTour().getIndex() + " Aktindex: " + activityindex + " Startzeit: " + activitystarttime + "(" + tmpjointact.getStartTimeWeekContext() + ")");
 				}
   		}
 		}
@@ -1762,6 +1772,7 @@ public class Coordinator
 	 */
 	private void executeStep11(String id)
 	{
+		
     // STEP 11 - Decision on joint activities
     for (HDay currentDay : pattern.getDays())
     {
@@ -1784,15 +1795,28 @@ public class Coordinator
         		continue;
         	}
         	
-        	// AttributeLookup erzeugen
-      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
         	
-    	    // Step-Objekt erzeugen
-    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
-    	    step.doStep();
-
-          // Status festlegen
-    	    currentActivity.setJointStatus(Integer.parseInt(step.getAlternativeChosen()));
+        	/*
+      		 * Schritte nur durchführen, falls Person nicht als letzte Person eines Haushalts modelliert wird
+      		 * Bei letzter Person im Haushalt können keine weiteren neuen gemeinsamen Aktivitäten mehr erzeugt werden!
+      		 */
+      		if ((int) person.getAttributefromMap("numbermodeledinhh") != person.getHousehold().getNumberofPersonsinHousehold())
+      		{
+	        	// AttributeLookup erzeugen
+	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
+	        	
+	    	    // Step-Objekt erzeugen
+	    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    	    step.doStep();
+	
+	          // Status festlegen
+	    	    currentActivity.setJointStatus(Integer.parseInt(step.getAlternativeChosen()));
+      		}
+    	    else
+    	    {
+    	    	// Falls letzte Person, sind keine weiteren gemeinsamen Aktionen möglich
+	    	    currentActivity.setJointStatus(4);
+    	    }
         }
       }
     }
@@ -2855,29 +2879,32 @@ public class Coordinator
    */
   private void createStartTimesforActivities()
   {
-      for (HDay day : pattern.getDays())
+    for (HDay day : pattern.getDays())
+    {
+      // ! sorts the list permanently
+      HTour.sortTourList(day.getTours());
+      for (HTour tour : day.getTours())
       {
-          // ! sorts the list permanently
-          HTour.sortTourList(day.getTours());
-          for (HTour tour : day.getTours())
-          {
-              // ! sorts the list permanently
-              HActivity.sortActivityList(tour.getActivities());
-              for (HActivity act : tour.getActivities())
-              {
-              	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
-              	if (act.isActivityFirstinTour())
-              	{
-              		act.setStartTime(tour.getStartTime() + act.getEstimatedTripTimeBeforeActivity());
-              	}
-              	// Ansonsten durch das Ende der vorherigen Aktivität
-              	else
-              	{
-              		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
-              	}
-              }
-          }
+        // ! sorts the list permanently
+        HActivity.sortActivityList(tour.getActivities());
+        for (HActivity act : tour.getActivities())
+        {
+        	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
+        	if (!act.startTimeisScheduled())
+        	{
+        		if (act.isActivityFirstinTour())
+          	{
+          		act.setStartTime(tour.getStartTime() + act.getEstimatedTripTimeBeforeActivity());
+          	}
+          	// Ansonsten durch das Ende der vorherigen Aktivität
+          	else
+          	{
+          		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
+          	}
+        	}
+        }
       }
+    }
   }
 
   /**
@@ -2985,13 +3012,22 @@ public class Coordinator
 				
 				if (otherunmodeledpersinhh.size()>0)
 				{
-					// Wähle eine zufällige Nummer der verbleibenden Personen
-					List<Integer> keys = new ArrayList<Integer>(otherunmodeledpersinhh.keySet());
-					Integer randomkey = keys.get(randomgenerator.getRandomPersonKey(keys.size()));
-					
-					// Aktivität zur Berücksichtigung bei anderer Person aufnehmen
-					ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);
-					otherperson.addJointActivityforConsideration(tmpactivity);
+					// Bestimme, mit wievielen Personen die Aktivität durchgeführt wird
+					int anzahlgemeinsamerpers = 1;//(int) randomgenerator.getRandomValueBetween(1, otherunmodeledpersinhh.size(), 1);
+					//TODO Wahrscheinlichkeiten für die Anzahl an Personen, die an Akt teilnehmen bestimmen!
+					for (int i=1 ; i<= anzahlgemeinsamerpers; i++)
+					{
+						// Wähle eine zufällige Nummer der verbleibenden Personen
+						List<Integer> keys = new ArrayList<Integer>(otherunmodeledpersinhh.keySet());
+						Integer randomkey = keys.get(randomgenerator.getRandomPersonKey(keys.size()));
+						
+						// Aktivität zur Berücksichtigung bei anderer Person aufnehmen
+						ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);
+						otherperson.addJointActivityforConsideration(tmpactivity);
+						
+						// Diese Person aus der Liste entfernen und ggf. noch andere Personen in Akt mit aufnehmen
+						otherunmodeledpersinhh.remove(randomkey);
+					}
 				}
 			}
 		}

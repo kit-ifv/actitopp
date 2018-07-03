@@ -484,11 +484,11 @@ public class ActitoppPerson
         @Override
         public int compare(ActitoppPerson person1, ActitoppPerson person2)
         {   
-          if(person1.getprobableShareofJointActions() < person2.getprobableShareofJointActions())
+          if(person1.getProbableshareofjointactions() < person2.getProbableshareofjointactions())
           {
             return +1;
           }
-          else if(person1.getprobableShareofJointActions() == person2.getprobableShareofJointActions())
+          else if(person1.getProbableshareofjointactions() == person2.getProbableshareofjointactions())
           {
           	return 0;
           }
@@ -532,25 +532,6 @@ public class ActitoppPerson
 			e.printStackTrace();
 		}
 		
-	}
-	
-	/**
-	 * 
-	 * Methode bestimmt den möglichen Anteil gemeinsamer Aktivitäten an allen Aktivitäten der Person
-	 * Dient zum Bestimmen der Reihenfolge der Modellierung (für gemeinsame Aktivitäten)
-	 * 
-	 * @return
-	 */
-	public double getprobableShareofJointActions() {
-		
-//TODO: Enhancing method in general!
-		
-		double result=-1;
-		
-		if (this.getEmployment()==1) result=0.1;
-		if (this.getEmployment()!=1) result=0.5;
-		
-		return result;
 	}
 	
   /**
