@@ -36,8 +36,12 @@ public class ActitoppPerson
 	private double commutingdistance_work = 0.0;
 	private double commutingdistance_education = 0.0;
 	
-	
-  private List<HActivity> jointActivitiesforConsideration;
+	// Variablen für gemeinsame Aktivitäten
+
+	// basiert auf Regressionsmodell und dient der Feestlegung der Modellierungsreihenfolge der Personen im HH
+	private double probableshareofjointactions=-1;
+	// Liste zu berücksichtigender gemeinsamer Wege/Aktivitäten der Person im HH
+	private List<HActivity> jointActivitiesforConsideration;
 
 	
 	
@@ -407,6 +411,30 @@ public class ActitoppPerson
 	}
 
 
+	/**
+	 * @return the probableshareofjointactions
+	 */
+	public double getProbableshareofjointactions() {
+		return probableshareofjointactions;
+	}
+
+
+
+	public void calculateProbableshareofjointactions(ModelFileBase fileBase) {
+		
+		// AttributeLookup erzeugen
+		AttributeLookup lookup = new AttributeLookup(this);
+		
+		// Modellobjekt erzeugen
+		DefaultLinearRegressionCalculation regression = new DefaultLinearRegressionCalculation("gemwegakt_anteil_reg_estimates", fileBase, lookup);
+		
+		// Initialisierung und Regressionskalkulation
+		regression.initializeEstimates();				
+		this.probableshareofjointactions = regression.calculateRegression();
+
+	}
+
+
 	@Override
 	public String toString()	{
   	StringBuffer message = new StringBuffer();
@@ -442,9 +470,14 @@ public class ActitoppPerson
    * 
    * @param personListe
    */
-  public static void sortPersonListOnProbabilityofJointActions_DESC(List<ActitoppPerson> personList)
+  public static void sortPersonListOnProbabilityofJointActions_DESC(List<ActitoppPerson> personList, ModelFileBase fileBase)
   {
   	assert personList != null : "Liste zum Sortieren ist leer";
+  	
+  	for (ActitoppPerson tmpperson : personList)
+  	{
+  		tmpperson.calculateProbableshareofjointactions(fileBase);
+  	}
   	
       Collections.sort(personList, new Comparator<ActitoppPerson>()
       {

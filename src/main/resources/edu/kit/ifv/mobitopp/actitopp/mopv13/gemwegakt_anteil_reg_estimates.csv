@@ -1,0 +1,15 @@
+Variable;Estimate;ContextIdentifier
+Intercept;0.14439;person
+beruf_vollzeit;-0.03998;person
+beruf_teilzeit;-0.04051;person
+beruf_rentner;-0.10395;person
+persin2pershh;0.17409;person
+persin3pershh;0.11314;person
+rentnerin2pershh;0.21982;person
+alter_10bis17;-0.04516;person
+alter_18bis25;-0.11734;person
+alter_26bis35;-0.08474;person
+alter_36bis50;-0.07046;person
+alter_51bis60;-0.04349;person
+male;-0.01995;person
+anzahlkinder_u18;0.04985;person

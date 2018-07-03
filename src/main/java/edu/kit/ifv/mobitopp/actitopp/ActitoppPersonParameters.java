@@ -121,6 +121,34 @@ public enum ActitoppPersonParameters {
 	},
 	
 	/*
+	 *  HHGRO
+	 */
+	persin2pershh("persin2pershh") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			return ((actitoppPerson.getHousehold().getNumberofPersonsinHousehold() == 2) ? 1.0 : 0.0);
+		}
+	},	
+	persin3pershh("persin3pershh") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			return ((actitoppPerson.getHousehold().getNumberofPersonsinHousehold() == 3) ? 1.0 : 0.0);
+		}
+	},
+	rentnerin2pershh("rentnerin2pershh") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			return ((actitoppPerson.getHousehold().getNumberofPersonsinHousehold() == 2 && actitoppPerson.getEmployment() == 7) ? 1.0 : 0.0);
+		}
+	},
+	
+	/*
 	 * ALTER
 	 */
 	alter_10bis17("alter_10bis17") 

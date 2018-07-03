@@ -69,6 +69,12 @@ public class Configuration {
   		"8C", "8E", "8K", 
   		"10C", "10E", "10H", "10K", "10N", "10P", "10R", "10T"
   };
+  
+  //Angaben der Dateinamen, die Parameter Estimated für einfache Regressionen enthalten
+  public static final String[] linearregressionestimates_filenames =
+  { 
+  		"gemwegakt_anteil_reg_estimates"
+  };  
 
   
   //Angabe der maximalen Kategorie-Indizes bei Häufigskeitsverteilungen

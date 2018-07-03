@@ -25,6 +25,8 @@ public class ModelFileBase
   private Map<String,Map<String, List<ModelParameterWeight>>> modelParameterWeightsMap;
   // Map mit Objekten, die die Zeitverteilungen der Steps enthalten (KAT csv Dateien)
   private Map<String,DiscreteTimeDistribution> timeDistributionsMap;
+  // Map mit Objekten, die Estimates einfacher Regressionsmodelle enthalten
+  private Map<String,Map<String, LinearRegressionEstimate>> linearregressionestimatesmap;
   
   /**
    * 
@@ -37,6 +39,7 @@ public class ModelFileBase
     this.modelFlowListsMap = new HashMap<String, ModelFlowLists>();
     this.modelParameterWeightsMap = new HashMap<String, Map<String,List<ModelParameterWeight>>>();
     this.timeDistributionsMap = new HashMap<String, DiscreteTimeDistribution>();
+    this.linearregressionestimatesmap = new HashMap<String, Map<String, LinearRegressionEstimate>>();
     
     try
     {
@@ -44,6 +47,7 @@ public class ModelFileBase
       initFlowLists();
       initWeights();
       initTimeDistributionLists();
+      initLinearRegressionEstimates();
     }
     catch (IOException e)
     {
@@ -53,7 +57,10 @@ public class ModelFileBase
   }
     
     
-  public Map<String, ModelFlowLists> getModelFlowListsMap()
+
+
+
+	public Map<String, ModelFlowLists> getModelFlowListsMap()
 	{
     return modelFlowListsMap;
 	}
@@ -116,6 +123,18 @@ public class ModelFileBase
   public DiscreteTimeDistribution getTimeDistribution(String ID)
   {
     return timeDistributionsMap.get(ID);
+  }
+  
+  /**
+   * 
+   * Gibt die Map der Regressionsestimates für die gewünschte Regression
+   * 
+   * @param regressionname
+   * @return
+   */
+  public Map<String, LinearRegressionEstimate> getLinearRegressionEstimates(String regressionname)
+  {
+  	return linearregressionestimatesmap.get(regressionname);
   }
     
 	/**
@@ -198,5 +217,27 @@ public class ModelFileBase
       }
     }
   }
+  
+  /**
+   * 
+   * Initialisierung der Estimates für einfache Regressionsparameter
+   * @throws IOException
+   */
+  private void initLinearRegressionEstimates() throws IOException
+  {
+  	// Angabe der Dateinmanen bzw. Schritte, die einfache Regressionsmodelle verwenden
+    String[] toInitialize = Configuration.linearregressionestimates_filenames;
+ 
+    // Initialisierung der Listen aller Dateien
+    for(int i = 0; i < toInitialize.length;i++)
+    {   
+      String sourceLocation = Configuration.parameterset + "/"+ toInitialize[i] +".csv";
+      CSVLinearRegressionEstimatesLoader loader = new CSVLinearRegressionEstimatesLoader();
+			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
+				Map<String, LinearRegressionEstimate> tmpmap = loader.getEstimates(input);
+				linearregressionestimatesmap.put(toInitialize[i], tmpmap);
+			}
+    }
+	}
  
 }
