@@ -137,7 +137,7 @@ public class Coordinator
     executeStep7MC("7M", 'L');
     executeStep7MC("7N", 'S');
     executeStep7MC("7O", 'T');
-    
+  
     executeStep8A("8A");
     executeStep8_MainAct("8B", "8C");
     executeStep8_MainAct("8D", "8E");
@@ -167,7 +167,7 @@ public class Coordinator
     executeStep10ST();
     
    	// Erstelle Startzeiten für jede Aktivität 
-    createStartTimesforActivities();
+    //createStartTimesforActivities();
     
     // Gemeinsame Aktivitäten
     if (Configuration.model_joint_actions) 
@@ -199,7 +199,7 @@ public class Coordinator
     
     // first sanity checks: check for overlapping activities. if found,
     // throw exception and redo activityweek
-    checkOverlappingActivities(pattern);
+    weekPatternisFreeofOverlaps(pattern);
 
   }
   
@@ -212,107 +212,127 @@ public class Coordinator
    */
   private void addJointActivitiestoPattern()
   {
-  	//TODO doppelte Schleifenprüfung - auch in aufrufender Methode
-  	if(Configuration.model_joint_actions)
-		{
-			for (HActivity tmpjointact : person.getAllJointActivitiesforConsideration())
+  	//TODO DEBUG ONLY
+  	if (person.getPersIndex()==145)
   		{
-				// Infos für die neue, gemeinsame Akt
-				int indexday = tmpjointact.getIndexDay();
-				int tourindex = tmpjointact.getTour().getIndex();
-				
-				int personindex_created = tmpjointact.getPerson().getPersIndex();
-				
-				int activityindex = tmpjointact.getIndex();
-				char activitytype = tmpjointact.getType();
-				int activityduration = tmpjointact.getDuration();
-				int activitystarttime = tmpjointact.getStartTime();
-				int activityjointStatus = tmpjointact.getJointStatus();
-				int activitytripdurationbefore = tmpjointact.getEstimatedTripTimeBeforeActivity();
-				
-								
-        // Hole Referenz auf Tour oder füge die Tour in das Pattern ein, falls sie noch nicht existiert
-        HDay currentDay = pattern.getDay(indexday);
-        
-        HTour oneTour;
-				if (currentDay.existsTour(tourindex))
-				{
-					oneTour = currentDay.getTour(tourindex);
-				}
-				else
-				{
-					oneTour = new HTour(currentDay, tourindex);
-					currentDay.addTour(oneTour);
-				}
-                  
-        // Füge die Aktivität in das Pattern ein
-				HActivity activity = null;
-				
-				
-				switch(activityjointStatus)
-				{
-					// Weg davor und Aktivität werden gemeinsam durchgeführt
-					case 1:
-					{
-						activity = new HActivity(oneTour, activityindex, activitytype, activityduration, activitystarttime, activityjointStatus, activitytripdurationbefore);
-						break;
-					}
-					// Nur Aktivität wird gemeinsam durchgeführt
-					case 2:
-					{
-						activity = new HActivity(oneTour, activityindex, activitytype, activityduration, activitystarttime, activityjointStatus);
-						break;
-					}		
-					// Weg davor wird gemeinsam durchgeführt
-					case 3:
-					{
-						activity = new HActivity(oneTour, activityindex, activitystarttime, activityjointStatus, activitytripdurationbefore);
-						break;
-					}
-				}			
-				assert activity!=null : "Aktivität wurde nicht erzeugt";
-				activity.addAttributetoMap("CreatorPersonIndex", (double) personindex_created); 
-				
-				
-				/*
-				 *  Prüfe, ob Aktivität konfliktfrei einfügbar ist in das Pattern
-				 */
-				boolean konfliktfrei = true;
-				String reason="";
-				
-				// Aktivität mit diesem Index in dieser Tour existiert bereits
-				if (currentDay.existsActivity(oneTour.getIndex(), activityindex)) 
-				{
-					konfliktfrei=false;
-					reason = "Aktivität mit Index existiert bereits in Tour!";
-				}
-				
-				// Aktivität passt zeitlich nicht an diese Position
-				for (HActivity tmpact : currentDay.getAllActivitiesoftheDay())
-				{
-					if (
-							(tmpact.getTour().getIndex() > activity.getTour().getIndex() && tmpact.getStartTime() < activity.getStartTime())
-							||
-							(tmpact.getTour().getIndex() == activity.getTour().getIndex() && tmpact.getIndex() > activity.getIndex() && tmpact.getStartTime() < activity.getStartTime())
-						)
-					{
-						konfliktfrei = false;
-						reason = "Aktivität passt zeitlich nicht an diese Position!";
-						break;
-					}
-				}
-								
-				
-				if (konfliktfrei)
-				{
-					oneTour.addActivity(activity);
-				}
-				else
-				{
-					System.err.println("gemeinsame Aktivität konnte nicht eingefügt werden! // " + reason);
-					System.err.println("Aktivitiät Tag:" + currentDay.getIndex() + " Tour: " + activity.getTour().getIndex() + " Aktindex: " + activityindex + " Startzeit: " + activitystarttime + "(" + tmpjointact.getStartTimeWeekContext() + ")");
-				}
+  		System.out.println("hier");
   		}
+		for (HActivity tmpjointact : person.getAllJointActivitiesforConsideration())
+		{
+			// Infos für die neue, gemeinsame Akt
+			int indexday = tmpjointact.getIndexDay();
+			int tourindex = tmpjointact.getTour().getIndex();
+			
+			int personindex_created = tmpjointact.getPerson().getPersIndex();
+			
+			int activityindex = tmpjointact.getIndex();
+			char activitytype = tmpjointact.getType();
+			int activityduration = tmpjointact.getDuration();
+			int activitystarttime = tmpjointact.getStartTime();
+			int activityjointStatus = tmpjointact.getJointStatus();
+			int activitytripdurationbefore = tmpjointact.getEstimatedTripTimeBeforeActivity();
+			
+							
+      // Hole Referenz auf Tour oder füge die Tour in das Pattern ein, falls sie noch nicht existiert
+      HDay currentDay = pattern.getDay(indexday);
+      
+      HTour oneTour;
+			if (currentDay.existsTour(tourindex))
+			{
+				oneTour = currentDay.getTour(tourindex);
+			}
+			else
+			{
+				oneTour = new HTour(currentDay, tourindex);
+				currentDay.addTour(oneTour);
+			}
+                
+      // Füge die Aktivität in das Pattern ein
+			HActivity activity = null;
+			
+			
+			switch(activityjointStatus)
+			{
+				// Weg davor und Aktivität werden gemeinsam durchgeführt
+				case 1:
+				{
+					activity = new HActivity(oneTour, activityindex, activitytype, activityduration, activitystarttime, activityjointStatus, activitytripdurationbefore);
+					break;
+				}
+				// Nur Aktivität wird gemeinsam durchgeführt
+				case 2:
+				{
+					activity = new HActivity(oneTour, activityindex, activitytype, activityduration, activitystarttime, activityjointStatus);
+					break;
+				}		
+				// Weg davor wird gemeinsam durchgeführt
+				case 3:
+				{
+					activity = new HActivity(oneTour, activityindex, activitystarttime, activityjointStatus, activitytripdurationbefore);
+					break;
+				}
+			}			
+			assert activity!=null : "Aktivität wurde nicht erzeugt";
+			activity.addAttributetoMap("CreatorPersonIndex", (double) personindex_created); 
+			
+			
+			/*
+			 *  Prüfe, ob Aktivität konfliktfrei einfügbar ist in das Pattern
+			 */
+			boolean konfliktfrei = true;
+			String reason="";
+			String existingaktinvolved="";
+			String newaktaktinvolved="";
+			
+			// Aktivität mit diesem Index in dieser Tour existiert bereits
+			if (currentDay.existsActivity(oneTour.getIndex(), activityindex)) 
+			{
+				konfliktfrei=false;
+				reason = "Aktivität mit Index existiert bereits in Tour!";
+				newaktaktinvolved = activity.toString();
+			}
+			
+			// Aktivität passt von der Reihenfolge (Index und Zeit) nicht an diese Position
+			for (HActivity tmpact : currentDay.getAllActivitiesoftheDay())
+			{
+				if (
+						(tmpact.getTour().getIndex() > activity.getTour().getIndex() && tmpact.getStartTime() < activity.getStartTime())
+						||
+						(tmpact.getTour().getIndex() == activity.getTour().getIndex() && tmpact.getIndex() > activity.getIndex() && tmpact.getStartTime() < activity.getStartTime())
+					)
+				{
+					konfliktfrei = false;
+					reason = "Aktivität passt zeitlich nicht an diese Position!";
+					existingaktinvolved = tmpact.toString();
+					newaktaktinvolved = activity.toString();
+					break;
+				}
+			}
+			
+			// Zeitraum der Akt kollidiert mit anderer Akt
+			for (HActivity tmpact : currentDay.getAllActivitiesoftheDay())
+			{
+				if (tmpact.startTimeisScheduled() && tmpact.checkOverlappingtoOtherActivity(activity))
+				{
+					konfliktfrei = false;
+					reason = "Aktivitäten überlagern sich!";
+					existingaktinvolved = tmpact.toString();
+					newaktaktinvolved = activity.toString();
+					break;
+				}
+			}								
+			
+			if (konfliktfrei)
+			{
+				oneTour.addActivity(activity);
+			}
+			else
+			{
+				System.err.println("gemeinsame Aktivität konnte nicht eingefügt werden! // " + reason);
+				// System.err.println("Aktivitiät Tag:" + currentDay.getIndex() + " Tour: " + activity.getTour().getIndex() + " Aktindex: " + activityindex + " Startzeit: " + activitystarttime + "(" + tmpjointact.getStartTimeWeekContext() + ")");
+				System.err.println("Existing Conflicting Act: " + existingaktinvolved);
+				System.err.println("New Conflicting Act: " + newaktaktinvolved);
+			}
 		}
   }
   
@@ -743,9 +763,9 @@ public class Coordinator
 	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
 	    	    int maxduration = calculateMaxdurationDueToScheduledActivities(currentActivity);
 	    	    int loc_upperbound = getDurationTimeClassforExactDuration(maxduration);
-	    	   	   
-	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
-	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
+	    	    
+	    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getLowerBound()) 																step_dc.limitLowerBoundOnly(loc_upperbound); 
 	
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
@@ -828,8 +848,8 @@ public class Coordinator
 	    	    int maxduration = calculateMaxdurationDueToScheduledActivities(currentActivity);
 	    	    int loc_upperbound = getDurationTimeClassforExactDuration(maxduration);
 	    		   
-	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
-	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getLowerBound()) 																step_dc.limitLowerBoundOnly(loc_upperbound); 
 	
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
@@ -1505,6 +1525,9 @@ public class Coordinator
 		  		if (startTimeDueToScheduledActivities!=-1)
 		  		{
 		  			currentTour.setStartTime(startTimeDueToScheduledActivities);   
+		  			
+		        // Setze die Startzeiten der Aktivitäten in dieser Tour
+		        createStartTimesforActivities(currentTour);
 		  		}
 		    }
 	    }
@@ -1589,7 +1612,10 @@ public class Coordinator
         
         // Speichere Ergebnisse ab
         int chosenStartTime = step_mc.getChosenTime();
-        currentTour.setStartTime(chosenStartTime);   	  		
+        currentTour.setStartTime(chosenStartTime);   	  	
+        
+        // Setze die Startzeiten der Aktivitäten in dieser Tour
+        createStartTimesforActivities(currentTour);
 		  }	       
 	  }
 	}
@@ -1761,6 +1787,9 @@ public class Coordinator
 	          // Speichere Ergebnisse ab
 	          int starttimetour = currentDay.getTour(currentTour.getIndex()-1).getEndTime() + mcstep.getChosenTime();
 	          currentTour.setStartTime(starttimetour);
+	          
+	          // Setze die Startzeiten der Aktivitäten in dieser Tour
+	          createStartTimesforActivities(currentTour);
         }
       }
     }
@@ -2877,6 +2906,7 @@ public class Coordinator
    * Erstellt Startzeiten für jede Aktivität
    * 
    */
+	@SuppressWarnings("unused")
   private void createStartTimesforActivities()
   {
     for (HDay day : pattern.getDays())
@@ -2907,6 +2937,37 @@ public class Coordinator
     }
   }
 
+	/**
+   * 
+   * Erstellt Startzeiten für jede Aktivität einer bestimmten Tour
+   * 
+   */
+  private void createStartTimesforActivities(HTour acttour)
+  {
+    // ! sorts the list permanently
+    HActivity.sortActivityList(acttour.getActivities());
+    for (HActivity act : acttour.getActivities())
+    {
+    	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
+    	if (!act.startTimeisScheduled())
+    	{
+    		if (act.isActivityFirstinTour())
+      	{
+      		act.setStartTime(acttour.getStartTime() + act.getEstimatedTripTimeBeforeActivity());
+      	}
+      	// Ansonsten durch das Ende der vorherigen Aktivität
+      	else
+      	{
+      		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
+      	}
+    	}
+    }
+    
+    // Prüfe, ob die Tour einen lückenlosen Ablauf hat, das heißt keine Leerzeit zwischen Akt und Wegen
+    if (!tourisFreeofGaps(acttour)) System.err.println("Tour hat Lücken! " + acttour);
+  }
+  
+  
   /**
    * 
    * Methode erzeugt Home-Aktivitäten zwischen den Touren
@@ -2935,8 +2996,12 @@ public class Coordinator
     		// Wenn Aktivität die letzte der Tour ist, erzeuge Heimaktivität
     		if (act.isActivityLastinTour())
     		{
-    			int ende_tour = act.getTour().getEndTimeWeekContext();
-    			int start_next_tour = allmodeledActivities.get(i+1).getTour().getStartTimeWeekContext();
+    			HTour acttour = act.getTour();
+    			HTour nexttour =  allmodeledActivities.get(i+1).getTour();
+    			
+    			int ende_tour = acttour.getEndTimeWeekContext();
+    			int start_next_tour = nexttour.getStartTimeWeekContext();
+    			
     			// Bestimme Puffer
     			int duration2 = start_next_tour - ende_tour;
     			assert duration2>0 : "Fehler - keine Home-Aktivität nach Ende der Tour möglich! - " + start_next_tour + " // " + ende_tour;
@@ -3073,33 +3138,58 @@ public class Coordinator
 
 	/**
 	 * 
-	 * Methode zum Überprüfen für Überlappende Aktivitäten
+	 * Prüft, ob WeekPattern überlappende Aktivitäten enthält
 	 * 
 	 * @param weekpattern
 	 * @return
 	 * @throws InvalidPatternException
 	 */
-	private boolean checkOverlappingActivities(HWeekPattern weekpattern) throws InvalidPatternException
+	private boolean weekPatternisFreeofOverlaps(HWeekPattern weekpattern) throws InvalidPatternException
 	{
-			List<HActivity> allActivities = weekpattern.getAllActivities();
-			HActivity.sortActivityListInWeekOrder(allActivities);
-	    int lastStartTime = -1;
-
-	    for (int i = 0; i < allActivities.size(); i++)
-	    {
-	        HActivity activity = allActivities.get(i);
-	        int currentStartTime = activity.getStartTimeWeekContext();
-
-	        if (i != 0)
-	        {
-	            HActivity involved[] = {allActivities.get(i-1),activity};
-	            if (currentStartTime < lastStartTime) throw new InvalidPatternException(involved, weekpattern, "activity start order not ascending " + currentStartTime + " vs " + lastStartTime);
-	        }
+		boolean freeofOverlaps=true;
 	
-	        lastStartTime = currentStartTime;
-	    }
+		List<HActivity> allActivities = weekpattern.getAllActivities();
+		HActivity.sortActivityListInWeekOrder(allActivities);
+    
+    for (int i = 0; i < allActivities.size()-1; i++)
+    {
+    	HActivity aktuelleakt = allActivities.get(i);
+    	HActivity naechsteakt = allActivities.get(i+1);
+    	
+      if (aktuelleakt.checkOverlappingtoOtherActivity(naechsteakt)) 
+      {
+      	freeofOverlaps = false;
+      	throw new InvalidPatternException(weekpattern, "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt);
+      }
+    }
+    return freeofOverlaps;
+	}
 	
-	    return true;
+	
+	
+	/**
+	 * 
+	 * Prüft, ob eine Tour keine Zeitlücken aufweist, das heißt ob Akt und Wege direkt aneinander gereiht sind
+	 * 
+	 * @param tour
+	 * @return
+	 */
+	private boolean tourisFreeofGaps(HTour tour)
+	{
+		boolean gapfree = true;
+		
+		List<HActivity> tmpaktliste = tour.getActivities();
+		HActivity.sortActivityList(tmpaktliste);
+		
+		for (int i=0 ; i<tmpaktliste.size()-1; i++)
+		{
+			HActivity aktuelleakt = tmpaktliste.get(i);
+			HActivity naechsteakt = tmpaktliste.get(i+1);
+			
+			if (aktuelleakt.getEndTimeWeekContext() != naechsteakt.getTripStartTimeBeforeActivityWeekContext()) gapfree=false;
+		}	
+		
+		return gapfree;
 	}
 	
 	

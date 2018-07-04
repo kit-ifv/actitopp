@@ -169,17 +169,22 @@ public class DiscreteTimeDistribution
         //Phase1: check and apply bounds
         int usedLowerBound = startValue;
         int usedUpperBound = endValue;
+                
         if(lowerbound != -1 && upperbound != -1)
         {
-            if(lowerbound >= startValue && lowerbound <= endValue)
-            {
-                usedLowerBound = lowerbound;
-            }
-            
-            if(upperbound >= startValue && upperbound <=endValue)
-            {
-                usedUpperBound = upperbound;
-            }
+        	// Stelle sicher, dass Grenzen aus Vorbedingungen zu denen der gezogenen Zeitklasse passen!
+        	assert lowerbound<=usedUpperBound : "Inconsistent Boundaries! lowerBound aus Vorbedingungen: " + lowerbound + " vs. upperBound der Kategorie: " + usedUpperBound;
+          assert upperbound>=usedLowerBound : "Inconsistent Boundaries! upperBound aus Vorbedingungen: " + upperbound + " vs. lowerBound der Kategorie: " + usedLowerBound;
+
+          if(lowerbound >= startValue && lowerbound <= endValue)
+          {
+              usedLowerBound = lowerbound;
+          }
+          
+          if(upperbound >= startValue && upperbound <=endValue)
+          {
+              usedUpperBound = upperbound;
+          }
         }
         
         if(lowerbound > upperbound)

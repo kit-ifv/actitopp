@@ -224,7 +224,7 @@ public class HTour
    */
   public int getEndTime()
   {
-  	return getStartTime() + getTourDuration();
+  	return getLastActivityInTour().getEndTime() + getLastActivityInTour().getEstimatedTripTimeAfterActivity();
   }
 
   /**

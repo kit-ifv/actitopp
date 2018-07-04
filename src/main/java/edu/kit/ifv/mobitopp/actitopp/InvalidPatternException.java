@@ -21,13 +21,7 @@ public class InvalidPatternException extends Exception
     this.reason = reason;
   }
     
-  public InvalidPatternException(HActivity[] involved, HWeekPattern faultyPattern, String reason) 
-  {
-    this.involvedActivities = involved;
-  	this.faultyHWeekPattern = faultyPattern;
-    this.reason = reason;
-	}
-
+  
 	public String getReason()
   {
       return reason;

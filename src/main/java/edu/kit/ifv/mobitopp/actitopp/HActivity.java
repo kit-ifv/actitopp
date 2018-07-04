@@ -482,7 +482,9 @@ public class HActivity
 	 */
 	public boolean isHomeActivity()
 	{
-		return getType()=='H';
+		boolean ishome = false;
+		if (activitytypeisScheduled() && getType()=='H') ishome = true;
+		return ishome;
 	}
 
 	/**
@@ -759,6 +761,8 @@ public class HActivity
 	
 	/**
 	 * Prüft, ob sich zwei Aktivitäten in ihren Zeitintervallen überlagern
+	 * false = Sie überlagern sich nicht
+	 * true = Sie überlagern sich
 	 * 
 	 * @param tmpact
 	 * @return
@@ -768,11 +772,12 @@ public class HActivity
 		boolean result = false;
 		
 		// Zeitbelegung der aktuellen Aktivität ermitteln
-		int starttime = getTripStartTimeBeforeActivityWeekContext();
-		int endtime = getEndTimeWeekContext() + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : 0);
+		int starttime = getStartTimeWeekContext() - (tripBeforeActivityisScheduled() ? getEstimatedTripTimeBeforeActivity() : 0);
+		int endtime = (durationisScheduled() ? getEndTimeWeekContext() : getStartTimeWeekContext()) + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : 0);
+
 		
 		// Zeitbelegung der anderen Aktivität ermitteln
-		int starttime_other = tmpact.getTripStartTimeBeforeActivityWeekContext();
+		int starttime_other = tmpact.getStartTimeWeekContext() - (tmpact.tripBeforeActivityisScheduled() ? tmpact.getEstimatedTripTimeBeforeActivity() : 0);
 		int endtime_other = tmpact.getEndTimeWeekContext() + (tmpact.tripAfterActivityisScheduled() ? tmpact.getEstimatedTripTimeAfterActivity() : 0);
 		
 		if (
