@@ -154,9 +154,27 @@ public class ActiToppHousehold {
 		this.numberofcarsinhousehold = numberofcarsinhousehold;
 	}
 	
+	/**
+	 * Gibt die Anzahl der Personen im Haushalt zurück
+	 * @return
+	 */
 	public int getNumberofPersonsinHousehold() {
 		return this.householdmembers.size();
 	}
+	
+	/**
+	 * Setzt alle Modellierungsergebnisse für diesen Haushalt zurück!
+	 */
+	public void resetHouseholdModelingResults()
+	{
+		for (ActitoppPerson actperson : getHouseholdmembersasList())
+		{
+			actperson.clearAttributesMap();
+			actperson.clearWeekPattern();
+			actperson.clearJointActivitiesforConsideration();
+		}
+	}
+	
 	
 	@Override
 	public String toString()	{

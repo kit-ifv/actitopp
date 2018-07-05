@@ -376,23 +376,23 @@ public class HActivity
   	if (isHomeActivity())
   	{
   		result= getIndexDay() + 	
-  				" Start " + getStartTimeWeekContext() + 
-  				" Ende " + getEndTimeWeekContext() + 
-  				" Dauer: " + this.duration + 
-  				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
+  				" Start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
+  				" Ende " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
+  				" Dauer: " + (durationisScheduled() ? this.duration : "n.a.") + 
+  				" Typ: " + (activitytypeisScheduled() ? this.type : "n.a.") + " (" + this.mobiToppActType + ")" + 
   				" jointStatus: " + this.jointStatus
   				;  		
   	}
   	else
   	{
   		result= getIndexDay() + "/" + getTour().getIndex() + "/" + getIndex() + 	
-		  				" Start " + getStartTimeWeekContext() + 
-		  				" Ende " + getEndTimeWeekContext() + 
-		  				" Dauer: " + this.duration + 
-		  				" Typ: " + this.type + " (" + this.mobiToppActType + ")" + 
-		  				" jointStatus: " + this.jointStatus + 
-		  				" Weg hin: " + getEstimatedTripTimeBeforeActivity() + 
-		  				(tripAfterActivityisScheduled() ? " Weg rück: " + getEstimatedTripTimeAfterActivity() : "")
+		  				" Start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
+		  				" Ende " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
+		  				" Dauer: " + (durationisScheduled() ? this.duration : "n.a.") + 
+		  				" Typ: " + (activitytypeisScheduled() ? this.type : "n.a.") + " (" + this.mobiToppActType + ")" + 
+		  				" jointStatus: " + this.jointStatus +
+		  				" Weg hin: " + (tripBeforeActivityisScheduled() ? getEstimatedTripTimeBeforeActivity() : "n.a.") + 
+		  				" Weg rück: " + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : "n.a.")
 		  				;
   	}
 		return result;
@@ -520,18 +520,90 @@ public class HActivity
 		HActivity previousActivity;
 		
 		//Prüfe, ob die Aktivtät die erste in der Tour ist
-	    if (getIndex() != getTour().getLowestActivityIndex())
-	    {
-	    	previousActivity = getTour().getActivity(getIndex()-1);
-	    }
-	    // Falls die Aktivität die erste ist, gibt es keinen Vorgänger in der Tour
-	    else
-	    {
-	    	previousActivity = null;
-	    }
-	    return previousActivity;
+    if (getIndex() != getTour().getLowestActivityIndex())
+    {
+    	previousActivity = getTour().getActivity(getIndex()-1);
+    }
+    // Falls die Aktivität die erste ist, gibt es keinen Vorgänger in der Tour
+    else
+    {
+    	previousActivity = null;
+    }
+    return previousActivity;
+	}
+	
+	/**
+	 * 
+	 * Gibt die nachfolgende Aktivität auf der Tour zurück
+	 * 
+	 * @return
+	 */
+	public HActivity getNextActivityinTour()
+	{
+		HActivity nextActivity;
+		
+		//Prüfe, ob die Aktivtät die letzte in der Tour ist
+    if (getIndex() != getTour().getHighestActivityIndex())
+    {
+    	nextActivity = getTour().getActivity(getIndex()+1);
+    }
+    // Falls die Aktivität die letzte ist, gibt es keinen Nachfolger in der Tour
+    else
+    {
+    	nextActivity = null;
+    }
+    return nextActivity;
+	}
+	
+	
+	/**
+	 * 
+	 * Gibt die vorherige Außer-Haus-Aktivität des Patterns zurück.
+	 * 
+	 * @return
+	 */
+	public HActivity getPreviousOutOfHomeActivityinPattern()
+	{
+		HActivity previousact=null;
+		
+		// Aktivität ist die erste in der Tour, das heißt ermittel letzte Aktivität aus vorheriger Tour
+		if (isActivityFirstinTour())
+		{
+			HTour vorherigeTour = getTour().getPreviousTourinPattern();
+			if (vorherigeTour!=null) previousact = vorherigeTour.getLastActivityInTour();
+		}
+		else
+		{
+			previousact = getPreviousActivityinTour();
+		}
+		return previousact;
 	}
 
+	/**
+	 * 
+	 * Gibt die nachfolgende Außer-Haus-Aktivität des Patterns zurück.
+	 * 
+	 * @return
+	 */
+	public HActivity getNextOutOfHomeActivityinPattern()
+	{
+		HActivity nextact=null;
+		
+		// Aktivität ist die letzte in der Tour, das heißt ermittel erste Aktivität aus nachfolgender Tour
+		if (isActivityLastinTour())
+		{
+			HTour naechsteTour = getTour().getNextTourinPattern();
+			if (naechsteTour!=null) nextact = naechsteTour.getFirstActivityInTour();
+		}
+		else
+		{
+			nextact = getNextActivityinTour();
+		}
+		return nextact;
+	}
+
+	
+	
 	/**
 	 * 
 	 * Gibt den Endzeitpunkt der Aktivität zurück
@@ -778,7 +850,7 @@ public class HActivity
 		
 		// Zeitbelegung der anderen Aktivität ermitteln
 		int starttime_other = tmpact.getStartTimeWeekContext() - (tmpact.tripBeforeActivityisScheduled() ? tmpact.getEstimatedTripTimeBeforeActivity() : 0);
-		int endtime_other = tmpact.getEndTimeWeekContext() + (tmpact.tripAfterActivityisScheduled() ? tmpact.getEstimatedTripTimeAfterActivity() : 0);
+		int endtime_other = (tmpact.durationisScheduled() ? tmpact.getEndTimeWeekContext() : tmpact.getStartTimeWeekContext()) + (tmpact.tripAfterActivityisScheduled() ? tmpact.getEstimatedTripTimeAfterActivity() : 0);
 		
 		if (
 					(starttime < starttime_other && starttime_other < endtime) ||
@@ -790,5 +862,6 @@ public class HActivity
 		
 		return result;
 	}
+
 
 }

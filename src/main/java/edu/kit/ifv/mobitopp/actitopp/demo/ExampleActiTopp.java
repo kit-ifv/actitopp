@@ -65,7 +65,7 @@ public class ExampleActiTopp {
     		
         scheduleOK = true;                
       }
-      catch (InvalidPatternException e)
+      catch (InvalidPersonPatternException | InvalidHouseholdPatternException e)
       {
         System.err.println(e.getReason());
         System.err.println("person involved: " + testperson.getPersIndex());
@@ -115,7 +115,7 @@ public class ExampleActiTopp {
 				
 			   scheduleOK = true;                
 			 }
-			 catch (InvalidPatternException e)
+			 catch (InvalidPersonPatternException | InvalidHouseholdPatternException e)
 			 {
 			   System.err.println(e.getReason());
 			   System.err.println("person involved: " + testperson.getPersIndex());
@@ -175,7 +175,7 @@ public class ExampleActiTopp {
     		
         scheduleOK = true;                
       }
-      catch (InvalidPatternException e)
+      catch (InvalidPersonPatternException | InvalidHouseholdPatternException e)
       {
         System.err.println(e.getReason());
         System.err.println("person involved: " + testperson.getPersIndex());
@@ -223,7 +223,7 @@ public class ExampleActiTopp {
 	      		
 	          scheduleOK = true;                
 	        }
-	        catch (InvalidPatternException e)
+	        catch (InvalidPersonPatternException | InvalidHouseholdPatternException e)
 	        {
 	          System.err.println(e.getReason());
 	          System.err.println("person involved: " + actperson.getPersIndex());
@@ -291,7 +291,7 @@ public class ExampleActiTopp {
 		      		
 		          scheduleOK = true;                
 		        }
-		        catch (InvalidPatternException e)
+		        catch (InvalidPersonPatternException | InvalidHouseholdPatternException e)
 		        {
 		          System.err.println(e.getReason());
 		          System.err.println("person involved: " + actperson.getPersIndex());

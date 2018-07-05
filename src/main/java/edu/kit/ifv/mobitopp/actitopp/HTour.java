@@ -134,13 +134,15 @@ public class HTour
 			String tostring = "";
 			if (this.isScheduled())
 			{
-				tostring = 	"Start " + getStartTimeWeekContext() + 
+				tostring = 	getDay().getIndex() + "/" + getIndex() + 
+										" Start " + getStartTimeWeekContext() + 
 	    							" Ende " + getEndTimeWeekContext() + 
 	    							" Dauer: " + getTourDuration();  
 			}
 			else
 			{
-				tostring = 	"Start --- " + 
+				tostring = 	getDay().getIndex() + "/" + getIndex() + 
+										" Start --- " + 
 										" Ende --- " +  
 										" Dauer: " + getTourDuration(); 
 			}
@@ -168,6 +170,8 @@ public class HTour
 	{
 		return this.getIndex()==0;
 	}
+	
+
 
   
   /**
@@ -236,8 +240,8 @@ public class HTour
    */
   public HActivity getActivity(int index)
   {
-    	HActivity indexact = null;
-    	for (HActivity activity : getActivities())
+  	HActivity indexact = null;
+  	for (HActivity activity : getActivities())
   	{
   		if (activity.getIndex()==index)
   		{
@@ -334,30 +338,79 @@ public class HTour
 	 * 
 	 * @return
 	 */
-	public HTour getPreviousTour()
+	public HTour getPreviousTourinPattern()
 	{
 		HTour previousTour;
 		//Prüfe, ob die Tour die erste Tour des Tages ist
-	    if (index == day.getLowestTourIndex())
-	    {
-	    	// Tour ist die erste des Tages, gib also die letzte Tour des vorherigen Tages zurück
-	    	HDay previousDay = day.getPreviousDay();
-	    	// Wenn der vorherige Tag eine HomeDay war oder es keinen vorherigen Tag gibt, gib Null zurück
-	    	if (previousDay==null || previousDay.isHomeDay())
-	    	{
-	    		previousTour = null;
-	    	}
-	    	else
-	    	{
-	    		previousTour = previousDay.getLastTourOfDay();
-	    	}
-	    }
-	    // Falls nicht wird die vorherige Tour dieses Tages zurückgegeben
-	    else
-	    {
-	    	previousTour = day.getTour(index-1);
-	    }
-	    return previousTour;
+    if (index == day.getLowestTourIndex())
+    {
+    	// Suche so lange rückwärts, bis ein Tag mit Touren gefunden wird oder es keinen Vortag mehr gibt
+    	HDay previousDaywithTour = day;
+    	do 
+  		{
+    		previousDaywithTour = previousDaywithTour.getPreviousDay();	
+  			if (previousDaywithTour!=null && !previousDaywithTour.isHomeDay()) break;
+  		}
+  		while(previousDaywithTour!=null);
+    	
+    	// Falls kein Vortag mit Tour existiert wird null zurückgegeben
+    	if (previousDaywithTour==null)
+    	{
+    		previousTour = null;
+    	}
+    	// Andernfalls die letzte Tour des Vortags
+    	else
+    	{
+    		previousTour = previousDaywithTour.getLastTourOfDay();
+    	}  	
+    }
+    // Falls nicht wird die vorherige Tour dieses Tages zurückgegeben
+    else
+    {
+    	previousTour = day.getTour(index-1);
+    }
+    return previousTour;
+	}
+	
+	/**
+	 * 
+	 * Gibt die nächste Tour im Pattern zurück
+	 * (erste Tour des Folgetags oder nächste Tour des aktuellen Tags)
+	 * 
+	 * @return
+	 */
+	public HTour getNextTourinPattern()
+	{
+		HTour nextTour;
+		//Prüfe, ob die Tour die letzte Tour des Tages ist
+    if (index == day.getHighestTourIndex())
+    {
+    	// Suche so lange vorwärts, bis ein Tag mit Touren gefunden wird oder es keinen Folgetag mehr gibt
+    	HDay nextDaywithTour = day;
+    	do 
+  		{
+    		nextDaywithTour = nextDaywithTour.getNextDay();	
+  			if (nextDaywithTour!=null && !nextDaywithTour.isHomeDay()) break;
+  		}
+  		while(nextDaywithTour!=null);
+    	
+    	// Falls kein Folgetag mit Tour existiert wird null zurückgegeben
+    	if (nextDaywithTour==null)
+    	{
+    		nextTour = null;
+    	}
+    	// Andernfalls die letzte Tour des Vortags
+    	else
+    	{
+    		nextTour = nextDaywithTour.getFirstTourOfDay();
+    	}  	
+    }
+    // Falls nicht wird die nächste Tour dieses Tages zurückgegeben
+    else
+    {
+    	nextTour = day.getTour(index+1);
+    }
+    return nextTour;
 	}
 
 	/**

@@ -409,7 +409,28 @@ public class ActitoppPerson
 	public Map<String, Double> getAttributesMap() {
 		return attributes;
 	}
+	
+	/**
+	 * Entfernt alle gespeicherten Attribute aus der Map
+	 */
+	public void clearAttributesMap() {
+		attributes.clear();
+	}
+	
+	/**
+	 * Entfernt das gespeicherte WeekPattern von der Person
+	 */
+	public void clearWeekPattern() {
+		weekPattern = null;
+	}
 
+	/**
+	 * Entfernt alle gemeinsamen Aktivitäten anderer Haushaltsmitglieder aus der Liste  
+	 */
+	public void clearJointActivitiesforConsideration()
+	{
+		jointActivitiesforConsideration.clear();
+	}
 
 	/**
 	 * @return the probableshareofjointactions
@@ -417,8 +438,6 @@ public class ActitoppPerson
 	public double getProbableshareofjointactions() {
 		return probableshareofjointactions;
 	}
-
-
 
 	public void calculateProbableshareofjointactions(ModelFileBase fileBase) {
 		
@@ -505,12 +524,11 @@ public class ActitoppPerson
 	 * Methode erzeugt Wochenaktivitätenplan für Person
 	 * 
 	 * @param modelbase
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 * @throws PrerequisiteNotMetException
 	 */
-	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPatternException 
-	{
-		
+	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPersonPatternException, InvalidHouseholdPatternException
+	{		
 		// Erzeuge ein leeres Default-Pattern
 		weekPattern = new HWeekPattern(this);
 		
@@ -565,7 +583,7 @@ public class ActitoppPerson
 				)
 			{
 				activityconflict = true;
-				System.err.println("Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");
+				System.err.println("Person " + getPersIndex() + ": Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");
 				System.err.println("aufzunehmende Akt: " + act);
 				System.err.println("existierende Akt: " + tmpact);
 				break;

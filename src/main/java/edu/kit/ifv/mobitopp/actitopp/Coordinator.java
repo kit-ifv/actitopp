@@ -91,9 +91,9 @@ public class Coordinator
    * @throws FileNotFoundException
    * @throws IOException
    * @throws PrerequisiteNotMetException
-   * @throws InvalidPatternException
+   * @throws InvalidPersonPatternException
    */
-  public void executeModel() throws FileNotFoundException, IOException, InvalidPatternException
+  public void executeModel() throws FileNotFoundException, IOException, InvalidPersonPatternException, InvalidHouseholdPatternException
   {
   	
   	// Durchführung der Modellschritte
@@ -212,11 +212,6 @@ public class Coordinator
    */
   private void addJointActivitiestoPattern()
   {
-  	//TODO DEBUG ONLY
-  	if (person.getPersIndex()==145)
-  		{
-  		System.out.println("hier");
-  		}
 		for (HActivity tmpjointact : person.getAllJointActivitiesforConsideration())
 		{
 			// Infos für die neue, gemeinsame Akt
@@ -718,7 +713,7 @@ public class Coordinator
 	 * @param id_dc
 	 * @param id_mc
 	 */
-	private void executeStep8_MainAct(String id_dc, String id_mc) throws InvalidPatternException
+	private void executeStep8_MainAct(String id_dc, String id_mc) throws InvalidPersonPatternException
 	{
 		
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
@@ -812,7 +807,7 @@ public class Coordinator
 	 * @param id_dc
 	 * @param id_mc
 	 */
-	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPatternException
+	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPersonPatternException
 	{
 		
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
@@ -1157,11 +1152,11 @@ public class Coordinator
 	/**
 	 * 
 	 * @param id
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10B(String id) throws InvalidPatternException
+	private void executeStep10B(String id) throws InvalidPersonPatternException
 	{
 	  // STEP 10b: determine time class for the start of a work/edu tour
 		modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
@@ -1200,11 +1195,11 @@ public class Coordinator
 	/**
 	 * 
 	 * @param id
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10C(String id) throws  InvalidPatternException
+	private void executeStep10C(String id) throws  InvalidPersonPatternException
 	{
 	    // Step 10c: exact start time for the work/edu tour
 	    if (person.isPersonWorkerAndWorkMainToursAreScheduled())
@@ -1249,11 +1244,11 @@ public class Coordinator
 	/**
 	 * 
 	 * @param id
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10D(String id) throws InvalidPatternException
+	private void executeStep10D(String id) throws InvalidPersonPatternException
 	{
 	    // STEP 10d: determine time class for the start of all other main tours
 		for (HDay currentDay : pattern.getDays())
@@ -1293,11 +1288,11 @@ public class Coordinator
 	/**
 	 * 
 	 * @param id
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10E(String id) throws InvalidPatternException
+	private void executeStep10E(String id) throws InvalidPersonPatternException
 	{
 		// Step 10e: exact start time for other main tours
 		modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
@@ -1341,11 +1336,11 @@ public class Coordinator
 
 	/**
 	 * 
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10GH() throws InvalidPatternException
+	private void executeStep10GH() throws InvalidPersonPatternException
 	{
     // Step 10g and Step10h: determine start time class for tours PRIOR to main tour and determine the exact start time
     // the tours MUST be picked in a certain order: first one (earliest tour) first.
@@ -1411,11 +1406,11 @@ public class Coordinator
 	
 	/**
 	 * 
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10JK() throws InvalidPatternException
+	private void executeStep10JK() throws InvalidPersonPatternException
   {
   	// Step 10j and Step 10k: determine start time class for tours POST to main tour and determine the exact start time
     // the tours MUST be picked in a certain order: first one after main tour first.
@@ -1479,7 +1474,8 @@ public class Coordinator
 
 	/**
 	 * 
-	 * Legt die Startzeiten für Touren fest bei denen es bereits festgelegte Startzeiten für Aktivitäten gibt 
+	 * Legt die Startzeiten für Touren fest bei denen es bereits festgelegte Startzeiten für Aktivitäten gibt, 
+	 * bspw. durch bereits festgelegte gemeinsame Aktivitäten von anderen Personen
 	 * 
 	 */
 	private void createTourStartTimesDueToScheduledActivities()
@@ -1494,12 +1490,11 @@ public class Coordinator
 	  	
 	    for (HTour currentTour : currentDay.getTours())
 	    {
-	    		    
 		  	// Führe Schritt nur für Touren aus, die noch keine festgelegte Startzeit haben
 		  	if (!currentTour.isScheduled())
 		    {
 		  		
-		  		// Prüfe, ob es eine Aktivität in der Tour gibt, deren Startzeit bereits festgelegt wurde (bspw. durch gemeinsame Aktivitäten
+		  		// Prüfe, ob es eine Aktivität in der Tour gibt, deren Startzeit bereits festgelegt wurde (bspw. durch gemeinsame Aktivitäten)
 		  		int startTimeDueToScheduledActivities=-1;
 		  		
 	  			int tripdurations=0;
@@ -1508,12 +1503,18 @@ public class Coordinator
 		  		HActivity.sortActivityList(currentTour.getActivities());
 		  		for (HActivity tmpact : currentTour.getActivities())
 		  		{
-	
+		  			/*
+		  			 *  Wenn die Startzeit der Aktivität festgelegt ist, rechne von dem Punkt aus 
+		  			 *  rückwärts und ziehe alle Dauern bisheriger Wege und Aktivitäten in der Tour ab
+		  			 */		  			
 		  			if (tmpact.startTimeisScheduled())
 		  			{
 		  				startTimeDueToScheduledActivities= tmpact.getTripStartTimeBeforeActivity() - tripdurations - activitydurations;
 		  				break;
 		  			}
+		  			/*
+		  			 * Andernfalls addiere die Tour und Aktivitätszeit auf
+		  			 */
 		  			else
 		  			{
 		  				tripdurations += tmpact.getEstimatedTripTimeBeforeActivity();
@@ -1524,9 +1525,9 @@ public class Coordinator
 		  		// Lege Startzeit fest falls durch bereits festgelegte Aktivitäten bestimmt 
 		  		if (startTimeDueToScheduledActivities!=-1)
 		  		{
+		  			// Startzeit der Tour festlegen
 		  			currentTour.setStartTime(startTimeDueToScheduledActivities);   
-		  			
-		        // Setze die Startzeiten der Aktivitäten in dieser Tour
+		  			// Setze die Startzeiten der Aktivitäten in dieser Tour
 		        createStartTimesforActivities(currentTour);
 		  		}
 		    }
@@ -1538,9 +1539,9 @@ public class Coordinator
 	 * 
 	 * @param id
 	 * @param tournrdestages
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
-	private void executeStep10(String id_dc, String id_mc, int tournrdestages) throws InvalidPatternException
+	private void executeStep10(String id_dc, String id_mc, int tournrdestages) throws InvalidPersonPatternException
 	{
 		// Step 10: exact start time for x tour of the day
 		modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
@@ -1626,11 +1627,11 @@ public class Coordinator
 	 * 
 	 * @param id
 	 * @param tournrdestages
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10DC(String id, int tournrdestages) throws InvalidPatternException
+	private void executeStep10DC(String id, int tournrdestages) throws InvalidPersonPatternException
 	{
 	  // STEP 10m: determine time class for the start of the x tour of the day
 		for (HDay currentDay : pattern.getDays())
@@ -1674,11 +1675,11 @@ public class Coordinator
 	 * 
 	 * @param id
 	 * @param tournrdestages
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private void executeStep10MC(String id, int tournrdestages) throws InvalidPatternException
+	private void executeStep10MC(String id, int tournrdestages) throws InvalidPersonPatternException
 	{
 		// Step 10n: exact start time for x tour of the day
 		modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
@@ -1726,9 +1727,9 @@ public class Coordinator
     
 	/**
 	 * 
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
-	private void executeStep10ST() throws InvalidPatternException
+	private void executeStep10ST() throws InvalidPersonPatternException
 	{
     // Step 10s and Step10t: determine home time before tour starts and then define tour start time
 		//											 only for the fourth tour if the day and following
@@ -1927,13 +1928,41 @@ public class Coordinator
 	 * 
 	 * @param act
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
-	private int calculateMaxdurationDueToScheduledActivities(HActivity act) throws InvalidPatternException
+	private int calculateMaxdurationDueToScheduledActivities(HActivity act) throws InvalidPersonPatternException
 	{
-		// Suche die nächste nachfolgende Aktivität, deren Startzeit bereits festgelegt ist
 		HDay dayofact = act.getDay();
 		
+		/*
+		 * Grundidee der Bestimmung der unteren Grenze
+		 * 
+		 * 1. Ausgangspunkt (in absteigender Priorität)
+		 * - Es gibt bereits eine vorhergehende Aktivität mit festgelegter Startzeit am Tag
+		 * - Die letzte Aktivität des Vortags ragt in den aktuellen Tag hinein
+		 * - Anfang des Tages
+		 * 
+		 * 2. Ermittel alle Aktivitätendauern zwischen Tagesanfang / letzter Aktivität und der aktuellen Akt
+		 * 3. Ermittel alle Wegdauern zwischen Tagesanfang / letzter Aktivität und der aktuellen Akt
+		 * 4. Ermittel Puffer für Heimzeiten für alle Touren zwischen Tagesanfang / Tour der letzten Aktivität und der aktuellen Akt
+		 * 
+		 * 
+		 * Grundidee der Bestimmung der oberen Grenze
+		 * 
+		 * 1. Ausgangspunkt (in absteigender Priorität)
+		 * - Es gibt bereits eine nachfolgende Aktivität mit festgelegter Startzeit am Tag
+		 * - Ende des Tages
+		 * 
+		 * Schritte 2-4 analog
+		 */
+		
+		
+		/*
+		 * 1.
+		 * 
+		 * Ermittel die Ausgangspunkte
+		 * 
+		 */
 		HActivity last_act_scheduled = null;
 		HActivity next_act_scheduled = null;
 
@@ -1954,40 +1983,166 @@ public class Coordinator
 				if(tmpact.startTimeisScheduled() && (next_act_scheduled==null || tmpact.getStartTime()<next_act_scheduled.getStartTime())) next_act_scheduled = tmpact;
 			}	
 		}
-				
-		// Addiere alle vorher festgelegten Weg- und Aktivitätendauern
-		int activitydurationsincelastscheduled = countActivityDurationsbetweenActivitiesofOneDay(last_act_scheduled, act);
-		int tripdurationssincelastscheduled = countTripDurationsbetweenActivitiesofOneDay(last_act_scheduled, act);
-		int activitydurationuntilnextscheduled = countActivityDurationsbetweenActivitiesofOneDay(act, next_act_scheduled);
-		int tripdurationsuntilnextscheduled = countTripDurationsbetweenActivitiesofOneDay(act, next_act_scheduled);
 		
-		int endtimelastscheduled=-1;
+		/*
+		 * Bestimme Ausgangspunkt der unteren Grenze
+		 */
+		
+		int ausgangspunktunteregrenze=0;
 		if (last_act_scheduled!=null)
 		{
-			endtimelastscheduled = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR); 
+			ausgangspunktunteregrenze = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR); 
 		}
 		else
 		{
-			endtimelastscheduled = 0;
+			// Prüfe, ob letzte Akt des Vortages in den aktuellen Tag ragt!
+			HDay vortag = dayofact.getPreviousDay();
+			if (vortag!=null && !vortag.isHomeDay())
+			{
+				HActivity letzteaktvortag = vortag.getLastTourOfDay().getLastActivityInTour();
+				if (letzteaktvortag.startTimeisScheduled())
+				{
+					int endeletzteaktvortag = letzteaktvortag.getStartTime() +
+							(letzteaktvortag.durationisScheduled() ? letzteaktvortag.getDuration() : 0) + 
+							(letzteaktvortag.tripAfterActivityisScheduled() ? letzteaktvortag.getEstimatedTripTimeAfterActivity() : 0);
+					if (endeletzteaktvortag>1440) 
+					{
+						ausgangspunktunteregrenze = endeletzteaktvortag-1440;
+					}
+				}
+			}
 		}
-		assert endtimelastscheduled!=-1 : "endtimelastscheduled konnte nicht bestimmt werden!";
+	
+		/*
+		 * Bestimme Ausgangspunkt der oberen Grenze
+		 */	
+
+		int ausgangspunktoberegrenze=0;
+		if (next_act_scheduled!=null)
+		{
+			ausgangspunktoberegrenze = next_act_scheduled.getStartTime(); 
+		}
+		else
+		{
+			ausgangspunktoberegrenze = 1440;
+		}
+	
 		
-		int starttimenextscheduled = (next_act_scheduled == null) ? 1440 : next_act_scheduled.getStartTime();
+		/*
+		 * 2.
+		 * 
+		 * Ermittel die Aktivitätendauern
+		 * 
+		 */
+		
+		int activitydurationsincelastscheduled = countActivityDurationsbetweenActivitiesofOneDay(last_act_scheduled, act);
+		int activitydurationuntilnextscheduled = countActivityDurationsbetweenActivitiesofOneDay(act, next_act_scheduled);
+		
+		/*
+		 * 3.
+		 * 
+		 * Ermittel die Wegdauern
+		 * 
+		 */
+		
+		int tripdurationssincelastscheduled = countTripDurationsbetweenActivitiesofOneDay(last_act_scheduled, act);
+		int tripdurationsuntilnextscheduled = countTripDurationsbetweenActivitiesofOneDay(act, next_act_scheduled);
+	
+		/*
+		 * 4.
+		 * 
+		 * Ermittel die Heimzeitpuffer
+		 * Berücksichtige jeweils 1 Minute pro Heimakt als Mindestpuffer
+		 * 
+		 */
+
+		/*
+		 * Vorher
+		 */
+		int timeforhomeactsincelastscheduled=0;		
+	  if (last_act_scheduled==null)
+		{
+			// Zähle wieviele Touren vor der aktuelle Tour liegen
+	  	timeforhomeactsincelastscheduled += (act.getTour().getIndex() - act.getDay().getLowestTourIndex());
+		}
+		else
+		{
+			// Zähle wieviele Touren zwischen der der letzten festgelegten und der aktuellen liegen
+			timeforhomeactsincelastscheduled += (act.getTour().getIndex() - last_act_scheduled.getTour().getIndex());
+		}
+	  
+	  /*
+	   * Nachher
+	   */
+		int timeforhomeactuntilnextscheduled=0;
+	  if (next_act_scheduled==null)
+		{
+			// Zähle wieviele Touren nach der aktuellen Tour noch kommen
+	  	timeforhomeactuntilnextscheduled += (act.getDay().getHighestTourIndex() - act.getTour().getIndex());
+		}
+		else
+		{
+			// Zähle wieviele Touren zwischen der der nächsten festgelegten und der aktuellen liegen
+			timeforhomeactuntilnextscheduled += (next_act_scheduled.getTour().getIndex() - act.getTour().getIndex());
+		}
+	  
+		
+		
+//TODO Aufräumen		
+/*		
+		HActivity last_act_scheduled2 = act;
+
+		// Suche letzte festgelegte Aktivität im Pattern
+		do 
+		{
+			last_act_scheduled2 = last_act_scheduled2.getPreviousOutOfHomeActivityinPattern();	
+			if (last_act_scheduled2!=null && last_act_scheduled2.startTimeisScheduled()) break;
+		}
+		while(last_act_scheduled2!=null);
+		
+		// Prüfen, ob diese Aktivität ggf. in den aktuellen Tag reinragt
+		int boundaryoflastactscheduled=0;
+		if (last_act_scheduled2!=null)
+		{
+			int weektimeboundaryoflastactscheduled = last_act_scheduled2.getStartTimeWeekContext() + 
+																	(last_act_scheduled2.durationisScheduled() ? last_act_scheduled2.getDuration() : 0) + 
+																	(last_act_scheduled2.tripAfterActivityisScheduled() ? last_act_scheduled2.getEstimatedTripTimeAfterActivity() : 0);
+			int dayofboundary = boundaryoflastactscheduled/1440;
+			if (dayofboundary == dayofact.getIndex())
+			{
+				boundaryoflastactscheduled = weektimeboundaryoflastactscheduled % 1440;
+			}
+		}
+	*/	
+
+		
+		/*
+		 * 5.
+		 * 
+		 * Bestimme Schranken und maximale Dauern
+		 * 
+		 */
+	  
+	  //DEBUG ONLY
+	  if (person.getPersIndex()==151 && act.getTour().getDay().getIndex()==4)
+	  {
+	  	System.out.println("H");
+	  }
+		
 		
 		// Bestimme obere und untere Schranken
-		int lowerbound = endtimelastscheduled + activitydurationsincelastscheduled + tripdurationssincelastscheduled;
-		int upperbound = starttimenextscheduled - activitydurationuntilnextscheduled - tripdurationsuntilnextscheduled;
+		int lowerbound = ausgangspunktunteregrenze + activitydurationsincelastscheduled + tripdurationssincelastscheduled + timeforhomeactsincelastscheduled;
+		int upperbound = ausgangspunktoberegrenze - activitydurationuntilnextscheduled - tripdurationsuntilnextscheduled + timeforhomeactuntilnextscheduled;
 		
 		int maxduration = upperbound - lowerbound;
     // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
     if (upperbound<lowerbound)
     {
     	String errorMsg = "Duration Bounds incompatible Tour " + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPatternException(pattern, errorMsg);
+    	throw new InvalidPersonPatternException(pattern, errorMsg);
     }
 		
 		return maxduration;
-	
 	}
 	
 	private int getDurationTimeClassforExactDuration (int maxduration)
@@ -2102,9 +2257,9 @@ public class Coordinator
 	 * @param tour
 	 * @param categories
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
-	private int[] calculateBoundsForHomeTime(HTour tour, boolean categories) throws InvalidPatternException
+	private int[] calculateBoundsForHomeTime(HTour tour, boolean categories) throws InvalidPersonPatternException
   {
 		HDay tourday = tour.getDay();
 		
@@ -2161,7 +2316,7 @@ public class Coordinator
     if (upperbound<lowerbound)
     {
     	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPatternException(pattern, errorMsg);
+    	throw new InvalidPersonPatternException(pattern, errorMsg);
     }
 
     // Zeitklassen falls erforderlich
@@ -2187,7 +2342,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
     }
       
@@ -2215,9 +2370,9 @@ public class Coordinator
 	 * @param categories
 	 * @param tour
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
-	private int[] calculateStartingBoundsForTours(HTour tour, boolean categories) throws InvalidPatternException
+	private int[] calculateStartingBoundsForTours(HTour tour, boolean categories) throws InvalidPersonPatternException
 	{
 		// lowerbound startet mit 1 - upperbound mit 1440 (0 Uhr nächster Tag)
 	  int lowerbound = 1;
@@ -2225,6 +2380,8 @@ public class Coordinator
 	  
 	  int lowercat = -1;
 	  int uppercat = -1;
+	  
+
 	  
 	  HDay tourday = tour.getDay();
 	          
@@ -2244,7 +2401,8 @@ public class Coordinator
 	  	// Sobald eine bereits geplante Tour gefunden wurde wird von diesem Punkt ausgegangen die obere Grenze berechnet
 	  	if (tmptour.isScheduled())
 	  	{
-	  		upperbound = tmptour.getStartTime() - tmptourdurations;
+	  		// -1 um noch einen Puffer von min. 1 Minute für Heimaktivität zu ermöglichen
+	  		upperbound = tmptour.getStartTime() - tmptourdurations - 1;
 	  		break;
 	  	}
 	  	// Sollte die Tour noch nicht verplant sein wird die Dauer der Tour in die Grenzenberechnung mit einbezogen
@@ -2265,7 +2423,7 @@ public class Coordinator
 	  if (upperbound<lowerbound)
 	  {
 	  	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	  	throw new InvalidPatternException(pattern, errorMsg);
+	  	throw new InvalidPersonPatternException(pattern, errorMsg);
 	  }
 	
 	  // Zeitklassen für erste Tour des Tages
@@ -2308,7 +2466,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
 	  }
 	    
@@ -2385,10 +2543,10 @@ public class Coordinator
 	 * @param day
 	 * @param tour
 	 * @param modelstep
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
-	private void modifyAlternativesForStep10B(HDay day, HTour tour, DefaultDCModelStep modelstep) throws InvalidPatternException
+	private void modifyAlternativesForStep10B(HDay day, HTour tour, DefaultDCModelStep modelstep) throws InvalidPersonPatternException
 	{
 		// Bestimme die Grenzen auf Basis bereits festgelegter Aktivitätszeiten
 	  int bounds[] = calculateStartingBoundsForMainTours(day, true);
@@ -2462,10 +2620,10 @@ public class Coordinator
    * @param day
    * @param tour
    * @return
-   * @throws InvalidPatternException
+   * @throws InvalidPersonPatternException
    */
 	@Deprecated
-  private int[] calculateStartingBoundsForTours(HDay day, HTour tour, boolean categories) throws InvalidPatternException
+  private int[] calculateStartingBoundsForTours(HDay day, HTour tour, boolean categories) throws InvalidPersonPatternException
   {
   	// lowerbound startet mit 1 - upperbound mit 1440 (0 Uhr nächster Tag)
     int lowerbound = 1;
@@ -2491,7 +2649,7 @@ public class Coordinator
     if (upperbound<lowerbound)
     {
     	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPatternException(pattern, errorMsg);
+    	throw new InvalidPersonPatternException(pattern, errorMsg);
     }
 
     // Zeitklassen für erste Tour des Tages
@@ -2534,7 +2692,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
     }
       
@@ -2561,10 +2719,10 @@ public class Coordinator
    * @param categories
    * @param day
    * @return
-   * @throws InvalidPatternException
+   * @throws InvalidPersonPatternException
    */
   @Deprecated
-  private int[] calculateStartingBoundsForMainTours(HDay day, boolean categories) throws InvalidPatternException
+  private int[] calculateStartingBoundsForMainTours(HDay day, boolean categories) throws InvalidPersonPatternException
   {
   	// lowerbound startet mit 0 - upperbound mit 1619 (2h59 nachts nächster Tag)
     int lowerbound = 0;
@@ -2599,7 +2757,7 @@ public class Coordinator
     if (upperbound<lowerbound)
     {
     	String errorMsg = "MainTours: UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPatternException(pattern, errorMsg);
+    	throw new InvalidPersonPatternException(pattern, errorMsg);
     }
 
     if(categories)
@@ -2621,7 +2779,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "MainTours: Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
     }
     
@@ -2649,12 +2807,12 @@ public class Coordinator
 	 * @param tour
 	 * @param categories
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
   @Deprecated
-	private int[] calculateStartingBoundsForPreTours(HDay day, HTour tour, boolean categories) throws InvalidPatternException
+	private int[] calculateStartingBoundsForPreTours(HDay day, HTour tour, boolean categories) throws InvalidPersonPatternException
 	{  
-		HTour previousTour = tour.getPreviousTour();
+		HTour previousTour = tour.getPreviousTourinPattern();
     int lowerbound = 0;
     int upperbound = 0;
     int preTourTime = 0;
@@ -2695,7 +2853,7 @@ public class Coordinator
     if (upperbound<lowerbound)
     {
     	String errorMsg = "PreTours: UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPatternException(pattern, errorMsg);
+    	throw new InvalidPersonPatternException(pattern, errorMsg);
     }
     
     // Setze die Zeiten in Kategorien um
@@ -2717,7 +2875,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "PreTours: Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
     }
 	    
@@ -2745,12 +2903,12 @@ public class Coordinator
 	 * @param tour
 	 * @param categories
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
   @Deprecated
-	private int[] calculateStartingBoundsForPostTours(HDay day, HTour tour, boolean categories) throws InvalidPatternException
+	private int[] calculateStartingBoundsForPostTours(HDay day, HTour tour, boolean categories) throws InvalidPersonPatternException
 	{		
-		HTour previousTour = tour.getPreviousTour();
+		HTour previousTour = tour.getPreviousTourinPattern();
     int lowerbound = 0;
     int upperbound = 0;
     int preTourTime = 0;
@@ -2773,7 +2931,7 @@ public class Coordinator
     if (upperbound<lowerbound)
     {
     	String errorMsg = "PostTours: UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPatternException(pattern, errorMsg);
+    	throw new InvalidPersonPatternException(pattern, errorMsg);
     }
 
     // Setze die Zeiten in Kategorien um
@@ -2795,7 +2953,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "PostTours: Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
     }
     
@@ -2820,11 +2978,11 @@ public class Coordinator
 	 * @param tour
 	 * @param categories
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
 	@Deprecated
 	@SuppressWarnings({"unused"})
-	private int[] calculateBoundsForHomeTime(HDay day, HTour tour, boolean categories) throws InvalidPatternException
+	private int[] calculateBoundsForHomeTime(HDay day, HTour tour, boolean categories) throws InvalidPersonPatternException
 	{
 		// lowerbound startet mit 1 - upperbound mit 1440 (maximale Heimzeit)
 	  int lowerbound = 1;
@@ -2855,7 +3013,7 @@ public class Coordinator
 	  if (upperbound<lowerbound)
 	  {
 	  	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	  	throw new InvalidPatternException(pattern, errorMsg);
+	  	throw new InvalidPersonPatternException(pattern, errorMsg);
 	  }
 	
 	  // Zeitklassen falls erforderlich
@@ -2881,7 +3039,7 @@ public class Coordinator
 	    if (uppercat==-1 || lowercat==-1)
 	    {
 	    	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : Could not identify categories - UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-	    	throw new InvalidPatternException(pattern, errorMsg);
+	    	throw new InvalidPersonPatternException(pattern, errorMsg);
 	    }
 	  }
 	    
@@ -2967,13 +3125,15 @@ public class Coordinator
     if (!tourisFreeofGaps(acttour)) System.err.println("Tour hat Lücken! " + acttour);
   }
   
-  
+
   /**
    * 
    * Methode erzeugt Home-Aktivitäten zwischen den Touren
    * 
+   * @param allmodeledActivities
+   * @throws InvalidPersonPatternException
    */
-  private void createHomeActivities(List<HActivity> allmodeledActivities)
+  private void createHomeActivities(List<HActivity> allmodeledActivities) throws InvalidPersonPatternException, InvalidHouseholdPatternException
   {
   	char homeact = 'H';
   	
@@ -3004,6 +3164,26 @@ public class Coordinator
     			
     			// Bestimme Puffer
     			int duration2 = start_next_tour - ende_tour;
+    			if (duration2<=0) 
+    			{
+    				/*
+    				 * Prüfe, ob die letzte Akt der Tour und die erste Akt der nächsten Tour über gemeinsame Aktivitäten hinzugefügt wurden
+    				 *  Falls ja, wird der gesamte Haushalt neu modelliert, da über Neumodellierung der Person kein Erfolg erzielt werden kann.
+    				 */
+    				if (acttour.getLastActivityInTour().getCreatorPersonIndex() != person.getPersIndex() && 
+    						nexttour.getFirstActivityInTour().getCreatorPersonIndex() != person.getPersIndex())
+    				{
+    					throw new InvalidHouseholdPatternException(pattern, "keine Zeit für Heimaktivität zwischen Touren " + acttour + " " + nexttour);
+    				}
+    				/*
+    				 * Ansonsten modelliere nur die Person neu, da durch neue Zufallszahl eine der Konfliktaktivitäten ggf. zeitliche korrekt modelliert werden kann.
+    				 */
+    				else
+    				{
+    					//TODO Aktivieren
+    				// throw new InvalidPersonPatternException(pattern, "keine Zeit für Heimaktivität zwischen Touren " + acttour + " " + nexttour);
+    				}
+    			}
     			assert duration2>0 : "Fehler - keine Home-Aktivität nach Ende der Tour möglich! - " + start_next_tour + " // " + ende_tour;
     			// Bestimme zugehörigen Tag zu der Heimaktivität
     			int day = (int) ende_tour/1440;
@@ -3142,9 +3322,9 @@ public class Coordinator
 	 * 
 	 * @param weekpattern
 	 * @return
-	 * @throws InvalidPatternException
+	 * @throws InvalidPersonPatternException
 	 */
-	private boolean weekPatternisFreeofOverlaps(HWeekPattern weekpattern) throws InvalidPatternException
+	private boolean weekPatternisFreeofOverlaps(HWeekPattern weekpattern) throws InvalidPersonPatternException
 	{
 		boolean freeofOverlaps=true;
 	
@@ -3159,7 +3339,7 @@ public class Coordinator
       if (aktuelleakt.checkOverlappingtoOtherActivity(naechsteakt)) 
       {
       	freeofOverlaps = false;
-      	throw new InvalidPatternException(weekpattern, "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt);
+      	throw new InvalidPersonPatternException(weekpattern, "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt);
       }
     }
     return freeofOverlaps;
