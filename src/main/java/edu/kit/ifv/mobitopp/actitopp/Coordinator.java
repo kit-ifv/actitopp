@@ -101,6 +101,7 @@ public class Coordinator
     // Gemeinsame Aktivitäten
     if (Configuration.model_joint_actions) 
     {
+    	processJointActivities();
     	addJointActivitiestoPattern();
     }
   	
@@ -203,6 +204,93 @@ public class Coordinator
 
   }
   
+  private void processJointActivities()
+  {
+  	
+  	/*
+  	 * Idee:
+  	 * 
+  	 * - Prüfe die Liste der gemeinsamen Aktivitäten auf zeitliche Überschneidungen, d.h. Konflikte
+  	 * - Entferne Konfliktaktivitäten
+  	 * - Bestimme untere Grenzen für die Anzahl an Touren und Aktivitäten an jedem Tag basierend auf der Liste gemeinsamer Aktivitäten
+  	 * 
+  	 * - Modelliere Anzahl an Touren und Aktivitäten 
+  	 * 		- Es muss an jedem Tag mit gemeinsamen Aktivitäten mindestens eine Tour geben!
+  	 * 		- Bei mehr als 2 gemeinsamen Aktivitäten mindestens 2 Touren!
+  	 * 		- Es gibt für Haupt- und Vorheraktivitätenzahl keine Mindestanzahlen. Aktualisiere die Zahl der bereits modellierten Aktivitäten
+  	 * 		  und lege die Grenze nur bei den Nachheraktivitäten fest. Bei mehreren Touren auf jede Tour aufteilen!
+  	 * 
+  	 * - Nach Schritt 6: Aktivitäten platzieren
+  	 * 
+  	 * Regelbasiert:
+  	 * - Wenn Tourindex der ursprünglichen Aktivität vorhanden ist, dann füge Sie in diese Tour ein
+  	 * - Wenn Aktindex der urspünglichen Aktivität in der Tour vorhanden ist, füge Sie an dem Platz ein	
+  	 * 
+  	 * - Wenn Tour oder Aktindex noch nicht vorhanden sind, nehme den nächstgelegenen Index, der noch nicht durch gemeinsame Akt belegt ist
+  	 * 		Bsp. einzufügende Akt ist 1/1/3, höchster Index ist aber 1/1/2, dann ersetze Akt 1/1/2 mit der gemeinsamen Akt
+  	 * 
+  	 * - Gemeinsame Akt mit Typ 1 oder 3 von zuhause aus muss immer erste Akt in Tour sein, auch bei eingefügter Tour	
+  	 * 
+  	 */
+  	
+ //TODO Methode zum eliminieren von Überschneidungen in ActitoppPerson.java überführen
+  	
+  	/*
+  	 * Eliminiere sich überschneidende Aktivitäten
+  	 */
+  	List<HActivity> listgemakt = person.getAllJointActivitiesforConsideration();
+  	HActivity.sortActivityListInWeekOrder(listgemakt);
+  	
+  	List<HActivity> listgemaktohnekonflikte = new ArrayList<HActivity>();
+
+  	// Durlaufe die ursprüngliche Liste und füge Sie in die konfliktfreie ein, falls keine Konflikte vorliegen
+  	for (HActivity act : listgemakt)
+  	{
+  		boolean aktistkonfliktfrei=true;
+  		for(HActivity tmpact : listgemaktohnekonflikte)
+  		{
+  			if (act.checkOverlappingtoOtherActivity(tmpact)) 
+  			{
+  				System.err.println("Conflicting: " + act);
+  				aktistkonfliktfrei=false;
+  			}
+  		}
+  		if (aktistkonfliktfrei) listgemaktohnekonflikte.add(act);
+  	}
+  	
+  	/*
+  	 * Bestimme Mindestzahl an Touren und Aktivitäten basierend auf den bereits vorhandenen gemeinsamen Aktivitäten
+  	 */
+  	
+  	int[] numberofactbounds = {0,0,0,0,0,0,0};
+  	int[] numberoftourbounds = {0,0,0,0,0,0,0};
+
+  	
+  	for (HActivity act : listgemaktohnekonflikte)
+  	{
+  		// Zähle Anzahl der Aktivitäten hoch
+  		numberofactbounds[act.getIndexDay()] += 1;
+  		
+  		// Bestimme Mindestzahl an Touren
+  		// Bei max. 2 Aktivitäten nur eine Tour mindestens
+  		if (numberofactbounds[act.getIndexDay()] <= 2) 
+  		{
+  			numberoftourbounds[act.getIndexDay()] = 1;
+  		}
+  		// Bei mehr als 2 Aktivitäten mindestens zwei Touren
+  		else
+  		{
+  			numberoftourbounds[act.getIndexDay()] = 2;
+  		}
+  	}
+  
+  	System.out.println("");
+  	
+  }
+  
+  
+  
+  
   
   /**
    * 
@@ -228,9 +316,8 @@ public class Coordinator
 			int activitytripdurationbefore = tmpjointact.getEstimatedTripTimeBeforeActivity();
 			
 							
-      // Hole Referenz auf Tour oder füge die Tour in das Pattern ein, falls sie noch nicht existiert
+      // Hole Referenz auf Tag und Tour oder erzeuge Sie neu falls noch nicht existent
       HDay currentDay = pattern.getDay(indexday);
-      
       HTour oneTour;
 			if (currentDay.existsTour(tourindex))
 			{
@@ -239,7 +326,6 @@ public class Coordinator
 			else
 			{
 				oneTour = new HTour(currentDay, tourindex);
-				currentDay.addTour(oneTour);
 			}
                 
       // Füge die Aktivität in das Pattern ein
@@ -319,6 +405,7 @@ public class Coordinator
 			
 			if (konfliktfrei)
 			{
+				if (!currentDay.existsTour(tourindex)) currentDay.addTour(oneTour);			
 				oneTour.addActivity(activity);
 			}
 			else
@@ -452,6 +539,9 @@ public class Coordinator
         
         if (tour!=null) currentDay.addTour(tour);
       }
+    
+    HTour.sortTourList(currentDay.getTours());
+      
     }
 	}
 
@@ -552,6 +642,8 @@ public class Coordinator
           
           if (act!=null) currentTour.addActivity(act);
         }
+        
+        HActivity.sortActivityList(currentTour.getActivities());
       }
     }
 	}
@@ -713,7 +805,7 @@ public class Coordinator
 	 * @param id_dc
 	 * @param id_mc
 	 */
-	private void executeStep8_MainAct(String id_dc, String id_mc) throws InvalidPersonPatternException
+	private void executeStep8_MainAct(String id_dc, String id_mc) throws InvalidPersonPatternException, InvalidHouseholdPatternException
 	{
 		
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
@@ -807,7 +899,7 @@ public class Coordinator
 	 * @param id_dc
 	 * @param id_mc
 	 */
-	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPersonPatternException
+	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPersonPatternException, InvalidHouseholdPatternException
 	{
 		
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
@@ -1930,7 +2022,7 @@ public class Coordinator
 	 * @return
 	 * @throws InvalidPersonPatternException
 	 */
-	private int calculateMaxdurationDueToScheduledActivities(HActivity act) throws InvalidPersonPatternException
+	private int calculateMaxdurationDueToScheduledActivities(HActivity act) throws InvalidPersonPatternException, InvalidHouseholdPatternException
 	{
 		HDay dayofact = act.getDay();
 		
@@ -1940,7 +2032,7 @@ public class Coordinator
 		 * 1. Ausgangspunkt (in absteigender Priorität)
 		 * - Es gibt bereits eine vorhergehende Aktivität mit festgelegter Startzeit am Tag
 		 * - Die letzte Aktivität des Vortags ragt in den aktuellen Tag hinein
-		 * - Anfang des Tages
+		 * - Anfang des Tages (1 Minute Puffer für Heimzeiten)
 		 * 
 		 * 2. Ermittel alle Aktivitätendauern zwischen Tagesanfang / letzter Aktivität und der aktuellen Akt
 		 * 3. Ermittel alle Wegdauern zwischen Tagesanfang / letzter Aktivität und der aktuellen Akt
@@ -1988,7 +2080,7 @@ public class Coordinator
 		 * Bestimme Ausgangspunkt der unteren Grenze
 		 */
 		
-		int ausgangspunktunteregrenze=0;
+		int ausgangspunktunteregrenze=1;
 		if (last_act_scheduled!=null)
 		{
 			ausgangspunktunteregrenze = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR); 
@@ -2085,36 +2177,6 @@ public class Coordinator
 			// Zähle wieviele Touren zwischen der der nächsten festgelegten und der aktuellen liegen
 			timeforhomeactuntilnextscheduled += (next_act_scheduled.getTour().getIndex() - act.getTour().getIndex());
 		}
-	  
-		
-		
-//TODO Aufräumen		
-/*		
-		HActivity last_act_scheduled2 = act;
-
-		// Suche letzte festgelegte Aktivität im Pattern
-		do 
-		{
-			last_act_scheduled2 = last_act_scheduled2.getPreviousOutOfHomeActivityinPattern();	
-			if (last_act_scheduled2!=null && last_act_scheduled2.startTimeisScheduled()) break;
-		}
-		while(last_act_scheduled2!=null);
-		
-		// Prüfen, ob diese Aktivität ggf. in den aktuellen Tag reinragt
-		int boundaryoflastactscheduled=0;
-		if (last_act_scheduled2!=null)
-		{
-			int weektimeboundaryoflastactscheduled = last_act_scheduled2.getStartTimeWeekContext() + 
-																	(last_act_scheduled2.durationisScheduled() ? last_act_scheduled2.getDuration() : 0) + 
-																	(last_act_scheduled2.tripAfterActivityisScheduled() ? last_act_scheduled2.getEstimatedTripTimeAfterActivity() : 0);
-			int dayofboundary = boundaryoflastactscheduled/1440;
-			if (dayofboundary == dayofact.getIndex())
-			{
-				boundaryoflastactscheduled = weektimeboundaryoflastactscheduled % 1440;
-			}
-		}
-	*/	
-
 		
 		/*
 		 * 5.
@@ -2124,7 +2186,7 @@ public class Coordinator
 		 */
 	  
 	  //DEBUG ONLY
-	  if (person.getPersIndex()==151 && act.getTour().getDay().getIndex()==4)
+	  if (person.getPersIndex()==517 && act.getIndexDay()==6 && act.getTour().getIndex()==0 && act.getIndex()==3)
 	  {
 	  	System.out.println("H");
 	  }
@@ -2138,8 +2200,17 @@ public class Coordinator
     // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
     if (upperbound<lowerbound)
     {
-    	String errorMsg = "Duration Bounds incompatible Tour " + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
-    	throw new InvalidPersonPatternException(pattern, errorMsg);
+    	if (next_act_scheduled!= null && next_act_scheduled.getCreatorPersonIndex()!=person.getPersIndex() && 
+    			last_act_scheduled!=null && last_act_scheduled.getCreatorPersonIndex()!=person.getPersIndex())
+    	{
+    		String errorMsg = "Duration Bounds incompatible Act (Household Exception) " + act.getIndexDay() + "/" + act.getTour().getIndex() + "/" + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+    		throw new InvalidHouseholdPatternException(pattern, errorMsg);
+    	}
+    	else
+    	{
+    		String errorMsg = "Duration Bounds incompatible Act (Person Exception) " + act.getIndexDay() + "/" + act.getTour().getIndex() + "/" + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+    		throw new InvalidPersonPatternException(pattern, errorMsg);
+    	}
     }
 		
 		return maxduration;
@@ -2297,19 +2368,7 @@ public class Coordinator
  	  
  	  // Upperbound wird zusätzlich durch das Ende der vorherigen Tour (= schon verbrauchte Zeit) bestimmt
     upperbound -= tourday.getTour(tour.getIndex()-1).getEndTime();
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+       
     
           
     // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
@@ -2374,58 +2433,166 @@ public class Coordinator
 	 */
 	private int[] calculateStartingBoundsForTours(HTour tour, boolean categories) throws InvalidPersonPatternException
 	{
-		// lowerbound startet mit 1 - upperbound mit 1440 (0 Uhr nächster Tag)
-	  int lowerbound = 1;
-	  int upperbound = 1440;
-	  
-	  int lowercat = -1;
-	  int uppercat = -1;
-	  
 
-	  
+		/*
+		 * Grundidee der Bestimmung der unteren Grenze
+		 * 
+		 * 1. Ausgangspunkt (in absteigender Priorität)
+		 * - Die Tour ist nicht die erste Tour des Tages -> Es gibt bereits die Endezeit der vorhergehenden Tour + 1
+		 * - Die letzte Aktivität des Vortags ragt in den aktuellen Tag hinein
+		 * - Anfang des Tages
+		 * 
+		 * 
+		 * Grundidee der Bestimmung der oberen Grenze
+		 * 
+		 * 1. Ausgangspunkt (in absteigender Priorität)
+		 * - Prüfe, ob es bereits eine weitere geplante Anfangszeit einer Tour im Tagesverlauf gibt
+		 * - Prüfe, ob es am nächsten Tag bis 3 Uhr morgens schon eine geplante Aktivität gibt
+		 * - 3 Uhr Nachts des Folgetages als spätestens Ende der Tour = 1620
+		 * 
+		 * 2. Alle noch geplanten Touren inkl. aller Aktivitäts- und Wegzeiten abziehen zwischen Tagesende bzw. nächster geplanter Tour
+		 * 3. Puffer für Heimaktivitäten zwischen den Touren
+		 * 
+		 */
+		  
 	  HDay tourday = tour.getDay();
-	          
+	 
+	  int lowercat = -1;
+	  int uppercat = -1; 
+	  
+	  //TODO DEBUG ONLY
+	  if (person.getPersIndex()==2 && tourday.getIndex()==1 && tour.getIndex()==-1)
+	  {
+	  	System.out.println("H");
+	  }
+		/*
+		 * 
+		 * untere Grenze
+		 * 
+		 */
+
+	  int basisunteregrenze = 1;
+	 
+	  
 	  // Falls es sich nicht um die erste Tour des Tages handelt, wird lowerbound durch das Ende der vorhergehenden Tour bestimmt
 	  if (tour.getIndex() != tourday.getLowestTourIndex())
 	  {
-	  	lowerbound = tourday.getTour(tour.getIndex()-1).getEndTime() + 1;
+	  	basisunteregrenze = tourday.getTour(tour.getIndex()-1).getEndTime() + 1;
+	  }
+	  // Ansonsten prüfe, ob letzte Aktivität des Vortags noch in den aktuellen Tag ragt
+	  else
+	  {
+			// Prüfe, ob letzte Akt des Vortages in den aktuellen Tag ragt!
+			HDay vortag = tourday.getPreviousDay();
+			if (vortag!=null && !vortag.isHomeDay())
+			{
+				HActivity letzteaktvortag = vortag.getLastTourOfDay().getLastActivityInTour();
+				if (letzteaktvortag.startTimeisScheduled())
+				{
+					int endeletzteaktvortag = letzteaktvortag.getStartTime() +
+							(letzteaktvortag.durationisScheduled() ? letzteaktvortag.getDuration() : 0) + 
+							(letzteaktvortag.tripAfterActivityisScheduled() ? letzteaktvortag.getEstimatedTripTimeAfterActivity() : 0);
+					if (endeletzteaktvortag>1440) 
+					{
+						basisunteregrenze = endeletzteaktvortag-1440;
+					}
+				}
+			}
 	  }
 	  
+
+		/*
+		 * 
+		 * obere Grenze
+		 * 
+		 */
+
+	  /*
+	   * 1. Ausgangspunkt
+	   */
+	  int basisoberegrenze = 1620;
+	  HTour nexttourscheduled=null;
 	  
-	  // Bestimme obere Grenze basierend auf bereits festgelegten Startzeitpunkten der im weiteren Tagesverlauf folgenden Touren
-	  int tmptourdurations = 0;
-	  for (int i = tour.getIndex(); i <= tourday.getHighestTourIndex(); i++)
+	  //Prüfe, ob es im Tagesverlauf noch weitere geplante Touren gibt
+	  for (int i = tour.getIndex()+1; i <= tourday.getHighestTourIndex(); i++)
 	  {
 	  	HTour tmptour = tourday.getTour(i);
-	  	
 	  	// Sobald eine bereits geplante Tour gefunden wurde wird von diesem Punkt ausgegangen die obere Grenze berechnet
 	  	if (tmptour.isScheduled())
 	  	{
-	  		// -1 um noch einen Puffer von min. 1 Minute für Heimaktivität zu ermöglichen
-	  		upperbound = tmptour.getStartTime() - tmptourdurations - 1;
+	  		nexttourscheduled=tmptour;
+	  		basisoberegrenze = tmptour.getStartTime();
 	  		break;
 	  	}
-	  	// Sollte die Tour noch nicht verplant sein wird die Dauer der Tour in die Grenzenberechnung mit einbezogen
-	  	else
-	  	{
-	  		// +1 um jeweils nach der Tour noch eine Heimaktivität von min. einer Minute zu ermöglichen
-	  		tmptourdurations += tmptour.getTourDuration() + 1;
-	  	}
-	  	// Falls Schleife bis zur letzten Tour läuft gibt es keine festgelegten Startzeiten und die Obergrenze kann basierend auf den Tourdauern bestimmt werden
-	  	if (tmptour.getIndex()==tourday.getHighestTourIndex())
-	  	{
-	  		upperbound = upperbound - tmptourdurations;
-	  	}
 	  }
+	  // Prüfe, ob am Folgetag bis 3 Uhr nachts bereits die erste Aktivität geplant ist, falls keine weitere geplante Tour an diesem Tag
+	  if (nexttourscheduled==null)
+	  {
+	  	HDay folgetag = tourday.getNextDay();
+	  	if (folgetag!=null && !folgetag.isHomeDay())
+			{
+				HActivity ersteaktfolgetag = folgetag.getFirstTourOfDay().getFirstActivityInTour();
+				if (ersteaktfolgetag.startTimeisScheduled())
+				{
+					int startersteaktfolgetag = ersteaktfolgetag.getStartTime() -
+							(ersteaktfolgetag.tripBeforeActivityisScheduled() ? ersteaktfolgetag.getEstimatedTripTimeBeforeActivity() : 0);
+					if (startersteaktfolgetag<180) 
+					{
+						basisoberegrenze = 1439 + startersteaktfolgetag;
+					}
+				}
+			}	  						
+	  }
+	  
+	  
+	  /*
+	   * 2. Aktivitäts- und Wegzeiten bis Tagesende / nächster geplanter Tour
+	   * 3. Heimzeitpuffer
+	   */
+	  int tmptourdurations = 0;
+	  int heimzeitpuffer = 0;
+	  int tourindexfuersuche;
+	  // Bestimme, bis zu welcher Tour die Dauern gezählt werden
+	  if(nexttourscheduled!=null)
+	  {
+	  	// Falls nächste Tour bekannt ist, werden alle Touren bis dahin gezählt
+	  	tourindexfuersuche = nexttourscheduled.getIndex()-1;
+	  }
+	  else
+	  {
+	  	// Falls nächste Tour nicht bekannt ist, werden alle restlichen Touren des Tages gezählt
+	  	tourindexfuersuche = tourday.getHighestTourIndex();
+	  }
+	  for (int i = tour.getIndex(); i <= tourindexfuersuche; i++)
+	  {
+	  	HTour tmptour = tourday.getTour(i);
+	  	tmptourdurations += tmptour.getTourDuration();
+	  	
+	  	heimzeitpuffer += 1;
+	  }
+	  
+	  
+	  /*
+	   * 
+	   * Grenzen bestimmen und falls notwendig Kategorien bilden
+	   * 
+	   */
+	  
+	  int lowerbound = basisunteregrenze;
+	  int upperbound = basisoberegrenze - tmptourdurations - heimzeitpuffer;
+	  
+	  // UpperBound falls notwendig auf 1439 kürzen, da keine späteren Anfangszeiten  möglich
+	  if (upperbound>1439) upperbound=1439;
 	  
 	        
 	  // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
 	  if (upperbound<lowerbound)
 	  {
-	  	String errorMsg = "TourStartTimes Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
+	  	String errorMsg = "TourStartTimes Tour " + tourday.getIndex() + "/" + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
 	  	throw new InvalidPersonPatternException(pattern, errorMsg);
 	  }
 	
+	  
 	  // Zeitklassen für erste Tour des Tages
 	  if(categories && tour.getIndex()== tourday.getLowestTourIndex())
 	  {
@@ -2443,7 +2610,7 @@ public class Coordinator
 	      }
 	    }
 	
-	    // Zeitklassen für zweite und dritte Tour des Tages
+	  // Zeitklassen für zweite und dritte Tour des Tages
 	  if(categories && tour.getIndex()!= tourday.getLowestTourIndex())
 	  {
 	    // Setze die Zeiten in Kategorien um

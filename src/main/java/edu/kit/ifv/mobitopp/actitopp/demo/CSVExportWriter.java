@@ -133,7 +133,7 @@ public class CSVExportWriter
 		// Zweck
 		rueckgabe += act.getType() + ";";
 		// joint Status
-		rueckgabe += act.getJointStatus() + "";
+		rueckgabe += (Configuration.model_joint_actions ? act.getJointStatus(): "-99") + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		
@@ -174,7 +174,7 @@ public class CSVExportWriter
 		// Zweck
 		rueckgabe += act.getType() + ";";
 		// jointStatus
-		rueckgabe += act.getJointStatus() + "";
+		rueckgabe += (Configuration.model_joint_actions ? act.getJointStatus(): "-99") + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		
@@ -215,7 +215,7 @@ public class CSVExportWriter
 		// Zweck ist hier immer HOME, da letzter Weg in Tour nach Hause
 		rueckgabe += "H" + ";";
 		// jointStatus - aktuell immer 4 (keine Gemeinsamkeit, da Gemeinsamkeiten bei NachHause Wegen noch nicht modelliert werden!
-		rueckgabe += "4" + "";
+		rueckgabe += (Configuration.model_joint_actions ? "4": "-99") + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		

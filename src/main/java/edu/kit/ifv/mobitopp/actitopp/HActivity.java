@@ -282,43 +282,30 @@ public class HActivity
   {
   	assert actList != null : "Liste zum Sortieren ist leer";
   	
-      Collections.sort(actList, new Comparator<HActivity>()
-      {
-
-          @Override
-          public int compare(HActivity act1, HActivity act2)
-          {
-              
-              if(act1.getWeekDay() < act2.getWeekDay())
-              {
-                  return -1;
-              }
-              else if (act1.getWeekDay() == act2.getWeekDay())
-              {
-                  if(act1.getStartTime() < act2.getStartTime())
-                  {
-                      return -1;
-                  }
-                  else if(act1.getStartTime() == act2.getStartTime())
-                  {
-                      return 0;
-                  }
-                  else
-                  {
-                      return 1;
-                  }
-              }
-              else 
-              {
-                  return 1;
-              }
-          }
-      });
+  Collections.sort(actList, new Comparator<HActivity>()
+  {
+	    @Override
+	    public int compare(HActivity act1, HActivity act2)
+	    {
+	      if(act1.getStartTimeWeekContext()< act2.getStartTimeWeekContext())
+	      {
+	          return -1;
+	      }
+	      else if(act1.getStartTimeWeekContext() == act2.getStartTimeWeekContext())
+	      {
+	          return 0;
+	      }
+	      else
+	      {
+	          return 1;
+	      }
+	    }
+	  });
   }
     
   /**
    * 
-   * Methode zum Sortieren der Aktivitätenliste nach Index
+   * Methode zum Sortieren der Aktivitätenliste nach Index innerhalb einer Tour
    * 
    * @param list
    */

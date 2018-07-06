@@ -561,6 +561,16 @@ public class ActitoppPerson
   	return jointActivitiesforConsideration;
   }
   
+  /**
+   * Setzt die übergebene Liste als neue Liste für konfliktfreie Aktivitäten
+   * 
+   * @param aktliste
+   */
+  public void setAllJointActivitiesforConsideration(List<HActivity> aktliste)
+  {
+  	this.jointActivitiesforConsideration = aktliste;
+  }
+  
 	/**
 	 * Fügt die Aktivität der Liste gemeinsamer Aktivitäten hinzu falls kein Konflikt vorliegt
 	 * 
