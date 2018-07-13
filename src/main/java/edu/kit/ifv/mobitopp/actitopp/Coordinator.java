@@ -43,6 +43,12 @@ public class Coordinator
     private DiscreteTimeDistribution[][] modifiedTourStartDTDs;
     
     
+    // Important for modeling joint actions
+    
+   	int[] numberofactsperday_lowerboundduetojointactions = {0,0,0,0,0,0,0};
+  	int[] numberoftoursperday_lowerboundduetojointactions = {0,0,0,0,0,0,0};
+    
+    
     
     ////////////////
     
@@ -102,7 +108,7 @@ public class Coordinator
     if (Configuration.model_joint_actions) 
     {
     	processJointActivities();
-    	addJointActivitiestoPattern();
+    	// addJointActivitiestoPattern();
     }
   	
   	
@@ -123,10 +129,14 @@ public class Coordinator
     executeStep5("5A");
     executeStep5("5B");
     
-    executeStep6("6A");
-    
-    createTripTimesforActivities();
-    
+    executeStep6("6A"); 
+
+    // Gemeinsame Aktivitäten
+    if (Configuration.model_joint_actions) 
+    {
+    	placeJointActivitiesIntoPattern();
+    }
+
     executeStep7DC("7A", 'W');
     executeStep7DC("7B", 'E');
     executeStep7DC("7C", 'L');
@@ -229,11 +239,15 @@ public class Coordinator
   	 * - Wenn Tour oder Aktindex noch nicht vorhanden sind, nehme den nächstgelegenen Index, der noch nicht durch gemeinsame Akt belegt ist
   	 * 		Bsp. einzufügende Akt ist 1/1/3, höchster Index ist aber 1/1/2, dann ersetze Akt 1/1/2 mit der gemeinsamen Akt
   	 * 
+  	 * - Zeitüberlappungen beachten! Wenn Liste chronologisch abgearbeitet wird, bestimmt die Position der zuvor eingefügten Aktivität die untere Grenze
+  	 * 
   	 * - Gemeinsame Akt mit Typ 1 oder 3 von zuhause aus muss immer erste Akt in Tour sein, auch bei eingefügter Tour	
   	 * 
   	 */
   	
  //TODO Methode zum eliminieren von Überschneidungen in ActitoppPerson.java überführen
+  	
+ // TODO Konfliktfreiheit muss direkt in ActiToppPerson geprüft werden, wenn die Akt in die Liste aufgenommen wird!
   	
   	/*
   	 * Eliminiere sich überschneidende Aktivitäten
@@ -242,7 +256,8 @@ public class Coordinator
   	HActivity.sortActivityListInWeekOrder(listgemakt);
   	
   	List<HActivity> listgemaktohnekonflikte = new ArrayList<HActivity>();
-
+  	int anzaktmitkonflikten=0;
+  	
   	// Durlaufe die ursprüngliche Liste und füge Sie in die konfliktfreie ein, falls keine Konflikte vorliegen
   	for (HActivity act : listgemakt)
   	{
@@ -255,39 +270,273 @@ public class Coordinator
   				aktistkonfliktfrei=false;
   			}
   		}
-  		if (aktistkonfliktfrei) listgemaktohnekonflikte.add(act);
+  		if (aktistkonfliktfrei) 
+  		{
+  			listgemaktohnekonflikte.add(act);
+  		}
+  		else
+  		{
+  			anzaktmitkonflikten+=1;
+  		}
   	}
+  	
+  	if (anzaktmitkonflikten>0)
+  	{
+  		System.err.println("Methode " + Thread.currentThread().getStackTrace()[2].getMethodName() + " // " + anzaktmitkonflikten + " von " + listgemakt.size() + " Akt mit Konflikten");
+  	}
+  	
+  	person.setAllJointActivitiesforConsideration(listgemaktohnekonflikte);
   	
   	/*
   	 * Bestimme Mindestzahl an Touren und Aktivitäten basierend auf den bereits vorhandenen gemeinsamen Aktivitäten
   	 */
-  	
-  	int[] numberofactbounds = {0,0,0,0,0,0,0};
-  	int[] numberoftourbounds = {0,0,0,0,0,0,0};
-
-  	
+  	  	
   	for (HActivity act : listgemaktohnekonflikte)
   	{
   		// Zähle Anzahl der Aktivitäten hoch
-  		numberofactbounds[act.getIndexDay()] += 1;
+  		numberofactsperday_lowerboundduetojointactions[act.getIndexDay()] += 1;
   		
   		// Bestimme Mindestzahl an Touren
   		// Bei max. 2 Aktivitäten nur eine Tour mindestens
-  		if (numberofactbounds[act.getIndexDay()] <= 2) 
+  		if (numberofactsperday_lowerboundduetojointactions[act.getIndexDay()] <= 2) 
   		{
-  			numberoftourbounds[act.getIndexDay()] = 1;
+  			numberoftoursperday_lowerboundduetojointactions[act.getIndexDay()] = 1;
   		}
   		// Bei mehr als 2 Aktivitäten mindestens zwei Touren
   		else
   		{
-  			numberoftourbounds[act.getIndexDay()] = 2;
+  			numberoftoursperday_lowerboundduetojointactions[act.getIndexDay()] = 2;
   		}
   	}
-  
-  	System.out.println("");
-  	
+    	
   }
   
+  
+  private void placeJointActivitiesIntoPattern()
+  {
+  	
+   	List<HActivity> listgemakt = person.getAllJointActivitiesforConsideration();
+  	HActivity.sortActivityListInWeekOrder(listgemakt);
+
+  	/*
+  	 * Aktivitätenliste in Wochensortierung durchgehen und bestehenden Aktivität durch gemeinsame aus der Liste ersetzen
+  	 * 
+  	 */
+  	
+  	for (int indexinliste=0 ; indexinliste < listgemakt.size(); indexinliste++)
+  	{
+  		HActivity gemakt = listgemakt.get(indexinliste);
+  		
+  		// Indextag der Aktivität bestimmen
+  		int gemakt_tagindex = gemakt.getIndexDay();
+  		// Tourindex der Aktivität bestimmen
+  		int gemakt_tourindex = gemakt.getTour().getIndex();
+  		// Aktindex der Aktivität bestimmen
+  		int gemakt_aktindex = gemakt.getIndex();
+  		// JointStatus der Aktivität bestimmen
+  		int gemakt_jointStatus = gemakt.getJointStatus();
+  		
+    	/*
+    	 * Bestimme mögliche Aktivitäten, die ersetzt werden können
+    	 */
+  		List <HActivity> possibleact = new ArrayList<HActivity>();
+  		
+  		/*
+  		 *  Schritt 1: Alle verfügbaren Aktivitäten des Tages
+  		 */
+  		{
+	    	for (HActivity act : pattern.getDay(gemakt_tagindex).getAllActivitiesoftheDay())
+	    	{
+	    		possibleact.add(act);
+	    	}
+	    	HActivity.sortActivityList(possibleact);
+  		}
+  		
+    	/*
+    	 *  Schritt 2: 	Bestimme, ob es bereits getauschte Aktivitäten an diesem Tag gibt. Füge nur Aktivitäten, die nach der letzten
+    	 *  						getauschten liegene in eine neue Liste hinzu und arbeite mit dieser weiter
+    	 */
+	  	{
+	    	HActivity letzteaktgetauscht=null;
+	    	for (HActivity act : possibleact)
+	    	{
+	    		if ((act.getAttributefromMap("actreplacedbyjointact")!= null ? act.getAttributefromMap("actreplacedbyjointact") : 0) == 1.0) letzteaktgetauscht=act;
+	    	}
+	    	if (letzteaktgetauscht!=null)
+	    	{
+	    		List<HActivity> possibleactlaterinweek = new ArrayList<HActivity>();
+	    		for (HActivity act : possibleact)
+	    		{
+	    			if (act.compareTo(letzteaktgetauscht) < 0) possibleactlaterinweek.add(act);
+	    		}
+	    		possibleact = possibleactlaterinweek;
+	    	}
+	  	}
+	  	
+    	/*
+    	 * Schritt 3:	Bestimme, ob es weitere gemeinsame Aktivitäten an dem Tag gibt, die noch getauscht werden müssen
+    	 * 						Entferne entsprechend die letzten X Einträge aus der Liste möglicher Aktivitäten, damit diese noch Platz finden!
+    	 */
+	  	{
+		  	int anzweiteregemaktamtag=0;
+	    	for (int i=indexinliste+1; i<listgemakt.size(); i++)
+	    	{
+	    		HActivity act = listgemakt.get(i);
+	    		if (act.getIndexDay()== gemakt_tagindex) anzweiteregemaktamtag += 1;
+	    	}
+	    	if (anzweiteregemaktamtag>0)
+	    	{
+	    		for (int i=1; i<=anzweiteregemaktamtag; i++)
+	    		{
+	    			int letzterindex = possibleact.size()-1;
+	    			possibleact.remove(letzterindex);
+	    		}
+	    	}
+	  	}
+    	
+    	/*
+    	 * Schritt 4: Sicherstellen, dass Liste möglicher Aktivitäten nicht leer ist
+    	 */
+    	assert possibleact.size()!=0 : "Liste der Aktivitäten zur Ersetzung ist leer!";
+  		
+    	
+    	/*
+    	 * Schritt 5: Gemeinsame Akt von Typ 1 oder 3, d.h. mit gemeinsamem Hinweg muss, falls es sich um die erste Aktivität
+    	 *  					auf der Tour handelt auch bei der eingefügten Aktivität die erste der Tour sein.
+    	 *  
+    	 *  					Such in solchen Fällen alle andere ersten Aktivität von Touren in der Liste möglicher Aktivitäten und 
+    	 *  					arbeite mit der neuen Liste weiter
+    	 */
+    	{
+	    	if ((gemakt_jointStatus==1 || gemakt_jointStatus==3) && gemakt.isActivityFirstinTour())
+	    	{
+	    		List<HActivity> possibleactersteaktintour = new ArrayList<HActivity>();
+	    		for (HActivity act : possibleact)
+	    		{
+	    			if (act.isActivityFirstinTour()) possibleactersteaktintour.add(act);
+	    		}
+	    		possibleact = possibleactersteaktintour;
+	    	}
+    	}
+    	
+    	
+    	/*
+    	 * Schritt 6: Prüfen, ob List aufgrund von Schritt 5 möglicherweise leer ist.
+    	 * 						Falls ja, kann Aktivität nicht eigefügt werden.
+    	 */
+    	if (possibleact.size()==0) 
+    	{
+    		System.err.println("Akt konnte nicht ersetzt werden! Schritt 6");
+    		break;
+    	}
+    	
+    	
+    	/*
+    	 * Schritt 6: Prüfen, ob der Tourindex der gemeinsamen Akt in den möglichen Akt vorhanden ist (Prio zum Ersetzen!)
+    	 * 						Falls ja, dann prüfen, ob es den Aktindex auf der Tour auch gibt (Prio zum Ersetzen!)
+    	 */
+    	{
+	    	// Füge alle Akt mit gleichem Tourindex in eine eigene Liste ein
+	    	List<HActivity> possibleactgleichertourindex = new ArrayList<HActivity>();
+	    	for (HActivity act : possibleact)
+	    	{
+	    		if (act.getTour().getIndex() == gemakt_tourindex)
+	    		{
+	    			possibleactgleichertourindex.add(act);
+	    		}
+	    	}
+	    	// Falls Aktivität mit gleichen Tourindex existieren, arbeite mit dieser Liste weiter
+	    	if (possibleactgleichertourindex.size()!=0)
+	    	{
+	    		possibleact = possibleactgleichertourindex;
+	    	
+	    		// Füge alle Akt mit gleichem Aktindex in eine eigene Liste ein
+	    		List<HActivity> possibleactgleicheraktindex = new ArrayList<HActivity>();
+	      	for (HActivity act : possibleact)
+	      	{
+	      		if (act.getIndex() == gemakt_aktindex)
+	      		{
+	      			possibleactgleicheraktindex.add(act);
+	      		}
+	      	}
+	      	// Falls Aktivität mit gleichen Aktindex existiert, arbeite mit dieser Liste weiter
+	      	if (possibleactgleicheraktindex.size()!=0)
+	      	{
+	      		possibleact = possibleactgleicheraktindex;
+	      	}
+	    	}
+    	}
+    	
+    	/*
+    	 * Schritt 7: Sicherstellen, dass Liste möglicher Aktivitäten nicht leer ist
+    	 */
+    	assert possibleact.size()!=0 : "Liste der Aktivitäten zur Ersetzung ist leer!";
+    	
+    	/*
+    	 * Schritt 8: Wähle zufällig eine der verbleibenden möglichen Aktivitäten
+    	 */
+    	int zufallszahl = randomgenerator.getRandomValueBetween(0, possibleact.size()-1, 1);
+    	HActivity actforreplacement = possibleact.get(zufallszahl);
+    	
+    	/*
+    	 * Schritt 9: Aktivität durch gemeinsame Aktivität ersetzen
+    	 */
+    	{
+	    	// Aktivitäteneigenschaften ermitteln
+	    	int gemakt_duration = gemakt.getDuration();
+	    	int gemakt_starttime = gemakt.getStartTime();
+	    	char gemakt_acttype = gemakt.getType(); 		
+	    	int gemakt_creatorPersonIndex = gemakt.getCreatorPersonIndex();		
+	    	
+	    	int gemakt_durationtripbefore = gemakt.getEstimatedTripTimeBeforeActivity();
+	    	
+	    	// Aktivität markieren
+	    	actforreplacement.addAttributetoMap("actreplacedbyjointact", 1.0);
+	    	
+	    	// Je nach Art der Gemeinsamkeit unterschiedliche Aktivitäteneigenschaften ersetzen
+	    	switch(gemakt_jointStatus)
+				{
+					// Weg davor und Aktivität werden gemeinsam durchgeführt
+					case 1:
+					{
+						// Weg erzeugen
+						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, gemakt_durationtripbefore));
+						
+						// Akteigenschaften ersetzen
+						actforreplacement.setDuration(gemakt_duration);
+						actforreplacement.setStartTime(gemakt_starttime);
+						actforreplacement.setType(gemakt_acttype);
+						actforreplacement.setJointStatus(gemakt_jointStatus);
+						actforreplacement.addAttributetoMap("CreatorPersonIndex", (double) gemakt_creatorPersonIndex); 
+						break;
+					}
+					// Nur Aktivität wird gemeinsam durchgeführt
+					case 2:
+					{
+						// Akteigenschaften ersetzen
+						actforreplacement.setDuration(gemakt_duration);
+						actforreplacement.setStartTime(gemakt_starttime);
+						actforreplacement.setType(gemakt_acttype);
+						actforreplacement.setJointStatus(gemakt_jointStatus);
+						actforreplacement.addAttributetoMap("CreatorPersonIndex", (double) gemakt_creatorPersonIndex); 
+						break;
+					}		
+					// Nur Weg davor wird gemeinsam durchgeführt
+					case 3:
+					{
+						// Weg erzeugen
+						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, gemakt_durationtripbefore));
+						actforreplacement.setStartTime(gemakt_starttime);
+					}
+				}			
+    	}
+  		
+  	}
+
+  	
+  	// Sicherstellen, dass die Reihenfolge sortiert nach Index mit der nach Startzeit übereinstimmt!
+  	
+  }
   
   
   
@@ -457,7 +706,7 @@ public class Coordinator
   	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
   	    
   	    // Falls es schon Touren gibt (aus gemeinsamen Akt), H als Aktivitätstyp ausschließen
-  	    if (currentDay.getAmountOfTours()>0)
+  	    if (currentDay.getAmountOfTours()>0 || numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]>0)
   	    {
   	    	step.limitUpperBoundOnly(step.alternatives.size()-2);
 	    	}
@@ -519,8 +768,16 @@ public class Coordinator
 	    
 	    // Mindesttourzahl festlegen, falls es schon Touren aus gemeinsamen Aktivitäten gibt
 	    int mindesttourzahl=0;
-	    if (id.equals("3A")) mindesttourzahl = currentDay.getLowestTourIndex() * -1;
-	    if (id.equals("3B")) mindesttourzahl = currentDay.getHighestTourIndex() * +1;
+	    
+	    // Prüfe, ob Mindesttourzahl aus lowerBound bereits erreicht wurde
+	    if (currentDay.getAmountOfTours() < numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()])
+	    {
+	    	int verbleibendetouren = numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()] - currentDay.getAmountOfTours();
+	    	// Bei 3A werden verbleibende Touren halbiert, da auch ggf. noch Touren in 3B modelliert werden können
+	    	if (id.equals("3A")) mindesttourzahl = Math.round(verbleibendetouren/2);
+	    	// 3B bekommt als Mindesttourenzahl alle bis dahin noch verbliebenen Touren
+	    	if (id.equals("3B")) mindesttourzahl = verbleibendetouren;
+	    }
 	    
 	    // Alternativen limitieren basierend auf Mindestourzahl
 	    step.limitLowerBoundOnly(mindesttourzahl);
@@ -540,9 +797,10 @@ public class Coordinator
         if (tour!=null) currentDay.addTour(tour);
       }
     
-    HTour.sortTourList(currentDay.getTours());
-      
-    }
+      HTour.sortTourList(currentDay.getTours());
+    
+	    if (id.equals("3B")) assert (currentDay.getAmountOfTours() >= numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]) : "wrong number of tours - violating lower bound due to joint actions";
+    }    
 	}
 
 	/**
@@ -565,7 +823,7 @@ public class Coordinator
         /*
          * Ignoriere Touren, deren Hauptaktivität schon festgelegt ist
          * 	- Hauptouren des Tages (siehe Schritt 2)
-         *  - andere Hauptaktivitäten, welche über gemeinsame Aktivität ins Pattern gekommen sind
+         *  - andere Hauptaktivitäten, welche über gemeinsame Aktivitäten ins Pattern gekommen sind
          */
       	if(!currentDay.existsActivityTypeforActivity(currentTour.getIndex(),0))
         {
@@ -612,8 +870,10 @@ public class Coordinator
       	continue;
       }
         
-      for (HTour currentTour : currentDay.getTours())
+      for (int i = currentDay.getLowestTourIndex(); i <= currentDay.getHighestTourIndex(); i++)
       {
+      	HTour currentTour = currentDay.getTour(i);
+      	
       	// AttributeLookup erzeugen
     		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
       	
@@ -622,8 +882,25 @@ public class Coordinator
     		
   	    // Mindesaktzahl festlegen, falls es schon Aktivitäten aus gemeinsamen Aktivitäten gibt
   	    int mindestaktzahl =0;
-  	    if (id.equals("5A")) mindestaktzahl = currentTour.getLowestActivityIndex() * -1;
-  	    if (id.equals("5B")) mindestaktzahl = currentTour.getHighestActivityIndex() * +1;
+  	    
+  	    // Prüfe, ob Mindestaktzahl aus lowerBound bereits erreicht wurde
+  	    if (currentDay.getTotalAmountOfActivitites() < numberofactsperday_lowerboundduetojointactions[currentDay.getIndex()])
+  	    {
+  	    	// Bestimme noch nicht verplante Aktivitäten basierend auf Mindestzahl aus gemeinsamen Akt und bereits verplanten
+  	    	int verbleibendeakt = numberofactsperday_lowerboundduetojointactions[currentDay.getIndex()] - currentDay.getTotalAmountOfActivitites();
+  		
+  	    	/*
+  	    	 * Bestimme, wieviele Aktivitätenschätzungen in Schritt 5 noch durchgeführt werden
+					 *
+  	    	 * Formel: verbleibendenAnzahlanTouren * 2 (wegen 5A und 5B) - 1 (falls es schon Schritt 5B ist und damit 5A schon durchgeführt wurde
+  	    	 * verbleibendeAnzahlanTouren =  currentDay.getHighestTourIndex() - aktuellerTourIndex(i) + 1
+  	    	 */
+  	    	int verbleibendeaktschaetzungen =  2*(currentDay.getHighestTourIndex() - i + 1) - (id.equals("5B") ? 1 : 0);
+  	    	// Bestimme Mindestzahl aufgrund verbleibender Akt im Verhältnis zu verbleibenden Schätzungen 
+  	    	mindestaktzahl = Math.round(verbleibendeakt/verbleibendeaktschaetzungen);
+  	    	// bei der letzten Tour des Tages und der NACH-Aktivitätenzahl muss Mindestanzahl zwingend erreicht werden
+  	    	if (id.equals("5B") && currentTour.getIndex() == currentDay.getHighestTourIndex()) mindestaktzahl = verbleibendeakt;
+  	    }
   	    
   	    // Alternativen limitieren basierend auf Mindesaktzahl
   	    step.limitLowerBoundOnly(mindestaktzahl);
@@ -643,8 +920,9 @@ public class Coordinator
           if (act!=null) currentTour.addActivity(act);
         }
         
-        HActivity.sortActivityList(currentTour.getActivities());
+        HActivity.sortActivityList(currentTour.getActivities());        
       }
+      if (id.equals("5B")) assert (currentDay.getTotalAmountOfActivitites() >= numberofactsperday_lowerboundduetojointactions[currentDay.getIndex()]) : "wrong number of activities - violating lower bound due to joint actions";
     }
 	}
 

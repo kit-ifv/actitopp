@@ -305,7 +305,7 @@ public class HActivity
     
   /**
    * 
-   * Methode zum Sortieren der Aktivitätenliste nach Index innerhalb einer Tour
+   * Methode zum Sortieren der Aktivitätenliste nach Indizes
    * 
    * @param list
    */
@@ -315,6 +315,29 @@ public class HActivity
   		
       Collections.sort(list, new Comparator<HActivity>()
       {
+        @Override
+        public int compare(HActivity o1, HActivity o2)
+        {
+        	int result = 99;
+        	if			(o1.getIndexDay() <  o2.getIndexDay()) result = -1;
+        	else if	(o1.getIndexDay() >  o2.getIndexDay()) result = +1;
+        	else
+        	{
+          	if			(o1.getTour().getIndex() <   o2.getTour().getIndex()) result = -1;
+          	else if	(o1.getTour().getIndex() >   o2.getTour().getIndex()) result = +1;
+          	else
+          	{
+              if			(o1.getIndex() < o2.getIndex()) result = -1;
+              else if	(o1.getIndex() > o2.getIndex()) result = +1;
+              else 																		result = 0;
+          	}
+        	}
+        	
+        	assert result!=99 : "Could not compare these two activities! - Act1: " + o1 + " - Act2: " + o2;
+        	return result;      		
+        }
+        
+/*        
           @Override
           public int compare(HActivity o1, HActivity o2)
           {
@@ -322,6 +345,7 @@ public class HActivity
               if(o1.getIndex() >o2.getIndex()) return 1;
               return 0;
           }
+*/
       });
   }
   
@@ -672,6 +696,34 @@ public class HActivity
 		return getEndTimeWeekContext();
 	}
 	
+	/**
+	 * @return the tripbeforeactivity
+	 */
+	public HTrip getTripbeforeactivity() {
+		return tripbeforeactivity;
+	}
+
+	/**
+	 * @param tripbeforeactivity the tripbeforeactivity to set
+	 */
+	public void setTripbeforeactivity(HTrip tripbeforeactivity) {
+		this.tripbeforeactivity = tripbeforeactivity;
+	}
+
+	/**
+	 * @return the tripafteractivity
+	 */
+	public HTrip getTripafteractivity() {
+		return tripafteractivity;
+	}
+
+	/**
+	 * @param tripafteractivity the tripafteractivity to set
+	 */
+	public void setTripafteractivity(HTrip tripafteractivity) {
+		this.tripafteractivity = tripafteractivity;
+	}
+
 	/**
 	 * 
 	 * Mean-Time-Berechnung
