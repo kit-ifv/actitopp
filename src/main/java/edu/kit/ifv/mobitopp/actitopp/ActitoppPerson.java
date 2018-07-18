@@ -577,20 +577,12 @@ public class ActitoppPerson
 	 * @param act
 	 */
 	public void addJointActivityforConsideration(HActivity act){
+		
 		// Prüfe, ob es bereits eine Aktivität in dem Zeitraum oder in der Tour gibt
 		boolean activityconflict = false;
 		for (HActivity tmpact : jointActivitiesforConsideration)
 		{
-			if(
-					(	tmpact.getWeekDay()					==	act.getWeekDay() && 
-						tmpact.getTour().getIndex() == 	act.getTour().getIndex() &&
-						tmpact.getIndex()						== 	act.getIndex()
-					) 
-					||
-					(
-						act.checkOverlappingtoOtherActivity(tmpact)
-					)
-				)
+			if(HActivity.checkActivityOverlapping(act,tmpact))
 			{
 				activityconflict = true;
 				System.err.println("Person " + getPersIndex() + ": Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");

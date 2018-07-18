@@ -127,27 +127,83 @@ public class HTour
 	    });
 	}
 
+	/**
+	 * 
+	 * Prüft, ob die Tour keine Zeitlücken aufweist, das heißt ob Akt und Wege direkt aneinander gereiht sind
+	 * 
+	 * @param tour
+	 * @return
+	 */
+	public boolean tourisFreeofGaps()
+	{
+		boolean gapfree = true;
+		HActivity.sortActivityListbyIndices(activities);
+		
+		for (int i=0 ; i<activities.size()-1; i++)
+		{
+			HActivity aktuelleakt = activities.get(i);
+			HActivity naechsteakt = activities.get(i+1);
+			
+			if (aktuelleakt.getEndTimeWeekContext() != naechsteakt.getTripStartTimeBeforeActivityWeekContext()) 
+			{
+				gapfree=false;
+			}
+		}	
+		
+		return gapfree;
+	}
 
 	@Override
-    public String toString()
+  public String toString()
+  {
+		String tostring = "";
+		if (this.isScheduled())
+		{
+			tostring = 	getDay().getIndex() + "/" + getIndex() + 
+									" Start " + getStartTimeWeekContext() + 
+    							" Ende " + getEndTimeWeekContext() + 
+    							" Dauer: " + getTourDuration();  
+		}
+		else
+		{
+			tostring = 	getDay().getIndex() + "/" + getIndex() + 
+									" Start --- " + 
+									" Ende --- " +  
+									" Dauer: " + getTourDuration(); 
+		}
+  	return 	tostring;
+  }   
+	
+	/**
+   * 
+   * Erstellt Startzeiten für jede Aktivität einer bestimmten Tour
+   * 
+   */
+  public void createStartTimesforActivities()
+  {
+    // ! sorts the list permanently
+    HActivity.sortActivityListbyIndices(getActivities());
+    for (HActivity act : getActivities())
     {
-			String tostring = "";
-			if (this.isScheduled())
-			{
-				tostring = 	getDay().getIndex() + "/" + getIndex() + 
-										" Start " + getStartTimeWeekContext() + 
-	    							" Ende " + getEndTimeWeekContext() + 
-	    							" Dauer: " + getTourDuration();  
-			}
-			else
-			{
-				tostring = 	getDay().getIndex() + "/" + getIndex() + 
-										" Start --- " + 
-										" Ende --- " +  
-										" Dauer: " + getTourDuration(); 
-			}
-    	return 	tostring;
-    }   
+    	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
+    	if (!act.startTimeisScheduled())
+    	{
+    		if (act.isActivityFirstinTour())
+      	{
+      		act.setStartTime(getStartTime() + act.getEstimatedTripTimeBeforeActivity());
+      	}
+      	// Ansonsten durch das Ende der vorherigen Aktivität
+      	else
+      	{
+      		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
+      	}
+    	}
+    }
+    
+    // Prüfe, ob die Tour einen lückenlosen Ablauf hat, das heißt keine Leerzeit zwischen Akt und Wegen
+    if (!tourisFreeofGaps()) System.err.println("Tour hat Lücken! " + this);
+  }
+  
 	
 	/**
 	 * 

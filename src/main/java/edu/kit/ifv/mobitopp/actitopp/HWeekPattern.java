@@ -140,7 +140,7 @@ public class HWeekPattern
   	List<HActivity> tmpliste = new ArrayList<HActivity>();
   	tmpliste.addAll(getAllOutofHomeActivities());
   	tmpliste.addAll(getAllHomeActivities());
-  	HActivity.sortActivityListInWeekOrder(tmpliste);
+  	HActivity.sortActivityListbyWeekStartTimes(tmpliste);
   	return tmpliste;
   }
   
@@ -281,7 +281,7 @@ public class HWeekPattern
 		List<HActivity> listenkopie = new ArrayList<HActivity>();
 		listenkopie = getAllOutofHomeActivities();
 		
-  	HActivity.sortActivityListInWeekOrder(listenkopie);
+  	HActivity.sortActivityListbyWeekStartTimes(listenkopie);
 
   	System.out.println("");
   	System.out.println(" -------------- AKTIVITÄTENLISTE --------------");
@@ -303,7 +303,7 @@ public class HWeekPattern
 		List<HActivity> listenkopie = new ArrayList<HActivity>();
 		listenkopie = getAllActivities();
 		
-  	HActivity.sortActivityListInWeekOrder(listenkopie);
+  	HActivity.sortActivityListbyWeekStartTimes(listenkopie);
 
   	System.out.println("");
   	System.out.println(" -------------- AKTIVITÄTENLISTE --------------");
@@ -338,7 +338,7 @@ public class HWeekPattern
 		List<HActivity> listenkopie = new ArrayList<HActivity>();
 		listenkopie = getAllJointActivities();
 		
-  	HActivity.sortActivityListInWeekOrder(listenkopie);
+  	HActivity.sortActivityListbyWeekStartTimes(listenkopie);
 
   	System.out.println("");
   	System.out.println(" -------------- LISTE gemeinsamer AKTIVITÄTEN --------------");

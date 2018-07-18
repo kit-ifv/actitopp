@@ -28,10 +28,7 @@ public class HActivity
   
   private HTrip tripbeforeactivity;
   private HTrip tripafteractivity;
-  
-  
-//  private int estimatedTripTime 	= -1;
-  
+ 
   private int jointStatus					= -1;
 
   /*
@@ -278,7 +275,7 @@ public class HActivity
    * 
    * @param actList
    */
-  public static void sortActivityListInWeekOrder(List<HActivity> actList)
+  public static void sortActivityListbyWeekStartTimes(List<HActivity> actList)
   {
   	assert actList != null : "Liste zum Sortieren ist leer";
   	
@@ -309,7 +306,7 @@ public class HActivity
    * 
    * @param list
    */
-  public static void sortActivityList(List<HActivity> list)
+  public static void sortActivityListbyIndices(List<HActivity> list)
   {
   	assert list != null : "Liste zum Sortieren ist leer";
   		
@@ -319,8 +316,8 @@ public class HActivity
         public int compare(HActivity o1, HActivity o2)
         {
         	int result = 99;
-        	if			(o1.getIndexDay() <  o2.getIndexDay()) result = -1;
-        	else if	(o1.getIndexDay() >  o2.getIndexDay()) result = +1;
+        	if			(o1.getDayIndex() <  o2.getDayIndex()) result = -1;
+        	else if	(o1.getDayIndex() >  o2.getDayIndex()) result = +1;
         	else
         	{
           	if			(o1.getTour().getIndex() <   o2.getTour().getIndex()) result = -1;
@@ -350,6 +347,75 @@ public class HActivity
   }
   
   /**
+   * 
+   * Berechnet die Zeitdauern in Minuten zwischen dem Ende der ersten Aktivität (inkl. Weg) und dem Anfang der zweiten Aktivität (inkl. Weg vorher)
+   * 
+   * @param firstact
+   * @param secondact
+   * @return
+   */
+  public static int getTimebetweenTwoActivities(HActivity firstact, HActivity secondact)
+  {
+  	int result=-999999;
+  	
+  	int endezeitersteakt;
+  	int anfangszeitzweiteakt;
+  	
+  	// Endezeit erste Aktivität
+  	endezeitersteakt = firstact.getEndTimeWeekContext();
+  	if (firstact.isActivityLastinTour())
+  	{
+  		endezeitersteakt += firstact.getEstimatedTripTimeAfterActivity();
+  	}
+
+  	// Anfangszeit zweite Aktivität
+  	anfangszeitzweiteakt = secondact.getTripStartTimeBeforeActivityWeekContext();
+  	
+  	//Rückgabe
+  	result = anfangszeitzweiteakt - endezeitersteakt; 	
+  	assert result!=-999999 : "Could not determine time between these two activities";
+  	return result;
+  }
+  
+  
+  
+  /**
+	 * Prüft, ob sich zwei Aktivitäten in ihren Zeitintervallen überlagern
+	 * false = Sie überlagern sich nicht
+	 * true = Sie überlagern sich
+	 * 
+	 * @param tmpact
+	 * @return
+	 */
+	public static boolean checkActivityOverlapping(HActivity act1, HActivity act2)
+	{
+		boolean result = false;
+		
+		// Zeitbelegung der aktuellen Aktivität ermitteln
+		int starttime_first = act1.getStartTimeWeekContext() - (act1.tripBeforeActivityisScheduled() ? act1.getEstimatedTripTimeBeforeActivity() : 0);
+		int endtime_first = (act1.durationisScheduled() ? act1.getEndTimeWeekContext() : act1.getStartTimeWeekContext()) + (act1.tripAfterActivityisScheduled() ? act1.getEstimatedTripTimeAfterActivity() : 0);
+	
+		// Zeitbelegung der anderen Aktivität ermitteln
+		int starttime_second = act2.getStartTimeWeekContext() - (act2.tripBeforeActivityisScheduled() ? act2.getEstimatedTripTimeBeforeActivity() : 0);
+		int endtime_second = (act2.durationisScheduled() ? act2.getEndTimeWeekContext() : act2.getStartTimeWeekContext()) + (act2.tripAfterActivityisScheduled() ? act2.getEstimatedTripTimeAfterActivity() : 0);
+		
+		if (
+					// Start oder Ende der zweiten Aktivität liegen im Zeithorizont der ersten
+					(starttime_second > starttime_first && starttime_second < endtime_first) ||
+					(endtime_second 	> starttime_first && endtime_second 	< endtime_first)
+					||
+					// Start oder Ende der ersten Aktivität liegen im Zeithorizont der zweiten
+					(starttime_first > starttime_second && starttime_first < endtime_second) ||
+					(endtime_first 	 > starttime_second && endtime_first 	 < endtime_second)
+			 )
+		{
+			result=true;
+		}
+		
+		return result;
+	}
+
+	/**
    * Vergleicht zwei Aktivitäten in ihrer Reihenfolge
    * 
    * 0  - beide Aktivitäten sind gleich
@@ -359,7 +425,8 @@ public class HActivity
    * @param acttocompare
    * @return
    */
-  public int compareTo(HActivity acttocompare) {
+  public int compareTo(HActivity acttocompare) 
+  {
     int result=99;
     if (acttocompare.getWeekDay() >  this.getWeekDay()) result = 1;
     if (acttocompare.getWeekDay() <  this.getWeekDay()) result = -1;
@@ -376,8 +443,8 @@ public class HActivity
     }
     assert result!=99 : "Could not compare these two activities! - Act1: " + this + " - Act2: " + acttocompare;
     return result;
-}
-
+  }
+ 
 
   @Override
 	public String toString()
@@ -386,7 +453,7 @@ public class HActivity
   	
   	if (isHomeActivity())
   	{
-  		result= getIndexDay() + 	
+  		result= getDayIndex() + 	
   				" Start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
   				" Ende " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
   				" Dauer: " + (durationisScheduled() ? this.duration : "n.a.") + 
@@ -396,7 +463,7 @@ public class HActivity
   	}
   	else
   	{
-  		result= getIndexDay() + "/" + getTour().getIndex() + "/" + getIndex() + 	
+  		result= getDayIndex() + "/" + getTour().getIndex() + "/" + getIndex() + 	
 		  				" Start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
 		  				" Ende " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
 		  				" Dauer: " + (durationisScheduled() ? this.duration : "n.a.") + 
@@ -646,27 +713,29 @@ public class HActivity
 	}
 
 	/**
+	 * Gibt den Index des zugehörigen Tages zurück
 	 * 
 	 * @return
 	 */
-	public int getIndexDay()
+	public int getDayIndex()
 	{
-		int daynumber = -1;
-		if (isHomeActivity())
-		{
-			daynumber = getDay().getIndex();
-		}
-		else
-		{
-			//daynumber = getTour().getDay().getIndex();
-			daynumber = getDay().getIndex();
-		}
-		return daynumber;
+		return getDay().getIndex();
 	}
+	
+	/**
+	 * Gibt den Index der zugehörigen Tour zurück
+	 * 
+	 * @return
+	 */
+	public int getTourIndex()
+	{
+		return getTour().getIndex();
+	}
+	
 
 	public int getStartTimeWeekContext()
 	{
-		return 1440*getIndexDay() + getStartTime();
+		return 1440*getDayIndex() + getStartTime();
 	}
 
 	public int getEndTimeWeekContext()
@@ -769,26 +838,45 @@ public class HActivity
 	 */
 	public void calculateAndSetTripTimes()
 	{
-		if (tripbeforeactivity==null)
-		{
-	    int actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
 
-	    // Verbessere die Annahme der Wegezeit, falls ein Pendelweg vorliegt
-	    if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_work();
-	    if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
-	    
+		/*
+		 * Wegzeit vor der Aktivität
+		 */
+		
+		//Default-Annahme
+    int actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
+    // Verbessere die Annahme der Wegezeit, falls ein Pendelweg vorliegt
+    if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_work();
+    if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
+		if (tripbeforeactivity==null)
+		{   
 			tripbeforeactivity = new HTrip(this, actualTripTime_beforeTrip);
 		}
-
-		if (tripafteractivity==null && isActivityLastinTour())
+		else
 		{
-	    int actualTripTime_afterTrip = isActivityLastinTour() ? Configuration.FIXED_TRIP_TIME_ESTIMATOR : 0;
-	    
+			tripbeforeactivity.setTripduration(actualTripTime_beforeTrip);
+		}
+
+		/*
+		 * Wegzeit nach der Aktivität (nur bei letzter Akt in Tour)
+		 */	
+		
+		if (isActivityLastinTour())
+		{
+			//Default-Annahme
+	    int actualTripTime_afterTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
 	    // Verbessere die Annahme der Wegzeit auf dem letzten Weg der Tour nach der Aktivität, falls Pendelweg vorliegt
 	    if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_work();
 	    if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_education();
-
-	    tripafteractivity = new HTrip(this, actualTripTime_afterTrip);
+	    if (tripafteractivity==null)
+	    {
+	    	tripafteractivity = new HTrip(this, actualTripTime_afterTrip);
+	    }
+	    else
+	    {
+	    	tripafteractivity.setTripduration(actualTripTime_afterTrip);
+	    }
+	    
 		}
 	}
 	
@@ -870,37 +958,4 @@ public class HActivity
 		return result;
 	}
 	
-	/**
-	 * Prüft, ob sich zwei Aktivitäten in ihren Zeitintervallen überlagern
-	 * false = Sie überlagern sich nicht
-	 * true = Sie überlagern sich
-	 * 
-	 * @param tmpact
-	 * @return
-	 */
-	public boolean checkOverlappingtoOtherActivity(HActivity tmpact)
-	{
-		boolean result = false;
-		
-		// Zeitbelegung der aktuellen Aktivität ermitteln
-		int starttime = getStartTimeWeekContext() - (tripBeforeActivityisScheduled() ? getEstimatedTripTimeBeforeActivity() : 0);
-		int endtime = (durationisScheduled() ? getEndTimeWeekContext() : getStartTimeWeekContext()) + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : 0);
-
-		
-		// Zeitbelegung der anderen Aktivität ermitteln
-		int starttime_other = tmpact.getStartTimeWeekContext() - (tmpact.tripBeforeActivityisScheduled() ? tmpact.getEstimatedTripTimeBeforeActivity() : 0);
-		int endtime_other = (tmpact.durationisScheduled() ? tmpact.getEndTimeWeekContext() : tmpact.getStartTimeWeekContext()) + (tmpact.tripAfterActivityisScheduled() ? tmpact.getEstimatedTripTimeAfterActivity() : 0);
-		
-		if (
-					(starttime < starttime_other && starttime_other < endtime) ||
-					(starttime < endtime_other   && endtime_other   < endtime)
-			 )
-		{
-			result=true;
-		}
-		
-		return result;
-	}
-
-
 }

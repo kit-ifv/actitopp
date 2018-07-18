@@ -50,5 +50,10 @@ public class HTrip {
 		return activity;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "Dauer: " + getTripduration();
+	}
 	
 }
