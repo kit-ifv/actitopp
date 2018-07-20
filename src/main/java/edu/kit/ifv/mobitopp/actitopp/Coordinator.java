@@ -944,10 +944,15 @@ public class Coordinator
     	    step.doStep();
 
     	    // Eigenschaft abspeichern
-    	    currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
-    	    
-    	    // Bei unkoordinierter Modellierung ohne Stabilitätsaspekte wird der Wert immer mit 0 überschrieben!
-    	    if (!Configuration.coordinated_modelling) currentActivity.addAttributetoMap("standarddauer", 0.0d);
+    	    if (Configuration.coordinated_modelling)
+    	    {
+    	    	currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
+    	    }
+    	    else
+    	    {
+      	    // Bei unkoordinierter Modellierung ohne Stabilitätsaspekte wird der Wert immer mit 0 überschrieben!
+     	     currentActivity.addAttributetoMap("standarddauer", 0.0d);    	    	
+    	    }
         }
       }
     }
@@ -1009,10 +1014,21 @@ public class Coordinator
 	    	    
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert loc_lowerbound<=loc_upperbound;
-
-	    	    step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
-
+//TODO REMOVE
+	    	    //step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
 	    	    
+	    	    // Falls die berechnete Maximalzeit kleiner ist als die aktuellen Bounds, korrigiere diese auch nach unten
+	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
+
+	    	    // Limitiere die obere Grenze, falls bisher keine vorhanden ist
+	    	    if (step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound);
+	    	    // Limitiere die untere Grenze, falls diese größer ist als die bisherige untere Grenze
+	    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound); 
+	    	    		
+	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
+	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
+	    	    		
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
 	
@@ -1097,8 +1113,20 @@ public class Coordinator
 	    	    
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert loc_lowerbound<=loc_upperbound;
+//TODO REMOVE
+	    	    //step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+	    	    
+	    	    // Falls die berechnete Maximalzeit kleiner ist als die aktuellen Bounds, korrigiere diese auch nach unten
+	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
 
-	    	    step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+	    	    // Limitiere die obere Grenze, falls bisher keine vorhanden ist
+	    	    if (step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound);
+	    	    // Limitiere die untere Grenze, falls diese größer ist als die bisherige untere Grenze
+	    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound); 
+	    	    		
+	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
+	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
 
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
