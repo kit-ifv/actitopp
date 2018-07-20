@@ -191,7 +191,7 @@ public class DefaultDCModelStep extends AbsHModelStep
      * @param from
      * @param to
      */
-    public void limitAlternatives(int from, int to)
+    public void limitUpperandLowerBound(int from, int to)
     {
 	    fromRangeLimiter = from;
 	    toRangeLimiter = to;

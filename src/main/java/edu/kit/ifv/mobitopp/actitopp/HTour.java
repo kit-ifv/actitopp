@@ -183,6 +183,7 @@ public class HTour
   {
     // ! sorts the list permanently
     HActivity.sortActivityListbyIndices(getActivities());
+    
     for (HActivity act : getActivities())
     {
     	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
@@ -201,8 +202,9 @@ public class HTour
     }
     
     // Prüfe, ob die Tour einen lückenlosen Ablauf hat, das heißt keine Leerzeit zwischen Akt und Wegen
-    if (!tourisFreeofGaps()) System.err.println("Tour hat Lücken! " + this);
+    if (!tourisFreeofGaps()) System.err.println("Tour hat Lücken! " + this); 
   }
+  
   
 	
 	/**

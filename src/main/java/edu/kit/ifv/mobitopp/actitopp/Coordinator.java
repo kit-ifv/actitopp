@@ -204,7 +204,7 @@ public class Coordinator
     
     // first sanity checks: check for overlapping activities. if found,
     // throw exception and redo activityweek
-    weekPatternisFreeofOverlaps(pattern);
+    pattern.weekPatternisFreeofOverlaps();
 
   }
   
@@ -627,7 +627,7 @@ public class Coordinator
 			
 	  	/*
 	  	 *  Schritt 2: 	Bestimme, ob es bereits getauschte Aktivitäten an diesem Tag gibt. Füge nur Aktivitäten, die nach der letzten
-	  	 *  						getauschten liegene in eine neue Liste hinzu und arbeite mit dieser weiter
+	  	 *  						getauschten liegen in eine neue Liste hinzu und arbeite mit dieser weiter
 	  	 */
 	  	{
 	    	HActivity letzteaktgetauscht=null;
@@ -643,6 +643,15 @@ public class Coordinator
 	    			if (act.compareTo(letzteaktgetauscht) < 0) possibleactlaterinweek.add(act);
 	    		}
 	    		possibleact = possibleactlaterinweek;
+	    		
+	    		/*
+	    		 * Falls die letzte getauschte Akt nicht unmittelbar zeitlich vor der aktuellen liegt, entferne die erste mögliche Akt zum Tauschen aus
+	    		 * der Liste, damit keine Touren mit Lücken entstehen!
+	    		 */
+	    		if (letzteaktgetauscht.getJointStatus()!=3 && 
+	    				HActivity.getTimebetweenTwoActivities(letzteaktgetauscht, gemakt)!=0 && 
+	    				!letzteaktgetauscht.isActivityLastinTour())	
+	    			possibleact.remove(0);
 	    	}
 	  	}
 	  	
@@ -666,11 +675,17 @@ public class Coordinator
 	    		}
 	    	}
 	  	}
-	  	
+
+
 	  	/*
-	  	 * Schritt 4: Sicherstellen, dass Liste möglicher Aktivitäten nicht leer ist
+	  	 * Schritt 4: Prüfen, ob List aufgrund von Schritt 2&3 möglicherweise leer ist.
+	  	 * 						Falls ja, kann Aktivität nicht eigefügt werden.
 	  	 */
-	  	assert possibleact.size()!=0 : "Liste der Aktivitäten zur Ersetzung ist leer!";
+	  	if (possibleact.size()==0) 
+	  	{
+	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 4");
+	  		break;
+	  	}
 			
 	  	
 	  	/*
@@ -705,7 +720,7 @@ public class Coordinator
 	  	
 	  	
 	  	/*
-	  	 * Schritt 6: Prüfen, ob der Tourindex der gemeinsamen Akt in den möglichen Akt vorhanden ist (Prio zum Ersetzen!)
+	  	 * Schritt 7: Prüfen, ob der Tourindex der gemeinsamen Akt in den möglichen Akt vorhanden ist (Prio zum Ersetzen!)
 	  	 * 						Falls ja, dann prüfen, ob es den Aktindex auf der Tour auch gibt (Prio zum Ersetzen!)
 	  	 */
 	  	{
@@ -741,7 +756,7 @@ public class Coordinator
 	  	}
 	  	
 	  	/*
-	  	 * Schritt 7: Falls eine Aktivität die letzte einer Tour ist und unmittelbar anschließend eine weitere gemeinsame Aktivität folgt,
+	  	 * Schritt 8: Falls eine Aktivität die letzte einer Tour ist und unmittelbar anschließend eine weitere gemeinsame Aktivität folgt,
 	  	 * 						dann wird diese Aktivität entfernt, da keine Zeit für Heimaktivität übrig bleibt.
 	  	 * 
 	  	 * 						Anders ausgedrückt: Falls direkt anschließende gemeinsame Aktivität, dann entferne alle letzten Aktivitäten einer Tour
@@ -763,22 +778,17 @@ public class Coordinator
 	  	}
 	
 	  	/*
-	  	 * Schritt 8: 
+	  	 * Schritt 9: 
 	  	 *
-	  	 * Aufgrund von Schritt 7 kann es vorkommen, dass keine Aktivitäten mehr übrig bleiben zum Ersetzen.
+	  	 * Aufgrund von Schritt 8 kann es vorkommen, dass keine Aktivitäten mehr übrig bleiben zum Ersetzen.
 	  	 * Falls das der Fall ist kann die Aktivität nicht ersetzt werden! 
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 8");
+	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 9");
 	  		break;
 	  	}
-	  	
-	  	/*
-	  	 * Schritt 9: Sicherstellen, dass Liste möglicher Aktivitäten nicht leer ist
-	  	 */   	
-	  	assert possibleact.size()!=0 : "Liste der Aktivitäten zur Ersetzung ist leer!";
-	  	
+	
 	  	/*
 	  	 * Schritt 10: Wähle zufällig eine der verbleibenden möglichen Aktivitäten
 	  	 */
@@ -990,6 +1000,7 @@ public class Coordinator
 	  	     * DC-Schritt (8B, 8D)
 	  	     * 
 	  	     */
+	        
 	        // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
 	        if (!currentActivity.durationisScheduled())
 	        {
@@ -1002,13 +1013,17 @@ public class Coordinator
 	    	    // Alternativen ggf. auf Standardzeitkategorie einschränken
 	    	    modifyAlternativesDueTo8A(currentActivity, step_dc);  	    
 	    	    
-	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
-	    	    int maxduration = calculateMaxdurationDueToScheduledActivities(currentActivity);
-	    	    int loc_upperbound = getDurationTimeClassforExactDuration(maxduration);
+	    	    // Grenzen aufgrund ggf. bereits festgelgten Dauern beschränken
+	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
+	    	    int loc_lowerbound = getDurationTimeClassforExactDuration(durationBounds[0]);
+	    	    int loc_upperbound = getDurationTimeClassforExactDuration(durationBounds[1]);
 	    	    
-	    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
-	    	    if (loc_upperbound <= step_dc.getLowerBound()) 																step_dc.limitLowerBoundOnly(loc_upperbound); 
-	
+	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
+	    	    assert loc_lowerbound<=loc_upperbound;
+
+	    	    step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+
+	    	    
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
 	
@@ -1020,27 +1035,26 @@ public class Coordinator
 	    	     * MC-Schritt (8C, 8E)
 	    	     * 
 	    	     */
-	    	    // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
-	          if (!currentActivity.durationisScheduled())
-		        {
-	          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
-				      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-				      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
-				      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-				      
-				      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-				      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-				      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-				      
-				      // Limitiere die Obergrenze durch die noch verfügbare Zeit
-				      step_mc.setRangeBounds(0, calculateMaxdurationDueToScheduledActivities(currentActivity));
-				      
-				      // Wahlentscheidung durchführen
-				      step_mc.doStep();
-				     
-				      // Speichere Ergebnisse ab
-				      currentActivity.setDuration(step_mc.getChosenTime());
-		        } 
+          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
+			      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
+			      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
+			      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
+			      
+			      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+			      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
+			      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
+			      
+			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
+			      step_mc.setRangeBounds(durationBounds[0], durationBounds[1]);
+			      
+			      // Wahlentscheidung durchführen
+			      step_mc.doStep();
+			     
+			      // Speichere Ergebnisse ab
+			      currentActivity.setDuration(step_mc.getChosenTime());
+			      
+			      // Lege mögliche weitere Startzeiten von Aktivitäten fest
+			      HActivity.createPossibleStarttimes(currentTour.getActivities());
 	        }
 				}		
 			}
@@ -1056,7 +1070,7 @@ public class Coordinator
 	 */
 	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPersonPatternException, InvalidHouseholdPatternException
 	{
-		
+
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
 	  modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
 		
@@ -1076,7 +1090,8 @@ public class Coordinator
 	  	     * 
 	  	     * DC-Schritt
 	  	     * 
-	  	     */
+	  	     */    		
+	        
 	      	// Schritt nur durchführen, falls keine Hauptaktivität und Dauer noch nicht festgelegt wurde
 	        if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
 	        {   	     
@@ -1086,13 +1101,16 @@ public class Coordinator
 	    	    // Step-Objekt erzeugen
 	    	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
 	    	   
-	    	    // Alternativen ggf. basierend auf bereits festgelgten Dauern beschränken
-	    	    int maxduration = calculateMaxdurationDueToScheduledActivities(currentActivity);
-	    	    int loc_upperbound = getDurationTimeClassforExactDuration(maxduration);
-	    		   
-	    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
-	    	    if (loc_upperbound <= step_dc.getLowerBound()) 																step_dc.limitLowerBoundOnly(loc_upperbound); 
-	
+	    	    // Grenzen aufgrund ggf. bereits festgelgten Dauern beschränken
+	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
+	    	    int loc_lowerbound = getDurationTimeClassforExactDuration(durationBounds[0]);
+	    	    int loc_upperbound = getDurationTimeClassforExactDuration(durationBounds[1]);
+	    	    
+	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
+	    	    assert loc_lowerbound<=loc_upperbound;
+
+	    	    step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
 	
@@ -1104,27 +1122,26 @@ public class Coordinator
 	    	     * MC-Schritt
 	    	     * 
 	    	     */
-	    	    // Schritt nur durchführen, falls Dauer noch nicht festgelegt wurde
-	    	    if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
-	          {
-	          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
-	          	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-	  		      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
-	  		      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-	  		      
-	  		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-	  		      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-	  		      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-	
-				      // Limitiere die Obergrenze durch die noch verfügbare Zeit
-	  		      step_mc.setRangeBounds(0, calculateMaxdurationDueToScheduledActivities(currentActivity));
-				      
-				      // Wahlentscheidung durchführen
-	  		      step_mc.doStep();
-	  		     
-	  		      // Speichere Ergebnisse ab
-	  		      currentActivity.setDuration(step_mc.getChosenTime());
-	          }
+          	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
+          	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
+  		      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
+  		      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
+  		      
+  		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
+  		      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
+  		      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
+
+			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
+			      step_mc.setRangeBounds(durationBounds[0], durationBounds[1]);
+			      
+			      // Wahlentscheidung durchführen
+  		      step_mc.doStep();
+  		     
+  		      // Speichere Ergebnisse ab
+  		      currentActivity.setDuration(step_mc.getChosenTime());
+  		      
+			      // Lege mögliche weitere Startzeiten von Aktivitäten fest
+			      HActivity.createPossibleStarttimes(currentTour.getActivities()); 
 	        }
 				}		
 			}
@@ -1505,7 +1522,7 @@ public class Coordinator
 	      int bounds_dc[] = calculateStartingBoundsForTours(currentTour, true);
 		    int lowerbound = bounds_dc[0];
 		    int upperbound = bounds_dc[1];
-		    step_dc.limitAlternatives(lowerbound, upperbound);
+		    step_dc.limitUpperandLowerBound(lowerbound, upperbound);
 		    
 		    // Führe Entscheidungswahl durch
 		    step_dc.doStep();
@@ -1545,7 +1562,7 @@ public class Coordinator
 	      // Setze die Startzeiten der Aktivitäten in dieser Tour
 	      currentTour.createStartTimesforActivities();
 	      
-//TODO previosTour muss immer scheduled sein bei chronologier Modellierungsreihenfolge	      
+//TODO previousTour muss immer scheduled sein bei chronologier Modellierungsreihenfolge	      
 	      // Stelle sicher, dass sich die Touren nicht überlappen!
 	      HTour previousTour = currentTour.getPreviousTourinPattern();
 	      if (previousTour!=null && previousTour.isScheduled()) assert currentTour.getStartTimeWeekContext() > previousTour.getEndTimeWeekContext() : "Tours are overlapping!";
@@ -1590,7 +1607,7 @@ public class Coordinator
 	          int dcbounds[] = calculateBoundsForHomeTime(currentTour, true);
 	    	    int lowerbound = dcbounds[0];
 	    	    int upperbound = dcbounds[1];
-	    	    dcstep.limitAlternatives(lowerbound, upperbound);
+	    	    dcstep.limitUpperandLowerBound(lowerbound, upperbound);
 	    	    
 	    	    // Führe Entscheidungswahl durch
 	    	    dcstep.doStep();
@@ -1841,7 +1858,7 @@ public class Coordinator
   	    int bounds[] = calculateStartingBoundsForMainTours(currentDay, true);
   	    int lowerbound = bounds[0];
   	    int upperbound = bounds[1];
-  	    step.limitAlternatives(lowerbound, upperbound);
+  	    step.limitUpperandLowerBound(lowerbound, upperbound);
   	    
   	    // Führe Entscheidungswahl durch
   	    step.doStep();
@@ -1939,7 +1956,7 @@ public class Coordinator
 	    	    int dcbounds[] = calculateStartingBoundsForPreTours(currentDay, currentTour, true);
 	    	    int lowerbound = dcbounds[0];
 	    	    int upperbound = dcbounds[1];
-	    	    dcstep.limitAlternatives(lowerbound, upperbound);
+	    	    dcstep.limitUpperandLowerBound(lowerbound, upperbound);
 	    	    
 	    	    // Führe Entscheidungswahl durch
 	    	    dcstep.doStep();
@@ -2008,7 +2025,7 @@ public class Coordinator
 	    	    int dcbounds[] = calculateStartingBoundsForPostTours(currentDay, currentTour, true);
 	    	    int lowerbound = dcbounds[0];
 	    	    int upperbound = dcbounds[1];
-	    	    dcstep.limitAlternatives(lowerbound, upperbound);
+	    	    dcstep.limitUpperandLowerBound(lowerbound, upperbound);
 	    	    
 	    	    // Führe Entscheidungswahl durch
 	    	    dcstep.doStep();
@@ -2074,7 +2091,7 @@ public class Coordinator
 	      int bounds[] = calculateStartingBoundsForTours(currentDay, currentTour, true);
 		    int lowerbound = bounds[0];
 		    int upperbound = bounds[1];
-		    step.limitAlternatives(lowerbound, upperbound);
+		    step.limitUpperandLowerBound(lowerbound, upperbound);
 		    
 		    // Führe Entscheidungswahl durch
 		    step.doStep();
@@ -2172,22 +2189,23 @@ public class Coordinator
       	to=Configuration.NUMBER_OF_ACT_DURATION_CLASSES-1;
       }
         
-      step.limitAlternatives(from, to);
+      step.limitUpperandLowerBound(from, to);
       // add utility bonus of 10% to average time class (middle of the 3 selected)
       step.applyUtilityModification(timeCategory, 1.10);
     }
 	}
 
-
+	
 	/**
 	 * 
-	 * Bestimmt die Obergrenze für die Aktivitätendauern auf Basis bereits geplanter Aktivitäten.
+	 * Bestimmt die Obergrenze und Untergrenze für die Aktivitätendauern auf Basis bereits geplanter Aktivitäten.
 	 * 
 	 * @param act
-	 * @return
+	 * @return [0] = Untergrenze [1] = Obergrenze
 	 * @throws InvalidPersonPatternException
+	 * @throws InvalidHouseholdPatternException
 	 */
-	private int calculateMaxdurationDueToScheduledActivities(HActivity act) throws InvalidPersonPatternException, InvalidHouseholdPatternException
+	private int[] calculateDurationBoundsDueToOtherActivities(HActivity act) throws InvalidPersonPatternException, InvalidHouseholdPatternException
 	{
 		HDay dayofact = act.getDay();
 		
@@ -2381,6 +2399,7 @@ public class Coordinator
 		if (act.startTimeisScheduled()) lowerbound = act.getStartTime();
 		
 		int maxduration = upperbound - lowerbound;
+		int minduration = 1;
 		
     // Limitiere maximaleDauer auf 1 Tag falls mehr als 1 Tag!
     maxduration = Math.min(maxduration,1440);
@@ -2400,10 +2419,50 @@ public class Coordinator
     		throw new InvalidPersonPatternException(pattern, errorMsg);
     	}
     }
+    
+    /*
+     * Prüfen, ob Aktivität innerhalb einer Tour liegt und vorhergehende und nachfolgende Aktivität bereits bzgl. der
+     * Startzeit determiniert sind. Falls ja, ist untere Grenze = obere Grenze
+     */
+    if(!act.isActivityFirstinTour() && !act.isActivityLastinTour())
+    {
+    	HActivity letzteakt = act.getPreviousActivityinTour();
+    	HActivity naechsteakt = act.getNextActivityinTour();
+    	
+    	if (letzteakt.startTimeisScheduled() && letzteakt.durationisScheduled() && naechsteakt.startTimeisScheduled())
+    	{
+    		minduration = maxduration;
+    	}
+    }
+    /*
+     * Prüfen, ob Aktivität und die nachfolgende bereits eine Startzeit haben.
+     * Dann gilt ebenfalls untere Grenze = obere Grenze
+     */
+    if (act.startTimeisScheduled() && !act.isActivityLastinTour())
+    {
+    	if (act.getNextActivityinTour().startTimeisScheduled()) minduration=maxduration;
+    }
+    
+    
+    /*
+     * Rückgabe der Grenzen für die Dauer
+     */
 		
-		return maxduration;
+    int[] durationBounds = new int[2];
+    durationBounds[0] = minduration;
+    durationBounds[1] = maxduration;
+    
+		return durationBounds;
 	}
 	
+	
+	/**
+	 * 
+	 * Bestimmt anhands eines exakten Wertes die entsprechende Zeitklasse
+	 * 
+	 * @param maxduration
+	 * @return
+	 */
 	private int getDurationTimeClassforExactDuration (int maxduration)
 	{
     int timeClass=-1;
@@ -2461,6 +2520,8 @@ public class Coordinator
 		}
 		return result;
 	}
+	
+	
 	
 	/**
 	 * 
@@ -3011,7 +3072,7 @@ public class Coordinator
 	          maxTimeClass = i;
 	      }
 	  }
-	  step8j.limitAlternatives(0, maxTimeClass);
+	  step8j.limitUpperandLowerBound(0, maxTimeClass);
 	
 	}
 
@@ -3063,7 +3124,7 @@ public class Coordinator
 	  	}
 	  }
 	  // Schränke die Alternativen entsprechend der Grenzen ein
-	  modelstep.limitAlternatives(lowerbound, upperbound);
+	  modelstep.limitUpperandLowerBound(lowerbound, upperbound);
 	
 	}
 
@@ -3731,34 +3792,6 @@ public class Coordinator
 		}
 	}
 
-	/**
-	 * 
-	 * Prüft, ob WeekPattern überlappende Aktivitäten enthält
-	 * 
-	 * @param weekpattern
-	 * @return
-	 * @throws InvalidPersonPatternException
-	 */
-	private boolean weekPatternisFreeofOverlaps(HWeekPattern weekpattern) throws InvalidPersonPatternException
-	{
-		boolean freeofOverlaps=true;
-	
-		List<HActivity> allActivities = weekpattern.getAllActivities();
-		HActivity.sortActivityListbyWeekStartTimes(allActivities);
-    
-    for (int i = 0; i < allActivities.size()-1; i++)
-    {
-    	HActivity aktuelleakt = allActivities.get(i);
-    	HActivity naechsteakt = allActivities.get(i+1);
-    	
-    	assert !HActivity.checkActivityOverlapping(aktuelleakt,naechsteakt) : "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt;
-    	
-      if (HActivity.checkActivityOverlapping(aktuelleakt,naechsteakt)) throw new InvalidPersonPatternException(weekpattern, "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt);
-    }
-    return freeofOverlaps;
-	}
-	
-	
 	
 	
 	
@@ -3786,5 +3819,6 @@ public class Coordinator
       return null;
 
   }
-
+  
+  
 }

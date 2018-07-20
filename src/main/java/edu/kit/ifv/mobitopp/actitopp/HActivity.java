@@ -414,6 +414,42 @@ public class HActivity
 		
 		return result;
 	}
+	
+	/**
+	 * Legt wenn mögliche Startzeiten für die übergebenen Aktivitäten fest
+	 * 
+	 * @param actliste
+	 */
+  public static void createPossibleStarttimes(List<HActivity> actliste)
+  {
+  	for (HActivity act : actliste)
+    {
+    	if (!act.startTimeisScheduled())
+    	{
+        /*
+         * Falls die vorhergehende Aktivität in Tour bereits eine festgelegte Starteit und Dauer hat, 
+         * dann lege die Startzeit ausgehend von der vorhergehenden Aktivität fest.
+         */
+        if (!act.isActivityFirstinTour() 
+        				&& act.getPreviousActivityinTour().startTimeisScheduled() 
+        				&& act.getPreviousActivityinTour().durationisScheduled())
+    		{
+        	act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
+    		}	
+        	
+        /*
+         * Falls die nachfolgede Aktivität in Tour bereits eine festgelegte Starteit hat und die Aktivität selbst bereits eine Dauer, 
+         * dann lege die Startzeit ausgehend von der nachfolgenden Aktivität fest.
+         */
+        if (!act.isActivityLastinTour() 
+        		&& act.durationisScheduled()
+        		&& act.getNextActivityinTour().startTimeisScheduled())
+        {
+        	act.setStartTime(act.getNextActivityinTour().getTripStartTimeBeforeActivity() - act.getDuration());
+        }
+    	}
+    }
+  }
 
 	/**
    * Vergleicht zwei Aktivitäten in ihrer Reihenfolge

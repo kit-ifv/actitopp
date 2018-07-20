@@ -359,6 +359,33 @@ public class HWeekPattern
 		assert act.getType()=='H' : "keine Heimaktivität";
 		homeactivitities.add(act);
 	}
+	
+	/**
+	 * 
+	 * Prüft, ob WeekPattern überlappende Aktivitäten enthält
+	 * 
+	 * @param weekpattern
+	 * @return
+	 * @throws InvalidPersonPatternException
+	 */
+	public boolean weekPatternisFreeofOverlaps() throws InvalidPersonPatternException
+	{
+		boolean freeofOverlaps=true;
+	
+		List<HActivity> allActivities = this.getAllActivities();
+		HActivity.sortActivityListbyWeekStartTimes(allActivities);
+    
+    for (int i = 0; i < allActivities.size()-1; i++)
+    {
+    	HActivity aktuelleakt = allActivities.get(i);
+    	HActivity naechsteakt = allActivities.get(i+1);
+    	
+    	assert !HActivity.checkActivityOverlapping(aktuelleakt,naechsteakt) : "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt;
+    	
+      if (HActivity.checkActivityOverlapping(aktuelleakt,naechsteakt)) throw new InvalidPersonPatternException(this, "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt);
+    }
+    return freeofOverlaps;
+	}
 
 	
 }
