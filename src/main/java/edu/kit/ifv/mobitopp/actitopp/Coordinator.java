@@ -1014,17 +1014,32 @@ public class Coordinator
 	    	    
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert loc_lowerbound<=loc_upperbound;
-//TODO REMOVE
-	    	    //step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+
+	    	    // Beide Grenzen sind gleich, das heißt Dauer ist gesetzt
+	    	    if (loc_lowerbound==loc_upperbound)
+	    	    {
+	    	    	step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+	    	    }
+	    	    // Beide Grenzen sind NICHT gleich
+	    	    else
+	    	    {   	    
+		    	    // Limitiere die obere Grenze, falls diese kleiner ist als die bisherige oder nicht gesetzt ist
+		    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
 	    	    
+		    	    // Limitiere die untere Grenze, falls diese größer ist als die bisherige untere Grenze
+		    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound);   
+		    	    
+		    	    // Limitiere die unter Grenze, falls diese jetzt höher ist als die obere Grenze
+		    	    if (step_dc.getLowerBound() >= step_dc.getUpperBound()) step_dc.limitLowerBoundOnly(step_dc.getUpperBound());   
+	    	    }
+	    	   /* 
 	    	    // Falls die berechnete Maximalzeit kleiner ist als die aktuellen Bounds, korrigiere diese auch nach unten
 	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
 	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
 
 	    	    // Limitiere die obere Grenze, falls bisher keine vorhanden ist
 	    	    if (step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound);
-	    	    // Limitiere die untere Grenze, falls diese größer ist als die bisherige untere Grenze
-	    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound); 
+*/
 	    	    		
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
@@ -1113,17 +1128,24 @@ public class Coordinator
 	    	    
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert loc_lowerbound<=loc_upperbound;
-//TODO REMOVE
-	    	    //step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
-	    	    
-	    	    // Falls die berechnete Maximalzeit kleiner ist als die aktuellen Bounds, korrigiere diese auch nach unten
-	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
-	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
 
-	    	    // Limitiere die obere Grenze, falls bisher keine vorhanden ist
-	    	    if (step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound);
-	    	    // Limitiere die untere Grenze, falls diese größer ist als die bisherige untere Grenze
-	    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound); 
+	    	    // Beide Grenzen sind gleich, das heißt Dauer ist gesetzt
+	    	    if (loc_lowerbound==loc_upperbound)
+	    	    {
+	    	    	step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
+	    	    }
+	    	    // Beide Grenzen sind NICHT gleich
+	    	    else
+	    	    {   	    
+		    	    // Limitiere die obere Grenze, falls diese kleiner ist als die bisherige oder nicht gesetzt ist
+		    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
+	    	    
+		    	    // Limitiere die untere Grenze, falls diese größer ist als die bisherige untere Grenze
+		    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound);   
+		    	    
+		    	    // Limitiere die unter Grenze, falls diese jetzt höher ist als die obere Grenze
+		    	    if (step_dc.getLowerBound() >= step_dc.getUpperBound()) step_dc.limitLowerBoundOnly(step_dc.getUpperBound());   
+	    	    }
 	    	    		
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
