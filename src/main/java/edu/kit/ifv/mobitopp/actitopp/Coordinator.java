@@ -2437,11 +2437,18 @@ public class Coordinator
 						if (randomvalue <  0.75) anzahlweiterepersausverteilung=1;
 						if (randomvalue >= 0.75) anzahlweiterepersausverteilung=2;
 					}
-					if (hhgro>=4)
+					if (hhgro==4)
 					{
 						if (0 	 <= randomvalue && randomvalue < 0.73) 	anzahlweiterepersausverteilung=1;
 						if (0.73 <= randomvalue && randomvalue < 0.89) 	anzahlweiterepersausverteilung=2;
 						if (0.89 <= randomvalue && randomvalue <= 1) 		anzahlweiterepersausverteilung=3;
+					}
+					if (hhgro>=5)
+					{
+						if (0 	 <= randomvalue && randomvalue < 0.79) 	anzahlweiterepersausverteilung=1;
+						if (0.79 <= randomvalue && randomvalue < 0.92) 	anzahlweiterepersausverteilung=2;
+						if (0.92 <= randomvalue && randomvalue < 0.95) 	anzahlweiterepersausverteilung=3;
+						if (0.95 <= randomvalue && randomvalue <= 1) 		anzahlweiterepersausverteilung=4;
 					}
 					
 					//TODO Verbesserungsmöglichkeit: Die Auswahl gemeinsamer Personen kontextsensitiver gestalten, bspw. immer Vater mit Kind, ...
