@@ -2403,12 +2403,6 @@ public class Coordinator
 			if (tmpactivity.getJointStatus()!=4 && tmpactivity.getCreatorPersonIndex()==person.getPersIndex()) 
 			{
 				
-				//TODO 	Hier Code einfügen, der bestimmt mit welcher weiteren Person die Aktivität durchgeführt wird
-				//			Überlegen, ob man prüfen kann, bei welchem Personen das Einfügen zu einem Konflikt führt und diese dann nicht als Personen für das Einfügen berücksichtigen
-				/*
-				 * Vereinfachung: Zufällige Auswahl einer anderen Person aus dem Haushalt
-				 */
-				
 				// Erstelle Map mit allen anderen Personennummern im Haushalt, die noch nicht modelliert wurden und wähle zufällig eine
 				Map<Integer,ActitoppPerson> otherunmodeledpersinhh = new HashMap<Integer, ActitoppPerson>();
 				// Füge zunächst alle Personen des Haushalts hinzu
@@ -2427,9 +2421,34 @@ public class Coordinator
 				if (otherunmodeledpersinhh.size()>0)
 				{
 					// Bestimme, mit wievielen Personen die Aktivität durchgeführt wird
-					int anzahlgemeinsamerpers = 1;//(int) randomgenerator.getRandomValueBetween(1, otherunmodeledpersinhh.size(), 1);
-					//TODO Wahrscheinlichkeiten für die Anzahl an Personen, die an Akt teilnehmen bestimmen!
-					for (int i=1 ; i<= anzahlgemeinsamerpers; i++)
+					int anzahlweiterepersausverteilung=99;
+					double randomvalue = randomgenerator.getRandomValue();
+					int hhgro = person.getHousehold().getNumberofPersonsinHousehold();
+					
+					/*
+					 * Wahrscheinlichkeiten für die Anzahl mehrerer Personen stammt aus MOP-Auswertungen
+					 */
+					if (hhgro==2)
+					{
+						anzahlweiterepersausverteilung=1;
+					}
+					if (hhgro==3)
+					{
+						if (randomvalue <  0.75) anzahlweiterepersausverteilung=1;
+						if (randomvalue >= 0.75) anzahlweiterepersausverteilung=2;
+					}
+					if (hhgro>=4)
+					{
+						if (0 	 <= randomvalue && randomvalue < 0.73) 	anzahlweiterepersausverteilung=1;
+						if (0.73 <= randomvalue && randomvalue < 0.89) 	anzahlweiterepersausverteilung=2;
+						if (0.89 <= randomvalue && randomvalue <= 1) 		anzahlweiterepersausverteilung=3;
+					}
+					
+					//TODO Verbesserungsmöglichkeit: Die Auswahl gemeinsamer Personen kontextsensitiver gestalten, bspw. immer Vater mit Kind, ...
+								
+					// Maximale Anzahl wird zusätzlich begrenzt von der Anzahl weitere möglicher Personen, die noch nicht modelliert wurden
+					int anzahlweiterepers = Math.min(anzahlweiterepersausverteilung, otherunmodeledpersinhh.size());
+					for (int i=1 ; i<= anzahlweiterepers; i++)
 					{
 						// Wähle eine zufällige Nummer der verbleibenden Personen
 						List<Integer> keys = new ArrayList<Integer>(otherunmodeledpersinhh.keySet());
