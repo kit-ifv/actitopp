@@ -147,6 +147,7 @@ public class ExampleActiTopp {
 		
 		ActitoppPerson testperson = new ActitoppPerson(
 				testhousehold,  // Haushalt
+				1,							// PersNr im Haushalt
 				10, 						// PersIndex
 				55, 						// Alter
 				1, 							// Beruf

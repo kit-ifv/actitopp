@@ -153,6 +153,7 @@ public class CSVPersonInputReader
 	      // Person erzeugen
 	      ActitoppPerson tmpperson = new ActitoppPerson(
 	      		tmphousehold,
+	      		Integer.parseInt(splitted[1]),		// PersNr im Haushalt
 	      		Integer.parseInt(splitted[2]), 		// PersIndex
 	      		Integer.parseInt(splitted[3]), 		// Alter
 	      		Integer.parseInt(splitted[4]), 		// Beruf
@@ -160,9 +161,7 @@ public class CSVPersonInputReader
 	      		Double.parseDouble(splitted[6]),	// Pendeldistanz zur Arbeit in Kilometern	(0 falls kein Pendeln)
 	      		Double.parseDouble(splitted[7])		// Pendeldistanz zu Bildungszwecken in Kilometern (0 falls kein Pendeln)
 	  				);		
-	      
-	      // Person dem Haushalt hinzufügen
-	      tmphousehold.addHouseholdmember(tmpperson, Integer.parseInt(splitted[1]));
+	
 	      
 	      // Person der Map hinzufügen
 	      personmap.put(Integer.parseInt(splitted[2]), tmpperson);

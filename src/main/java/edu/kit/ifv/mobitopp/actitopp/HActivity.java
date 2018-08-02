@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,7 +30,8 @@ public class HActivity
   private HTrip tripbeforeactivity;
   private HTrip tripafteractivity;
  
-  private int jointStatus					= -1;
+  private int jointStatus = -1;
+  private List<ActitoppPerson> jointParticipants  = new ArrayList<ActitoppPerson>();
 
   /*
    * erwartete Wegezeit nach der Aktivität
@@ -56,6 +58,7 @@ public class HActivity
     setIndex(index);
     
     this.attributes = new HashMap<String, Double>();
+    setCreatorPersonIndex(day.getPerson().getPersIndex());
 	}  
 	
 	/**
@@ -227,19 +230,17 @@ public class HActivity
 		this.jointStatus = jointStatus;
 	}
 
+	/**
+	 * 
+	 * @return the estimatedTripTimeBeforeActivity
+	 */
 	public int getEstimatedTripTimeBeforeActivity() 
 	{
 		assert tripBeforeActivityisScheduled() : "Trip vor der Aktvitität ist zum Zugriffszeitpunkt nicht initialisiert";
 		int tmptriptimebefore = tripbeforeactivity.getTripduration();
 		return tmptriptimebefore;
 	}
-/*
-	private void setEstimatedTripTime(int estimatedTripTime) 
-	{
-		assert estimatedTripTime>0 || (estimatedTripTime==0 && getType()=='H') : "zu setzende Wegzeit ist nicht größer 0";
-		this.estimatedTripTime = estimatedTripTime;
-	}
-*/
+
 	/**
 	 * @return the estimatedTripTimeAfterActivity
 	 */
@@ -249,14 +250,6 @@ public class HActivity
 		int tmptriptimeafter = tripafteractivity.getTripduration();
 		return tmptriptimeafter;
 	}
-
-/*
-	private void setEstimatedTripTimeAfterActivity(int estimatedTripTimeAfterActivity) 
-	{
-		assert (estimatedTripTimeAfterActivity==0 && !isActivityLastinTour()) || (estimatedTripTimeAfterActivity>0 && isActivityLastinTour()) : "zu setzende Wegzeit muss 0 (bei nicht letzter Aktivität in Tour) oder größer 0 (bei letzter Aktivität in der Tour) sein";
-		this.estimatedTripTimeAfterActivity = estimatedTripTimeAfterActivity;
-	}
-*/
 	
 	public byte getMobiToppActType() 
 	{
@@ -992,6 +985,59 @@ public class HActivity
 		}
 		assert result!=-1 : "CreatorPersonIndex konnte nicht bestimmt werden!";
 		return result;
+	}
+	
+	/**
+	 * 
+	 * Legt den Personenindex fest, der diese Aktivität erstmals erstellt hat
+	 * 
+	 * @param persindex
+	 */
+	public void setCreatorPersonIndex(int persindex)
+	{
+		if (attributes.containsKey("CreatorPersonIndex"))
+		{
+			attributes.remove("CreatorPersonIndex");
+		}
+		attributes.put("CreatorPersonIndex", (double) persindex);
+	}
+
+	/**
+	 * @return the JointParticipants
+	 */
+	public List<ActitoppPerson> getJointParticipants() {
+		return jointParticipants;
+	}
+
+	/**
+	 * @param JointParticipants the JointParticipants to set
+	 */
+	public void setJointParticipants(List<ActitoppPerson> gemJointParticipants) {
+		this.jointParticipants = gemJointParticipants;
+	}
+	
+	/**
+	 * Fügt eine Person hinzu, die gleichzeitig eine gemeinsame Weg/Akt hat
+	 * 
+	 * @param person
+	 */
+	public void addJointParticipant (ActitoppPerson person)
+	{
+		jointParticipants.add(person);
+	}
+	
+	
+	/**
+	 * Löscht eine Person aus der Liste mit Personen, die gleichzeitig eine gemeinsame Weg/Akt hat
+	 * 
+	 * @param person
+	 */
+	public void removeJointParticipant (ActitoppPerson person)
+	{
+		jointParticipants.remove(person);
+		
+		// Wenn dadurch keine Teilnehmer mehr für die gemeinsame Aktivität übrig ist, entferne den Status als gemeinsame Aktivität
+		if (jointParticipants.size()==0) setJointStatus(4);
 	}
 	
 }

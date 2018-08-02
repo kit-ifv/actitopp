@@ -1,8 +1,5 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,12 +91,10 @@ public class Coordinator
    * (Main-)Methode zur Koordination der einzelnen Modellschritte
    *
    * @return
-   * @throws FileNotFoundException
-   * @throws IOException
-   * @throws PrerequisiteNotMetException
+   * @throws InvalidHouseholdPatternException
    * @throws InvalidPersonPatternException
    */
-  public void executeModel() throws FileNotFoundException, IOException, InvalidPersonPatternException, InvalidHouseholdPatternException
+  public void executeModel() throws InvalidPersonPatternException, InvalidHouseholdPatternException
   {
   	
   	// Durchführung der Modellschritte
@@ -157,7 +152,6 @@ public class Coordinator
     
     executeStep10A("10A");
        
-    
     createTourStartTimesDueToScheduledActivities();
     
     executeStep10("10M","10N", 1);
@@ -168,7 +162,7 @@ public class Coordinator
     if (Configuration.model_joint_actions) 
     {
     	executeStep11("11");
-  		// Bestimme, welche gemeinsamen Wege/Aktivitäten welcher anderen Personen beeinflussen
+  		// Bestimme, welche gemeinsamen Wege/Aktivitäten mit welchen anderen Personen durchgeführt werden sollen
   		selectWithWhomforJointActions();		
     }
     
@@ -673,9 +667,10 @@ public class Coordinator
 	  	if (possibleact.size()==0) 
 	  	{
 	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 4");
+	  		gemakt.removeJointParticipant(person);
 	  		break;
 	  	}
-			
+	  	
 	  	
 	  	/*
 	  	 * Schritt 5: Gemeinsame Akt von Typ 1 oder 3, d.h. mit gemeinsamem Hinweg muss, falls es sich um die erste Aktivität
@@ -704,6 +699,7 @@ public class Coordinator
 	  	if (possibleact.size()==0) 
 	  	{
 	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 6");
+	  		gemakt.removeJointParticipant(person);
 	  		break;
 	  	}
 	  	
@@ -775,6 +771,7 @@ public class Coordinator
 	  	if (possibleact.size()==0) 
 	  	{
 	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 9");
+	  		gemakt.removeJointParticipant(person);
 	  		break;
 	  	}
 	
@@ -810,7 +807,7 @@ public class Coordinator
 						actforreplacement.setStartTime(gemakt_starttime);
 						actforreplacement.setType(gemakt_acttype);
 						actforreplacement.setJointStatus(gemakt_jointStatus);
-						actforreplacement.addAttributetoMap("CreatorPersonIndex", (double) gemakt_creatorPersonIndex); 
+						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
 						// Wegzeiten aufgrund möglichen anderen Aktivitätentyps neu berechnen
 						actforreplacement.calculateAndSetTripTimes();
@@ -828,7 +825,7 @@ public class Coordinator
 						actforreplacement.setStartTime(gemakt_starttime);
 						actforreplacement.setType(gemakt_acttype);
 						actforreplacement.setJointStatus(gemakt_jointStatus);
-						actforreplacement.addAttributetoMap("CreatorPersonIndex", (double) gemakt_creatorPersonIndex); 
+						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
 						// Wegzeiten aufgrund möglichen anderen Aktivitätentyps neu berechnen
 						actforreplacement.calculateAndSetTripTimes();
@@ -840,7 +837,7 @@ public class Coordinator
 					{
 						// Akteigenschaften ersetzen
 						actforreplacement.setJointStatus(gemakt_jointStatus);
-						actforreplacement.addAttributetoMap("CreatorPersonIndex", (double) gemakt_creatorPersonIndex); 
+						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
 						// Weg erzeugen
 						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, gemakt_durationtripbefore));
@@ -854,7 +851,7 @@ public class Coordinator
 		}
 	
 		
-		// Sicherstellen, dass die Reihenfolge sortiert nach Index mit der nach Startzeit übereinstimmt!
+		//TODO  Sicherstellen, dass die Reihenfolge sortiert nach Index mit der nach Startzeit übereinstimmt!
 		
 	}
 
@@ -1196,7 +1193,7 @@ public class Coordinator
 	{
     // Step 9A: standard start time category for main tours during the week
     	
-    if (person.isPersonWorkerAndWorkMainToursAreScheduled())
+    if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled())
     {
     	 // AttributeLookup erzeugen
   		AttributeLookup lookup = new AttributeLookup(person);   	
@@ -1219,7 +1216,7 @@ public class Coordinator
 	private void executeStep10A(String id)
 	{
 	  // Step 10a: check if main tour for work/edu lies within standard start time (applies only to work/edu persons)
-	  if (person.isPersonWorkerAndWorkMainToursAreScheduled())
+	  if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled())
 	  {
 	    for (HDay currentDay : pattern.getDays())
 	    {
@@ -2354,14 +2351,6 @@ public class Coordinator
     				{
     					throw new InvalidHouseholdPatternException(pattern, "keine Zeit für Heimaktivität zwischen Touren " + acttour + " " + nexttour);
     				}
-    				/*
-    				 * Ansonsten modelliere nur die Person neu, da durch neue Zufallszahl eine der Konfliktaktivitäten ggf. zeitliche korrekt modelliert werden kann.
-    				 */
-    				else
-    				{
-    					//TODO Aktivieren
-    				// throw new InvalidPersonPatternException(pattern, "keine Zeit für Heimaktivität zwischen Touren " + acttour + " " + nexttour);
-    				}
     			}
     			assert duration2>0 : "Fehler - keine Home-Aktivität nach Ende der Tour möglich! - " + start_next_tour + " // " + ende_tour;
     			// Bestimme zugehörigen Tag zu der Heimaktivität
@@ -2414,7 +2403,8 @@ public class Coordinator
 			if (tmpactivity.getJointStatus()!=4 && tmpactivity.getCreatorPersonIndex()==person.getPersIndex()) 
 			{
 				
-				//TODO Hier Code einfügen, der bestimmt mit welcher weiteren Person die Aktivität durchgeführt wird
+				//TODO 	Hier Code einfügen, der bestimmt mit welcher weiteren Person die Aktivität durchgeführt wird
+				//			Überlegen, ob man prüfen kann, bei welchem Personen das Einfügen zu einem Konflikt führt und diese dann nicht als Personen für das Einfügen berücksichtigen
 				/*
 				 * Vereinfachung: Zufällige Auswahl einer anderen Person aus dem Haushalt
 				 */
@@ -2448,6 +2438,9 @@ public class Coordinator
 						// Aktivität zur Berücksichtigung bei anderer Person aufnehmen
 						ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);
 						otherperson.addJointActivityforConsideration(tmpactivity);
+						
+						// Andere Person als Teilnehmer bei der Aktivität eintragen
+						tmpactivity.addJointParticipant(otherperson);
 						
 						// Diese Person aus der Liste entfernen und ggf. noch andere Personen in Akt mit aufnehmen
 						otherunmodeledpersinhh.remove(randomkey);

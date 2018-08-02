@@ -73,7 +73,7 @@ public class Configuration {
   //Angaben der Dateinamen, die Parameter Estimated für einfache Regressionen enthalten
   public static final String[] linearregressionestimates_filenames =
   { 
-  		"gemwegakt_anteil_reg_estimates"
+  		"97estimates"
   };  
 
   

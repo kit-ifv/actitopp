@@ -1,7 +1,5 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -71,7 +69,8 @@ public class ActitoppPerson
 		/*
 		 * Zur Abwärtskompatibilität können Personen nach wie vor ohne Haushaltsbezug erstellt
 		 * werden. Es wird intern allerdings ein Haushaltsobjekt erzeugt, um den Variablenzugriff
-		 * auf Haushaltsvariablen einheitlich nach außen einheitlich zu gestalten.
+		 * auf Haushaltsvariablen nach außen einheitlich zu gestalten. Die Personen werden so alle
+		 * in 1-Personen Haushalten verwaltet.
 		 */
 		this.household = new ActiToppHousehold(
 				PersIndex, 
@@ -80,6 +79,7 @@ public class ActitoppPerson
 				areatype, 
 				numberofcarsinhousehold
 		);
+		this.household.addHouseholdmember(this, 1);
 				
 		this.setPersIndex(PersIndex);
 		this.setAge(age);
@@ -125,6 +125,7 @@ public class ActitoppPerson
 		this.setCommutingdistance_education(commutingdistance_education);
 		}	
 	
+	
 	/**
 	 * Konstruktor zum Erstellen einer Person mit Haushaltskontext
 	 * 
@@ -136,6 +137,7 @@ public class ActitoppPerson
 	 */
 	public ActitoppPerson(
 			ActiToppHousehold household,
+			int persnrinhousehold,
 			int PersIndex,
 			int age,
 			int employment,
@@ -143,6 +145,7 @@ public class ActitoppPerson
 	) {
 
 		this.household = household;
+		this.household.addHouseholdmember(this, persnrinhousehold);
 		
 		this.setPersIndex(PersIndex);
 		this.setAge(age);
@@ -168,6 +171,7 @@ public class ActitoppPerson
 	 */
 	public ActitoppPerson(
 			ActiToppHousehold household,
+			int persnrinhousehold,
 			int PersIndex,
 			int age,
 			int employment,
@@ -176,7 +180,7 @@ public class ActitoppPerson
 			double commutingdistance_education
 	) {
 		
-		this(household,PersIndex,age,employment,gender);
+		this(household,persnrinhousehold,PersIndex,age,employment,gender);
 		
 		this.setCommutingdistance_work(commutingdistance_work);
 		this.setCommutingdistance_education(commutingdistance_education);
@@ -444,8 +448,8 @@ public class ActitoppPerson
 		// AttributeLookup erzeugen
 		AttributeLookup lookup = new AttributeLookup(this);
 		
-		// Modellobjekt erzeugen
-		DefaultLinearRegressionCalculation regression = new DefaultLinearRegressionCalculation("gemwegakt_anteil_reg_estimates", fileBase, lookup);
+		// Modellobjekt erzeugen (97estimates.csv enthält die Modellparameter)
+		DefaultLinearRegressionCalculation regression = new DefaultLinearRegressionCalculation("97estimates", fileBase, lookup);
 		
 		// Initialisierung und Regressionskalkulation
 		regression.initializeEstimates();				
@@ -536,19 +540,15 @@ public class ActitoppPerson
 		Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
 	
 		// Erzeuge den Schedule
-		try 
-		{
+//		try 
+//		{
 			modelCoordinator.executeModel();
-		} 
-		catch (FileNotFoundException e) 
+//		} 
+/*		catch (IOException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+*/
 		
 	}
 	
@@ -606,7 +606,7 @@ public class ActitoppPerson
 	 * 
 	 * @return
 	 */
-	public boolean isPersonWorkerAndWorkMainToursAreScheduled()
+	public boolean isPersonWorkorSchoolCommuterAndMainToursAreScheduled()
 	{   
 		int employmenttype = this.getEmployment();
     if (employmenttype == 1 || employmenttype == 2 || employmenttype == 40 || employmenttype == 41 || employmenttype == 42 || employmenttype == 5)

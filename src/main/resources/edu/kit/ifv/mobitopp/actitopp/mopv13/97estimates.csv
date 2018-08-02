@@ -1,4 +1,4 @@
-Variable;Estimate;ContextIdentifier
+Variable;Estimate;contextidentifier
 Intercept;0.14439;person
 beruf_vollzeit;-0.03998;person
 beruf_teilzeit;-0.04051;person
