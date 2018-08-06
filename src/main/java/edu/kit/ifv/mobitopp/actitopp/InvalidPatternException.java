@@ -4,9 +4,11 @@ package edu.kit.ifv.mobitopp.actitopp;
 /**
  * @author Tim Hilgert
  * This Exception is thrown if the weekly pattern of a person is invalid.
- * In that case, it is advised to redo the whole activity creation proces for that person, but with a different seed
+ * In that case, it is advised to redo the whole activity creation process but with a different seed.
+ * 
+ * Depending on the source of the error, only one person or the whole household needs to be remodeled
  */
-public class InvalidPersonPatternException extends AbsInvalidPatternException
+public class InvalidPatternException extends AbsInvalidPatternException
 {
 
 	private static final long serialVersionUID = -3030772908826568766L;
@@ -14,11 +16,13 @@ public class InvalidPersonPatternException extends AbsInvalidPatternException
   private String reason;
   private HActivity[] involvedActivities;
   
-  private String errorType ="Person";
+  // Household or Person
+  private String errorType;
     
 
-  public InvalidPersonPatternException(HWeekPattern faultyPattern, String reason)
+  public InvalidPatternException(String errortype, HWeekPattern faultyPattern, String reason)
   {
+  	this.errorType = errortype;
     this.faultyHWeekPattern = faultyPattern;
     this.reason = reason;
   }
@@ -26,7 +30,10 @@ public class InvalidPersonPatternException extends AbsInvalidPatternException
   
 	public String getReason()
   {
-      return reason;
+      return errorType + " Error - "
+      				+ "HH" + faultyHWeekPattern.getPerson().getHousehold().getHouseholdIndex() + "/" 
+      				+ "P" + faultyHWeekPattern.getPerson().getPersIndex() 
+      				+ " - " + reason;
   }
 
 
@@ -56,7 +63,8 @@ public class InvalidPersonPatternException extends AbsInvalidPatternException
 	public void setInvolvedActivities(HActivity[] involvedActivities) {
 		this.involvedActivities = involvedActivities;
 	}
-	
+
+
 	/**
 	 * @return the errortype
 	 */
