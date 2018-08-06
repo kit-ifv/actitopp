@@ -528,8 +528,9 @@ public class ActitoppPerson
 	 * Methode erzeugt Wochenaktivitätenplan für Person
 	 * 
 	 * @param modelbase
+	 * @param rnghelper
 	 * @throws InvalidPersonPatternException
-	 * @throws PrerequisiteNotMetException
+	 * @throws InvalidHouseholdPatternException
 	 */
 	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPersonPatternException, InvalidHouseholdPatternException
 	{		
@@ -540,16 +541,7 @@ public class ActitoppPerson
 		Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
 	
 		// Erzeuge den Schedule
-//		try 
-//		{
-			modelCoordinator.executeModel();
-//		} 
-/*		catch (IOException e) 
-		{
-			e.printStackTrace();
-		} 
-*/
-		
+		modelCoordinator.executeModel();		
 	}
 	
   /**
@@ -577,6 +569,9 @@ public class ActitoppPerson
 	 * @param act
 	 */
 	public void addJointActivityforConsideration(HActivity act){
+		
+		//Sicherstellen, dass es eine gemeinsame Akt ist
+		assert act.getJointStatus()>=1 && act.getJointStatus()<=3 : "no jointAct!";
 		
 		// Prüfe, ob es bereits eine Aktivität in dem Zeitraum oder in der Tour gibt
 		boolean activityconflict = false;

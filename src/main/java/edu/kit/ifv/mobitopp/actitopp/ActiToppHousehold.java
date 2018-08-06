@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class ActiToppHousehold {
 	
-	private int HouseholdIndex;
+	private int householdIndex;
 	
 	// Enthält alle Haushaltsmitglieder
 	private Map<Integer, ActitoppPerson> householdmembers;
@@ -36,7 +36,7 @@ public class ActiToppHousehold {
 	public ActiToppHousehold(int householdIndex, int children0_10, int children_u18, int areatype, int numberofcarsinhousehold) {
 		
 		super();
-		HouseholdIndex = householdIndex;
+		this.householdIndex = householdIndex;
 
 		this.children0_10 = children0_10;
 		this.children_u18 = children_u18;
@@ -50,7 +50,7 @@ public class ActiToppHousehold {
 	 * @return the householdIndex
 	 */
 	public int getHouseholdIndex() {
-		return HouseholdIndex;
+		return householdIndex;
 	}
 
 	/**
@@ -201,5 +201,45 @@ public class ActiToppHousehold {
 		message.append(getNumberofcarsinhousehold());		
 		
 		return message.toString();
+	}
+	
+	/**
+	 * Methode erzeugt Wochenaktivitätenplan für einen gesamten Haushalt
+	 * 
+	 * @param modelbase
+	 * @param rnghelper
+	 * @throws InvalidHouseholdPatternException
+	 */
+	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator)	throws InvalidHouseholdPatternException
+	{
+		List<ActitoppPerson> hhmitglieder = getHouseholdmembersasList();
+		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmitglieder, fileBase);
+		
+		for (int i=0; i<hhmitglieder.size(); i++)
+		{
+			ActitoppPerson actperson = hhmitglieder.get(i);
+
+			boolean personscheduleOK = false;
+	    while (!personscheduleOK)
+	    {
+	      try
+	      {
+					// Setzte Modellierungsnummer im HH als Attribut der Person
+					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
+					
+	    		// Erzeuge Wochenaktivitätenplan
+	      	actperson.generateSchedule(fileBase, randomgenerator);
+	    			      	
+	        personscheduleOK = true;                
+	      }
+	      catch (InvalidPersonPatternException e)
+	      {
+	        System.err.println(e.getReason());
+	        //System.err.println("InvalidPersonPattern - involved: HH" + householdIndex + "/P"+ actperson.getPersIndex());
+	        
+	        throw new InvalidHouseholdPatternException(actperson.getWeekPattern(),"Remodel HH: InvalidPersonPattern - involved: HH" + householdIndex + "/P"+ actperson.getPersIndex());
+	      }
+	    }	    			        	
+		}
 	}
 }

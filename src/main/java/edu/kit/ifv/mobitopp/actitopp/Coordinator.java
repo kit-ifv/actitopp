@@ -592,6 +592,8 @@ public class Coordinator
 			// JointStatus der Aktivität bestimmen
 			int gemakt_jointStatus = gemakt.getJointStatus();
 			
+			assert gemakt_jointStatus>=1 && gemakt_jointStatus<=3 : "keine gemeinsame Aktivität in der Liste der gemeinsamen Aktivitäten!"; 
+			
 	  	/*
 	  	 * Bestimme mögliche Aktivitäten, die ersetzt werden können
 	  	 */
@@ -1250,9 +1252,10 @@ public class Coordinator
 	 * 
 	 * Legt die Startzeiten für Touren fest bei denen es bereits festgelegte Startzeiten für Aktivitäten gibt, 
 	 * bspw. durch bereits festgelegte gemeinsame Aktivitäten von anderen Personen
+	 * @throws InvalidPersonPatternException 
 	 * 
 	 */
-	private void createTourStartTimesDueToScheduledActivities()
+	private void createTourStartTimesDueToScheduledActivities() throws InvalidPersonPatternException
 	{
 		for (HDay currentDay : pattern.getDays())
 	  {
@@ -1269,7 +1272,7 @@ public class Coordinator
 		    {
 		  		
 		  		// Prüfe, ob es eine Aktivität in der Tour gibt, deren Startzeit bereits festgelegt wurde (bspw. durch gemeinsame Aktivitäten)
-		  		int startTimeDueToScheduledActivities=-1;
+		  		int startTimeDueToScheduledActivities=99999;
 		  		
 	  			int tripdurations=0;
 	  			int activitydurations=0;
@@ -1296,8 +1299,18 @@ public class Coordinator
 		  			}
 		  		}
 		  		
+		  		/*
+		  		 * Durch bereits festgelegte gemeinsame Aktivitäten kann es vorkommen, dass negative Tourstartzeiten entstehen.
+		  		 * Bsp: Die Aktivität stammt von einer anderen Person und ist sehr nahe an 0 Uhr. Falls die aktuelle Personen einen 
+		  		 * längeren Default-Pendelweg hat, kann dadurch der Startzeitpunkt der Tour unter 0 Uhr fallen!
+		  		 */
+		  		if (startTimeDueToScheduledActivities<0)
+		  		{
+		  			throw new InvalidPersonPatternException(pattern, "TourStartTimes <0 " + currentTour);
+		  		}
+		  		
 		  		// Lege Startzeit fest falls durch bereits festgelegte Aktivitäten bestimmt 
-		  		if (startTimeDueToScheduledActivities!=-1)
+		  		if (startTimeDueToScheduledActivities!=99999)
 		  		{
 		  			// Startzeit der Tour festlegen
 		  			currentTour.setStartTime(startTimeDueToScheduledActivities);   
