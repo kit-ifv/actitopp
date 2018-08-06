@@ -44,7 +44,7 @@ public class ActitoppPerson
 	
 	
 	/**
-	 * Konstruktor zum Erstellen einer Person
+	 * Konstruktor zum Erstellen einer Person ohne Haushaltskontext
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -89,11 +89,13 @@ public class ActitoppPerson
 		this.attributes = new HashMap<String, Double>();
 		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
 		
+		// Setzte Modellierungsnummer im HH als Attribut der Person
+		this.addAttributetoMap("numbermodeledinhh", (double) (1));	
 		}
 	
 	
 	/**
-	 * Konstruktor zum Erstellen einer Person - mit Pendelentfernung
+	 * Konstruktor zum Erstellen einer Person - mit Pendelentfernung, ohne Haushaltskontext
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -155,6 +157,8 @@ public class ActitoppPerson
 		this.attributes = new HashMap<String, Double>();
 		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
 		
+		// Setzte Modellierungsnummer im HH als Attribut der Person - Default-Wert (kann durch Reihenfolge für gemAkt verändert werden)
+		this.addAttributetoMap("numbermodeledinhh", (double) persnrinhousehold);
 		}	
 
 	

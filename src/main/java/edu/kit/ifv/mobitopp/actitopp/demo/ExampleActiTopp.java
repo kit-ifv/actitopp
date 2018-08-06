@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp.demo;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import edu.kit.ifv.mobitopp.actitopp.*;
@@ -16,13 +17,13 @@ public class ExampleActiTopp {
 	public static void main(String[] args) 
 	{
 		
-		// createAndModelOnePerson_Example1();
+		createAndModelOnePerson_Example1();
 
-		// createAndModelOnePerson_Example2();
+		createAndModelOnePerson_Example2();
 		
-	  // createAndModelOnePerson_Example3();
+	  createAndModelOnePerson_Example3();
 		
-		// createAndModelMultiplePersons_Example1();
+		createAndModelMultiplePersons_Example1();
 		
 		createAndModelMultiplePersons_Example2();
 		
@@ -259,64 +260,88 @@ public class ExampleActiTopp {
 	 */
 	public static void createAndModelMultiplePersons_Example2()
 	{
-		try
-		{			
-			CSVHouseholdInputReader hhloader = new CSVHouseholdInputReader(ModelFileBase.class.getResourceAsStream("demo/Demo_HHInfo.csv"));
-			HashMap<Number, ActiToppHousehold> householdmap = hhloader.loadInput();
-						
-			CSVPersonInputReader personloader = new CSVPersonInputReader(ModelFileBase.class.getResourceAsStream("demo/Demo_Personen_mitHHIndex.csv"));
-			HashMap<Number, ActitoppPerson> personmap = personloader.loadInput_withHHIndex(householdmap);
-			
-			for (Number hhkey : householdmap.keySet())
-			{
-				for (ActitoppPerson actperson : householdmap.get(hhkey).getHouseholdmembers().values())
-				{
-					System.out.println(actperson);
-					// System.out.println(actperson.getPersIndex());
-					
-					
-				 /* 
-				  * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
-				  *  
-					* In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-					* in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-					* In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
-					*/
-					boolean scheduleOK = false;
-			    while (!scheduleOK)
-			    {
-		        try
-		        {
-		      		// Erzeuge Wochenaktivitätenplan
-		        	actperson.generateSchedule(fileBase, randomgenerator);
-		      		
-		          scheduleOK = true;                
-		        }
-		        catch (InvalidPersonPatternException | InvalidHouseholdPatternException e)
-		        {
-		          System.err.println(e.getReason());
-		          System.err.println("person involved: " + actperson.getPersIndex());
-		        }
-			    }
-					
-					actperson.getWeekPattern().printAllActivitiesList();
-				}	 
-			}
 				
-			// Output als CSV-Datei
-			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
-			tripwriter.exportTripData(personmap);
-			
-			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
-			activitywriter.exportActivityData(personmap);
-			
-			System.out.println("all persons processed!");	
-			
+		/*
+		 * 
+		 * Inputpersonen aus SAS-Export-Datei einlesen
+		 * 
+		 */
+		HashMap<Number, ActiToppHousehold> householdmap = null;
+		HashMap<Number, ActitoppPerson> personmap = null;;
+				
+		try
+		{
+			CSVHouseholdInputReader hhloader = new CSVHouseholdInputReader(ModelFileBase.class.getResourceAsStream("demo/Demo_HHInfo.csv"));
+			CSVPersonInputReader personloader = new CSVPersonInputReader(ModelFileBase.class.getResourceAsStream("demo/Demo_Personen_mitHHIndex.csv"));
+			householdmap = hhloader.loadInput();			
+			personmap = personloader.loadInput_withHHIndex(householdmap);
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
+		
+		assert householdmap!=null : "HouseholdMap konnte nicht eingelesen werden.";
+		assert personmap !=null : "PersonMap konnte nicht eingelesen werden.";
+		
+		
+		for (Number key : householdmap.keySet())
+		{
+			ActiToppHousehold acthousehold = householdmap.get(key);
+			System.out.println("HH: " + acthousehold.getHouseholdIndex() + " HHGRO: " + acthousehold.getNumberofPersonsinHousehold());
+			
+							
+		  /* 
+		   * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
+		   * 
+		   * Reihenfolge der Aktivitätenplanmodellierung orientiert sich an der Wahrscheinlichkeit des Anteils gemeinsamer Aktivitäten
+		   * 
+		   * In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
+			 * in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
+			 * In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
+			 */
+			
+			boolean householdscheduleOK = false;
+			while (!householdscheduleOK)
+			{	
+				try
+				{
+					
+					// Pläne für den gesamten Haushalt generieren
+					acthousehold.generateSchedules(fileBase, randomgenerator);
+
+					//System.out.println("HHdone: " + key);
+					householdscheduleOK = true;
+					
+				}
+				catch (InvalidHouseholdPatternException e)
+				{
+					System.err.println(e.getReason());
+					
+	        // Setze die Modellierungsergebnisse dieses Haushalts zurück für neuen Versuch
+	        acthousehold.resetHouseholdModelingResults();
+				}
+			}
+		}
+				
+		
+		try
+		{
+			// Output der Wege als CSV-Datei
+			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
+			tripwriter.exportTripData(personmap);
+			
+			// Output der Aktivitäten als CSV-Datei
+			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
+			activitywriter.exportActivityData(personmap);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+			
+		System.out.println("all persons processed!");	
 
 	}
 
