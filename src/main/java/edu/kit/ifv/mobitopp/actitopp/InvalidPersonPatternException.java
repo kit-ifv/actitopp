@@ -13,6 +13,8 @@ public class InvalidPersonPatternException extends AbsInvalidPatternException
 	private HWeekPattern faultyHWeekPattern;
   private String reason;
   private HActivity[] involvedActivities;
+  
+  private String errorType ="Person";
     
 
   public InvalidPersonPatternException(HWeekPattern faultyPattern, String reason)
@@ -53,6 +55,21 @@ public class InvalidPersonPatternException extends AbsInvalidPatternException
 
 	public void setInvolvedActivities(HActivity[] involvedActivities) {
 		this.involvedActivities = involvedActivities;
+	}
+	
+	/**
+	 * @return the errortype
+	 */
+	public String getErrorType() {
+		return errorType;
+	}
+
+
+	/**
+	 * @param errortype the errortype to set
+	 */
+	public void setErrorType(String errortype) {
+		this.errorType = errortype;
 	}
 
 }

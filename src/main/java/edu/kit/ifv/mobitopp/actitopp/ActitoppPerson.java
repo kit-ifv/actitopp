@@ -533,10 +533,9 @@ public class ActitoppPerson
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
-	 * @throws InvalidPersonPatternException
-	 * @throws InvalidHouseholdPatternException
+	 * @throws InvalidPatternException
 	 */
-	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPersonPatternException, InvalidHouseholdPatternException
+	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPatternException
 	{		
 		// Erzeuge ein leeres Default-Pattern
 		weekPattern = new HWeekPattern(this);
@@ -584,9 +583,13 @@ public class ActitoppPerson
 			if(HActivity.checkActivityOverlapping(act,tmpact))
 			{
 				activityconflict = true;
-				System.err.println("Person " + getPersIndex() + ": Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");
-				System.err.println("aufzunehmende Akt: " + act);
-				System.err.println("existierende Akt: " + tmpact);
+				System.err.println("HH" + getHousehold().getHouseholdIndex() + "/P" + getPersIndex() + ": Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");
+				if (Configuration.debugenabled)
+				{
+					System.err.println("aufzunehmende Akt: " + act);
+					System.err.println("existierende Akt: " + tmpact);
+				}
+
 				break;
 			}
 		}

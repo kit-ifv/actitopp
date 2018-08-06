@@ -9,6 +9,10 @@ public abstract class AbsInvalidPatternException extends Exception{
 	public abstract String getReason();
 
   public abstract void setReason(String reason);
+  
+	public abstract String getErrorType();
+
+  public abstract void setErrorType(String reason);
 
   public abstract HWeekPattern getFaultyPattern();
 

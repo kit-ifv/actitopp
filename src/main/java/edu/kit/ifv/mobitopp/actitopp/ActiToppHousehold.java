@@ -208,9 +208,9 @@ public class ActiToppHousehold {
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
-	 * @throws InvalidHouseholdPatternException
+	 * @throws InvalidPatternException
 	 */
-	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator)	throws InvalidHouseholdPatternException
+	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator)	throws InvalidPatternException
 	{
 		List<ActitoppPerson> hhmitglieder = getHouseholdmembersasList();
 		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmitglieder, fileBase);
@@ -232,12 +232,19 @@ public class ActiToppHousehold {
 	    			      	
 	        personscheduleOK = true;                
 	      }
-	      catch (InvalidPersonPatternException e)
+	      catch (InvalidPatternException e)
 	      {
 	        System.err.println(e.getReason());
-	        //System.err.println("InvalidPersonPattern - involved: HH" + householdIndex + "/P"+ actperson.getPersIndex());
-	        
-	        throw new InvalidHouseholdPatternException(actperson.getWeekPattern(),"Remodel HH: InvalidPersonPattern - involved: HH" + householdIndex + "/P"+ actperson.getPersIndex());
+	         
+	        /*
+	         * Bei der Modellierung von gemeinsamen Aktivitäten werden Fehler auf der Personenebene wetergereicht.
+	         * In diesen Fällen muss der gesamte Haushalt neu modelliert werden, da gegenseitige Abhängigkeiten durch 
+	         * gemeinsame Aktivitäten und Wege bestehen können.
+	         */
+	        if (Configuration.model_joint_actions)
+	        {
+	        	throw new InvalidPatternException("Household",actperson.getWeekPattern(),"Remodel Household");
+	        }
 	      }
 	    }	    			        	
 		}

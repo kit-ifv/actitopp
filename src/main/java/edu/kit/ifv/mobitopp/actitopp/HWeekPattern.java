@@ -368,7 +368,7 @@ public class HWeekPattern
 	 * @return
 	 * @throws InvalidPersonPatternException
 	 */
-	public boolean weekPatternisFreeofOverlaps() throws InvalidPersonPatternException
+	public boolean weekPatternisFreeofOverlaps() 
 	{
 		boolean freeofOverlaps=true;
 	
@@ -381,8 +381,6 @@ public class HWeekPattern
     	HActivity naechsteakt = allActivities.get(i+1);
     	
     	assert !HActivity.checkActivityOverlapping(aktuelleakt,naechsteakt) : "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt;
-    	
-      if (HActivity.checkActivityOverlapping(aktuelleakt,naechsteakt)) throw new InvalidPersonPatternException(this, "activities are overlapping " + aktuelleakt +  " vs " + naechsteakt);
     }
     return freeofOverlaps;
 	}
