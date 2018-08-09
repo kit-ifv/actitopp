@@ -1,6 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp.demo;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import edu.kit.ifv.mobitopp.actitopp.*;
@@ -259,6 +261,11 @@ public class ExampleActiTopp {
 	 */
 	public static void createAndModelMultiplePersons_Example2()
 	{
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy kk:mm:ss");   
+		
+		LocalDateTime start = LocalDateTime.now();
+		long timestart = System.currentTimeMillis();
+		System.out.println(start.format(df));   
 				
 		/*
 		 * 
@@ -341,6 +348,19 @@ public class ExampleActiTopp {
 		
 			
 		System.out.println("all persons processed!");	
+		
+		
+		LocalDateTime end = LocalDateTime.now();
+		long timeende = System.currentTimeMillis();
+		System.out.println("End: " + end.format(df)); 
+		
+		
+		long dauer_msec = (timeende - timestart);
+		System.out.println("Duration total: " + dauer_msec + " milli sec"); 
+		double dauer_msec_perhh = dauer_msec / householdmap.size();
+		System.out.println("Duration per HH: " + dauer_msec_perhh + " milli sec");
+		double dauer_msec_perpers = dauer_msec / personmap.size();
+		System.out.println("Duration per Pers: " + dauer_msec_perpers + " milli sec");
 
 	}
 
