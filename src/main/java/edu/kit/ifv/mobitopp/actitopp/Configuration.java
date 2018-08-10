@@ -19,10 +19,11 @@ public class Configuration {
  * 		mopv10					=	Nutzung der Parameterschätzungen des MOP 2004-2013 (nur für actiTopp Version 1.0)
  * 		mopv11					= Nutzung der Parameterschätzungen des MOP 2004-2013 (ab actiTopp Version 1.1)
  * 		mopv13					= Nutzung der Parameterschätzungen des MOP 2004-2013 (inkl. gemeinsame Aktivitäten - ab actiTopp Version 1.3)
+ * 		mopv14					= Nutzung der Parameterschätzungen des MOP 2004-2013 (ab actiTopp Version 1.4)
  * 		stuttgart				=	Nutzung der Parameterschätzungen auf Basis des MOP 2004-2013 kalibriert auf die Stuttgart-Erhebung	
  */
 	
-	public static final String parameterset = "mopv13";
+	public static final String parameterset = "mopv14";
 	
 	
 	
@@ -45,7 +46,7 @@ public class Configuration {
 	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
   public static final String[] flowlist_initials =
   { 		
-  		"1A", "1B", "1C", "1D", "1E", "1F", 
+  		"1A", "1B", "1C", "1D", "1E", "1F", "1K",
   		"2A", 
   		"3A", "3B", 
   		"4A", 

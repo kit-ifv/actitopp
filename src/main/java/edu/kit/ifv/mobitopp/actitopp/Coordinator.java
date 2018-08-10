@@ -109,6 +109,8 @@ public class Coordinator
     executeStep1("1D", "anztage_s");
     executeStep1("1E", "anztage_t");
     executeStep1("1F", "anztage_immobil");
+    
+    executeStep1("1K", "anztourentag_def");
        
     executeStep2("2A");
     

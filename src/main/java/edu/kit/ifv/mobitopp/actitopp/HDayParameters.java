@@ -388,6 +388,92 @@ public enum HDayParameters {
 			return (+1) * day.getHighestTourIndex();
 		}
 	},	
+	
+	tagvorher_0vortouren("tagvorher_0vortouren") 
+	{
+		@Override
+		public double getAttribute(HDay day) 
+		{
+			HDay previousday = day.getPreviousDay();
+			int tagvorhervortouren=999;
+			if (previousday!=null)
+			{
+				if (previousday.isHomeDay())
+				{
+					tagvorhervortouren=0;
+				}
+				else
+				{
+					tagvorhervortouren = -1 * previousday.getLowestTourIndex();
+				}
+			}
+			return (tagvorhervortouren==0 ? 1.0 : 0.0);
+		}
+	},	
+	tagvorher_1vortour("tagvorher_1vortour") 
+	{
+		@Override
+		public double getAttribute(HDay day) 
+		{
+			HDay previousday = day.getPreviousDay();
+			int tagvorhervortouren=999;
+			if (previousday!=null)
+			{
+				if (previousday.isHomeDay())
+				{
+					tagvorhervortouren=0;
+				}
+				else
+				{
+					tagvorhervortouren = -1 * previousday.getLowestTourIndex();
+				}
+			}
+			return (tagvorhervortouren==1 ? 1.0 : 0.0);
+		}
+	},
+	tagvorher_0nachtouren("tagvorher_0nachtouren") 
+	{
+		@Override
+		public double getAttribute(HDay day) 
+		{
+			HDay previousday = day.getPreviousDay();
+			int tagvorhernachtouren=999;
+			if (previousday!=null)
+			{
+				if (previousday.isHomeDay())
+				{
+					tagvorhernachtouren=0;
+				}
+				else
+				{
+					tagvorhernachtouren = +1 * previousday.getHighestTourIndex();
+				}
+			}
+			return (tagvorhernachtouren==0 ? 1.0 : 0.0);
+		}
+	},
+	tagvorher_1nachtour("tagvorher_1nachtour") 
+	{
+		@Override
+		public double getAttribute(HDay day) 
+		{
+			HDay previousday = day.getPreviousDay();
+			int tagvorhernachtouren=999;
+			if (previousday!=null)
+			{
+				if (previousday.isHomeDay())
+				{
+					tagvorhernachtouren=0;
+				}
+				else
+				{
+					tagvorhernachtouren = +1 * previousday.getHighestTourIndex();
+				}
+			}
+			return (tagvorhernachtouren==1 ? 1.0 : 0.0);
+		}
+	},
+	
 
 	/*
 	 * AnzahlTouren am Tag
