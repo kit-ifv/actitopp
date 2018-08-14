@@ -230,6 +230,7 @@ public class Coordinator
   		{
   			numberoftoursperday_lowerboundduetojointactions[act.getDayIndex()] = 1;
   		}
+  		//TODO ggf. deaktivieren, da dadurch die Anzahl an Touren zu hoch wird!
   		// Bei mehr als 2 Aktivitäten mindestens zwei Touren
   		else
   		{

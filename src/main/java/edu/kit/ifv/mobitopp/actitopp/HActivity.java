@@ -911,7 +911,7 @@ public class HActivity
 	
 	public boolean isScheduled()
 	{
-		return this.duration!=-1 && this.starttime!=-1 && this.type!='x' && this.jointStatus!=-1;
+		return this.duration!=-1 && this.starttime!=-1 && this.type!='x' && (Configuration.model_joint_actions ? this.jointStatus!=-1 : true);
 	}
 	
 	public boolean activitytypeisScheduled()
