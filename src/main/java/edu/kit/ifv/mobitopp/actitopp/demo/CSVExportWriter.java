@@ -75,7 +75,7 @@ public class CSVExportWriter
 	{
 						  	
 	  	// Header
-	  	writer.append("HHIndex;PersNr;PersIndex;WOTAG;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
+	  	writer.append("HHIndex;PersNr;PersIndex;WOTAG;TourIndex;AktIndex;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
 	  	writer.append('\n');
 	  	writer.flush();
 
@@ -112,6 +112,18 @@ public class CSVExportWriter
 		
 		String rueckgabe="";
 		
+		/*
+		 * TourINdex und Aktindex für Heimaktivitäten bestimmen
+		 * Falls Tag ein kompletter Heimtag ist, dann wird 0/0 zurückgegeben, ansonsten -99/-99
+		 */
+		int tmptourindex=0;
+		int tmpaktindex=0;
+		if (act.getDay().getAmountOfTours()>0)
+		{
+			tmptourindex=-99;
+			tmpaktindex=-99;
+		}
+			
 		// HHIndex
 		rueckgabe += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
 		// PersNr
@@ -120,6 +132,10 @@ public class CSVExportWriter
 		rueckgabe += act.getPerson().getPersIndex() + ";";
 		// WOTAG
 		rueckgabe += act.getWeekDay() + ";";
+		// TourIndex
+		rueckgabe += (act.isHomeActivity() ? tmptourindex : act.getTourIndex()) + ";";
+		// AktIndex
+		rueckgabe += (act.isHomeActivity() ? tmpaktindex : act.getIndex()) + ";";
 		// Startzeit
 		rueckgabe += act.getStartTime() + ";";
 		// Startzeit_woche
