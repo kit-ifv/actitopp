@@ -249,4 +249,52 @@ public class ActiToppHousehold {
 	    }	    			        	
 		}
 	}
+
+	/**
+	 * Methode erzeugt Wochenaktivitätenplan für einen gesamten Haushalt
+	 * 
+	 * @param modelbase
+	 * @param rnghelper
+	 * @param debugloggers
+	 * @throws InvalidPatternException
+	 */
+	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator, DebugLoggers debugloggers)	throws InvalidPatternException
+	{
+		List<ActitoppPerson> hhmitglieder = getHouseholdmembersasList();
+		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmitglieder, fileBase);
+		
+		for (int i=0; i<hhmitglieder.size(); i++)
+		{
+			ActitoppPerson actperson = hhmitglieder.get(i);
+	
+			boolean personscheduleOK = false;
+	    while (!personscheduleOK)
+	    {
+	      try
+	      {
+					// Setzte Modellierungsnummer im HH als Attribut der Person
+					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
+					
+	    		// Erzeuge Wochenaktivitätenplan
+	      	actperson.generateSchedule(fileBase, randomgenerator, debugloggers);
+	    			      	
+	        personscheduleOK = true;                
+	      }
+	      catch (InvalidPatternException e)
+	      {
+	        System.err.println(e.getReason());
+	         
+	        /*
+	         * Bei der Modellierung von gemeinsamen Aktivitäten werden Fehler auf der Personenebene wetergereicht.
+	         * In diesen Fällen muss der gesamte Haushalt neu modelliert werden, da gegenseitige Abhängigkeiten durch 
+	         * gemeinsame Aktivitäten und Wege bestehen können.
+	         */
+	        if (Configuration.model_joint_actions)
+	        {
+	        	throw new InvalidPatternException("Household",actperson.getWeekPattern(),"Remodel Household");
+	        }
+	      }
+	    }	    			        	
+		}
+	}
 }

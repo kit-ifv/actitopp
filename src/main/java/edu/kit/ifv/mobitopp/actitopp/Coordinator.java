@@ -27,6 +27,7 @@ public class Coordinator
 
     private ModelFileBase fileBase;
     private RNGHelper randomgenerator;
+    private DebugLoggers debugloggers;
    
     // important for Step8C: dtd tables must be modified after each MC-selection
     // process
@@ -82,6 +83,20 @@ public class Coordinator
       modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
       modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
 
+    }
+    
+    /**
+     * 
+     * Konstruktor
+     * 
+     * @param person
+     * @param personIndex
+     * @param fileBase
+     */
+    public Coordinator(ActitoppPerson person, ModelFileBase fileBase, RNGHelper randomgenerator, DebugLoggers debugloggers)
+    {
+    	this(person, fileBase, randomgenerator);
+    	this.debugloggers = debugloggers;    	
     }
     
  
@@ -255,7 +270,13 @@ public class Coordinator
     step.doStep();
     
     // Ergebnis zu Personen-Map hinzufügen
-    person.addAttributetoMap(variablenname, Double.parseDouble(step.getAlternativeChosen()));
+    double decision = Double.parseDouble(step.getAlternativeChosen());
+    person.addAttributetoMap(variablenname, decision);
+    
+    if(debugloggers!= null && debugloggers.existsLogger(id))
+    {
+    	debugloggers.getLogger(id).put(person, String.valueOf(decision));
+    }
 	}
 
 	/**
@@ -285,6 +306,12 @@ public class Coordinator
   	    // Auswahl durchführen
   	    step.doStep();
   	    char activityType = step.getAlternativeChosen().charAt(0);
+  	    
+  	    // DebugLogger schreiben falls aktiviert
+  	    if(debugloggers!= null && debugloggers.existsLogger(id))
+  	    {
+  	    	debugloggers.getLogger(id).put(currentDay, String.valueOf(activityType));
+  	    }
     		
   	    if (activityType!='H')
         {	
@@ -355,6 +382,12 @@ public class Coordinator
 	    
 	    // Entscheidung durchführen
 	    step.doStep();
+	    
+	    // DebugLogger schreiben falls aktiviert
+	    if(debugloggers!= null && debugloggers.existsLogger(id))
+	    {
+	    	debugloggers.getLogger(id).put(currentDay, String.valueOf(step.getDecision()));
+	    }
             
       // Erstelle die weiteren Touren an diesem Tag basierend auf der Entscheidung und füge Sie in das Pattern ein, falls sie noch nicht existieren
       for (int j = 1; j <= step.getDecision(); j++)
@@ -407,6 +440,12 @@ public class Coordinator
 
           // Speichere gewählte Entscheidung für weitere Verwendung
           char chosenActivityType = step.getAlternativeChosen().charAt(0);
+          
+          // DebugLogger schreiben falls aktiviert
+    	    if(debugloggers!= null && debugloggers.existsLogger(id))
+    	    {
+    	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(chosenActivityType));
+    	    }
           
   	    	HActivity activity = null;
   	    	
@@ -479,6 +518,12 @@ public class Coordinator
   	    // Entscheidung durchführen
   	    step.doStep();    		
 
+  	    // DebugLogger schreiben falls aktiviert
+  	    if(debugloggers!= null && debugloggers.existsLogger(id))
+  	    {
+  	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(step.getDecision()));
+  	    }
+  	    
   	    // Erstelle die weiteren Aktivitäten in dieser Tour basierend auf der Entscheidung und füge Sie in das Pattern ein
         for (int j = 1; j <= step.getDecision(); j++)
         {
@@ -527,7 +572,14 @@ public class Coordinator
       	    step.doStep();
 
             // Aktivitätstyp festlegen
-      	    currentActivity.setType(step.getAlternativeChosen().charAt(0));
+      	    char chosenActivityType = step.getAlternativeChosen().charAt(0);
+      	    currentActivity.setType(chosenActivityType);
+      	    
+      	    // DebugLogger schreiben falls aktiviert
+      	    if(debugloggers!= null && debugloggers.existsLogger(id))
+      	    {
+      	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(chosenActivityType));
+      	    }
           }
         }
       }
@@ -902,6 +954,12 @@ public class Coordinator
 	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
 	    step.doStep();
 	    
+	    //Debug-Logger schreiben falls aktiviert
+	    if(debugloggers!= null && debugloggers.existsLogger(id))
+	    {
+	    	debugloggers.getLogger(id).put(person, String.valueOf(step.getDecision()));
+	    }
+	    
 	    // Ergebnis als Index und Alternative zu Personen-Map hinzufügen für spätere Verwendung
 	    person.addAttributetoMap(activitytype+"budget_category_index", (double) step.getDecision());
 	    person.addAttributetoMap(activitytype+"budget_category_alternative", Double.parseDouble(step.getAlternativeChosen()));
@@ -932,6 +990,13 @@ public class Coordinator
         step.doStep();
         
         int chosenTime = step.getChosenTime();
+        
+  	    //Debug-Logger schreiben falls aktiviert
+  	    if(debugloggers!= null && debugloggers.existsLogger(id))
+  	    {
+  	    	debugloggers.getLogger(id).put(person, String.valueOf(chosenTime));
+  	    }
+  	    
         //Entscheidungsindex als Property speichern
         person.addAttributetoMap(activitytype+"budget_exact",(double) chosenTime);
       }
@@ -967,6 +1032,12 @@ public class Coordinator
     	    // Step-Objekt erzeugen
     	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
     	    step.doStep();
+    	    
+    	    //Debug-Logger schreiben falls aktiviert
+    	    if(debugloggers!= null && debugloggers.existsLogger(id))
+    	    {
+    	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(step.getAlternativeChosen()));
+    	    }
 
     	    // Eigenschaft abspeichern
     	    if (Configuration.coordinated_modelling)
@@ -1072,6 +1143,12 @@ public class Coordinator
 	    	    		
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
+	    	    
+	    	    //Debug-Logger schreiben falls aktiviert
+	    	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
+	    	    {
+	    	    	debugloggers.getLogger(id_dc).put(currentActivity, String.valueOf(step_dc.getDecision()));
+	    	    }
 	
 	    	    // Entscheidungsindex abspeichern
 	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step_dc.getDecision()); 	
@@ -1095,6 +1172,12 @@ public class Coordinator
 			      
 			      // Wahlentscheidung durchführen
 			      step_mc.doStep();
+			      
+	    	    //Debug-Logger schreiben falls aktiviert
+	    	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
+	    	    {
+	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(step_mc.getChosenTime()));
+	    	    }
 			     
 			      // Speichere Ergebnisse ab
 			      currentActivity.setDuration(step_mc.getChosenTime());
@@ -1179,6 +1262,12 @@ public class Coordinator
 
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
+	    	    
+	    	    //Debug-Logger schreiben falls aktiviert
+	    	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
+	    	    {
+	    	    	debugloggers.getLogger(id_dc).put(currentActivity, String.valueOf(step_dc.getDecision()));
+	    	    }
 	
 	    	    // Entscheidungsindex abspeichern
 	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step_dc.getDecision()); 	
@@ -1202,6 +1291,12 @@ public class Coordinator
 			      
 			      // Wahlentscheidung durchführen
   		      step_mc.doStep();
+  		      
+	    	    //Debug-Logger schreiben falls aktiviert
+	    	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
+	    	    {
+	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(step_mc.getChosenTime()));
+	    	    }
   		     
   		      // Speichere Ergebnisse ab
   		      currentActivity.setDuration(step_mc.getChosenTime());
@@ -1231,6 +1326,12 @@ public class Coordinator
 	    // Step-Objekt erzeugen
 	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
 	    step.doStep();
+	    
+	    //Debug-Logger schreiben falls aktiviert
+	    if(debugloggers!= null && debugloggers.existsLogger(id))
+	    {
+	    	debugloggers.getLogger(id).put(person, String.valueOf(step.getDecision()));
+	    }
 
 	    // Eigenschaft abspeichern
 	    person.addAttributetoMap("main_tours_default_start_cat",(double) step.getDecision());
@@ -1266,6 +1367,12 @@ public class Coordinator
 	  	    // Step-Objekt erzeugen
 	  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
 	  	    step.doStep();
+	  	    
+	  	    //Debug-Logger schreiben falls aktiviert
+	  	    if(debugloggers!= null && debugloggers.existsLogger(id))
+	  	    {
+	  	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(step.getAlternativeChosen()));
+	  	    }
 	
 	  	    // Eigenschaft abspeichern
 	  	    currentTour.addAttributetoMap("default_start_cat_yes",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
@@ -1399,6 +1506,12 @@ public class Coordinator
 		    
 		    // Führe Entscheidungswahl durch
 		    step_dc.doStep();
+		    
+  	    //Debug-Logger schreiben falls aktiviert
+  	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
+  	    {
+  	    	debugloggers.getLogger(id_dc).put(currentTour, String.valueOf(step_dc.getDecision()));
+  	    }
 	
 		    // Eigenschaft abspeichern
 		    currentTour.addAttributetoMap("tourStartCat_index",(double) step_dc.getDecision());
@@ -1427,9 +1540,15 @@ public class Coordinator
 	      
 	      // Entscheidung durchführen
 	      step_mc.doStep();
+	      int chosenStartTime = step_mc.getChosenTime();
+	      
+  	    //Debug-Logger schreiben falls aktiviert
+  	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
+  	    {
+  	    	debugloggers.getLogger(id_mc).put(currentTour, String.valueOf(chosenStartTime));
+  	    }
 	      
 	      // Speichere Ergebnisse ab
-	      int chosenStartTime = step_mc.getChosenTime();
 	      currentTour.setStartTime(chosenStartTime);   	  	
 	      
 	      // Setze die Startzeiten der Aktivitäten in dieser Tour
@@ -1484,6 +1603,12 @@ public class Coordinator
 	    	    
 	    	    // Führe Entscheidungswahl durch
 	    	    dcstep.doStep();
+	    	    
+	    	    //Debug-Logger schreiben falls aktiviert
+	    	    if(debugloggers!= null && debugloggers.existsLogger("10S"))
+	    	    {
+	    	    	debugloggers.getLogger("10S").put(currentTour, String.valueOf(dcstep.getDecision()));
+	    	    }
 	
 	    	    // Eigenschaft abspeichern
 	    	    int chosenHomeTimeCategory = dcstep.getDecision();
@@ -1504,6 +1629,12 @@ public class Coordinator
 	          
 	          // Entscheidung durchführen
 	          mcstep.doStep();
+	          
+	    	    //Debug-Logger schreiben falls aktiviert
+	    	    if(debugloggers!= null && debugloggers.existsLogger("10T"))
+	    	    {
+	    	    	debugloggers.getLogger("10T").put(currentTour, String.valueOf(mcstep.getChosenTime()));
+	    	    }
 	          
 	          // Speichere Ergebnisse ab
 	          int starttimetour = currentDay.getTour(currentTour.getIndex()-1).getEndTime() + mcstep.getChosenTime();
@@ -1560,6 +1691,12 @@ public class Coordinator
 	    	    // Step-Objekt erzeugen
 	    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
 	    	    step.doStep();
+	    	    
+      	    // DebugLogger schreiben falls aktiviert
+      	    if(debugloggers!= null && debugloggers.existsLogger(id))
+      	    {
+      	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(step.getAlternativeChosen()));
+      	    }
 	
 	          // Status festlegen
 	    	    currentActivity.setJointStatus(Integer.parseInt(step.getAlternativeChosen()));
@@ -1596,6 +1733,12 @@ public class Coordinator
 	  // Step-Objekt erzeugen
 	  DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
 	  step.doStep();
+	  
+    // DebugLogger schreiben falls aktiviert
+    if(debugloggers!= null && debugloggers.existsLogger(id))
+    {
+    	debugloggers.getLogger(id).put(activity, String.valueOf(step.getAlternativeChosen()));
+    }
 	
 	  // Speichere gewählte Entscheidung für weitere Verwendung
 	  int chosenActivityType = Integer.parseInt(step.getAlternativeChosen());

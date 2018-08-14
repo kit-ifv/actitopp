@@ -11,6 +11,7 @@ public class ExampleActiTopp {
 	
 	private static ModelFileBase fileBase = new ModelFileBase();
 	private static RNGHelper randomgenerator = new RNGHelper(1234);
+	private static DebugLoggers debugloggers = new DebugLoggers();
 	
 	/**
 	 * 
@@ -18,7 +19,7 @@ public class ExampleActiTopp {
 	 */
 	public static void main(String[] args) 
 	{
-		
+			
 		createAndModelOnePerson_Example1();
 
 		createAndModelOnePerson_Example2();
@@ -27,7 +28,12 @@ public class ExampleActiTopp {
 	
 		createAndModelMultiplePersons_Example1();
 		
+		/*beispielhafte Verwendung eines Debug-Loggers für Entscheidung 2A*/
+		debugloggers.addDebugLogger("2A");
+
 		createAndModelMultiplePersons_Example2();
+
+		debugloggers.exportLoggerInfos("2A", "D:/DemoLogger2A.csv");
 		
 	}
 	
@@ -258,6 +264,7 @@ public class ExampleActiTopp {
 	 * 
 	 * Erzeugung mehrerer Personen inkl. Haushaltskontext & Aktivitätenplan
 	 * 
+	 * 
 	 */
 	public static void createAndModelMultiplePersons_Example2()
 	{
@@ -314,7 +321,7 @@ public class ExampleActiTopp {
 				{
 					
 					// Pläne für den gesamten Haushalt generieren
-					acthousehold.generateSchedules(fileBase, randomgenerator);
+					acthousehold.generateSchedules(fileBase, randomgenerator, debugloggers);
 
 					//System.out.println("HHdone: " + key);
 					householdscheduleOK = true;

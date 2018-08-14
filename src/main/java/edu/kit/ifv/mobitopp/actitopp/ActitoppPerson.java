@@ -547,6 +547,26 @@ public class ActitoppPerson
 		modelCoordinator.executeModel();		
 	}
 	
+	/**
+	 * Methode erzeugt Wochenaktivitätenplan für Person
+	 * 
+	 * @param modelbase
+	 * @param rnghelper
+	 * @param debugloggers
+	 * @throws InvalidPatternException
+	 */
+	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator, DebugLoggers debugloggers)	throws InvalidPatternException
+	{		
+		// Erzeuge ein leeres Default-Pattern
+		weekPattern = new HWeekPattern(this);
+		
+		// Erzeuge einen Coordinator zum Modellablauf
+		Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator, debugloggers);
+	
+		// Erzeuge den Schedule
+		modelCoordinator.executeModel();		
+	}
+	
   /**
    * 
    * @return
