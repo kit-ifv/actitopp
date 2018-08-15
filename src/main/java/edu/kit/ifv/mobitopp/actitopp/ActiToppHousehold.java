@@ -175,6 +175,7 @@ public class ActiToppHousehold {
 		}
 	}
 	
+
 	
 	@Override
 	public String toString()	{
@@ -283,7 +284,8 @@ public class ActiToppHousehold {
 	      catch (InvalidPatternException e)
 	      {
 	        System.err.println(e.getReason());
-	         
+	        debugloggers.deleteInformationforPerson(actperson);
+	        
 	        /*
 	         * Bei der Modellierung von gemeinsamen Aktivitäten werden Fehler auf der Personenebene wetergereicht.
 	         * In diesen Fällen muss der gesamte Haushalt neu modelliert werden, da gegenseitige Abhängigkeiten durch 

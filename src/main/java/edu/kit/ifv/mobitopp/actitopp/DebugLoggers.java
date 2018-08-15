@@ -4,6 +4,7 @@ package edu.kit.ifv.mobitopp.actitopp;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 /**
@@ -261,4 +262,114 @@ public class DebugLoggers
 		}		
 	}
 
+	/**
+	 * 
+	 * Entfernt alle Logging Ergebnisse für einen Haushalt
+	 * Ist notwendig, falls der Haushalt beispielsweise erneut modelliert wird
+	 * 
+	 * @param tmphousehold
+	 */
+	public void deleteInformationforHousehold(ActiToppHousehold tmphousehold)
+	{
+		int hhindex = tmphousehold.getHouseholdIndex();
+		for (String key : debugloggers.keySet())
+		{
+			/*
+			 * Alle Objekte eines DebugLoggers durchgehen
+			 */
+			LinkedHashMap<Object, String> relevantmap = debugloggers.get(key);
+			
+			for(Iterator<Object> it = relevantmap.keySet().iterator(); it.hasNext();)
+	    {			
+				Object referenceobject = it.next();	
+				// HouseholdLogger
+				if (referenceobject instanceof ActiToppHousehold)
+				{
+					ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
+					if (acthousehold.getHouseholdIndex()==hhindex) it.remove();			
+				}
+				
+				// PersonLogger
+				if (referenceobject instanceof ActitoppPerson)
+				{
+					ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
+					if (actperson.getHousehold().getHouseholdIndex()==hhindex) it.remove();
+				}
+				
+				// Daylogger
+				if (referenceobject instanceof HDay)
+				{
+					HDay actday = ((HDay) referenceobject);
+					if (actday.getPerson().getHousehold().getHouseholdIndex()==hhindex) it.remove();						
+				}
+				
+				// Tourlogger
+				if (referenceobject instanceof HTour)
+				{
+					HTour acttour = ((HTour) referenceobject);
+					if (acttour.getPerson().getHousehold().getHouseholdIndex()==hhindex) it.remove();
+				}
+				
+				// Activitylogger
+				if (referenceobject instanceof HActivity)
+				{
+					HActivity actact = ((HActivity) referenceobject);
+					if (actact.getPerson().getHousehold().getHouseholdIndex()==hhindex) it.remove();	
+				}				
+	    }
+		}
+	}
+	
+	/**
+	 * 
+	 * Entfernt alle Logging Ergebnisse für eine Person
+	 * Ist notwendig, falls die Person beispielsweise erneut modelliert wird
+	 * 
+	 * @param tmpperson
+	 */
+	public void deleteInformationforPerson(ActitoppPerson tmpperson)
+	{
+		int persindex = tmpperson.getPersIndex();
+		for (String key : debugloggers.keySet())
+		{
+			/*
+			 * Alle Objekte eines DebugLoggers durchgehen
+			 */
+			LinkedHashMap<Object, String> relevantmap = debugloggers.get(key);
+			
+			for(Iterator<Object> it = relevantmap.keySet().iterator(); it.hasNext();)
+	    {			
+				Object referenceobject = it.next();
+				
+				// PersonLogger
+				if (referenceobject instanceof ActitoppPerson)
+				{
+					ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
+					if (actperson.getPersIndex()==persindex) it.remove();			
+				}
+				
+				// Daylogger
+				if (referenceobject instanceof HDay)
+				{
+					HDay actday = ((HDay) referenceobject);
+					if (actday.getPerson().getPersIndex()==persindex) it.remove();						
+				}
+				
+				// Tourlogger
+				if (referenceobject instanceof HTour)
+				{
+					HTour acttour = ((HTour) referenceobject);
+					if (acttour.getPerson().getPersIndex()==persindex) it.remove();				
+				}
+				
+				// Activitylogger
+				if (referenceobject instanceof HActivity)
+				{
+					HActivity actact = ((HActivity) referenceobject);
+					if (actact.getPerson().getPersIndex()==persindex) it.remove();				
+				}				
+	    }
+		}
+	}
+	
 }

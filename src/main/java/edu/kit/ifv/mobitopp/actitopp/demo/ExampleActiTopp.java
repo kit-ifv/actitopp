@@ -333,6 +333,7 @@ public class ExampleActiTopp {
 					
 	        // Setze die Modellierungsergebnisse dieses Haushalts zurück für neuen Versuch
 	        acthousehold.resetHouseholdModelingResults();
+	        debugloggers.deleteInformationforHousehold(acthousehold);
 				}
 			}
 		}
