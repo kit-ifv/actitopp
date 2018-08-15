@@ -5,25 +5,6 @@ import java.util.List;
 public class LogitFunction implements ChoiceFunction
 {
 
-  @Override
-  @Deprecated
-  public double[] calculateProbabilities(double[] utilityNumbers)
-  {
-    double[] probabilities = new double[utilityNumbers.length];
-    double utilitySum = 0.0d;
-    
-    for (int i = 0; i < utilityNumbers.length; i++)
-    {
-      utilitySum +=Math.exp(utilityNumbers[i]);
-    }
-    
-    for (int i = 0; i < utilityNumbers.length; i++)
-    {
-      probabilities[i] = (Math.exp(utilityNumbers[i]) / utilitySum);
-    }
-    return probabilities;
-  }
-  
 
   public void calculateProbabilities(List<ModelAlternative> alternatives)
   {
@@ -39,26 +20,6 @@ public class LogitFunction implements ChoiceFunction
     }
   }
   
-
-  @Override
-  public int chooseAlternative(double[] probabilities, double random)
-  {
-    int ptr = 0;
-    double movingSum = probabilities[0];
-    while (ptr < probabilities.length)
-    {
-      if (random <= movingSum)
-      {
-        break;
-      }
-      else
-      {
-        movingSum += probabilities[ptr + 1];
-        ptr++;
-      }
-    }
-    return ptr;
-  }
   
   @Override
   public int chooseAlternative(List<ModelAlternative> alternatives, double random)

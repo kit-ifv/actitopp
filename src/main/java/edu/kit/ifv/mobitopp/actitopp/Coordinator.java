@@ -300,7 +300,7 @@ public class Coordinator
   	    // Falls es schon Touren gibt (aus gemeinsamen Akt), H als Aktivitätstyp ausschließen
   	    if (currentDay.getAmountOfTours()>0 || numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]>0)
   	    {
-  	    	step.removeAlternative("H"); 
+  	    	step.disableAlternative("H"); 
 	    	}
   	    
   	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
@@ -309,7 +309,7 @@ public class Coordinator
   	    		currentDay.getTotalAmountOfActivitites('W') == 0
   	    		)
   	    {
-  	    	step.removeAlternative("W"); 
+  	    	step.disableAlternative("W"); 
   	    }
   	    
   	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
@@ -318,18 +318,17 @@ public class Coordinator
   	    		currentDay.getTotalAmountOfActivitites('E') == 0
   	    		)
   	    {
-  	    	step.removeAlternative("E"); 
+  	    	step.disableAlternative("E"); 
   	    }
   	    
   	    // Nutzenbonus für Alternative W, falls Person erwerbstätig und Wochentag
-  	    if (person.getEmployment()==1 && currentDay.getWeekday()<6 && step.existsAlternative("W"))
+  	    if (person.getEmployment()==1 && currentDay.getWeekday()<6 && step.alternativeisEnabled("W"))
   	    {
   	    	step.adaptUtilityFactor("W", 1.1);
   	    }
-//Configuration.debugenabled=true; 	    
+   
   	    // Auswahl durchführen
   	    step.doStep();
-//Configuration.debugenabled=false;
   	    char activityType = step.getAlternativeChosen().charAt(0);
   	    
   	    // DebugLogger schreiben falls aktiviert
@@ -468,7 +467,7 @@ public class Coordinator
     	    		currentDay.getTotalAmountOfActivitites('W') == 0
     	    		)
     	    {
-    	    	step.removeAlternative("W"); 
+    	    	step.disableAlternative("W"); 
     	    }
     	    
     	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
@@ -477,7 +476,7 @@ public class Coordinator
     	    		currentDay.getTotalAmountOfActivitites('E') == 0
     	    		)
     	    {
-    	    	step.removeAlternative("E"); 
+    	    	step.disableAlternative("E"); 
     	    }
   	    
     	    //Auswahl durchführen
@@ -621,7 +620,7 @@ public class Coordinator
       	    		currentDay.getTotalAmountOfActivitites('W') == 0
       	    		)
       	    {
-      	    	step.removeAlternative("W"); 
+      	    	step.disableAlternative("W"); 
       	    }
       	    
       	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
@@ -630,7 +629,7 @@ public class Coordinator
       	    		currentDay.getTotalAmountOfActivitites('E') == 0
       	    		)
       	    {
-      	    	step.removeAlternative("E"); 
+      	    	step.disableAlternative("E"); 
       	    }
     	    
       	    //Auswahl durchführen
@@ -1194,14 +1193,7 @@ public class Coordinator
 		    	    // Limitiere die unter Grenze, falls diese jetzt höher ist als die obere Grenze
 		    	    if (step_dc.getLowerBound() >= step_dc.getUpperBound()) step_dc.limitLowerBoundOnly(step_dc.getUpperBound());   
 	    	    }
-	    	   /* 
-	    	    // Falls die berechnete Maximalzeit kleiner ist als die aktuellen Bounds, korrigiere diese auch nach unten
-	    	    if (loc_upperbound <= step_dc.getUpperBound()) step_dc.limitUpperBoundOnly(loc_upperbound); 
-	    	    if (loc_upperbound <= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_upperbound); 
 
-	    	    // Limitiere die obere Grenze, falls bisher keine vorhanden ist
-	    	    if (step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound);
-*/
 	    	    		
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();

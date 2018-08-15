@@ -97,6 +97,21 @@ public class ModelAlternative
   {
   	return getName();
   }
+	
+	
+	public void printUtilityDetails()
+  {
+    System.out.println("ALT: " + getName() );
+    //print base utility
+    System.out.print("Grundnutzen (real):"+getUtilityFunction().getBaseWeight() +" ___ ");
+    for(int i = 0; i < getUtilityFunction().getUtilityPairs().size(); i++)
+    {
+        ModelParameterWeight pair = getUtilityFunction().getUtilityPairs().get(i);
+        System.out.print(pair.getName() + ":" + pair.getattributevalue() + "*" + pair.getWeight());
+        System.out.print(" __ ");
+    }
+    System.out.println("\nTOTAL UTILITY: " + getUtility());
+  }
 
 
 }
