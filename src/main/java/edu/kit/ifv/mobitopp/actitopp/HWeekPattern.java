@@ -180,16 +180,14 @@ public class HWeekPattern
     // chosen type
     int[] ctr = new int[7];
 
-    for (int i = 0; i < this.getDays().size(); i++)
+    for (int i = 0; i < 7; i++)
     {
-      for (int j = 0; j < this.getDays().get(i).getTours().size(); j++)
+    	HDay currentDay = getDay(i);
+      for (HActivity act : currentDay.getAllActivitiesoftheDay())
       {
-        for (int h = 0; h < this.getDays().get(i).getTours().get(j).getActivities().size(); h++)
+      	if (act.activitytypeisScheduled() && act.getType() == activityType)
         {
-          if (this.getDays().get(i).getTours().get(j).getActivities().get(h).getType() == activityType)
-          {
-            ctr[i]++;
-          }
+      		ctr[i]++;
         }
       }
     }

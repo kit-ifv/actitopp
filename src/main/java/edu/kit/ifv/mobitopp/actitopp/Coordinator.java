@@ -300,11 +300,36 @@ public class Coordinator
   	    // Falls es schon Touren gibt (aus gemeinsamen Akt), H als Aktivitätstyp ausschließen
   	    if (currentDay.getAmountOfTours()>0 || numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]>0)
   	    {
-  	    	step.limitUpperBoundOnly(step.alternatives.size()-2);
+  	    	step.removeAlternative("H"); 
 	    	}
   	    
+  	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
+  	    if (
+  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
+  	    		currentDay.getTotalAmountOfActivitites('W') == 0
+  	    		)
+  	    {
+  	    	step.removeAlternative("W"); 
+  	    }
+  	    
+  	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
+  	    if (
+  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
+  	    		currentDay.getTotalAmountOfActivitites('E') == 0
+  	    		)
+  	    {
+  	    	step.removeAlternative("E"); 
+  	    }
+  	    
+  	    // Nutzenbonus für Alternative W, falls Person erwerbstätig und Wochentag
+  	    if (person.getEmployment()==1 && currentDay.getWeekday()<6 && step.existsAlternative("W"))
+  	    {
+  	    	step.adaptUtilityFactor("W", 1.1);
+  	    }
+//Configuration.debugenabled=true; 	    
   	    // Auswahl durchführen
   	    step.doStep();
+//Configuration.debugenabled=false;
   	    char activityType = step.getAlternativeChosen().charAt(0);
   	    
   	    // DebugLogger schreiben falls aktiviert
@@ -436,6 +461,26 @@ public class Coordinator
         	
     	    // Step-Objekt erzeugen
     	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+    	    
+    	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
+    	    if (
+    	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
+    	    		currentDay.getTotalAmountOfActivitites('W') == 0
+    	    		)
+    	    {
+    	    	step.removeAlternative("W"); 
+    	    }
+    	    
+    	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
+    	    if (
+    	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
+    	    		currentDay.getTotalAmountOfActivitites('E') == 0
+    	    		)
+    	    {
+    	    	step.removeAlternative("E"); 
+    	    }
+  	    
+    	    //Auswahl durchführen
     	    step.doStep();
 
           // Speichere gewählte Entscheidung für weitere Verwendung
@@ -569,6 +614,26 @@ public class Coordinator
           	
       	    // Step-Objekt erzeugen
       	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+      	    
+      	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
+      	    if (
+      	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
+      	    		currentDay.getTotalAmountOfActivitites('W') == 0
+      	    		)
+      	    {
+      	    	step.removeAlternative("W"); 
+      	    }
+      	    
+      	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
+      	    if (
+      	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
+      	    		currentDay.getTotalAmountOfActivitites('E') == 0
+      	    		)
+      	    {
+      	    	step.removeAlternative("E"); 
+      	    }
+    	    
+      	    //Auswahl durchführen
       	    step.doStep();
 
             // Aktivitätstyp festlegen
@@ -1140,10 +1205,10 @@ public class Coordinator
 	    	    		
 	    	    // Sicherstellen, dass die unter Grenze nicht über der oberen Grenze liegt
 	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
-	    	    		
+   	    		
 	    	    // Wahlentscheidung durchführen
 	    	    step_dc.doStep();
-	    	    
+
 	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
 	    	    {
@@ -1781,7 +1846,7 @@ public class Coordinator
         
       step.limitUpperandLowerBound(from, to);
       // add utility bonus of 10% to average time class (middle of the 3 selected)
-      step.applyUtilityModification(timeCategory, 1.10);
+      step.adaptUtilityFactor(timeCategory, 1.1);
     }
 	}
 

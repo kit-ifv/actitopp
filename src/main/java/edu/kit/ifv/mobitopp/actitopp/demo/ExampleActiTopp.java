@@ -21,20 +21,20 @@ public class ExampleActiTopp {
 	{
 			
 		createAndModelOnePerson_Example1();
-
+/*
 		createAndModelOnePerson_Example2();
 		
 	  createAndModelOnePerson_Example3();
 	
 		createAndModelMultiplePersons_Example1();
-		
+*/		
 		/*beispielhafte Verwendung eines Debug-Loggers für Entscheidung 2A*/
-		debugloggers.addDebugLogger("2A");
+/*		debugloggers.addDebugLogger("2A");
 
 		createAndModelMultiplePersons_Example2();
 
 		debugloggers.exportLoggerInfos("2A", "D:/DemoLogger2A.csv");
-		
+*/		
 	}
 	
 	

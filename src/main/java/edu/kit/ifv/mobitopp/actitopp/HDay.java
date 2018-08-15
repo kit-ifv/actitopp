@@ -186,7 +186,7 @@ public class HDay
       {
           for(HActivity act : tour.getActivities())
           {
-          	if (act.getType()== acttype) sum++;
+          	if (act.activitytypeisScheduled() && act.getType()== acttype) sum++;
           }
       }
       return sum;
