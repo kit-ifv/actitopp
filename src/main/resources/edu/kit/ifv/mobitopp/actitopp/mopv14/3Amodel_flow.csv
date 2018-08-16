@@ -1,6 +1,5 @@
 paramname;in;out;alternative;contextIdentifier
 beruf_vollzeit;yes;no;no;default
-beruf_teilzeit;yes;no;no;default
 haupttour_work;yes;no;no;day
 haupttour_education;yes;no;no;day
 haupttour_shopping;yes;no;no;day
@@ -11,10 +10,9 @@ alter_10bis17;yes;no;no;default
 alter_26bis35;yes;no;no;default
 alter_36bis50;yes;no;no;default
 alter_51bis60;yes;no;no;default
-alter_61bis70;yes;no;no;default
 pendeln_0bis5km;yes;no;no;default
-def_1tour;yes;no;no;person
-def_2touren;yes;no;no;person
+mean_1tour;yes;no;no;person
+mean_2touren;yes;no;no;person
 tagvorher_0vortouren;yes;no;no;day
 tagvorher_1vortour;yes;no;no;day
 0;no;yes;yes;day
@@ -23,4 +21,3 @@ tagvorher_1vortour;yes;no;no;day
 3;no;yes;yes;day
 4;no;yes;yes;day
 5;no;yes;yes;day
-6;no;yes;yes;day

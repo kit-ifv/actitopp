@@ -17,8 +17,8 @@ PKWHH;yes;no;no;default
 anztourenvorhaupttour;yes;no;no;day
 pendeln_ueber50km;yes;no;no;default
 pendeln_0bis5km;yes;no;no;default
-def_1tour;yes;no;no;person
-def_2touren;yes;no;no;person
+mean_1tour;yes;no;no;person
+mean_2touren;yes;no;no;person
 tagvorher_0nachtouren;yes;no;no;day
 tagvorher_1nachtour;yes;no;no;day
 0;no;yes;yes;day
@@ -27,4 +27,3 @@ tagvorher_1nachtour;yes;no;no;day
 3;no;yes;yes;day
 4;no;yes;yes;day
 5;no;yes;yes;day
-6;no;yes;yes;day

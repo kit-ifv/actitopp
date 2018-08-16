@@ -13,7 +13,7 @@ pendeln_ueber50km;yes;no;no;default
 pendeln_0bis5km;yes;no;no;default
 haushalthatkinderunter10;yes;no;no;default
 male;yes;no;no;default
-0;no;yes;yes;person
 1;no;yes;yes;person
 2;no;yes;yes;person
 3;no;yes;yes;person
+4;no;yes;yes;person

@@ -125,7 +125,8 @@ public class Coordinator
     executeStep1("1E", "anztage_t");
     executeStep1("1F", "anztage_immobil");
     
-    executeStep1("1K", "anztourentag_def");
+    executeStep1("1K", "anztourentag_mean");
+    executeStep1("1L", "anzakttag_mean");
        
     executeStep2("2A");
     
@@ -303,28 +304,32 @@ public class Coordinator
   	    	step.disableAlternative("H"); 
 	    	}
   	    
-  	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
-  	    if (
-  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
-  	    		currentDay.getTotalAmountOfActivitites('W') == 0
-  	    		)
+  	    if (Configuration.coordinated_modelling)
   	    {
-  	    	step.disableAlternative("W"); 
-  	    }
-  	    
-  	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
-  	    if (
-  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
-  	    		currentDay.getTotalAmountOfActivitites('E') == 0
-  	    		)
-  	    {
-  	    	step.disableAlternative("E"); 
-  	    }
-  	    
-  	    // Nutzenbonus für Alternative W, falls Person erwerbstätig und Wochentag
-  	    if (person.getEmployment()==1 && currentDay.getWeekday()<6 && step.alternativeisEnabled("W"))
-  	    {
-  	    	step.adaptUtilityFactor("W", 1.1);
+	  	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
+	  	    if (
+	  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
+	  	    		currentDay.getTotalAmountOfActivitites('W') == 0 &&
+	  	    		person.getEmployment()==1
+	  	    		)
+	  	    {
+	  	    	step.disableAlternative("W"); 
+	  	    }
+	  	    
+	  	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
+	  	    if (
+	  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
+	  	    		currentDay.getTotalAmountOfActivitites('E') == 0
+	  	    		)
+	  	    {
+	  	    	step.disableAlternative("E"); 
+	  	    }
+	  	    
+	  	    // Nutzenbonus für Alternative W, falls Person erwerbstätig und Wochentag
+	  	    if (person.getEmployment()==1 && currentDay.getWeekday()<6 && step.alternativeisEnabled("W"))
+	  	    {
+	  	    	step.adaptUtilityFactor("W", 1.2);
+	  	    }
   	    }
    
   	    // Auswahl durchführen
@@ -399,10 +404,20 @@ public class Coordinator
 	    	if (id.equals("3A")) mindesttourzahl = Math.round(verbleibendetouren/2);
 	    	// 3B bekommt als Mindesttourenzahl alle bis dahin noch verbliebenen Touren
 	    	if (id.equals("3B")) mindesttourzahl = verbleibendetouren;
-	    }
+	    }  
 	    
 	    // Alternativen limitieren basierend auf Mindestourzahl
 	    step.limitLowerBoundOnly(mindesttourzahl);
+	    
+	    // Limitiere die Alternativen nach oben basierend auf dem Ergebnis von Schritt 1k
+	    if (Configuration.coordinated_modelling)
+	    {
+	    	int maxtourzahl=-1;
+	    	if (person.getAttributefromMap("anztourentag_mean")==1.0d) maxtourzahl=1;
+	    	if (person.getAttributefromMap("anztourentag_mean")==2.0d) maxtourzahl=2;
+	    	if (maxtourzahl!=-1) step.limitUpperBoundOnly((maxtourzahl>=mindesttourzahl ? maxtourzahl : mindesttourzahl));
+	    }
+	    
 	    
 	    // Entscheidung durchführen
 	    step.doStep();
@@ -1166,7 +1181,20 @@ public class Coordinator
 	    	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
 	    	    
 	    	    // Alternativen ggf. auf Standardzeitkategorie einschränken
-	    	    modifyAlternativesDueTo8A(currentActivity, step_dc);  	    
+	    	    if (currentActivity.getAttributesMap().get("standarddauer") == 1.0d)
+	    	    {
+	    	    	// Ermittle die Standard-Zeitkategorie für den Tag und den Zweck
+	    	      int timeCategory = currentActivity.calculateMeanTimeCategory();
+	    	      	
+	    	      // untere Grenze kann minimal 0 werden
+	    	      int from = Math.max(timeCategory - 1,0);
+	    	      // obere Grenze kann maximal in letzter Zeitklasse liegen
+	    	      int to = Math.min(timeCategory + 1,Configuration.NUMBER_OF_ACT_DURATION_CLASSES-1);
+	    	        
+	    	      step_dc.limitUpperandLowerBound(from, to);
+	    	      // add utility bonus of 10% to average time class (middle of the 3 selected)
+	    	      step_dc.adaptUtilityFactor(timeCategory, 1.1);
+	    	    } 	    
 	    	    
 	    	    // Grenzen aufgrund ggf. bereits festgelgten Dauern beschränken
 	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
@@ -1804,43 +1832,7 @@ public class Coordinator
 	  activity.setMobiToppActType((byte) chosenActivityType);          
 	}
 
-    
-	/**
-	 * 
-	 * limits the range of alternatives if "standarddauer == 1" in step 8a. See documentation for further details
-	 * 
-	 * @param activity
-	 * @param step
-	 */
-	private void modifyAlternativesDueTo8A(HActivity activity, DefaultDCModelStep step)
-	{
-    // Limitiere die Alternativen, falls Ergebnis von 8A YES ist
-    if (activity.getAttributesMap().get("standarddauer") == 1.0d)
-    {
-    	// Ermittle die Standard-Zeitkategorie für den Tag und den Zweck
-      int timeCategory = activity.calculateMeanTimeCategory();
-      	        
-      int from = timeCategory - 1;
-      int to = timeCategory + 1;
-        
-      // Behandlung der Sonderfälle
-      
-      // untere Grenze liegt in Zeitklasse 0
-      if (from<0)
-      {
-      	from=0;
-      }
-      // obere Grenze liegt in letzter Zeitklasse
-      if (to>Configuration.NUMBER_OF_ACT_DURATION_CLASSES-1)
-      {
-      	to=Configuration.NUMBER_OF_ACT_DURATION_CLASSES-1;
-      }
-        
-      step.limitUpperandLowerBound(from, to);
-      // add utility bonus of 10% to average time class (middle of the 3 selected)
-      step.adaptUtilityFactor(timeCategory, 1.1);
-    }
-	}
+   
 
 	
 	/**

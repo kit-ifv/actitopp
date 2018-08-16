@@ -102,12 +102,24 @@ public class DefaultDCModelStep extends AbsHModelStep
       	
     // RangeLimiter setzen
     toRangeLimiter = (toRangeLimiter >= 0) ? toRangeLimiter : alternatives.size();
+    
+    assert toRangeLimiter>=fromRangeLimiter : "fromRangeLimiter > toRangeLimiter!";
 
     // Alternativen, die außerhalb der Range liegen inaktiv setzen!
     for (int i=0; i<alternatives.size(); i++)
     {
     	if (i<fromRangeLimiter || i>toRangeLimiter) alternatives.get(i).setEnabled(false);
     }
+    
+    /*
+     * Prüfen, ob noch mindestens 1 Alternative zur Verfügung steht
+     */
+    boolean alternativeverfuegbar=false;
+    for (ModelAlternative mAlt : alternatives)
+    {
+    	if (mAlt.isEnabled()) alternativeverfuegbar=true;
+    }
+    assert alternativeverfuegbar==true : "Keine Alternative verfügbar!";
     
 	  // Nutzenfunktionen der aktiven Alternativen initialisieren
   	initAlternatives();

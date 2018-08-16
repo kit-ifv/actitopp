@@ -46,7 +46,7 @@ public class Configuration {
 	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
   public static final String[] flowlist_initials =
   { 		
-  		"1A", "1B", "1C", "1D", "1E", "1F", "1K",
+  		"1A", "1B", "1C", "1D", "1E", "1F", "1K","1L",
   		"2A", 
   		"3A", "3B", 
   		"4A", 
