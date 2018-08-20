@@ -1401,7 +1401,7 @@ public class Coordinator
 	 */
 	private void executeStep9A(String id)
 	{
-    // Step 9A: standard start time category for main tours during the week
+    // Step 9A: standard start time category for fist tours during the week
     	
     if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled())
     {
@@ -1419,7 +1419,7 @@ public class Coordinator
 	    }
 
 	    // Eigenschaft abspeichern
-	    person.addAttributetoMap("main_tours_default_start_cat",(double) step.getDecision());
+	    person.addAttributetoMap("first_tour_default_start_cat",(double) step.getDecision());
 	   }
 	}
 	
@@ -1431,7 +1431,7 @@ public class Coordinator
 	 */
 	private void executeStep10A(String id)
 	{
-	  // Step 10a: check if main tour for work/edu lies within standard start time (applies only to work/edu persons)
+	  // Step 10a: check if first tour is work/edu lies within standard start time (applies only to work/edu persons)
 	  if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled())
 	  {
 	    for (HDay currentDay : pattern.getDays())
@@ -1441,8 +1441,8 @@ public class Coordinator
 	      	continue;
 	      }
 	      
-	      // Bestimme Haupttour und deren Tourtyp
-	      HTour currentTour = currentDay.getTour(0);
+	      // Bestimme erste Tour des Tages und deren Tourtyp
+	      HTour currentTour = currentDay.getFirstTourOfDay();
 	    	char tourtype = currentTour.getActivity(0).getType();
 	      if (tourtype == 'W' || tourtype == 'E')
 	      {
@@ -1588,6 +1588,15 @@ public class Coordinator
 		    int lowerbound = bounds_dc[0];
 		    int upperbound = bounds_dc[1];
 		    step_dc.limitUpperandLowerBound(lowerbound, upperbound);
+		    
+		    if (Configuration.coordinated_modelling)
+		    {
+			    if (currentTour.existsAttributeinMap("default_start_cat_yes") && currentTour.getAttributefromMap("default_start_cat_yes")==1.0d)
+			    {
+			    	int defaultcat = (int) person.getAttributefromMap("first_tour_default_start_cat");
+			    	if (defaultcat>= lowerbound && defaultcat <= upperbound) step_dc.limitUpperandLowerBound(defaultcat, defaultcat);
+			    }
+		    }
 		    
 		    // Führe Entscheidungswahl durch
 		    step_dc.doStep();

@@ -409,6 +409,16 @@ public class ActitoppPerson
 	public double getAttributefromMap(String name) {
 		return this.attributes.get(name);
 	}
+	
+	/**
+	 * Prüft, ob ein Attribut in der Map existiert
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean existsAttributeinMap(String name) {
+		return this.attributes.get(name)!=null;
+	}
 
 
 	/**

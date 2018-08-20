@@ -470,6 +470,15 @@ public class HTour
     }
     return nextTour;
 	}
+	
+	/**
+	 * 
+	 * @param name spezifisches Attribut aus Map
+	 * @return
+	 */
+	public double getAttributefromMap(String name) {
+		return this.attributes.get(name);
+	}
 
 	/**
 	 * @param attributes spezifischesAttribut für Map
@@ -478,6 +487,15 @@ public class HTour
 		this.attributes.put(name, value);
 	}
 
+	/**
+	 * Prüft, ob ein Attribut in der Map existiert
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean existsAttributeinMap(String name) {
+		return this.attributes.get(name)!=null;
+	}
 
 	/**
 	 * @return the attributes
