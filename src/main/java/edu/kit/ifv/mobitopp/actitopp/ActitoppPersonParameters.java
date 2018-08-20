@@ -1276,7 +1276,7 @@ public enum ActitoppPersonParameters {
 	/*
 	 * Default Anzahl Touren am Tag = 1
 	 */
-	def_1tour("mean_1tour") 
+	mean_1tour("mean_1tour") 
 	{
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
@@ -1287,12 +1287,45 @@ public enum ActitoppPersonParameters {
 	/*
 	 * Default Anzahl Touren am Tag = 2
 	 */
-	def_2touren("mean_2touren") 
+	mean_2touren("mean_2touren") 
 	{
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
 			return ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 2) ? 1.0 : 0.0);
+		}
+	},
+	/*
+	 * Default Anzahl Akt am Tag = 1
+	 */
+	mean_1akt("mean_1akt") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 1) ? 1.0 : 0.0);
+		}
+	},
+	/*
+	 * Default Anzahl Akt am Tag = 2
+	 */
+	mean_2akt("mean_2akt") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 2) ? 1.0 : 0.0);
+		}
+	},
+	/*
+	 * Default Anzahl Akt am Tag = 3
+	 */
+	mean_3akt("mean_3akt") 
+	{
+		@Override
+		public double getAttribute(ActitoppPerson actitoppPerson) 
+		{
+			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 3) ? 1.0 : 0.0);
 		}
 	},
 	

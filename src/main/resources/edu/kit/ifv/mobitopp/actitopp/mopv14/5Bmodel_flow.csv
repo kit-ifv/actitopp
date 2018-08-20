@@ -6,7 +6,6 @@ anzaktvorhauptaktist2;yes;no;no;tour
 anzaktvorhauptaktist3;yes;no;no;tour
 tourtyp_work;yes;no;no;tour
 tourtyp_education;yes;no;no;tour
-tourtyp_shopping;yes;no;no;tour
 tag_sa;yes;no;no;day
 tag_so;yes;no;no;day
 alter_18bis35;yes;no;no;default
@@ -14,13 +13,12 @@ alter_36bis50;yes;no;no;default
 alter_51bis60;yes;no;no;default
 taghat1tour;yes;no;no;day
 taghat2touren;yes;no;no;day
+mean_1akt;yes;no;no;person
+mean_2akt;yes;no;no;person
+mean_3akt;yes;no;no;person
 0;no;yes;yes;tour
 1;no;yes;yes;tour
 2;no;yes;yes;tour
 3;no;yes;yes;tour
 4;no;yes;yes;tour
 5;no;yes;yes;tour
-6;no;yes;yes;tour
-7;no;yes;yes;tour
-8;no;yes;yes;tour
-9;no;yes;yes;tour
