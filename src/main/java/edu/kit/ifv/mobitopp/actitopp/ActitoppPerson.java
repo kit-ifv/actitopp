@@ -630,6 +630,27 @@ public class ActitoppPerson
 		}
 	}
 	
+	/**
+	 * bestimmt, ob Person erwerbstätig ist (Vollzeit, Teilzeit oder Azubi)
+	 * 
+	 * @return
+	 */
+	public boolean personisAnywayEmployed()
+	{
+		int employmenttype = getEmployment();
+		return (employmenttype == 1 || employmenttype == 2 ||  employmenttype == 21 || employmenttype == 22 || employmenttype == 5);
+	}
+	
+	/**
+	 * bestimmt, ob Person Schüler/Student ist
+	 * 
+	 * @return
+	 */
+	public boolean personisinEducation()
+	{
+		int employmenttype = getEmployment();
+		return (employmenttype == 4 || employmenttype == 40 ||  employmenttype == 41 ||  employmenttype == 42 ||  employmenttype == 5);
+	}
 	
 	
 	/**
@@ -640,8 +661,7 @@ public class ActitoppPerson
 	 */
 	public boolean isPersonWorkorSchoolCommuterAndMainToursAreScheduled()
 	{   
-		int employmenttype = this.getEmployment();
-    if (employmenttype == 1 || employmenttype == 2 || employmenttype == 40 || employmenttype == 41 || employmenttype == 42 || employmenttype == 5)
+    if (personisAnywayEmployed() || personisinEducation())
     {
       for (HDay day : getWeekPattern().getDays())
       {
@@ -660,6 +680,8 @@ public class ActitoppPerson
     }
     return false;
 	}
+	
+
 
 
 

@@ -1281,7 +1281,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 1) ? 1.0 : 0.0);
+			return (Configuration.coordinated_modelling ? ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 1) ? 1.0 : 0.0): 0.0);
 		}
 	},
 	/*
@@ -1292,7 +1292,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 2) ? 1.0 : 0.0);
+			return (Configuration.coordinated_modelling ? ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 2) ? 1.0 : 0.0): 0.0);
 		}
 	},
 	/*
@@ -1303,7 +1303,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 1) ? 1.0 : 0.0);
+			return (Configuration.coordinated_modelling ? ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 1) ? 1.0 : 0.0): 0.0);
 		}
 	},
 	/*
@@ -1314,7 +1314,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 2) ? 1.0 : 0.0);
+			return (Configuration.coordinated_modelling ? ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 2) ? 1.0 : 0.0): 0.0);
 		}
 	},
 	/*
@@ -1325,7 +1325,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 3) ? 1.0 : 0.0);
+			return (Configuration.coordinated_modelling ? ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 3) ? 1.0 : 0.0): 0.0);
 		}
 	},
 	

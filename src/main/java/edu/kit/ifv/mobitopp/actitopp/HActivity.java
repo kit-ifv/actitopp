@@ -1040,4 +1040,40 @@ public class HActivity
 		if (jointParticipants.size()==0) setJointStatus(4);
 	}
 	
+	/**
+	 * 
+	 * Bestimme die vermutete Aktivitätszeit basierend auf dem Aktivitätstyp und der Anzahl an Aktivitäten dieses Typs pro Tag.
+	 * 
+	 * Werte basieren auf MEDIAN-Werten der Dauer pro Tag [Minuten] von Aktivitäten dieses Typs aus den MOP-Daten.
+	 * Die default Activity Time wird gebildet durch: defaulttime = empiriewert / AnzAkt(Typ, Tag)
+	 * 
+	 * @return
+	 */
+	public int getDefaultActivityTime()
+	{
+		int defaulttime=-1;
+		switch(getType()){
+    case 'W':
+    	defaulttime = 472 / getDay().getTotalAmountOfActivitites('W');
+      break;
+    case 'E':
+    	defaulttime = 340 / getDay().getTotalAmountOfActivitites('E');
+      break;
+    case 'L':
+    	defaulttime = 130 / getDay().getTotalAmountOfActivitites('L');
+      break;
+    case 'S':
+    	defaulttime = 41 / getDay().getTotalAmountOfActivitites('S');
+      break; 
+    case 'T':
+    	defaulttime = 15 / getDay().getTotalAmountOfActivitites('T');
+      break; 
+    default:
+    	defaulttime = 278 / getDay().getTotalAmountOfActivitites();
+      break; 
+		}
+		assert defaulttime!=-1 : "DefaultTime konnte nicht bestimmt werden!";
+		return defaulttime;
+	}
+	
 }

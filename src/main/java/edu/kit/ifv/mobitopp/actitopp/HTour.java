@@ -230,6 +230,17 @@ public class HTour
 	}
 	
 
+	/**
+	 * 
+	 * Gibt an, ob es sich um die erste Tour des Tages handelt
+	 * 
+	 * @return
+	 */
+	public boolean isFirstTouroftheDay()
+	{
+		return this.getIndex()==day.getLowestTourIndex();
+	}
+	
 
   
   /**

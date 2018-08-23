@@ -310,7 +310,7 @@ public class Coordinator
 	  	    if (
 	  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
 	  	    		currentDay.getTotalAmountOfActivitites('W') == 0 &&
-	  	    		person.getEmployment()==1
+	  	    		person.personisAnywayEmployed()
 	  	    		)
 	  	    {
 	  	    	step.disableAlternative("W"); 
@@ -319,16 +319,23 @@ public class Coordinator
 	  	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivitäten erreicht sind!
 	  	    if (
 	  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
-	  	    		currentDay.getTotalAmountOfActivitites('E') == 0
+	  	    		currentDay.getTotalAmountOfActivitites('E') == 0 &&
+	  	    		person.personisinEducation()
 	  	    		)
 	  	    {
 	  	    	step.disableAlternative("E"); 
 	  	    }
 	  	    
 	  	    // Nutzenbonus für Alternative W, falls Person erwerbstätig und Wochentag
-	  	    if (person.getEmployment()==1 && currentDay.getWeekday()<6 && step.alternativeisEnabled("W"))
+	  	    if (person.personisAnywayEmployed() && currentDay.getWeekday()<6 && step.alternativeisEnabled("W"))
 	  	    {
-	  	    	step.adaptUtilityFactor("W", 1.2);
+	  	    	step.adaptUtilityFactor("W", 1.3);
+	  	    }
+	  	    
+	  	    // Nutzenbonus für Alternative E, falls Person Schüler/Student ist und Wochentag
+	  	    if (person.personisinEducation() && currentDay.getWeekday()<6 && step.alternativeisEnabled("E"))
+	  	    {
+	  	    	step.adaptUtilityFactor("E", 1.3);
 	  	    }
   	    }
    
@@ -1158,8 +1165,8 @@ public class Coordinator
 			for (HTour currentTour : currentDay.getTours())
 			{
 				boolean running=false;
-				if (id_dc.equals("8B") && currentTour.getIndex()==0) running=true;  // 8B gilt nur für Haupttouren (TourIndex=0)
-				if (id_dc.equals("8D") && currentTour.getIndex()!=0) running=true;	// 8D gilt nur für NICHT-Haupttouren (TourIndex!=0)
+				if (id_dc.equals("8B") && currentTour.isFirstTouroftheDay()) running=true;  // 8B gilt nur für erste Tour des Tages
+				if (id_dc.equals("8D") && !currentTour.isFirstTouroftheDay()) running=true;	// 8D gilt nur ab der zweiten Tour des Tages)
 					
 				if (running)
 				{
@@ -1185,6 +1192,16 @@ public class Coordinator
 	    	    {
 	    	    	// Ermittle die Standard-Zeitkategorie für den Tag und den Zweck
 	    	      int timeCategory = currentActivity.calculateMeanTimeCategory();
+	    	      
+		    	    //Debug-Logger schreiben falls aktiviert
+		    	    if(debugloggers!= null && debugloggers.existsLogger("meantime"))
+		    	    {
+		    	    	debugloggers.getLogger("meantime").put(currentActivity, String.valueOf(timeCategory));
+		    	    }
+		    	    if(debugloggers!= null && debugloggers.existsLogger("meantime2"))
+		    	    {
+		    	    	debugloggers.getLogger("meantime2").put(currentActivity, String.valueOf(currentActivity.getType()));
+		    	    }
 	    	      	
 	    	      // untere Grenze kann minimal 0 werden
 	    	      int from = Math.max(timeCategory - 1,0);
@@ -1257,15 +1274,16 @@ public class Coordinator
 			      
 			      // Wahlentscheidung durchführen
 			      step_mc.doStep();
+			      int chosenTime = (int) (step_mc.getChosenTime() * 1.00);
 			      
 	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
 	    	    {
-	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(step_mc.getChosenTime()));
+	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(chosenTime));
 	    	    }
 			     
 			      // Speichere Ergebnisse ab
-			      currentActivity.setDuration(step_mc.getChosenTime());
+			      currentActivity.setDuration(chosenTime);
 			      
 			      // Lege mögliche weitere Startzeiten von Aktivitäten fest
 			      HActivity.createPossibleStarttimes(currentTour.getActivities());
@@ -1375,16 +1393,17 @@ public class Coordinator
 			      step_mc.setRangeBounds(durationBounds[0], durationBounds[1]);
 			      
 			      // Wahlentscheidung durchführen
-  		      step_mc.doStep();
-  		      
+			      step_mc.doStep();
+			      int chosenTime = (int) (step_mc.getChosenTime() * 1.00);
+			      
 	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
 	    	    {
-	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(step_mc.getChosenTime()));
+	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(chosenTime));
 	    	    }
-  		     
-  		      // Speichere Ergebnisse ab
-  		      currentActivity.setDuration(step_mc.getChosenTime());
+			     
+			      // Speichere Ergebnisse ab
+			      currentActivity.setDuration(chosenTime);
   		      
 			      // Lege mögliche weitere Startzeiten von Aktivitäten fest
 			      HActivity.createPossibleStarttimes(currentTour.getActivities()); 
@@ -1913,7 +1932,7 @@ public class Coordinator
 		int ausgangspunktunteregrenze=1;
 		if (last_act_scheduled!=null)
 		{
-			ausgangspunktunteregrenze = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR); 
+			ausgangspunktunteregrenze = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : last_act_scheduled.getDefaultActivityTime()); 
 		}
 		else
 		{
@@ -2163,7 +2182,7 @@ public class Coordinator
 				}
 				else
 				{
-					result += Configuration.FIXED_ACTIVITY_TIME_ESTIMATOR;
+					result += tmpact.getDefaultActivityTime();
 				}
 			}
 		}
@@ -2305,7 +2324,7 @@ public class Coordinator
 	  /*
 	   * 1. Ausgangspunkt
 	   */
-	  int basisoberegrenze = 1620;
+	  int basisoberegrenze = 1440;
 	  HTour nexttourscheduled=null;
 	  
 	  //Prüfe, ob es im Tagesverlauf noch weitere geplante Touren gibt
@@ -2331,7 +2350,7 @@ public class Coordinator
 				{
 					int startersteaktfolgetag = ersteaktfolgetag.getStartTime() -
 							(ersteaktfolgetag.tripBeforeActivityisScheduled() ? ersteaktfolgetag.getEstimatedTripTimeBeforeActivity() : 0);
-					if (startersteaktfolgetag<180) 
+					if (startersteaktfolgetag<(basisoberegrenze-1440)) 
 					{
 						basisoberegrenze = 1439 + startersteaktfolgetag;
 					}
@@ -2376,7 +2395,7 @@ public class Coordinator
 	  int lowerbound = basisunteregrenze;
 	  int upperbound = basisoberegrenze - tmptourdurations - heimzeitpuffer;
 	  
-	  // UpperBound falls notwendig auf 1439 kürzen, da keine späteren Anfangszeiten  möglich
+	  // UpperBound falls notwendig auf 1439 kürzen, da keine späteren Anfangszeiten möglich
 	  if (upperbound>1439) upperbound=1439;
 	  
 	        
