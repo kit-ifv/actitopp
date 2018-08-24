@@ -618,6 +618,28 @@ public enum HTourParameters {
 		}
 	},
 	
+	vorherigeentscheidungyes("vorherigeentscheidungyes") 
+	{
+		@Override
+		public double getAttribute(HTour tour) 
+		{
+			double result=0;
+			boolean tourgefunden=false;
+			HTour tmptour=tour;
+			while (!tourgefunden)
+			{
+				 tmptour = tmptour.getPreviousTourinPattern();
+				 if (tmptour==null)	break;
+				 if (tmptour.isFirstTouroftheDay() && (tmptour.getActivity(0).getType()=='W' || tmptour.getActivity(0).getType()=='E'))
+				 {
+					 tourgefunden = true;
+				 }
+			}
+			if (tourgefunden && tmptour.getAttributefromMap("default_start_cat_yes")==1.0) result=1;			
+			return result;
+		}
+	},
+	
 	
 	;
 		
