@@ -1,7 +1,6 @@
 paramname;in;out;alternative;contextIdentifier
 anzakt_woche_w;yes;no;no;person
 anzakt_woche_e;yes;no;no;person
-anztouren_woche_w;yes;no;no;person
 beruf_vollzeit;yes;no;no;default
 beruf_teilzeit;yes;no;no;default
 beruf_schueler;yes;no;no;default
@@ -22,3 +21,7 @@ tagemit_wakt_6;yes;no;no;person
 3;no;yes;yes;person
 4;no;yes;yes;person
 5;no;yes;yes;person
+6;no;yes;yes;person
+7;no;yes;yes;person
+8;no;yes;yes;person
+9;no;yes;yes;person

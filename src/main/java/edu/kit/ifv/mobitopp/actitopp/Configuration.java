@@ -81,7 +81,7 @@ public class Configuration {
   //Angabe der maximalen Kategorie-Indizes bei Häufigskeitsverteilungen
   public static final int[] timeDistributions_MaxIndizes =
   { 
-  		4, 3, 5, 4, 3, 
+  		8, 5, 5, 4, 3, 
   		14, 14, 14, 
   		15, 15, 10, 10, 15, 10, 10, 9
   };

@@ -1,7 +1,7 @@
 paramname;in;out;alternative;contextIdentifier
-takt_prowoche_1bis3;yes;no;no;person
-takt_prowoche_4bis6;yes;no;no;person
-takt_prowoche_7bis10;yes;no;no;person
+anzakt_woche_w;yes;no;no;person
+anzakt_woche_s;yes;no;no;person
+anzakt_woche_t;yes;no;no;person
 beruf_vollzeit;yes;no;no;default
 beruf_teilzeit;yes;no;no;default
 beruf_schueler;yes;no;no;default
