@@ -173,7 +173,10 @@ public class Coordinator
     
     executeStep10("10M","10N", 1);
     executeStep10("10O","10P", 2);
+    /*
+     * Tim (27.08.2018): Schritt 10Q,R abgeschaltet. Startzeit wird über Heimzeit in 110S,T bestimmt.
     executeStep10("10Q","10R", 3);
+    */
     executeStep10ST();
     
     if (Configuration.model_joint_actions) 
@@ -1690,14 +1693,14 @@ public class Coordinator
 	  modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
 	  for (HDay currentDay : pattern.getDays())
 	  {
-	  	if (currentDay.isHomeDay() || currentDay.getAmountOfTours()< 4)
+	  	if (currentDay.isHomeDay())
 	    {
 	    	continue;
 	    }
-	    for (int j=currentDay.getLowestTourIndex()+3; j<=currentDay.getHighestTourIndex(); j++)
+	    for (int j=currentDay.getLowestTourIndex(); j<=currentDay.getHighestTourIndex(); j++)
 	    {
 	    	HTour currentTour = currentDay.getTour(j);
-	    	// Bestimme Heimzeit vor Tour
+	    	// Bestimme Heimzeit vor Tour für alle Touren ohne Startzeit
 	      if (!currentTour.isScheduled())
 	      {
 	      	// 10S
@@ -1726,7 +1729,7 @@ public class Coordinator
 	    	    // Eigenschaft abspeichern
 	    	    int chosenHomeTimeCategory = dcstep.getDecision();
 	      	
-	    	 // 10T
+	    	    // 10T
 	    	    
 	    	    // Vorbereitungen und Objekte erzeugen
 	          String stepID = "10T" + (int) chosenHomeTimeCategory;

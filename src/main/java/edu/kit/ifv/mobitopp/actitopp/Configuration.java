@@ -175,28 +175,12 @@ public class Configuration {
  * 		Wegzeitkonstante	
  */		
 	
-	// Konstante für die durchschnittliche Zeitbelegung eines Weges
-//	public static final int FIXED_TRIP_TIME_ESTIMATOR = 20;
+	// Konstante für die durchschnittliche Zeitbelegung eines Weges in Minuten
 	public static final int FIXED_TRIP_TIME_ESTIMATOR = 15;
 	
-
-
-/*
- * 
- * 		Folgende Einstellungen sind nur relevant, falls die Ausführung direkt durch die mobiTopp Bevsynthese erfolgt
- * 
- */
-  
-	//ganzzahlige Prozentangabe, um die Bevölkerunssynthese nur für einen bestimmten Anteil der Bevölkerung durchzuführen
-	public static final int percent_bevsynthese = 1;	
 	
-	// steuert, alle wieviele Datensätze das Logging für die actiTopp Log-Dateien aktiviert wird
-	public static final int anzexportds = 20000;
-		
 /*
- * 
  * 		Folgende Einstellungen sind nur zu Debugzwecken relevant
- * 
  */
 	
 	// steuert die Ausgabe von Log in Modellschritten

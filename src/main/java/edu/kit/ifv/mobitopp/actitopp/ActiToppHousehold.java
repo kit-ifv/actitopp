@@ -235,7 +235,7 @@ public class ActiToppHousehold {
 	      }
 	      catch (InvalidPatternException e)
 	      {
-	        System.err.println(e.getReason());
+	        //System.err.println(e.getReason());
 	         
 	        /*
 	         * Bei der Modellierung von gemeinsamen Aktivitäten werden Fehler auf der Personenebene wetergereicht.
@@ -283,7 +283,7 @@ public class ActiToppHousehold {
 	      }
 	      catch (InvalidPatternException e)
 	      {
-	        System.err.println(e.getReason());
+	        //System.err.println(e.getReason());
 	        debugloggers.deleteInformationforPerson(actperson);
 	        
 	        /*
