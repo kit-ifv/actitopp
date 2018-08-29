@@ -37,17 +37,10 @@ public class ModelFlowLists
   {
     return outParamList;
   }
-  public void setOutParamList(List<String> outParamList)
-  {
-    this.outParamList = outParamList;
-  }
+
   public List<String> getAlternativesList()
   {
     return alternativesList;
-  }
-  public void setAlternativesList(List<String> alternativesList)
-  {
-    this.alternativesList = alternativesList;
   }
 
 	/**
@@ -57,10 +50,4 @@ public class ModelFlowLists
 		return inParamMap;
 	}
 
-	/**
-	 * @param inParamMap the inParamMap to set
-	 */
-	public void setInParamMap(Map<String, String> inParamMap) {
-		this.inParamMap = inParamMap;
-	}
 }

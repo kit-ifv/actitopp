@@ -9,15 +9,25 @@ public class LogitFunction implements ChoiceFunction
   public void calculateProbabilities(List<ModelAlternative> alternatives)
   {
   	double utilitySum = 0.0d;
+  	double probabilitySum = 0.0d;
+  	
+  	// Calculate utilitysum of all alternatives
     for (ModelAlternative ma : alternatives)
     {
       if (ma.isEnabled()) utilitySum += Math.exp(ma.getUtility());
     }
     
+    // Calculate probability of each alternative based on utilitySum
     for (ModelAlternative ma : alternatives)
     {
-    	if (ma.isEnabled()) ma.setProbability(Math.exp(ma.getUtility()) / utilitySum);
+    	if (ma.isEnabled()) 
+    	{
+    		double probability = Math.exp(ma.getUtility()) / utilitySum;
+    		ma.setProbability(probability);
+    		probabilitySum += probability;
+    	}
     }
+    //assert Math.round(probabilitySum*100)/100 == 1.0d:"wrong probability sum! (!=1.0d)";
   }
   
   
@@ -31,14 +41,15 @@ public class LogitFunction implements ChoiceFunction
     	ModelAlternative ma = alternatives.get(i);
     	if (ma.isEnabled())
     	{
+    		double movingsumnew = movingSum + ma.getProbability();
     		// Bedingung, dass random-Wert im Bereich zwischen letzter und aktueller Grenze liegt
-        if (random>= movingSum && random <= movingSum + ma.getProbability())
+        if (random>= movingSum && random <= movingsumnew)
         {
         	choiceindex=i;
         	break;
         }
         // Falls nicht, wird Schleife weiter durchgeführt
-        movingSum += ma.getProbability();
+        movingSum = movingsumnew;
     	}
     }
     assert choiceindex!=-1 : "Konnte keine Wahl treffen!";

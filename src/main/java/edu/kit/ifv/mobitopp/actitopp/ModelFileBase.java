@@ -45,7 +45,7 @@ public class ModelFileBase
     {
     	// Initialisierungen
       initFlowLists();
-      initWeights();
+      initParameterWeights();
       initTimeDistributionLists();
       initLinearRegressionEstimates();
     }
@@ -56,24 +56,15 @@ public class ModelFileBase
     }
   }
     
-    
-
-
 
 	public Map<String, ModelFlowLists> getModelFlowListsMap()
 	{
     return modelFlowListsMap;
 	}
 
-
 	public Map<String,DiscreteTimeDistribution> getTimeDistributionsMap()
 	{
     return timeDistributionsMap;
-	}
-
-	public void setTimeDistributionsMap(Map<String,DiscreteTimeDistribution> timeDistributionMap)
-	{
-    this.timeDistributionsMap = timeDistributionMap;
 	}
 
   public Map<String, Map<String, List<ModelParameterWeight>>> getModelParameterWeightsMap() 
@@ -81,11 +72,6 @@ public class ModelFileBase
   	return modelParameterWeightsMap;
 	}
 
-	public void setModelParameterWeightsMap(Map<String, Map<String, List<ModelParameterWeight>>> modelParameterWeightsMap) 
-	{
-		this.modelParameterWeightsMap = modelParameterWeightsMap;
-	}
-	
 	
 	/**
 	 * 
@@ -146,16 +132,13 @@ public class ModelFileBase
    */
   private void initFlowLists() throws FileNotFoundException, IOException
   {
-  	// Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
-    String[] toInitialize = Configuration.flowlist_initials;
-
     // Initialisierung der Listen aller Stufen
-    for (String s : toInitialize)
+    for (String s : Configuration.flowlist_initials)
     {
       String sourceLocation = Configuration.parameterset + "/" + s + "model_flow.csv";
       CSVModelFlowListsLoader loader = new CSVModelFlowListsLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-				ModelFlowLists lists = loader.loadLists(input);
+				ModelFlowLists lists = loader.loadList(input);
 				modelFlowListsMap.put(s, lists);
 			}
     }
@@ -167,19 +150,18 @@ public class ModelFileBase
    * @throws IOException 
 	 * 
 	 */
-	private void initWeights() throws IOException
+	private void initParameterWeights() throws IOException
 	{
-    Set<String> keys = this.getModelFlowListsMap().keySet();
-
-    for (String keyString : keys)
+    for (String keyString : modelFlowListsMap.keySet())
     {
     	// Referenz auf eine Modelflowliste des spezifischen Schritts
       ModelFlowLists flow = this.getModelFlowLists(keyString);
       
       String sourceLocation = Configuration.parameterset + "/"+ keyString +"Params.csv";
       CSVParameterWeightLoader weightLoader = new CSVParameterWeightLoader();
-      //Map: (alternative --> list of utility weights)
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
+      
+			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+			{
 				Map<String, List<ModelParameterWeight>> wm = weightLoader.getWeightValues(input,
 						new ArrayList<String>(flow.getInParamMap().keySet()), flow.getAlternativesList());
 				modelParameterWeightsMap.put(keyString, wm);

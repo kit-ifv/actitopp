@@ -76,32 +76,32 @@ public class AttributeLookup {
   {
   	double attributeValue = 999999;
   	assert (reference.equals("default") || reference.equals("person") || reference.equals("day") || reference.equals("tour") || reference.equals("activity")) : "Unknown reference Value - " + reference;
-  	
-  	if (reference.equals("default") || reference.equals("person")) 
+ 	
+  	switch(reference)
   	{
-  		assert currentPerson!=null : "Person nicht initialisiert";
-  		attributeValue = ActitoppPersonParameters.getEnumValue(attributeName).getAttribute(currentPerson);
+  		case "default":
+	  	case "person":
+	  		assert currentPerson!=null : "Person nicht initialisiert";
+	  		attributeValue = ActitoppPersonParameters.getEnumValue(attributeName).getAttribute(currentPerson);
+	  		break;
+	  	case "day":
+	  		assert currentDay!=null : "Tag nicht intialisiert";
+	  		attributeValue = HDayParameters.getEnumValue(attributeName).getAttribute(currentDay);
+	  		break;
+	  	case "tour":
+	  		assert currentTour!=null : "Tour nicht initialisiert";
+	  		attributeValue = HTourParameters.getEnumValue(attributeName).getAttribute(currentTour);
+	  		break;
+	  	case "activity":
+	  		assert currentActivity!=null : "Aktivität nicht initialisiert";
+	  		attributeValue = HActivityParameters.getEnumValue(attributeName).getAttribute(currentActivity);
+	  		break;		
   	}
-  	if (reference.equals("day")) 
-  	{
-  		assert currentDay!=null : "Tag nicht intialisiert";
-  		attributeValue = HDayParameters.getEnumValue(attributeName).getAttribute(currentDay);
-  	}
-  	if (reference.equals("tour")) 
-  	{
-  		assert currentTour!=null : "Tour nicht initialisiert";
-  		attributeValue = HTourParameters.getEnumValue(attributeName).getAttribute(currentTour);
-  	}
-  	if (reference.equals("activity")) 
-  	{
-  		assert currentActivity!=null : "Aktivität nicht initialisiert";
-  		attributeValue = HActivityParameters.getEnumValue(attributeName).getAttribute(currentActivity);
-  	}
-  	
+
   	assert attributeValue != 999999 : "AttributeValue couldn't be read! - Reference: " + reference + " - Attribut: " + attributeName;
   	return attributeValue;
   }
-  
+
   public String toString()
   {
   	String personindex = "n.a.";

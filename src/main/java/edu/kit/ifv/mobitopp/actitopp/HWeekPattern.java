@@ -164,48 +164,7 @@ public class HWeekPattern
     }
     return tourList;
   }
-  
-
-  /**
-   * 
-   * Zählt die Anzahl an Aktivitäten eines Typs für alle Tage der Woche - jeweils Rückgabe in einem Feld mit Einträgen je Tag
-   * 
-   * @param activityType
-   * @return
-   */
-  public int[] countActivititesPerDay(char activityType)
-  {
-    // each position in arrays represents ONE day
-    // the content of each array pos represents the # of activities of the
-    // chosen type
-    int[] ctr = new int[7];
-
-    for (int i = 0; i < 7; i++)
-    {
-    	HDay currentDay = getDay(i);
-      for (HActivity act : currentDay.getAllActivitiesoftheDay())
-      {
-      	if (act.activitytypeisScheduled() && act.getType() == activityType)
-        {
-      		ctr[i]++;
-        }
-      }
-    }
-    return ctr;
-  }
-  
-  /**
-   * 
-   * Gibt die Anzahl an Aktivitäten für spezifischen Typ und Indextag aus
-   * 
-   * @param activityType
-   * @param indexday
-   * @return
-   */
-  public int countActivitiesPerDay(char activityType, int indexday)
-  {
-  	return this.getDays().get(indexday).getTotalAmountOfActivitites(activityType);
-  }
+    
 
   /**
    * 
@@ -216,14 +175,18 @@ public class HWeekPattern
    */
   public int countActivitiesPerWeek(char activityType)
   {
-    int[] dayActs = countActivititesPerDay(activityType);
-    int ctr = 0;
-    for (int i = 0; i < dayActs.length; i++)
-    {
-      ctr += dayActs[i];
-    }
-
-    return ctr;
+  	int ctr=0;
+  	for(HDay day : this.getDays())
+	  {
+	    for(HTour tour : day.getTours())
+	    {
+	      for(HActivity act : tour.getActivities())
+	      {
+	        if(act.getType()==activityType)ctr++;;
+	      }
+	    }
+	  }
+	  return ctr;  	
   }
   
   /**
@@ -235,42 +198,33 @@ public class HWeekPattern
    */
   public int countToursPerWeek(char activityType)
   {
-    int ctr = 0;
-    for (int i = 0; i < 7; i++)
-    {
-    	HDay currentDay = this.getDays().get(i);
-    	for (int j = 0; j < currentDay.getAmountOfTours(); j++)
-      {
-        if (currentDay.getTours().get(j).getActivities().get(0).getType()==activityType)
-        {
-        	ctr += 1;
-        }
-      }
-    }
-    return ctr;
+  	
+  	int ctr=0;
+  	for(HDay day : this.getDays())
+	  {
+	    for(HTour tour : day.getTours())
+	    {
+	      if(tour.getActivity(0).getType()==activityType)ctr++;;
+	    }
+	  }
+	  return ctr;  	
   }
   
   /**
    * 
    * Zählt die Tage, an denen eine spezifischer Aktivitätentyp auftritt
    * 
-   * @param activitytype
+   * @param activityType
    * @return
    */
-  public int countDaysWithSpecificActivity(char activitytype)
+  public int countDaysWithSpecificActivity(char activityType)
   {
-    int[] ctr = countActivititesPerDay(activitytype);
-
-    int daysWithAct = 0;
-    
-    for (int i = 0; i < 7; i++)
-    {
-      if (ctr[i] > 0)
-      {
-        daysWithAct++;
-      }
-    }
-    return daysWithAct;
+  	int ctr=0;  	
+  	for (HDay currentDay : getDays())
+		{
+			if (currentDay.getTotalAmountOfActivitites(activityType)>0) ctr++; 
+		}
+  	return ctr;
   }
   
 	

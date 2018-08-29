@@ -77,9 +77,9 @@ public class DefaultDCModelStep extends AbsHModelStep
      *  Parameter für den Schritt festlegen
      * 	Enthält alle Parameter die in diesem Schritt verwendet werden inkl. zugehöriger Referenzen (default, person, tour, ...)
      */
-    for (String s : mf.getInParamMap().keySet())
+    for (Entry<String, String> s : mf.getInParamMap().entrySet())
     {
-    	inParamMap.put(s, mf.getInParamMap().get(s));
+    	inParamMap.put(s.getKey(), s.getValue());
     } 
     
     /*

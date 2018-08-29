@@ -17,7 +17,7 @@ import java.util.Map;
 public class CSVModelFlowListsLoader 
 {
 
-	public ModelFlowLists loadLists(InputStream input) throws FileNotFoundException, IOException
+	public ModelFlowLists loadList(InputStream input) throws FileNotFoundException, IOException
 	{
 		
 		ModelFlowLists mf = new ModelFlowLists();
@@ -63,7 +63,6 @@ public class CSVModelFlowListsLoader
         if (alt)	alternativesList.add(paramName);
       }
     }
-	      
-	      return mf;
+    return mf;
 	}
 }
