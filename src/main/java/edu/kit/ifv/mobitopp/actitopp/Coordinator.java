@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 
@@ -35,10 +36,15 @@ public class Coordinator
     // original ones
     // each activity type gets one of these per category (1 table per (activity
     // type, week and person) * categories) -> WELST * 15
-    private DiscreteTimeDistribution[][] modifiedActDurationDTDs;
+    @Deprecated
+    private DiscreteDistribution[][] modifiedActDurationDTDs;
 
     // start time for work and education categories: WE * 16
-    private DiscreteTimeDistribution[][] modifiedTourStartDTDs;
+    @Deprecated
+    private DiscreteDistribution[][] modifiedTourStartDTDs;
+    
+    
+    private HashMap<String, DiscreteDistribution> personalWRDDistributions;
     
     
     // Important for modeling joint actions
@@ -80,8 +86,11 @@ public class Coordinator
       this.fileBase = fileBase;
       this.randomgenerator = randomgenerator;
          
-      modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
-      modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
+      modifiedActDurationDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
+      modifiedTourStartDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
+      
+      this.personalWRDDistributions = new HashMap<String, DiscreteDistribution>();
+      //createWRDDistributionsfromFileBase();
 
     }
     
@@ -1075,7 +1084,7 @@ public class Coordinator
         // Entscheidung aus Schritt 7A-E ermitteln
         double chosenIndex = person.getAttributefromMap(activitytype+"budget_category_index");
 
-        DefaultMCModelStep step = new DefaultMCModelStep(id + (int) chosenIndex, this);
+        DefaultMCModelStep step = new DefaultMCModelStep(id, String.valueOf((int) chosenIndex), this);
         step.doStep();
         
         int chosenTime = step.getChosenTime();
@@ -1154,7 +1163,7 @@ public class Coordinator
 	{
 		
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
-	  modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
+	  modifiedActDurationDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
 		
 	  for (HDay currentDay : pattern.getDays())
 	  {
@@ -1265,7 +1274,7 @@ public class Coordinator
 	    	     */
           	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
 			      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-			      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
+			      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc, String.valueOf((int) chosenTimeCategory), this);
 			      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
 			      
 			      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
@@ -1308,7 +1317,7 @@ public class Coordinator
 	{
 
 		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
-	  modifiedActDurationDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
+	  modifiedActDurationDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
 		
 	  for (HDay currentDay : pattern.getDays())
 	  {
@@ -1385,7 +1394,7 @@ public class Coordinator
 	    	     */
           	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
           	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-  		      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc + (int) chosenTimeCategory, this);
+  		      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc, String.valueOf((int) chosenTimeCategory), this);
   		      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
   		      
   		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
@@ -1575,7 +1584,7 @@ public class Coordinator
 	private void executeStep10(String id_dc, String id_mc, int tournrdestages) throws InvalidPatternException
 	{
 		// Step 10: exact start time for x tour of the day
-		modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
+		modifiedTourStartDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
 			
 	  // STEP 10: determine time class for the start of the x tour of the day
 		for (HDay currentDay : pattern.getDays())
@@ -1643,8 +1652,7 @@ public class Coordinator
 	      double chosenStartCategory = (double) currentTour.getAttributesMap().get("tourStartCat_index");
 	      
 	      // Vorbereitungen und Objekte erzeugen
-	      String stepID = id_mc + (int) chosenStartCategory;
-	      DefaultMCModelStep step_mc = new DefaultMCModelStep(stepID, this);
+	      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc, String.valueOf((int)chosenStartCategory), this);
 	      char mainActivityTypeInTour = currentTour.getActivity(0).getType();
 	      step_mc.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenStartCategory);
 	      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
@@ -1690,7 +1698,7 @@ public class Coordinator
 		//											 only for the fourth tour if the day and following
 	
 	  // reset tour start dtds
-	  modifiedTourStartDTDs = new DiscreteTimeDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
+	  modifiedTourStartDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
 	  for (HDay currentDay : pattern.getDays())
 	  {
 	  	if (currentDay.isHomeDay())
@@ -1732,8 +1740,7 @@ public class Coordinator
 	    	    // 10T
 	    	    
 	    	    // Vorbereitungen und Objekte erzeugen
-	          String stepID = "10T" + (int) chosenHomeTimeCategory;
-	          DefaultMCModelStep mcstep = new DefaultMCModelStep(stepID, this);
+	    	    DefaultMCModelStep mcstep = new DefaultMCModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), this);
 	          char mainActivityTypeInTour = currentTour.getActivity(0).getType();
 	          mcstep.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenHomeTimeCategory);
 	          // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
@@ -2808,7 +2815,7 @@ public class Coordinator
 	    return randomgenerator;
 	}
 
-  public DiscreteTimeDistribution[][] getModifiedDTDs(int type)
+  public DiscreteDistribution[][] getModifiedDTDs(int type)
   {
       switch (type)
       {
@@ -2823,4 +2830,84 @@ public class Coordinator
   }
   
   
+  public void createpersonalDistributionEntry(String wrdstepid, String categoryname)
+  {
+  	ModellnformationWRD modelstep = fileBase.getModelInformationforWRDStep(wrdstepid);	
+  	ModelDistributionInformation distributioninformation = modelstep.getWRDDistribution(categoryname);
+  	
+  	ArrayList<Double> relSumList = new ArrayList<Double>();
+    ArrayList<Integer> sharesList = new ArrayList<Integer>();
+    
+    int sameValueRange = 0;
+    double lastValue = -1.0;       
+    Map<Integer, Integer> sameValueMap = new HashMap<Integer, Integer>();
+    
+    
+    int startPoint = -1;
+    int endPoint = -1;
+    int runningIndex =-1;
+    
+    for (Entry<Integer, ModelDistributionElement> elements : distributioninformation.getDistributionElements().entrySet())
+    {
+    	ModelDistributionElement element = elements.getValue();
+    	
+    	int slot = elements.getKey();
+    	int share = element.getAmount();
+    	double relSum = element.getShare_sum();
+      
+      relSumList.add(relSum);
+      sharesList.add(share);
+
+      if (startPoint == -1)
+      {
+        startPoint = slot;
+      }
+      
+      //TODO: check the precision and how many 0's we need
+      if( (Math.abs(relSum - lastValue) < 0.000000001))
+      {
+      	sameValueRange++;
+      }
+      else
+      {
+        if(sameValueRange >=1)
+        {
+          sameValueMap.put((runningIndex)-sameValueRange, sameValueRange);
+        }
+        sameValueRange = 0;
+      }
+      
+      lastValue = relSum;
+      runningIndex++;
+    }
+  
+    endPoint = runningIndex + startPoint;
+    
+    double[] dArr = new double[relSumList.size()];
+    for (int i = 0; i < dArr.length; i++) {
+    	dArr[i] = relSumList.get(i);  
+    }
+    
+    int[] sArr = new int[sharesList.size()];
+    for(int i = 0; i < sArr.length;i++)
+    {
+      sArr[i] = sharesList.get(i);
+    }
+    
+    //finish map
+    if(sameValueRange >= 1)
+    {
+      sameValueMap.put((runningIndex+1)-sameValueRange, sameValueRange);
+    }
+    
+    DiscreteDistribution distribution = new DiscreteDistribution(startPoint, endPoint,dArr,sameValueMap, sArr);
+    
+    personalWRDDistributions.put(wrdstepid + categoryname, distribution);		    
+  }
+  
+  
+  public DiscreteDistribution getpersonalWRDdistribution(String id, String categoryName)
+  {
+  	return personalWRDDistributions.get(id+categoryName);
+  }
 }

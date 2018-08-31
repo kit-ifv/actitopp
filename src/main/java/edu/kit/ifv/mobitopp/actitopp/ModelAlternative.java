@@ -7,7 +7,9 @@ package edu.kit.ifv.mobitopp.actitopp;
  */
 public class ModelAlternative
 {
-  private LCUtilityFunction utilityFunction;
+  private UtilityFunction utilityFunction;
+
+  
   private String name;
   private double probability=-1;
   private boolean enabled = true;
@@ -32,10 +34,10 @@ public class ModelAlternative
 	{
 	  super();
 	  this.name = name;
-	  utilityFunction = new LCUtilityFunction(0f);
+	  utilityFunction = new UtilityFunction();
 	}
 
-	public LCUtilityFunction getUtilityFunction()
+	public UtilityFunction getUtilityFunction()
   {
     return utilityFunction;
   }
@@ -99,19 +101,7 @@ public class ModelAlternative
   }
 	
 	
-	public void printUtilityDetails()
-  {
-    System.out.println("ALT: " + getName() );
-    //print base utility
-    System.out.print("Grundnutzen (real):"+getUtilityFunction().getBaseWeight() +" ___ ");
-    for(int i = 0; i < getUtilityFunction().getUtilityPairs().size(); i++)
-    {
-        ModelParameterWeight pair = getUtilityFunction().getUtilityPairs().get(i);
-        System.out.print(pair.getName() + ":" + pair.getattributevalue() + "*" + pair.getWeight());
-        System.out.print(" __ ");
-    }
-    System.out.println("\nTOTAL UTILITY: " + getUtility());
-  }
+
 
 
 }

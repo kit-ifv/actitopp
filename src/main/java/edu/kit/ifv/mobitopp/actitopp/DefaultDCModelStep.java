@@ -3,10 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 
@@ -25,14 +22,17 @@ public class DefaultDCModelStep extends AbsHModelStep
   private String alternativeChosen;
   protected ChoiceFunction choiceFunction;
   
-  protected Map<String, String> inParamMap;
-  protected List<ModelAlternative> alternatives;
+  private ModellnformationDC modelinfo;
+	
+  
+//  protected Map<String, String> inParamMap;
+  protected ArrayList<ModelAlternative> alternatives;
 
 	/*
 	 *  mappedParameters = enthält für jede Alternative eine Liste (ArrayList) mit ModelParameterWeights
 	 *  ModelParameterWeights enthalten Name, Gewicht (Nutzenanteil) sowie Attribut (trifft zu oder nicht bzw. Größe)
 	 */
-  protected Map<String, List<ModelParameterWeight>> mappedParameters;
+//  protected Map<String, List<ModelParameterWeight>> mappedParameters;
   
   
   
@@ -54,21 +54,26 @@ public class DefaultDCModelStep extends AbsHModelStep
     super(id, modelCoordinator);
     
     this.attributeLookup = attributeLookup;
-    
-    this.inParamMap = new HashMap<String, String>();
     this.alternatives = new ArrayList<ModelAlternative>();  
-    
     this.choiceFunction = new LogitFunction();   
     
-    // Modellflowlisten aus der FileBase laden
     
-    ModelFlowLists mf = modelCoordinator.getFileBase().getModelFlowLists(id); 	    	
-		assert mf != null : "ModelFlow Object is null";
+ //   this.inParamMap = new HashMap<String, String>();
+   
+    /*
+     * load model information from file base
+     */
+    modelinfo = modelCoordinator.getFileBase().getModelInformationforDCStep(id);
+    assert modelinfo != null : "ModelInformationDC Object is null";
+    
+    
+ //   ModelFlowInformation mf = modelCoordinator.getFileBase().getModelFlowInformation(id); 	    	
+//		assert mf != null : "ModelFlow Object is null";
 
 		/*
-		 *  Alternativenlisten erzeugen
+		 *  create object for each step alternative
 		 */
-    for (String s : mf.getAlternativesList())
+    for (String s : modelinfo.getAlternativesList())
     {
     	alternatives.add(new ModelAlternative(s));
     }
@@ -77,17 +82,17 @@ public class DefaultDCModelStep extends AbsHModelStep
      *  Parameter für den Schritt festlegen
      * 	Enthält alle Parameter die in diesem Schritt verwendet werden inkl. zugehöriger Referenzen (default, person, tour, ...)
      */
-    for (Entry<String, String> s : mf.getInParamMap().entrySet())
-    {
-    	inParamMap.put(s.getKey(), s.getValue());
-    } 
+//    for (Entry<String, String> s : mf.getParamMap().entrySet())
+//    {
+ //   	inParamMap.put(s.getKey(), s.getValue());
+//    } 
     
     /*
      * mappedParameters = enthält für jede Alternative eine Liste (ArrayList) mit ModelParameterWeights
      * ModelParameterWeights enthalten Name, Gewicht (Nutzenanteil) sowie Attribut (trifft zu oder nicht bzw. Größe)
      * 
      */
-    mappedParameters = new FileBaseParameterWeightLoader(modelCoordinator.getFileBase()).getWeightValues(id);
+ //   mappedParameters = new FileBaseParameterWeightLoader(modelCoordinator.getFileBase()).getWeightValues(id);
   }
   
   
@@ -100,19 +105,19 @@ public class DefaultDCModelStep extends AbsHModelStep
   public int doStep()
   {
       	
-    // RangeLimiter setzen
+    // set rangeLimiter (UpperBound) if not yet determinded
     toRangeLimiter = (toRangeLimiter >= 0) ? toRangeLimiter : alternatives.size();
     
     assert toRangeLimiter>=fromRangeLimiter : "fromRangeLimiter > toRangeLimiter!";
 
-    // Alternativen, die außerhalb der Range liegen inaktiv setzen!
+    // disable alternatives out of Lower-UpperBound range!
     for (int i=0; i<alternatives.size(); i++)
     {
     	if (i<fromRangeLimiter || i>toRangeLimiter) alternatives.get(i).setEnabled(false);
     }
     
     /*
-     * Prüfen, ob noch mindestens 1 Alternative zur Verfügung steht
+     * check that there is at least one alternative still enabled
      */
     boolean alternativeverfuegbar=false;
     for (ModelAlternative mAlt : alternatives)
@@ -121,7 +126,7 @@ public class DefaultDCModelStep extends AbsHModelStep
     }
     assert alternativeverfuegbar==true : "Keine Alternative verfügbar!";
     
-	  // Nutzenfunktionen der aktiven Alternativen initialisieren
+	  // initialize utility function for each alternative
   	initAlternatives();
     
     // Wahrscheinlichkeiten der aktiven Alternativen berechnen
@@ -144,18 +149,38 @@ public class DefaultDCModelStep extends AbsHModelStep
   
 
 	/**
-	 * Methode initialisiert die Nutzenfunktionen der aktiven Alternativen anhand den zugeordneten Parametern
+	 * initialize utility functions of all enabled alternatives
 	 */
 	private void initAlternatives()
 	{
-		for (int i = 0; i < alternatives.size(); i++)
-	  {
-			// Referenz auf entsprechende Alternative setzen
-	    ModelAlternative mAlt = alternatives.get(i);
-	    
+		for (ModelAlternative mAlt : alternatives)
+	  {  
 			if (mAlt.isEnabled())
 			{
-		  	
+				UtilityFunction uf = mAlt.getUtilityFunction();
+				
+				// Loop through all parameters of this alternative
+				for (Entry<String, Double> mapentry : modelinfo.getParameterValuesforAlternative(mAlt.getName()).entrySet())
+				{
+					String parameterName = mapentry.getKey();
+					Double parameterValue = mapentry.getValue();
+					
+					if(parameterName.equals("Grundnutzen") || parameterName.equals("Intercept"))
+					{ 
+						uf.setBaseWeight(parameterValue);
+					}
+					else
+					{
+						String parameterContext = modelinfo.getContextforParameter(parameterName);
+						double attributeValue = attributeLookup.getAttributeValue(parameterContext, parameterName);
+						uf.addParameterAttributeCombination(new UtilityParameterAttributeCombination(parameterName, parameterValue, attributeValue));
+					}
+				}
+			}
+	  }
+				
+				
+/*		  	
 		  	// Erzeuge eine eigene Map für die Alternative
 		  	Map<String, Double> attribute = new HashMap<String, Double>();
 		
@@ -172,23 +197,23 @@ public class DefaultDCModelStep extends AbsHModelStep
 		    				
 
 		    // Referenz auf Parameter für diese Alternative setzen
-		    List<ModelParameterWeight> parameter = mappedParameters.get(mAlt.getName());
+		    List<ModelParameterAttributeCombination> parameter = mappedParameters.get(mAlt.getName());
 		    
 		    /*
 		     * Vorgehen allgemein: Iteriere über alle Parameter aus parameter-Objekt und ordne den entsprechenden attributeValue aus attribute zu
 		     */
-		    
+/*		    
 		    //Ermittle Grundnutzen           
-		    ModelParameterWeight grundnutzen = parameter.get(0);
+		    ModelParameterAttributeCombination grundnutzen = parameter.get(0);
 		    assert grundnutzen.getName().equals("Grundnutzen") : "erstes ModelParameterWeight ist nicht Grundnutzen! - " + grundnutzen.getName();
 		    
-		    mAlt.getUtilityFunction().setBaseWeight(grundnutzen.getWeight());
+		    mAlt.getUtilityFunction().setBaseWeight(grundnutzen.getparameterValue());
 		    
 		    //Ermittel alle weiteren Nutzen
 		    for (int j = 1; j < parameter.size(); j++)
 		    {
 		        // Parameter bestimmen
-		        ModelParameterWeight modelparameter = parameter.get(j);
+		        ModelParameterAttributeCombination modelparameter = parameter.get(j);
 		        // zugehörige Attributausprägung bestimmen
 		        double attributauspraegung = attribute.get(modelparameter.getName());                
 		        modelparameter.setattributevalue(attributauspraegung);
@@ -198,7 +223,7 @@ public class DefaultDCModelStep extends AbsHModelStep
 		    }
 		    
 			}
-	  }
+	  }*/
 	}
 
 

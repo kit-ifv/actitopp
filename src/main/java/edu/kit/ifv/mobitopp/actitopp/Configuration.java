@@ -2,6 +2,8 @@ package edu.kit.ifv.mobitopp.actitopp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -44,7 +46,7 @@ public class Configuration {
 	
 	
 	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
-  public static final String[] flowlist_initials =
+  public static final String[] dcsteps_ids =
   { 		
   		"1A", "1B", "1C", "1D", "1E", "1F", "1K","1L",
   		"2A", 
@@ -56,19 +58,41 @@ public class Configuration {
   		"8A", "8B", "8D", "8J", 
   		"9A", 
   		"10A",
-  		"10B", "10D", "10G", "10J",
+  		/*"10B", "10D", "10G", "10J",*/ /*Stufe 10B-J sind ab actiTopp 1.4 nicht mehr enthalten */
   		"10M", "10O", "10Q", "10S",
   		"11", /* Stufe 11 ist erst ab actiTopp 1.3 verfügbar*/
   		"98A", "98B", "98C"
   };
 	
   
+  public static final HashMap<String, Integer> wrdsteps;
+  static
+  {
+  	wrdsteps = new HashMap<String, Integer>();
+  	wrdsteps.put("7K", 8);
+  	wrdsteps.put("7L", 5);
+  	wrdsteps.put("7M", 5);
+  	wrdsteps.put("7N", 4);
+  	wrdsteps.put("7O", 3);
+  	
+  	wrdsteps.put("8C", 14);
+  	wrdsteps.put("8E", 14);
+  	wrdsteps.put("8K", 14);
+  	
+  	wrdsteps.put("10N", 15);
+  	wrdsteps.put("10P", 10);
+  	wrdsteps.put("10R", 10);
+  	wrdsteps.put("10T", 9);
+  }
+  
+  
   //Angaben der Stufen, die Listen mit Häufigkeitsverteilungen verwenden
-  public static final String[] timedistributions_initials =
+  public static final String[] wrdsteps_initials =
   { 
   		"7K", "7L", "7M", "7N", "7O", 
   		"8C", "8E", "8K", 
-  		"10C", "10E", "10H", "10K", "10N", "10P", "10R", "10T"
+  		/*"10C", "10E", "10H", "10K",*/ /*Stufe 10C-K sind ab actiTopp 1.4 nicht mehr enthalten */
+  		"10N", "10P", "10R", "10T"
   };
   
   //Angaben der Dateinamen, die Parameter Estimated für einfache Regressionen enthalten
@@ -79,11 +103,12 @@ public class Configuration {
 
   
   //Angabe der maximalen Kategorie-Indizes bei Häufigskeitsverteilungen
-  public static final int[] timeDistributions_MaxIndizes =
+  public static final int[] wrdsteps_MaxIndizes =
   { 
   		8, 5, 5, 4, 3, 
   		14, 14, 14, 
-  		15, 15, 10, 10, 15, 10, 10, 9
+  		/*15, 15, 10, 10,*/  /*Stufe 10C-K sind ab actiTopp 1.4 nicht mehr enthalten */
+  		15, 10, 10, 9
   };
 	
   

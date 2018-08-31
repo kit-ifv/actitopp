@@ -8,10 +8,9 @@ import java.util.Map.Entry;
 
 //TODO Tim: Klasse untersuchen und checken
 
-public class DiscreteTimeDistribution
+public class DiscreteDistribution
 {
     private int startValue;
-
     private int endValue;
 
     // arraypos: n = x; (n+1) => x+y, y >=0 and y = relative share
@@ -25,7 +24,7 @@ public class DiscreteTimeDistribution
     
     //this is the last used temporary DTD, which is based upon this object. 
     //only used for debug purposes (printing of the decision process...)
-    private DiscreteTimeDistribution lastTempDTD;
+    private DiscreteDistribution lastTempDTD;
 
     // the time distribution may have several values mapped to the same relative
     // share. we there save the range of this values as a KV-Pair
@@ -33,7 +32,7 @@ public class DiscreteTimeDistribution
     // V: how large the range is. Minimum is 1
     private Map<Integer, Integer> sameValues;
 
-    public DiscreteTimeDistribution(int startValue, int endValue, double[] distributionAsSum, Map<Integer, Integer> sameValueMap, int[] shares)
+    public DiscreteDistribution(int startValue, int endValue, double[] distributionAsSum, Map<Integer, Integer> sameValueMap, int[] shares)
     {
         super();
         this.startValue = startValue;
@@ -44,7 +43,7 @@ public class DiscreteTimeDistribution
         setOccurenceSum();
     }
 
-    public DiscreteTimeDistribution(DiscreteTimeDistribution source)
+    public DiscreteDistribution(DiscreteDistribution source)
     {
         super();
         this.startValue = source.startValue;
@@ -76,7 +75,7 @@ public class DiscreteTimeDistribution
         return newMap;
     }
     
-    public DiscreteTimeDistribution(DiscreteTimeDistribution source, int lowerBound, int upperBound)
+    public DiscreteDistribution(DiscreteDistribution source, int lowerBound, int upperBound)
     {
         super();
         
@@ -197,7 +196,7 @@ public class DiscreteTimeDistribution
 //        int end = (endValue - (endValue - usedUpperBound) - startValue) +1;
         
         //Phase2: create temporary distribution table with limited range
-        DiscreteTimeDistribution tmpDTD = new DiscreteTimeDistribution(this, usedLowerBound, usedUpperBound);
+        DiscreteDistribution tmpDTD = new DiscreteDistribution(this, usedLowerBound, usedUpperBound);
         lastTempDTD = tmpDTD;
         //Phase3: pick randomly
         double rand = randomgenerator.getRandomValue();
@@ -270,12 +269,12 @@ public class DiscreteTimeDistribution
         this.occurences = shares;
     }
 
-    public DiscreteTimeDistribution getLastTempDTD()
+    public DiscreteDistribution getLastTempDTD()
     {
         return lastTempDTD;
     }
 
-    public void setLastTempDTD(DiscreteTimeDistribution lastTempDTD)
+    public void setLastTempDTD(DiscreteDistribution lastTempDTD)
     {
         this.lastTempDTD = lastTempDTD;
     }

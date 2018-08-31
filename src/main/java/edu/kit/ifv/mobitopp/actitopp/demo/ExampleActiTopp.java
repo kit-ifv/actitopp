@@ -19,7 +19,7 @@ public class ExampleActiTopp {
 	 */
 	public static void main(String[] args) 
 	{
-			
+	
 		createAndModelOnePerson_Example1();
 /*
 		createAndModelOnePerson_Example2();
@@ -27,7 +27,9 @@ public class ExampleActiTopp {
 	  createAndModelOnePerson_Example3();
 	
 		createAndModelMultiplePersons_Example1();
-*/		
+		*/
+		//createAndModelMultiplePersons_Example2();
+		
 		/*beispielhafte Verwendung eines Debug-Loggers für Entscheidung 2A*/
 /*		debugloggers.addDebugLogger("2A");
 
@@ -297,47 +299,8 @@ public class ExampleActiTopp {
 		assert householdmap!=null : "HouseholdMap konnte nicht eingelesen werden.";
 		assert personmap !=null : "PersonMap konnte nicht eingelesen werden.";
 		
-		
-		for (Number key : householdmap.keySet())
-		{
-			ActiToppHousehold acthousehold = householdmap.get(key);
-			System.out.println("HH: " + acthousehold.getHouseholdIndex() + " HHGRO: " + acthousehold.getNumberofPersonsinHousehold());
-			
-							
-		  /* 
-		   * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
-		   * 
-		   * Reihenfolge der Aktivitätenplanmodellierung orientiert sich an der Wahrscheinlichkeit des Anteils gemeinsamer Aktivitäten
-		   * 
-		   * In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-			 * in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-			 * In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
-			 */
-			
-			boolean householdscheduleOK = false;
-			while (!householdscheduleOK)
-			{	
-				try
-				{
-					
-					// Pläne für den gesamten Haushalt generieren
-					acthousehold.generateSchedules(fileBase, randomgenerator, debugloggers);
-
-					//System.out.println("HHdone: " + key);
-					householdscheduleOK = true;
-					
-				}
-				catch (InvalidPatternException e)
-				{
-					System.err.println(e.getReason());
-					
-	        // Setze die Modellierungsergebnisse dieses Haushalts zurück für neuen Versuch
-	        acthousehold.resetHouseholdModelingResults();
-	        debugloggers.deleteInformationforHousehold(acthousehold);
-				}
-			}
-		}
-				
+		// Model Household using parallel streams
+		householdmap.values().parallelStream().forEach(ExampleActiTopp::runHousehold);
 		
 		try
 		{
@@ -370,6 +333,45 @@ public class ExampleActiTopp {
 		double dauer_msec_perpers = dauer_msec / personmap.size();
 		System.out.println("Duration per Pers: " + dauer_msec_perpers + " milli sec");
 
+	}
+
+
+	private static void runHousehold(ActiToppHousehold acthousehold) {
+		System.out.println("HH: " + acthousehold.getHouseholdIndex() + " HHGRO: " + acthousehold.getNumberofPersonsinHousehold());
+		
+						
+		/* 
+		 * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
+		 * 
+		 * Reihenfolge der Aktivitätenplanmodellierung orientiert sich an der Wahrscheinlichkeit des Anteils gemeinsamer Aktivitäten
+		 * 
+		 * In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
+		 * in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
+		 * In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
+		 */
+		
+		boolean householdscheduleOK = false;
+		while (!householdscheduleOK)
+		{	
+			try
+			{
+				
+				// Pläne für den gesamten Haushalt generieren
+				acthousehold.generateSchedules(fileBase, randomgenerator, debugloggers);
+
+				//System.out.println("HHdone: " + key);
+				householdscheduleOK = true;
+				
+			}
+			catch (InvalidPatternException e)
+			{
+				System.err.println(e.getReason());
+				
+		    // Setze die Modellierungsergebnisse dieses Haushalts zurück für neuen Versuch
+		    acthousehold.resetHouseholdModelingResults();
+		    debugloggers.deleteInformationforHousehold(acthousehold);
+			}
+		}
 	}
 
 }

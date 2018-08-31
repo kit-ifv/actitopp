@@ -8,8 +8,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-
 /**
  * 
  * @author Tim Hilgert
@@ -25,10 +23,10 @@ public class CSVLinearRegressionEstimatesLoader
 	 * @param input
 	 * @return
 	 */
-  public Map<String, LinearRegressionEstimate> getEstimates(InputStream input)
+  public HashMap<String, LinearRegressionEstimate> getEstimates(InputStream input)
   {
 
-    Map<String, LinearRegressionEstimate> estimatesMap = new HashMap<String, LinearRegressionEstimate>();
+    HashMap<String, LinearRegressionEstimate> estimatesMap = new HashMap<String, LinearRegressionEstimate>();
 
       
 		try(BufferedReader inRead = new BufferedReader(new InputStreamReader(input)))

@@ -3,11 +3,8 @@ package edu.kit.ifv.mobitopp.actitopp;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * 
@@ -19,14 +16,14 @@ import java.util.Set;
  */
 public class ModelFileBase
 {
-  // Map mit Objekten, die die Einstellungen der Parameter für die Steps enthalten (Model_flow csv Dateien)
-  private Map<String, ModelFlowLists> modelFlowListsMap;
-  // Map mit Objekten, die die Parameternamen und -werte der Steps enthalten (Params csv Dateien)
-  private Map<String,Map<String, List<ModelParameterWeight>>> modelParameterWeightsMap;
-  // Map mit Objekten, die die Zeitverteilungen der Steps enthalten (KAT csv Dateien)
-  private Map<String,DiscreteTimeDistribution> timeDistributionsMap;
+ 
+ 
+  private HashMap<String, ModellnformationDC> modelInformationDCsteps;
+  private HashMap<String, ModellnformationWRD> modelInformationWRDsteps;
+  
   // Map mit Objekten, die Estimates einfacher Regressionsmodelle enthalten
-  private Map<String,Map<String, LinearRegressionEstimate>> linearregressionestimatesmap;
+  private HashMap<String,HashMap<String, LinearRegressionEstimate>> linearregressionestimatesmap;
+  
   
   /**
    * 
@@ -36,17 +33,18 @@ public class ModelFileBase
   public ModelFileBase()
   {
     super();
-    this.modelFlowListsMap = new HashMap<String, ModelFlowLists>();
-    this.modelParameterWeightsMap = new HashMap<String, Map<String,List<ModelParameterWeight>>>();
-    this.timeDistributionsMap = new HashMap<String, DiscreteTimeDistribution>();
-    this.linearregressionestimatesmap = new HashMap<String, Map<String, LinearRegressionEstimate>>();
     
+    this.modelInformationDCsteps = new HashMap<String, ModellnformationDC>();
+    this.modelInformationWRDsteps = new HashMap<String, ModellnformationWRD>();
+    this.linearregressionestimatesmap = new HashMap<String, HashMap<String, LinearRegressionEstimate>>();
+  
     try
     {
     	// Initialisierungen
-      initFlowLists();
-      initParameterWeights();
-      initTimeDistributionLists();
+    	initDCStepInformation();
+    	initDCStepParameters();
+    	initWRDSteps();
+    	
       initLinearRegressionEstimates();
     }
     catch (IOException e)
@@ -55,61 +53,33 @@ public class ModelFileBase
 			throw new RuntimeException();
     }
   }
-    
-
-	public Map<String, ModelFlowLists> getModelFlowListsMap()
-	{
-    return modelFlowListsMap;
-	}
-
-	public Map<String,DiscreteTimeDistribution> getTimeDistributionsMap()
-	{
-    return timeDistributionsMap;
-	}
-
-  public Map<String, Map<String, List<ModelParameterWeight>>> getModelParameterWeightsMap() 
+  
+  
+  /**
+   * 
+   * returns {@link ModellnformationDC} object for specific id
+   * 
+   * @param modelstepid
+   * @return
+   */
+  public ModellnformationDC getModelInformationforDCStep(String modelstepid)
   {
-  	return modelParameterWeightsMap;
-	}
-
-	
-	/**
-	 * 
-	 * Gibt das ModeFlow Objekt für den angefragten Step zurück
-	 * 
-	 * @param ID
-	 * @return
-	 */
-	public ModelFlowLists getModelFlowLists(String ID)
-    {
-      ModelFlowLists lists = modelFlowListsMap.get(ID);
-			assert lists != null : modelFlowListsMap.keySet();
-      return lists;
-    }
-    
-	/**
-	 * 
-	 * Gibt die ParameterListe für den angefragten Step zurück
-	 * 
-	 * @param ID
-	 * @return
-	 */
-  public Map<String, List<ModelParameterWeight>> getmodelParameterWeightsList(String ID)
-  {
-    return modelParameterWeightsMap.get(ID);
+  	return modelInformationDCsteps.get(modelstepid);
   }
     
-	/**
-	 * 
-	 * Gibt das Objekt der Zeitverteilung für den angefragten Step zurück
-	 * 
-	 * @param ID
-	 * @return
-	 */
-  public DiscreteTimeDistribution getTimeDistribution(String ID)
+  
+  /**
+   * 
+   * returns {@link ModellnformationWRD} object for specific id
+   * 
+   * @param modelstepid
+   * @return
+   */
+  public ModellnformationWRD getModelInformationforWRDStep(String modelstepid)
   {
-    return timeDistributionsMap.get(ID);
+  	return modelInformationWRDsteps.get(modelstepid);
   }
+    
   
   /**
    * 
@@ -118,83 +88,86 @@ public class ModelFileBase
    * @param regressionname
    * @return
    */
-  public Map<String, LinearRegressionEstimate> getLinearRegressionEstimates(String regressionname)
+  public HashMap<String, LinearRegressionEstimate> getLinearRegressionEstimates(String regressionname)
   {
   	return linearregressionestimatesmap.get(regressionname);
   }
     
 	/**
    * 
-   * Initialisierung der Model-Flow-Listen (für Logit-Steps)
+   * read all relevant model flow information from files fpor dc steps
    * 
    * @throws FileNotFoundException
    * @throws IOException
    */
-  private void initFlowLists() throws FileNotFoundException, IOException
+  private void initDCStepInformation() throws FileNotFoundException, IOException
   {
-    // Initialisierung der Listen aller Stufen
-    for (String s : Configuration.flowlist_initials)
+    for (String s : Configuration.dcsteps_ids)
     {
       String sourceLocation = Configuration.parameterset + "/" + s + "model_flow.csv";
-      CSVModelFlowListsLoader loader = new CSVModelFlowListsLoader();
+      CSVModelFlowInformationLoader loader = new CSVModelFlowInformationLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-				ModelFlowLists lists = loader.loadList(input);
-				modelFlowListsMap.put(s, lists);
+				
+				// Creates ModelInformationOject
+				ModellnformationDC modelStep = new ModellnformationDC();
+				// Load ParameterNames, Contexts and Alternatives
+				loader.loadModelFlowData(input, modelStep);
+				// Adds the modelinformation to the map
+				modelInformationDCsteps.put(s, modelStep);
 			}
     }
   }
-
+  
   /**
 	 * 
 	 * Initialisierung der Parameter für Logit-Steps
    * @throws IOException 
 	 * 
 	 */
-	private void initParameterWeights() throws IOException
+	private void initDCStepParameters() throws IOException
 	{
-    for (String keyString : modelFlowListsMap.keySet())
+		// parameters need to be available for all DC model steps
+    for (String keyString : modelInformationDCsteps.keySet())
     {
     	// Referenz auf eine Modelflowliste des spezifischen Schritts
-      ModelFlowLists flow = this.getModelFlowLists(keyString);
+      ModellnformationDC modelstep = modelInformationDCsteps.get(keyString);
       
       String sourceLocation = Configuration.parameterset + "/"+ keyString +"Params.csv";
-      CSVParameterWeightLoader weightLoader = new CSVParameterWeightLoader();
+      CSVParameterLoader parameterLoader = new CSVParameterLoader();
       
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
 			{
-				Map<String, List<ModelParameterWeight>> wm = weightLoader.getWeightValues(input,
-						new ArrayList<String>(flow.getInParamMap().keySet()), flow.getAlternativesList());
-				modelParameterWeightsMap.put(keyString, wm);
+				parameterLoader.loadParameterValues(input, modelstep);		
 			}
     }
 	}
-	
+  
 	/**
    * 
-   * Initialisierung der Zeitverteilungen (für MC-Steps)
+   * initialize weighted random draw steps
    * 
    * @throws FileNotFoundException
    * @throws IOException
    */
-  private void initTimeDistributionLists() throws FileNotFoundException, IOException
+  private void initWRDSteps() throws FileNotFoundException, IOException
   {
-  	// Angabe der Stufen, die Zeitverteilungen verwenden
-    String[] toInitialize = Configuration.timedistributions_initials;
-    
-    // Angabe der maximalen Kategorie-Indizes
-    int[] toInitializeMaxIndizes = Configuration.timeDistributions_MaxIndizes;
-
-    // Initialisierung der Listen aller Stufen und Kategorien
-    for(int i = 0; i < toInitialize.length;i++)
+    // initialize all steps and all categories for each step
+    for(Entry<String, Integer> mapentry : Configuration.wrdsteps.entrySet())
     {
-      for(int j = 0; j <= toInitializeMaxIndizes[i];j++)
+    	String stepid = mapentry.getKey();
+    	int maxinidex = mapentry.getValue();
+    	
+    	ModellnformationWRD modelstep = new ModellnformationWRD();
+    	modelInformationWRDsteps.put(stepid, modelstep);
+    	
+      for(int index = 0; index <= maxinidex; index++)
       {	
-        String sourceLocation = Configuration.parameterset + "/"+ toInitialize[i] +"_KAT_"+ j +".csv";
-        CSVTimeDistributionLoader loader = new CSVTimeDistributionLoader();
+        String sourceLocation = Configuration.parameterset + "/"+ stepid +"_KAT_"+ index +".csv";
+        CSVWRDDistributionLoader loader = new CSVWRDDistributionLoader();
+        
 				try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-					DiscreteTimeDistribution dtd = loader.loadDistribution(input);
-					// ! just use the ID and the index as identifier
-					timeDistributionsMap.put((toInitialize[i] + j), dtd);
+					ModelDistributionInformation wrddist = loader.loadDistributionInformation(input);
+					modelstep.addDistributionInformation(String.valueOf(index), wrddist);
 				}
       }
     }
@@ -216,7 +189,7 @@ public class ModelFileBase
       String sourceLocation = Configuration.parameterset + "/"+ toInitialize[i] +".csv";
       CSVLinearRegressionEstimatesLoader loader = new CSVLinearRegressionEstimatesLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-				Map<String, LinearRegressionEstimate> tmpmap = loader.getEstimates(input);
+				HashMap<String, LinearRegressionEstimate> tmpmap = loader.getEstimates(input);
 				linearregressionestimatesmap.put(toInitialize[i], tmpmap);
 			}
     }

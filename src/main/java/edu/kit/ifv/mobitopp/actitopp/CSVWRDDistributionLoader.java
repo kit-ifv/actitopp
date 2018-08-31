@@ -17,11 +17,11 @@ import java.util.Map;
  * @author Tim Hilgert
  *
  */
-public class CSVTimeDistributionLoader
+public class CSVWRDDistributionLoader
 {
 	
-//TODO Kommentierung fehlt!	
-  public DiscreteTimeDistribution loadDistribution(InputStream input)
+
+  public DiscreteDistribution loadDistribution(InputStream input)
   {
     //TODO: performance optimization: find out how many lines there are and do use a fixed array instead of an list (and lateron toArray copy)
     List<Double> relSumList = new ArrayList<Double>();
@@ -53,7 +53,6 @@ public class CSVTimeDistributionLoader
         try
         {
           relSum = nf.parse(splitted[4]).doubleValue();
-            
         }
         catch (ParseException e)
         {
@@ -106,7 +105,7 @@ public class CSVTimeDistributionLoader
         sameValueMap.put((runningIndex+1)-sameValueRange, sameValueRange);
       }
       
-      DiscreteTimeDistribution distribution = new DiscreteTimeDistribution(startPoint, endPoint,dArr,sameValueMap, sArr );
+      DiscreteDistribution distribution = new DiscreteDistribution(startPoint, endPoint,dArr,sameValueMap, sArr );
       return distribution;
 
     }
@@ -115,5 +114,51 @@ public class CSVTimeDistributionLoader
         e.printStackTrace();
     }
     return null;
+  }
+  
+
+  public ModelDistributionInformation loadDistributionInformation(InputStream input)
+  {
+  	ModelDistributionInformation minfo = new ModelDistributionInformation();
+  	   
+    try (BufferedReader inRead = new BufferedReader(new InputStreamReader(input)))
+    {
+      boolean header = true;
+      String line = null;
+
+      while ((line = inRead.readLine()) != null)
+      {
+        if (header)
+        {
+          line = inRead.readLine();
+          header = false;
+        }
+        String[] splitted = line.split(";");
+        
+        int slot = Integer.parseInt(splitted[0]);
+        int amount = Integer.parseInt(splitted[1]);
+        int amount_sum = Integer.parseInt(splitted[2]);
+        double share = 0d;
+        double share_sum = 0d;
+        NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+        try
+        {
+        	share = nf.parse(splitted[3]).doubleValue();
+        	share_sum = nf.parse(splitted[4]).doubleValue();
+        }
+        catch (ParseException e)
+        {
+          e.printStackTrace();
+        }
+        
+        minfo.addDistributionElement(slot, new ModelDistributionElement(amount, amount_sum, share, share_sum));
+        
+      }      
+    } 
+    catch (IOException e) 
+    {
+			e.printStackTrace();
+		}
+    return minfo;
   }
 }
