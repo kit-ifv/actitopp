@@ -463,7 +463,7 @@ public class ActitoppPerson
 		AttributeLookup lookup = new AttributeLookup(this);
 		
 		// Modellobjekt erzeugen (97estimates.csv enthält die Modellparameter)
-		DefaultLinearRegressionCalculation regression = new DefaultLinearRegressionCalculation("97estimates", fileBase, lookup);
+		LinRegDefaultCalculation regression = new LinRegDefaultCalculation("97estimates", fileBase, lookup);
 		
 		// Initialisierung und Regressionskalkulation
 		regression.initializeEstimates();				

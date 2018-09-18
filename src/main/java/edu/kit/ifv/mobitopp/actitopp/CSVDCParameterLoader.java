@@ -17,7 +17,7 @@ import java.util.Map;
  * @author Tim Hilgert
  *
  */
-public class CSVParameterLoader
+public class CSVDCParameterLoader
 {
 	  
   /**
@@ -27,16 +27,16 @@ public class CSVParameterLoader
    * @param input
    * @param modelstep
    */
-  public void loadParameterValues(InputStream input, ModellnformationDC modelstep)
+  public void loadParameterValues(InputStream input, DCModelSteplnformation modelstep)
   {   
     /*
      * initialization of ModelAlternativeParameterValues objects
      * an object exists for each alternative of this modelstep
      */
-    Map<String, ModelAlternativeParameterValues> alternativesParameters = new HashMap<String, ModelAlternativeParameterValues>();
+    Map<String, DCModelAlternativeParameterValues> alternativesParameters = new HashMap<String, DCModelAlternativeParameterValues>();
     for (String s :  modelstep.getAlternativesList())
     {
-    	alternativesParameters.put(s, new ModelAlternativeParameterValues());
+    	alternativesParameters.put(s, new DCModelAlternativeParameterValues());
     }
   
 		try(BufferedReader inRead = new BufferedReader(new InputStreamReader(input)))

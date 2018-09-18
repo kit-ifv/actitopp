@@ -13,7 +13,7 @@ import java.util.Locale;
  * @author Tim Hilgert
  *
  */
-public class CSVLinearRegressionEstimatesLoader
+public class CSVLinRegEstimatesLoader
 {
 
 	/**
@@ -23,10 +23,10 @@ public class CSVLinearRegressionEstimatesLoader
 	 * @param input
 	 * @return
 	 */
-  public HashMap<String, LinearRegressionEstimate> getEstimates(InputStream input)
+  public HashMap<String, LinRegEstimate> getEstimates(InputStream input)
   {
 
-    HashMap<String, LinearRegressionEstimate> estimatesMap = new HashMap<String, LinearRegressionEstimate>();
+    HashMap<String, LinRegEstimate> estimatesMap = new HashMap<String, LinRegEstimate>();
 
       
 		try(BufferedReader inRead = new BufferedReader(new InputStreamReader(input)))
@@ -59,7 +59,7 @@ public class CSVLinearRegressionEstimatesLoader
         }
         
         assert (contextIdentifier.equals("default") || contextIdentifier.equals("person") || contextIdentifier.equals("day") || contextIdentifier.equals("tour") || contextIdentifier.equals("activity")) : "wrong Reference Value for InputParamMap - " + variable + " - " + contextIdentifier + " - SourceLocation: " + input;
-        estimatesMap.put(variable, new LinearRegressionEstimate(variable, estimatevalue, contextIdentifier));          
+        estimatesMap.put(variable, new LinRegEstimate(variable, estimatevalue, contextIdentifier));          
       }
     }
     catch (IOException e)

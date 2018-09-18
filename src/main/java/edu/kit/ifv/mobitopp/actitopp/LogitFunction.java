@@ -6,19 +6,19 @@ public class LogitFunction implements ChoiceFunction
 {
 
 
-  public void calculateProbabilities(List<ModelAlternative> alternatives)
+  public void calculateProbabilities(List<DCAlternative> alternatives)
   {
   	double utilitySum = 0.0d;
   	double probabilitySum = 0.0d;
   	
   	// Calculate utilitysum of all alternatives
-    for (ModelAlternative ma : alternatives)
+    for (DCAlternative ma : alternatives)
     {
       if (ma.isEnabled()) utilitySum += Math.exp(ma.getUtility());
     }
     
     // Calculate probability of each alternative based on utilitySum
-    for (ModelAlternative ma : alternatives)
+    for (DCAlternative ma : alternatives)
     {
     	if (ma.isEnabled()) 
     	{
@@ -27,32 +27,30 @@ public class LogitFunction implements ChoiceFunction
     		probabilitySum += probability;
     	}
     }
-    //assert Math.round(probabilitySum*100)/100 == 1.0d:"wrong probability sum! (!=1.0d)";
+    assert Math.round(probabilitySum*100)/100 == 1.0d:"wrong probability sum! (!=1.0d)";
   }
   
   
   @Override
-  public int chooseAlternative(List<ModelAlternative> alternatives, double random)
+  public int chooseAlternative(List<DCAlternative> alternatives, double random)
   {
   	int choiceindex=-1;
     double movingSum = 0;
     for (int i=0; i<alternatives.size();i++)
     {
-    	ModelAlternative ma = alternatives.get(i);
+    	DCAlternative ma = alternatives.get(i);
     	if (ma.isEnabled())
     	{
     		double movingsumnew = movingSum + ma.getProbability();
-    		// Bedingung, dass random-Wert im Bereich zwischen letzter und aktueller Grenze liegt
         if (random>= movingSum && random <= movingsumnew)
         {
         	choiceindex=i;
         	break;
         }
-        // Falls nicht, wird Schleife weiter durchgeführt
         movingSum = movingsumnew;
     	}
     }
-    assert choiceindex!=-1 : "Konnte keine Wahl treffen!";
+    assert choiceindex!=-1 : "could not make a choice!";
     return choiceindex;
   }
 

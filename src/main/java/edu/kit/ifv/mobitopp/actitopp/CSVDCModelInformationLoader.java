@@ -14,10 +14,10 @@ import java.util.HashMap;
  * @author Tim Hilgert
  *
  */
-public class CSVModelFlowInformationLoader 
+public class CSVDCModelInformationLoader 
 {
 
-	public void loadModelFlowData(InputStream input, ModellnformationDC modelstep) throws FileNotFoundException, IOException
+	public void loadModelFlowData(InputStream input, DCModelSteplnformation modelstep) throws FileNotFoundException, IOException
 	{
 		
 		// Map for parameter Names and Context	      

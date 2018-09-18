@@ -5,7 +5,7 @@ package edu.kit.ifv.mobitopp.actitopp;
  * @author Tim Hilgert
  *
  */
-public class ModelAlternative
+public class DCAlternative
 {
   private UtilityFunction utilityFunction;
 
@@ -30,7 +30,7 @@ public class ModelAlternative
    * 
    * @param name
    */
-	public ModelAlternative(String name)
+	public DCAlternative(String name)
 	{
 	  super();
 	  this.name = name;

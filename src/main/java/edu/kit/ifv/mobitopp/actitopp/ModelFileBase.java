@@ -18,11 +18,11 @@ public class ModelFileBase
 {
  
  
-  private HashMap<String, ModellnformationDC> modelInformationDCsteps;
-  private HashMap<String, ModellnformationWRD> modelInformationWRDsteps;
+  private HashMap<String, DCModelSteplnformation> modelInformationDCsteps;
+  private HashMap<String, WRDModelSteplnformation> modelInformationWRDsteps;
   
   // Map mit Objekten, die Estimates einfacher Regressionsmodelle enthalten
-  private HashMap<String,HashMap<String, LinearRegressionEstimate>> linearregressionestimatesmap;
+  private HashMap<String,HashMap<String, LinRegEstimate>> linearregressionestimatesmap;
   
   
   /**
@@ -34,9 +34,9 @@ public class ModelFileBase
   {
     super();
     
-    this.modelInformationDCsteps = new HashMap<String, ModellnformationDC>();
-    this.modelInformationWRDsteps = new HashMap<String, ModellnformationWRD>();
-    this.linearregressionestimatesmap = new HashMap<String, HashMap<String, LinearRegressionEstimate>>();
+    this.modelInformationDCsteps = new HashMap<String, DCModelSteplnformation>();
+    this.modelInformationWRDsteps = new HashMap<String, WRDModelSteplnformation>();
+    this.linearregressionestimatesmap = new HashMap<String, HashMap<String, LinRegEstimate>>();
   
     try
     {
@@ -57,12 +57,12 @@ public class ModelFileBase
   
   /**
    * 
-   * returns {@link ModellnformationDC} object for specific id
+   * returns {@link DCModelSteplnformation} object for specific id
    * 
    * @param modelstepid
    * @return
    */
-  public ModellnformationDC getModelInformationforDCStep(String modelstepid)
+  public DCModelSteplnformation getModelInformationforDCStep(String modelstepid)
   {
   	return modelInformationDCsteps.get(modelstepid);
   }
@@ -70,12 +70,12 @@ public class ModelFileBase
   
   /**
    * 
-   * returns {@link ModellnformationWRD} object for specific id
+   * returns {@link WRDModelSteplnformation} object for specific id
    * 
    * @param modelstepid
    * @return
    */
-  public ModellnformationWRD getModelInformationforWRDStep(String modelstepid)
+  public WRDModelSteplnformation getModelInformationforWRDStep(String modelstepid)
   {
   	return modelInformationWRDsteps.get(modelstepid);
   }
@@ -88,7 +88,7 @@ public class ModelFileBase
    * @param regressionname
    * @return
    */
-  public HashMap<String, LinearRegressionEstimate> getLinearRegressionEstimates(String regressionname)
+  public HashMap<String, LinRegEstimate> getLinearRegressionEstimates(String regressionname)
   {
   	return linearregressionestimatesmap.get(regressionname);
   }
@@ -102,14 +102,14 @@ public class ModelFileBase
    */
   private void initDCStepInformation() throws FileNotFoundException, IOException
   {
-    for (String s : Configuration.dcsteps_ids)
+    for (String s : Configuration.dcsteps)
     {
       String sourceLocation = Configuration.parameterset + "/" + s + "model_flow.csv";
-      CSVModelFlowInformationLoader loader = new CSVModelFlowInformationLoader();
+      CSVDCModelInformationLoader loader = new CSVDCModelInformationLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
 				
 				// Creates ModelInformationOject
-				ModellnformationDC modelStep = new ModellnformationDC();
+				DCModelSteplnformation modelStep = new DCModelSteplnformation();
 				// Load ParameterNames, Contexts and Alternatives
 				loader.loadModelFlowData(input, modelStep);
 				// Adds the modelinformation to the map
@@ -130,10 +130,10 @@ public class ModelFileBase
     for (String keyString : modelInformationDCsteps.keySet())
     {
     	// Referenz auf eine Modelflowliste des spezifischen Schritts
-      ModellnformationDC modelstep = modelInformationDCsteps.get(keyString);
+      DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
       
       String sourceLocation = Configuration.parameterset + "/"+ keyString +"Params.csv";
-      CSVParameterLoader parameterLoader = new CSVParameterLoader();
+      CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
       
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
 			{
@@ -157,7 +157,7 @@ public class ModelFileBase
     	String stepid = mapentry.getKey();
     	int maxinidex = mapentry.getValue();
     	
-    	ModellnformationWRD modelstep = new ModellnformationWRD();
+    	WRDModelSteplnformation modelstep = new WRDModelSteplnformation();
     	modelInformationWRDsteps.put(stepid, modelstep);
     	
       for(int index = 0; index <= maxinidex; index++)
@@ -166,7 +166,7 @@ public class ModelFileBase
         CSVWRDDistributionLoader loader = new CSVWRDDistributionLoader();
         
 				try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-					ModelDistributionInformation wrddist = loader.loadDistributionInformation(input);
+					WRDModelDistributionInformation wrddist = loader.loadDistributionInformation(input);
 					modelstep.addDistributionInformation(String.valueOf(index), wrddist);
 				}
       }
@@ -180,17 +180,14 @@ public class ModelFileBase
    */
   private void initLinearRegressionEstimates() throws IOException
   {
-  	// Angabe der Dateinmanen bzw. Schritte, die einfache Regressionsmodelle verwenden
-    String[] toInitialize = Configuration.linearregressionestimates_filenames;
- 
     // Initialisierung der Listen aller Dateien
-    for(int i = 0; i < toInitialize.length;i++)
+    for(String s : Configuration.linregsteps_filenames)
     {   
-      String sourceLocation = Configuration.parameterset + "/"+ toInitialize[i] +".csv";
-      CSVLinearRegressionEstimatesLoader loader = new CSVLinearRegressionEstimatesLoader();
+      String sourceLocation = Configuration.parameterset + "/"+ s +".csv";
+      CSVLinRegEstimatesLoader loader = new CSVLinRegEstimatesLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-				HashMap<String, LinearRegressionEstimate> tmpmap = loader.getEstimates(input);
-				linearregressionestimatesmap.put(toInitialize[i], tmpmap);
+				HashMap<String, LinRegEstimate> tmpmap = loader.getEstimates(input);
+				linearregressionestimatesmap.put(s, tmpmap);
 			}
     }
 	}

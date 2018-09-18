@@ -2,11 +2,11 @@ package edu.kit.ifv.mobitopp.actitopp;
 
 import java.util.HashMap;
 
-public class ModelAlternativeParameterValues {
+public class DCModelAlternativeParameterValues {
 	
 	private HashMap<String, Double> parameterValues;
 	
-	public ModelAlternativeParameterValues()
+	public DCModelAlternativeParameterValues()
 	{
 		parameterValues = new HashMap<String, Double>();
 	}

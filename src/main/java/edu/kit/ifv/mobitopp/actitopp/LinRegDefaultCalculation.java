@@ -3,20 +3,20 @@ package edu.kit.ifv.mobitopp.actitopp;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DefaultLinearRegressionCalculation {
+public class LinRegDefaultCalculation {
 	
 	private String regressionname;
 	private ModelFileBase fileBase;
 	private AttributeLookup attributeLookup;
 	
-	Map<String, LinearRegressionEstimate> estimatesMap;
+	Map<String, LinRegEstimate> estimatesMap;
 	
-	public DefaultLinearRegressionCalculation(String regressionname, ModelFileBase fileBase, AttributeLookup attributeLookup)
+	public LinRegDefaultCalculation(String regressionname, ModelFileBase fileBase, AttributeLookup attributeLookup)
 	{
 		this.regressionname = regressionname;
 		this.fileBase = fileBase;
 		this.attributeLookup = attributeLookup;
-		this.estimatesMap = new HashMap<String, LinearRegressionEstimate>();
+		this.estimatesMap = new HashMap<String, LinRegEstimate>();
 	}
 	
 	/**
@@ -30,8 +30,8 @@ public class DefaultLinearRegressionCalculation {
 		// Parameter laden und in Map für diese Entscheidung kopieren
 		for (String key : fileBase.getLinearRegressionEstimates(regressionname).keySet())
 		{
-			LinearRegressionEstimate vorlage = fileBase.getLinearRegressionEstimates(regressionname).get(key);
-			LinearRegressionEstimate estimate = new LinearRegressionEstimate(vorlage.getName(), vorlage.getEstimateValue(), vorlage.getContextIdentifier());
+			LinRegEstimate vorlage = fileBase.getLinearRegressionEstimates(regressionname).get(key);
+			LinRegEstimate estimate = new LinRegEstimate(vorlage.getName(), vorlage.getEstimateValue(), vorlage.getContextIdentifier());
 			estimatesMap.put(key, estimate);
 		}
 		
@@ -39,7 +39,7 @@ public class DefaultLinearRegressionCalculation {
 		for (String key : estimatesMap.keySet())
 		{
 	  	
-			LinearRegressionEstimate estimate = estimatesMap.get(key);
+			LinRegEstimate estimate = estimatesMap.get(key);
 			
 			if (key.equals("Grundnutzen") || key.equals("Intercept"))
 			{
@@ -67,7 +67,7 @@ public class DefaultLinearRegressionCalculation {
 		// Estimates auslesen und Linearkombination bilden
 		for (String key : estimatesMap.keySet())
 		{
-	  	LinearRegressionEstimate estimate = estimatesMap.get(key);
+	  	LinRegEstimate estimate = estimatesMap.get(key);
 			result = result + (estimate.getEstimateValue() * estimate.getAttributeValue());
 		}
 		

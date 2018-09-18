@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * 
@@ -29,44 +28,24 @@ public class Coordinator
     private ModelFileBase fileBase;
     private RNGHelper randomgenerator;
     private DebugLoggers debugloggers;
-   
-    // important for Step8C: dtd tables must be modified after each MC-selection
-    // process
-    // After the first MC-selection we must these modified tables instead of the
-    // original ones
-    // each activity type gets one of these per category (1 table per (activity
-    // type, week and person) * categories) -> WELST * 15
-    @Deprecated
-    private DiscreteDistribution[][] modifiedActDurationDTDs;
-
-    // start time for work and education categories: WE * 16
-    @Deprecated
-    private DiscreteDistribution[][] modifiedTourStartDTDs;
-    
-    
-    private HashMap<String, DiscreteDistribution> personalWRDDistributions;
+       
+    /*
+     * - distributions for wrd (weighted random draw) model steps are personalized.
+     * - they are dependent from step id, category and activity type
+     * 
+     * They are needed to store modified distributions after modeling decisions (e.g. when people decide to perform
+     * a 8-hour working acitivity, the distribution element (8 hours) will get a bonus that it is more likely to choose 
+     * 8 hours again the next time for this person. This ensures better stability of duration and starttime modeling.		
+     */
+    private HashMap<String, WRDDiscreteDistribution> personalWRDDistributions;
     
     
     // Important for modeling joint actions
     
-   	int[] numberofactsperday_lowerboundduetojointactions = {0,0,0,0,0,0,0};
-  	int[] numberoftoursperday_lowerboundduetojointactions = {0,0,0,0,0,0,0};
+   	private int[] numberofactsperday_lowerboundduetojointactions = {0,0,0,0,0,0,0};
+  	private int[] numberoftoursperday_lowerboundduetojointactions = {0,0,0,0,0,0,0};
     
     
-    
-    ////////////////
-    
-    //	KONSTANTEN
-    
-    ////////////////    
-    
-    // Konstante für die Nutzung der Zeitverteilungen der Aktivitätsdauern
-    private static final int INDICATOR_ACT_DURATIONS = 0;
-    // Konstante für die Nutzung der Zeitverteilungen der Startzeiten
-    private static final int INDICATOR_TOUR_STARTTIMES = 1;
-
-
-
     /**
      * 
      * Konstruktor
@@ -85,13 +64,8 @@ public class Coordinator
     	this.pattern = person.getWeekPattern();
       this.fileBase = fileBase;
       this.randomgenerator = randomgenerator;
-         
-      modifiedActDurationDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
-      modifiedTourStartDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
-      
-      this.personalWRDDistributions = new HashMap<String, DiscreteDistribution>();
-      //createWRDDistributionsfromFileBase();
-
+     
+      this.personalWRDDistributions = new HashMap<String, WRDDiscreteDistribution>();
     }
     
     /**
@@ -163,11 +137,11 @@ public class Coordinator
     executeStep7DC("7D", 'S');
     executeStep7DC("7E", 'T');
     
-    executeStep7MC("7K", 'W');
-    executeStep7MC("7L", 'E');
-    executeStep7MC("7M", 'L');
-    executeStep7MC("7N", 'S');
-    executeStep7MC("7O", 'T');
+    executeStep7WRD("7K", 'W');
+    executeStep7WRD("7L", 'E');
+    executeStep7WRD("7M", 'L');
+    executeStep7WRD("7N", 'S');
+    executeStep7WRD("7O", 'T');
   
     executeStep8A("8A");
     executeStep8_MainAct("8B", "8C");
@@ -279,7 +253,7 @@ public class Coordinator
 		AttributeLookup lookup = new AttributeLookup(person);
 		
     // Step-Objekt erzeugen
-    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     step.doStep();
     
     // Ergebnis zu Personen-Map hinzufügen
@@ -308,7 +282,7 @@ public class Coordinator
     		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
       	
   	    // Step-Objekt erzeugen
-  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
   	    
   	    // Falls es schon Touren gibt (aus gemeinsamen Akt), H als Aktivitätstyp ausschließen
   	    if (currentDay.getAmountOfTours()>0 || numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]>0)
@@ -410,7 +384,7 @@ public class Coordinator
   		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
     	
 	    // Step-Objekt erzeugen
-	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    
 	    // Mindesttourzahl festlegen, falls es schon Touren aus gemeinsamen Aktivitäten gibt
 	    int mindesttourzahl=0;
@@ -493,7 +467,7 @@ public class Coordinator
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
         	
     	    // Step-Objekt erzeugen
-    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     	    
     	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
     	    if (
@@ -566,7 +540,7 @@ public class Coordinator
     		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
       	
     	  // Step-Objekt erzeugen
-  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     		
   	    // Mindesaktzahl festlegen, falls es schon Aktivitäten aus gemeinsamen Aktivitäten gibt
   	    int mindestaktzahl =0;
@@ -646,7 +620,7 @@ public class Coordinator
         		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
           	
       	    // Step-Objekt erzeugen
-      	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+      	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
       	    
       	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivitäten erreicht sind!
       	    if (
@@ -1049,7 +1023,7 @@ public class Coordinator
 			AttributeLookup lookup = new AttributeLookup(person);
 			
 	    // Step-Objekt erzeugen
-	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    step.doStep();
 	    
 	    //Debug-Logger schreiben falls aktiviert
@@ -1076,7 +1050,7 @@ public class Coordinator
 	 * @param id
 	 * @param activitytype
 	 */
-	private void executeStep7MC(String id, char activitytype)
+	private void executeStep7WRD(String id, char activitytype)
     {
 	  	// Wird nur ausgeführt, wenn es zu dem Aktivitätentyp auch Aktivitäten gibt
 	  	if (pattern.countActivitiesPerWeek(activitytype)>0)
@@ -1084,10 +1058,10 @@ public class Coordinator
         // Entscheidung aus Schritt 7A-E ermitteln
         double chosenIndex = person.getAttributefromMap(activitytype+"budget_category_index");
 
-        DefaultMCModelStep step = new DefaultMCModelStep(id, String.valueOf((int) chosenIndex), this);
+        WRDDefaultModelStep step = new WRDDefaultModelStep(id, String.valueOf((int) chosenIndex), activitytype, this);
         step.doStep();
         
-        int chosenTime = step.getChosenTime();
+        int chosenTime = step.getchosenDistributionElement();
         
   	    //Debug-Logger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -1128,7 +1102,7 @@ public class Coordinator
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
         	
     	    // Step-Objekt erzeugen
-    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     	    step.doStep();
     	    
     	    //Debug-Logger schreiben falls aktiviert
@@ -1156,14 +1130,11 @@ public class Coordinator
 	/**
 	 * 
 	 * @param id_dc
-	 * @param id_mc
+	 * @param id_wrd
 	 * @throws InvalidPatternException
 	 */
-	private void executeStep8_MainAct(String id_dc, String id_mc) throws InvalidPatternException
+	private void executeStep8_MainAct(String id_dc, String id_wrd) throws InvalidPatternException
 	{
-		
-		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
-	  modifiedActDurationDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
 		
 	  for (HDay currentDay : pattern.getDays())
 	  {
@@ -1197,7 +1168,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
 	    	    // Step-Objekt erzeugen
-	    	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
+	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
 	    	    
 	    	    // Alternativen ggf. auf Standardzeitkategorie einschränken
 	    	    if (currentActivity.getAttributesMap().get("standarddauer") == 1.0d)
@@ -1269,29 +1240,24 @@ public class Coordinator
 	    	    
 	    	    /*
 	    	     * 
-	    	     * MC-Schritt (8C, 8E)
+	    	     * WRD-step (8C, 8E)
 	    	     * 
 	    	     */
           	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
 			      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-			      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc, String.valueOf((int) chosenTimeCategory), this);
-			      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-			      
-			      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-			      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-			      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-			      
+			      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getType(), this);
+			      			      
 			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
-			      step_mc.setRangeBounds(durationBounds[0], durationBounds[1]);
+			      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
 			      
 			      // Wahlentscheidung durchführen
-			      step_mc.doStep();
-			      int chosenTime = (int) (step_mc.getChosenTime() * 1.00);
-			      
+			      step_wrd.doStep();
+			      int chosenTime = (int) step_wrd.getchosenDistributionElement();
+			      		      
 	    	    //Debug-Logger schreiben falls aktiviert
-	    	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
+	    	    if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
 	    	    {
-	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(chosenTime));
+	    	    	debugloggers.getLogger(id_wrd).put(currentActivity, String.valueOf(chosenTime));
 	    	    }
 			     
 			      // Speichere Ergebnisse ab
@@ -1310,15 +1276,12 @@ public class Coordinator
 	/**
 	 * 
 	 * @param id_dc
-	 * @param id_mc
+	 * @param id_wrd
 	 * @throws InvalidPatternException
 	 */
-	private void executeStep8_NonMainAct(String id_dc, String id_mc) throws InvalidPatternException
+	private void executeStep8_NonMainAct(String id_dc, String id_wrd) throws InvalidPatternException
 	{
 
-		// Modifizierte Zeitverteilungen zur Modellierung von höheren Auswahlwahrscheinlichkeiten bereits gewählter Zeiten
-	  modifiedActDurationDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_ACT_DURATION_CLASSES];
-		
 	  for (HDay currentDay : pattern.getDays())
 	  {
 	  	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgeführt
@@ -1344,7 +1307,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
 	    	    // Step-Objekt erzeugen
-	    	    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
+	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
 	    	   
 	    	    // Grenzen aufgrund ggf. bereits festgelgten Dauern beschränken
 	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
@@ -1389,29 +1352,24 @@ public class Coordinator
 	    	    
 	    	    /*
 	    	     * 
-	    	     * MC-Schritt
+	    	     * WRD-Schritt
 	    	     * 
 	    	     */
           	// Objekt basierend auf der gewählten Zeitkategorie initialisieren
           	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-  		      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc, String.valueOf((int) chosenTimeCategory), this);
-  		      step_mc.setModifiedDTDtoUse(currentActivity.getType(), (int) chosenTimeCategory);
-  		      
-  		      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-  		      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-  		      step_mc.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-
+  		      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getType(), this);
+  		     
 			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
-			      step_mc.setRangeBounds(durationBounds[0], durationBounds[1]);
+  		      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
 			      
 			      // Wahlentscheidung durchführen
-			      step_mc.doStep();
-			      int chosenTime = (int) (step_mc.getChosenTime() * 1.00);
+  		      step_wrd.doStep();
+			      int chosenTime = (int) step_wrd.getchosenDistributionElement();
 			      
 	    	    //Debug-Logger schreiben falls aktiviert
-	    	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
+	    	    if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
 	    	    {
-	    	    	debugloggers.getLogger(id_mc).put(currentActivity, String.valueOf(chosenTime));
+	    	    	debugloggers.getLogger(id_wrd).put(currentActivity, String.valueOf(chosenTime));
 	    	    }
 			     
 			      // Speichere Ergebnisse ab
@@ -1440,7 +1398,7 @@ public class Coordinator
   		AttributeLookup lookup = new AttributeLookup(person);   	
     	
 	    // Step-Objekt erzeugen
-	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    step.doStep();
 	    
 	    //Debug-Logger schreiben falls aktiviert
@@ -1481,7 +1439,7 @@ public class Coordinator
 	    		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	      	
 	  	    // Step-Objekt erzeugen
-	  	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	  	    step.doStep();
 	  	    
 	  	    //Debug-Logger schreiben falls aktiviert
@@ -1577,14 +1535,13 @@ public class Coordinator
 
 	/**
 	 * 
-	 * @param id
+	 * @param id_dc
+	 * @param id_wrd
 	 * @param tournrdestages
-	 * @throws InvalidPersonPatternException
+	 * @throws InvalidPatternException
 	 */
-	private void executeStep10(String id_dc, String id_mc, int tournrdestages) throws InvalidPatternException
+	private void executeStep10(String id_dc, String id_wrd, int tournrdestages) throws InvalidPatternException
 	{
-		// Step 10: exact start time for x tour of the day
-		modifiedTourStartDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
 			
 	  // STEP 10: determine time class for the start of the x tour of the day
 		for (HDay currentDay : pattern.getDays())
@@ -1612,7 +1569,7 @@ public class Coordinator
 	  		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	    	
 		    // Step-Objekt erzeugen
-		    DefaultDCModelStep step_dc = new DefaultDCModelStep(id_dc, this, lookup);
+		    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
 		     		
 	      // Bestimme Ober- und Untergrenze und schränke Alternativenmenge ein
 	      int bounds_dc[] = calculateStartingBoundsForTours(currentTour, true);
@@ -1644,7 +1601,7 @@ public class Coordinator
 		    
 		    /*
 		     * 
-		     * MC-Schritt
+		     * WRD-Schritt
 		     * 
 		     */
 		    
@@ -1652,24 +1609,19 @@ public class Coordinator
 	      double chosenStartCategory = (double) currentTour.getAttributesMap().get("tourStartCat_index");
 	      
 	      // Vorbereitungen und Objekte erzeugen
-	      DefaultMCModelStep step_mc = new DefaultMCModelStep(id_mc, String.valueOf((int)chosenStartCategory), this);
-	      char mainActivityTypeInTour = currentTour.getActivity(0).getType();
-	      step_mc.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenStartCategory);
-	      // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-	      step_mc.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-	      //step.setOutPropertyName("tourStartTime");
-	      step_mc.setDTDTypeToUse(INDICATOR_TOUR_STARTTIMES);
+	      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int)chosenStartCategory), currentTour.getActivity(0).getType(), this);
+	      
 	      int[] bounds_mc = calculateStartingBoundsForTours(currentTour, false);
-	      step_mc.setRangeBounds(bounds_mc[0], bounds_mc[1]);
+	      step_wrd.setRangeBounds(bounds_mc[0], bounds_mc[1]);
 	      
 	      // Entscheidung durchführen
-	      step_mc.doStep();
-	      int chosenStartTime = step_mc.getChosenTime();
+	      step_wrd.doStep();
+	      int chosenStartTime = step_wrd.getchosenDistributionElement();
 	      
   	    //Debug-Logger schreiben falls aktiviert
-  	    if(debugloggers!= null && debugloggers.existsLogger(id_mc))
+  	    if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
   	    {
-  	    	debugloggers.getLogger(id_mc).put(currentTour, String.valueOf(chosenStartTime));
+  	    	debugloggers.getLogger(id_wrd).put(currentTour, String.valueOf(chosenStartTime));
   	    }
 	      
 	      // Speichere Ergebnisse ab
@@ -1697,8 +1649,6 @@ public class Coordinator
 	  // Step 10s and Step10t: determine home time before tour starts and then define tour start time
 		//											 only for the fourth tour if the day and following
 	
-	  // reset tour start dtds
-	  modifiedTourStartDTDs = new DiscreteDistribution[Configuration.NUMBER_OF_ACTIVITY_TYPES][Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES];
 	  for (HDay currentDay : pattern.getDays())
 	  {
 	  	if (currentDay.isHomeDay())
@@ -1717,7 +1667,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	        	
 	    	    // Step-Objekt erzeugen
-	    	    DefaultDCModelStep dcstep = new DefaultDCModelStep("10S", this, lookup);
+	    	    DCDefaultModelStep dcstep = new DCDefaultModelStep("10S", this, lookup);
 	    	     		
 	          // Bestimme Ober- und Untergrenze und schränke Alternativenmenge ein
 	          int dcbounds[] = calculateBoundsForHomeTime(currentTour, true);
@@ -1740,27 +1690,23 @@ public class Coordinator
 	    	    // 10T
 	    	    
 	    	    // Vorbereitungen und Objekte erzeugen
-	    	    DefaultMCModelStep mcstep = new DefaultMCModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), this);
-	          char mainActivityTypeInTour = currentTour.getActivity(0).getType();
-	          mcstep.setModifiedDTDtoUse(mainActivityTypeInTour, (int) chosenHomeTimeCategory);
-	          // angepasste Zeitverteilungen aus vorherigen Entscheidungen werden nur im koordinierten Fall verwendet
-	  	      mcstep.setModifyDTDAfterStep(Configuration.coordinated_modelling);
-	          //step.setOutPropertyName("tourStartTime");
-	          mcstep.setDTDTypeToUse(INDICATOR_ACT_DURATIONS);
-	          int[] mcbounds = calculateBoundsForHomeTime(currentTour, false);
-	          mcstep.setRangeBounds(mcbounds[0], mcbounds[1]);
+	    	    WRDDefaultModelStep step_wrd = new WRDDefaultModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), currentTour.getActivity(0).getType(), this);
+	    	    int[] wrdbounds = calculateBoundsForHomeTime(currentTour, false);
+	          step_wrd.setRangeBounds(wrdbounds[0], wrdbounds[1]);
 	          
 	          // Entscheidung durchführen
-	          mcstep.doStep();
+	          step_wrd.doStep();
+	          int chosenTime = step_wrd.getchosenDistributionElement();
+	          
 	          
 	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger("10T"))
 	    	    {
-	    	    	debugloggers.getLogger("10T").put(currentTour, String.valueOf(mcstep.getChosenTime()));
+	    	    	debugloggers.getLogger("10T").put(currentTour, String.valueOf(chosenTime));
 	    	    }
 	          
 	          // Speichere Ergebnisse ab
-	          int starttimetour = currentDay.getTour(currentTour.getIndex()-1).getEndTime() + mcstep.getChosenTime();
+	          int starttimetour = currentDay.getTour(currentTour.getIndex()-1).getEndTime() + chosenTime;
 	          currentTour.setStartTime(starttimetour);
 	          
 	          // Setze die Startzeiten der Aktivitäten in dieser Tour
@@ -1812,7 +1758,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
 	    	    // Step-Objekt erzeugen
-	    	    DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    	    step.doStep();
 	    	    
       	    // DebugLogger schreiben falls aktiviert
@@ -1854,7 +1800,7 @@ public class Coordinator
 		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, activity);   	
 		
 	  // Step-Objekt erzeugen
-	  DefaultDCModelStep step = new DefaultDCModelStep(id, this, lookup);
+	  DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	  step.doStep();
 	  
     // DebugLogger schreiben falls aktiviert
@@ -2802,9 +2748,6 @@ public class Coordinator
 	}
 
 	
-	
-	
-	
 	public ModelFileBase getFileBase()
 	{
 	    return fileBase;
@@ -2815,99 +2758,14 @@ public class Coordinator
 	    return randomgenerator;
 	}
 
-  public DiscreteDistribution[][] getModifiedDTDs(int type)
+   
+	public WRDDiscreteDistribution getpersonalWRDdistribution(String id, String categoryName, char activityType)
   {
-      switch (type)
-      {
-          case (INDICATOR_ACT_DURATIONS):
-              return this.modifiedActDurationDTDs;
-          case (INDICATOR_TOUR_STARTTIMES):
-              return this.modifiedTourStartDTDs;
-      }
-
-      return null;
-
+  	return personalWRDDistributions.get(id+categoryName+activityType);
   }
-  
-  
-  public void createpersonalDistributionEntry(String wrdstepid, String categoryname)
+	
+	public void addpersonalWRDdistribution(String id, String categoryName, char activityType, WRDDiscreteDistribution wrddist)
   {
-  	ModellnformationWRD modelstep = fileBase.getModelInformationforWRDStep(wrdstepid);	
-  	ModelDistributionInformation distributioninformation = modelstep.getWRDDistribution(categoryname);
-  	
-  	ArrayList<Double> relSumList = new ArrayList<Double>();
-    ArrayList<Integer> sharesList = new ArrayList<Integer>();
-    
-    int sameValueRange = 0;
-    double lastValue = -1.0;       
-    Map<Integer, Integer> sameValueMap = new HashMap<Integer, Integer>();
-    
-    
-    int startPoint = -1;
-    int endPoint = -1;
-    int runningIndex =-1;
-    
-    for (Entry<Integer, ModelDistributionElement> elements : distributioninformation.getDistributionElements().entrySet())
-    {
-    	ModelDistributionElement element = elements.getValue();
-    	
-    	int slot = elements.getKey();
-    	int share = element.getAmount();
-    	double relSum = element.getShare_sum();
-      
-      relSumList.add(relSum);
-      sharesList.add(share);
-
-      if (startPoint == -1)
-      {
-        startPoint = slot;
-      }
-      
-      //TODO: check the precision and how many 0's we need
-      if( (Math.abs(relSum - lastValue) < 0.000000001))
-      {
-      	sameValueRange++;
-      }
-      else
-      {
-        if(sameValueRange >=1)
-        {
-          sameValueMap.put((runningIndex)-sameValueRange, sameValueRange);
-        }
-        sameValueRange = 0;
-      }
-      
-      lastValue = relSum;
-      runningIndex++;
-    }
-  
-    endPoint = runningIndex + startPoint;
-    
-    double[] dArr = new double[relSumList.size()];
-    for (int i = 0; i < dArr.length; i++) {
-    	dArr[i] = relSumList.get(i);  
-    }
-    
-    int[] sArr = new int[sharesList.size()];
-    for(int i = 0; i < sArr.length;i++)
-    {
-      sArr[i] = sharesList.get(i);
-    }
-    
-    //finish map
-    if(sameValueRange >= 1)
-    {
-      sameValueMap.put((runningIndex+1)-sameValueRange, sameValueRange);
-    }
-    
-    DiscreteDistribution distribution = new DiscreteDistribution(startPoint, endPoint,dArr,sameValueMap, sArr);
-    
-    personalWRDDistributions.put(wrdstepid + categoryname, distribution);		    
-  }
-  
-  
-  public DiscreteDistribution getpersonalWRDdistribution(String id, String categoryName)
-  {
-  	return personalWRDDistributions.get(id+categoryName);
+  	personalWRDDistributions.put(id+categoryName+activityType,wrddist);
   }
 }

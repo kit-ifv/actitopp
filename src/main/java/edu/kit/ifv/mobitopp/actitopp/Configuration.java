@@ -3,7 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 
 /**
  * 
@@ -45,26 +45,62 @@ public class Configuration {
 	
 	
 	
-	//Angabe der Stufen, die Flowlisten für Logit-Modellierungen verwenden
-  public static final String[] dcsteps_ids =
-  { 		
-  		"1A", "1B", "1C", "1D", "1E", "1F", "1K","1L",
-  		"2A", 
-  		"3A", "3B", 
-  		"4A", 
-  		"5A", "5B",
-  		"6A", 
-  		"7A", "7B", "7C", "7D", "7E", 
-  		"8A", "8B", "8D", "8J", 
-  		"9A", 
-  		"10A",
-  		/*"10B", "10D", "10G", "10J",*/ /*Stufe 10B-J sind ab actiTopp 1.4 nicht mehr enthalten */
-  		"10M", "10O", "10Q", "10S",
-  		"11", /* Stufe 11 ist erst ab actiTopp 1.3 verfügbar*/
-  		"98A", "98B", "98C"
-  };
-	
+	//Angabe der Stufen, die Logit-Modellierungen verwenden
+  public static final HashSet<String> dcsteps;
+  static
+  {
+  	dcsteps = new HashSet<String>();
+  	dcsteps.add("1A");
+  	dcsteps.add("1B");
+  	dcsteps.add("1C");
+  	dcsteps.add("1D");
+  	dcsteps.add("1E");
+  	dcsteps.add("1F");
+  	dcsteps.add("1K");
+  	dcsteps.add("1L");
+  	/* Stufe 1K,1L ist erst ab actiTopp 1.4 verfügbar*/
+  	
+  	dcsteps.add("2A");
+  	
+  	dcsteps.add("3A");
+  	dcsteps.add("3B");
+  	
+  	dcsteps.add("4A");
+  	
+  	dcsteps.add("5A");
+  	dcsteps.add("5B");
+  	
+  	dcsteps.add("6A");
+  	
+  	dcsteps.add("7A");
+  	dcsteps.add("7B");
+  	dcsteps.add("7C");
+  	dcsteps.add("7D");
+  	dcsteps.add("7E");
+  	
+  	dcsteps.add("8A");
+  	dcsteps.add("8B");
+  	dcsteps.add("8D");
+  	dcsteps.add("8J");
+  	
+  	dcsteps.add("9A");
+  	
+  	dcsteps.add("10A");
+  	dcsteps.add("10M");
+  	dcsteps.add("10O");
+  	dcsteps.add("10Q");
+  	dcsteps.add("10S");
+  	/*"10B", "10D", "10G", "10J",*/ /*Stufe 10B-J sind ab actiTopp 1.4 nicht mehr enthalten */
+  	
+  	dcsteps.add("11");
+  	/* Stufe 11 ist erst ab actiTopp 1.3 verfügbar*/
+  	
+  	dcsteps.add("98A");
+  	dcsteps.add("98B");
+  	dcsteps.add("98C");
+  }  
   
+  //Angabe der Stufen, die WRD-Modellierungen verwenden
   public static final HashMap<String, Integer> wrdsteps;
   static
   {
@@ -85,32 +121,15 @@ public class Configuration {
   	wrdsteps.put("10T", 9);
   }
   
-  
-  //Angaben der Stufen, die Listen mit Häufigkeitsverteilungen verwenden
-  public static final String[] wrdsteps_initials =
-  { 
-  		"7K", "7L", "7M", "7N", "7O", 
-  		"8C", "8E", "8K", 
-  		/*"10C", "10E", "10H", "10K",*/ /*Stufe 10C-K sind ab actiTopp 1.4 nicht mehr enthalten */
-  		"10N", "10P", "10R", "10T"
-  };
-  
   //Angaben der Dateinamen, die Parameter Estimated für einfache Regressionen enthalten
-  public static final String[] linearregressionestimates_filenames =
-  { 
-  		"97estimates"
-  };  
-
+  public static final HashSet<String> linregsteps_filenames;
+  static
+  {
+  	linregsteps_filenames = new HashSet<String>();
+  	linregsteps_filenames.add("97estimates");	
+  }
   
-  //Angabe der maximalen Kategorie-Indizes bei Häufigskeitsverteilungen
-  public static final int[] wrdsteps_MaxIndizes =
-  { 
-  		8, 5, 5, 4, 3, 
-  		14, 14, 14, 
-  		/*15, 15, 10, 10,*/  /*Stufe 10C-K sind ab actiTopp 1.4 nicht mehr enthalten */
-  		15, 10, 10, 9
-  };
-	
+
   
 	
 /*
@@ -210,8 +229,5 @@ public class Configuration {
 	
 	// steuert die Ausgabe von Log in Modellschritten
 	public static boolean debugenabled = false;
-
-
-
 
 }

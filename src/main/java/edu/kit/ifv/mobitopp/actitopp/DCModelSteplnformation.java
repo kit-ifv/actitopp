@@ -13,18 +13,18 @@ import java.util.Map;
  * object to handle the model flow information of each model step
  * contains relevant parameters with their context of the step and alternatives
  */
-public class ModellnformationDC
+public class DCModelSteplnformation
 {
 	// contains all parameters for the specific model step
   private HashMap<String, String> parameterNamesContexts;
   // contains all alternative for the specific model step
   private ArrayList<String> alternativesList;
   // contains all possible alternatives including parameter values
-  private Map<String, ModelAlternativeParameterValues> alternativesParameters;
+  private Map<String, DCModelAlternativeParameterValues> alternativesParameters;
   
   
 
-  public ModellnformationDC()
+  public DCModelSteplnformation()
   {}
 
 
@@ -59,7 +59,7 @@ public class ModellnformationDC
 	/**
 	 * @return the alternativesParameters
 	 */
-	public Map<String, ModelAlternativeParameterValues> getAlternativesParameters() 
+	public Map<String, DCModelAlternativeParameterValues> getAlternativesParameters() 
 	{
 		assert alternativesParameters!=null : "alternativesParameters is null";
 		return alternativesParameters;
@@ -69,7 +69,7 @@ public class ModellnformationDC
 	/**
 	 * @param alternativesParameters the alternativesParameters to set
 	 */
-	public void setAlternativesParameters(Map<String, ModelAlternativeParameterValues> alternativesParameters) {
+	public void setAlternativesParameters(Map<String, DCModelAlternativeParameterValues> alternativesParameters) {
 		this.alternativesParameters = alternativesParameters;
 	}
 

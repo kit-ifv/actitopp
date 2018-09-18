@@ -13,6 +13,7 @@ public class UtilityFunction
   private double baseWeight;
   private ArrayList<UtilityParameterAttributeCombination> parameterattributeCombinations;
   
+  
   public UtilityFunction()
   {
   	this.parameterattributeCombinations = new ArrayList<UtilityParameterAttributeCombination>();

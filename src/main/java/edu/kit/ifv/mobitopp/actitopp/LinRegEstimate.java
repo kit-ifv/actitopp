@@ -15,7 +15,7 @@ package edu.kit.ifv.mobitopp.actitopp;
  * @author Tim Hilgert
  *
  */
-public class LinearRegressionEstimate {
+public class LinRegEstimate {
 	
 	// Name der Variable
 	private String name;
@@ -34,7 +34,7 @@ public class LinearRegressionEstimate {
 	 * @param value
 	 * @param contextIdentifier
 	 */
-	public LinearRegressionEstimate(String name, double value, String contextIdentifier)
+	public LinRegEstimate(String name, double value, String contextIdentifier)
 	{
 		this.name = name;
 		this.estimateValue = value;

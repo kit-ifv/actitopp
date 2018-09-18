@@ -10,7 +10,7 @@ public interface ChoiceFunction
      * @param alternatives
      * @return
      */
-    public void calculateProbabilities(List<ModelAlternative> alternatives);
+    public void calculateProbabilities(List<DCAlternative> alternatives);
     
     /**
      * Returns the index of the choice alternative that has been chosen
@@ -18,5 +18,5 @@ public interface ChoiceFunction
      * @param random
      * @return
      */
-    public int chooseAlternative(List<ModelAlternative> alternatives, double random);
+    public int chooseAlternative(List<DCAlternative> alternatives, double random);
 }
