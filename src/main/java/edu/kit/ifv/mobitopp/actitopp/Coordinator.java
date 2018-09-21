@@ -947,7 +947,7 @@ public class Coordinator
 						actforreplacement.calculateAndSetTripTimes();
 						
 						// Hinweg erzeugen und ersetzen
-						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, gemakt_durationtripbefore));
+						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, TripStatus.TRIP_BEFORE_ACT, gemakt_durationtripbefore));
 			
 						break;
 					}
@@ -974,7 +974,7 @@ public class Coordinator
 						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
 						// Weg erzeugen
-						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, gemakt_durationtripbefore));
+						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, TripStatus.TRIP_BEFORE_ACT, gemakt_durationtripbefore));
 						actforreplacement.setStartTime(gemakt_starttime);
 						
 						break;

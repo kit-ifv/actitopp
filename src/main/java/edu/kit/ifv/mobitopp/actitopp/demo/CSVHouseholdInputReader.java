@@ -21,7 +21,7 @@ public class CSVHouseholdInputReader
 	
 	/**
 	 *  
-	 * Konstruktor
+	 * constructor
 	 *
 	 * @param filename
 	 */
@@ -32,7 +32,7 @@ public class CSVHouseholdInputReader
 	
 	/**
 	 * 
-	 * Konstruktor
+	 * constructor
 	 *
 	 * @param input
 	 */
@@ -43,10 +43,10 @@ public class CSVHouseholdInputReader
 
 	/**
 	 * 
-	 * Methode zum Einlesen von Haushaltsdaten
+	 * method to read household information from file system
 	 * 
 	 * Expected input format:
-	 * HHIndex;anzahlkinder_u10;anzahlkinder_u18;Raumtyp_mobiTopp;PKWHH
+	 * hhindex;#childrenunder10;childrenunder18;areatype;#carsinhh
 	 * 
 	 * @return
 	 * @throws FileNotFoundException
@@ -79,13 +79,13 @@ public class CSVHouseholdInputReader
       
       try
       {
-        
+      	
         ActiToppHousehold tmphousehold = new ActiToppHousehold(
-        		Integer.parseInt(splitted[0]), 		// HouseholdIndex
-        		Integer.parseInt(splitted[1]), 		// Kinder 0-10
-        		Integer.parseInt(splitted[2]), 		// Kinder unter 18
-        		Integer.parseInt(splitted[3]), 		// Raumtyp
-        		Integer.parseInt(splitted[4])			// Pkw im HH
+        		Integer.parseInt(splitted[0]), 		// householdIndex
+        		Integer.parseInt(splitted[1]), 		// children_u10
+        		Integer.parseInt(splitted[2]), 		// children_u18
+        		Integer.parseInt(splitted[3]), 		// areatype
+        		Integer.parseInt(splitted[4])			// numberofcarsinhousehold
     				);		
         
         householdmap.put(Integer.parseInt(splitted[0]), tmphousehold);
@@ -94,11 +94,10 @@ public class CSVHouseholdInputReader
       catch (NumberFormatException e)
       {
       	// e.printStackTrace();
-      	System.err.println("Ungültige Eingabedaten - NumberFormatException");
-      	System.err.println("Zeile " + zeilenzaehler + " wird verworfen!");
+      	System.err.println("invalid input data - NumberFormatException");
+      	System.err.println("row " + zeilenzaehler + " will be ignored!");
       }
-    }
-	     
+    } 
 	  return householdmap;
 	}
 }

@@ -145,6 +145,22 @@ public class HWeekPattern
   }
   
   
+  /**
+   * 
+   * @return
+   */
+  public List<HTrip> getAllTrips()
+  {
+  	List<HTrip> tmpliste = new ArrayList<HTrip>();
+  	for (HActivity tmpact : getAllActivities())
+  	{
+  		if (tmpact.tripBeforeActivityisScheduled()) tmpliste.add(tmpact.getTripbeforeactivity());
+  		if (tmpact.tripAfterActivityisScheduled()) tmpliste.add(tmpact.getTripafteractivity());
+  	}
+  	return tmpliste;
+  }
+  
+  
   
   /**
    * 

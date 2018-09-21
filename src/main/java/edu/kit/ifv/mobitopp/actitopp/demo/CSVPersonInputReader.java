@@ -52,7 +52,7 @@ public class CSVPersonInputReader
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public HashMap<Number, ActitoppPerson> loadInput() throws FileNotFoundException, IOException
+	public HashMap<Number, ActitoppPerson> loadInput_withouthouseholdcontexts() throws FileNotFoundException, IOException
 	{
 		      
     // Initialisierungen
@@ -109,6 +109,8 @@ public class CSVPersonInputReader
 
 	/**
 	 * 
+	 * no longer needed! when working with a householdmap, used this as only reference to access households / persons
+	 * 
 	 * Methode zum Einlesen von Personendaten inkl. Haushaltskontext
 	 * 
 	 * Expected input format:
@@ -118,6 +120,7 @@ public class CSVPersonInputReader
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
+	@Deprecated
 	public HashMap<Number, ActitoppPerson> loadInput_withHHIndex(HashMap<Number, ActiToppHousehold> householdmap) throws FileNotFoundException, IOException
 	{
 		      
@@ -176,5 +179,66 @@ public class CSVPersonInputReader
 	  }
 	     
 	  return personmap;
+	}
+	
+	
+	/**
+	 * 
+	 * Methode zum Einlesen von Personendaten inkl. Haushaltskontext
+	 * 
+	 * Expected input format:
+	 * HHIndex;persnrinHH;PersIndex;alter_in_jahren;Beruf;SEX;pendeldistanz_arbeiten;pendeldistanz_bildung
+	 * 
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public void loadInput(HashMap<Number, ActiToppHousehold> householdmap) throws FileNotFoundException, IOException
+	{
+		      	
+	  String line = null;
+	  boolean header = true;
+	
+		int zeilenzaehler=0;
+		
+	  while ((line = inRead.readLine()) != null)
+	  {
+	  	zeilenzaehler++;
+	    
+	    // skip header section
+	    if (header)
+	    {
+	        line = inRead.readLine();
+	        header = false;
+	    }
+	    String[] splitted = line.split(";");
+	    
+	    try
+	    {
+	    	
+	      // get corresponding household to the input person
+	      ActiToppHousehold tmphousehold = householdmap.get(Integer.parseInt(splitted[0]));
+	      assert tmphousehold!=null:"household does not exists - hhindex: " + Integer.parseInt(splitted[0]);
+	    		 
+	      // create person (will be automatically added to the household)
+	      new ActitoppPerson(
+	      		tmphousehold,
+	      		Integer.parseInt(splitted[1]),		// persnr in household
+	      		Integer.parseInt(splitted[2]), 		// persindex
+	      		Integer.parseInt(splitted[3]), 		// age
+	      		Integer.parseInt(splitted[4]), 		// employement type
+	      		Integer.parseInt(splitted[5]), 		// gender
+	      		Double.parseDouble(splitted[6]),	// commuting distance to workplace in kilometers (0 if not commuting)
+	      		Double.parseDouble(splitted[7])		// commuting distance to school in kilometers (0 if not commuting)
+	  				);		
+	
+	    }
+	    catch (NumberFormatException e)
+	    {
+	    	// e.printStackTrace();
+	    	System.err.println("incalid input data - NumberFormatException");
+	    	System.err.println("row " + zeilenzaehler + " will be ignored!");
+	    }
+	  }
 	}
 }

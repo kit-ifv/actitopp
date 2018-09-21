@@ -23,81 +23,169 @@ public class CSVExportWriter
 	{
 		writer = new FileWriter(filename);
 	}
-	
 
-	/**
-	 * 
-	 * Export der Wegedaten der Personen
-	 * 
-	 * @param personmap
-	 * @throws IOException
-	 */
-	public void exportTripData(HashMap<Number,ActitoppPerson> personmap) throws IOException
-	{
-						  	
-	  	// Header
-	  	writer.append("HHIndex;PersNr;PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
-	  	writer.append('\n');
-	  	writer.flush();
-
-	  	// Durchlaufe alle Personen
-	  	for (Number key : personmap.keySet())
-			{
-				ActitoppPerson actperson = personmap.get(key);
-	  		
-	  		// Weginformation aus Aktivitätsdaten herauslesen
-	  		for (HActivity act : actperson.getWeekPattern().getAllActivities())
-	  		{
-	  			if (act.tripBeforeActivityisScheduled() && act.getEstimatedTripTimeBeforeActivity()>0)
-	  			{
-	    			writer.append(writeTripBeforeActivity(act));
-	    			writer.flush();
-	  			}
-	  			if (act.tripAfterActivityisScheduled() && act.getEstimatedTripTimeAfterActivity()>0)
-	  			{
-	    			writer.append(writeTripAfterActivity(act));
-	    			writer.flush();
-	  			}
-	  		}
-	  	}
-	  	writer.close();
-	}
-	
 	
 	/**
 	 * 
-	 * Export der Aktivitätsdaten der Personen
+	 * export trip data of all persons
+	 * map can consists of persons or households
 	 * 
-	 * @param personmap
+	 * @param maptoexport
 	 * @throws IOException
 	 */
-	public void exportActivityData(HashMap<Number,ActitoppPerson> personmap) throws IOException
+	public void exportTripData(HashMap<Number,?> maptoexport) throws IOException
+	{ 	
+  	exportTripData_header();
+
+//  	if (maptoexport instanceof HashMap<Number, ActiToppHousehold>);
+//TODO Lars fragen! 		
+  	
+  	for(Object referenceobject : maptoexport.values())
+    {
+  		
+			// Householdmap
+			if (referenceobject instanceof ActiToppHousehold)
+			{
+				ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
+				for (ActitoppPerson actperson : acthousehold.getHouseholdmembersasList())
+				{
+					exportTripData_singlePerson(actperson);
+				}
+			}
+			
+			// Personmap
+			if (referenceobject instanceof ActitoppPerson)
+			{
+				ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
+				exportTripData_singlePerson(actperson);
+			}
+		}
+  	writer.close();
+	}
+	
+
+	private void exportTripData_header() throws IOException 
+	{
+		// Header
+		writer.append("HHIndex;PersNr;PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
+		writer.append('\n');
+		writer.flush();
+	}
+
+
+	private void exportTripData_singlePerson(ActitoppPerson actperson) throws IOException 
+	{
+		// read trip information from activity schedule
+		for (HTrip trip : actperson.getWeekPattern().getAllTrips())
+		{
+			if (trip.getDuration()>0)
+			{
+				writer.append(writeTrip(trip));
+				writer.flush();
+			}
+
+		}
+	}
+	
+	/**
+	 * 
+	 * create output trip information
+	 * 
+	 * @param act
+	 * @return
+	 */
+	private String writeTrip(HTrip trip)
+	{
+		assert trip.isScheduled(): "Trip is not scheduled!";
+		String rueckgabe="";
+		
+		// HHIndex
+		rueckgabe += trip.getActivity().getPerson().getHousehold().getHouseholdIndex() + ";";		
+		// PersNr
+		rueckgabe += trip.getActivity().getPerson().getPersNrinHousehold() + ";";
+		// PersIndex
+		rueckgabe += trip.getActivity().getPerson().getPersIndex() + ";";
+		// Weekday
+		rueckgabe += trip.getActivity().getWeekDay() + ";";
+		// anzeit (endtime)
+		rueckgabe += trip.getEndTime() + ";";
+		// anzeit_woche (endtime_week)
+		rueckgabe += trip.getEndTimeWeekContext() + ";"; 
+		// abzeit (starttime)
+		rueckgabe += trip.getStartTime() + ";";		
+		// abzeit_woche (starttime_week)
+		rueckgabe += trip.getStartTime_WeekContext() + ";";  
+		// duration
+		rueckgabe += trip.getDuration() + ";";
+		// type of trip
+		rueckgabe += trip.getType() + ";";
+		// jointStatus
+		rueckgabe += (Configuration.model_joint_actions ? trip.getJointStatus(): "-99") + "";
+		
+		rueckgabe +="\n";
+		return rueckgabe;		
+	}
+
+
+	/**
+	 * 
+	 * export activity data of all persons
+	 * map can consists of persons or households
+	 * 
+	 * @param maptoexport
+	 * @throws IOException
+	 */
+	public void exportActivityData(HashMap<Number,?> maptoexport) throws IOException
 	{
 						  	
-	  	// Header
-	  	writer.append("HHIndex;PersNr;PersIndex;WOTAG;TourIndex;AktIndex;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
-	  	writer.append('\n');
-	  	writer.flush();
-
-	  	// Durchlaufe alle Personen
-	  	for (Number key : personmap.keySet())
+  	exportActivityData_header();
+ 	
+  	for(Object referenceobject : maptoexport.values())
+    {
+  		
+			// Householdmap
+			if (referenceobject instanceof ActiToppHousehold)
 			{
-				ActitoppPerson actperson = personmap.get(key);
-	  		
-	  		// Füge alle Aktivitäten hinzu
-	  		for (HActivity act : actperson.getWeekPattern().getAllActivities())
-	  		{
-	  			if (act.isScheduled())
-	  			{
-	    			writer.append(writeActivity(act));
-	    			writer.flush();
-	  			}
-	  		}
-	  	}
-	  	writer.close();
+				ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
+				for (ActitoppPerson actperson : acthousehold.getHouseholdmembersasList())
+				{
+					exportActivityData_singlePerson(actperson);
+				}
+			}
+			
+			// Personmap
+			if (referenceobject instanceof ActitoppPerson)
+			{
+				ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
+				exportActivityData_singlePerson(actperson);
+			}
+		}  
+  	writer.close();
+	}
+
+
+	private void exportActivityData_header() throws IOException {
+		// Header
+		writer.append("HHIndex;PersNr;PersIndex;WOTAG;TourIndex;AktIndex;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
+		writer.append('\n');
+		writer.flush();
 	}
 	
 	
+	private void exportActivityData_singlePerson(ActitoppPerson actperson) throws IOException 
+	{
+		// Füge alle Aktivitäten hinzu
+		for (HActivity act : actperson.getWeekPattern().getAllActivities())
+		{
+			if (act.isScheduled())
+			{
+				writer.append(writeActivity(act));
+				writer.flush();
+			}
+		}
+	}
+
+
 	/**
 	 * 
 	 * Schreibe Zeile mit Aktivitäteninfos
@@ -105,11 +193,9 @@ public class CSVExportWriter
 	 * @param act
 	 * @return
 	 */
-	public String writeActivity(HActivity act)
+	private String writeActivity(HActivity act)
 	{
-		
 		assert act.isScheduled():"Activity is not fully scheduled";
-		
 		String rueckgabe="";
 		
 		/*
@@ -150,88 +236,6 @@ public class CSVExportWriter
 		rueckgabe += act.getType() + ";";
 		// joint Status
 		rueckgabe += (Configuration.model_joint_actions ? act.getJointStatus(): "-99") + "";
-		
-		rueckgabe +="\n";
-		return rueckgabe;		
-	}
-	
-	/**
-	 * 
-	 * Schreibe Zeile mit Weginfos (vor der Aktivität)
-	 * 
-	 * @param act
-	 * @return
-	 */
-	public String writeTripBeforeActivity(HActivity act)
-	{
-		
-		assert act.tripBeforeActivityisScheduled(): "Trip is not scheduled!";
-	
-		String rueckgabe="";
-		
-		// HHIndex
-		rueckgabe += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
-		// PersNr
-		rueckgabe += act.getPerson().getPersNrinHousehold() + ";";
-		// PersIndex
-		rueckgabe += act.getPerson().getPersIndex() + ";";
-		// WOTAG
-		rueckgabe += act.getWeekDay() + ";";
-		//anzeit
-		rueckgabe += act.getStartTime() + ";";
-		// anzeit_woche
-		rueckgabe += act.getStartTimeWeekContext() + ";"; 
-		// abzeit
-		rueckgabe += act.getTripStartTimeBeforeActivity() + ";";		
-		// abzeit_woche
-		rueckgabe += act.getTripStartTimeBeforeActivityWeekContext() + ";";  
-		// Dauer
-		rueckgabe += act.getEstimatedTripTimeBeforeActivity() + ";";
-		// Zweck
-		rueckgabe += act.getType() + ";";
-		// jointStatus
-		rueckgabe += (Configuration.model_joint_actions ? act.getJointStatus(): "-99") + "";
-		
-		rueckgabe +="\n";
-		return rueckgabe;		
-	}
-	
-	/**
-	 * 
-	 * Schreibe Zeile mit Weginfos (nach der Aktivität)
-	 * 
-	 * @param act
-	 * @return
-	 */
-	public String writeTripAfterActivity(HActivity act)
-	{
-		
-		assert act.tripAfterActivityisScheduled(): "Trip is not scheduled!";
-				
-		String rueckgabe="";
-		
-		// HHIndex
-		rueckgabe += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
-		// PersNr
-		rueckgabe += act.getPerson().getPersNrinHousehold() + ";";
-		// PersIndex
-		rueckgabe += act.getPerson().getPersIndex() + ";";
-		// WOTAG
-		rueckgabe += act.getWeekDay() + ";";
-		//anzeit
-		rueckgabe += act.getTripStartTimeAfterActivity() + act.getEstimatedTripTimeAfterActivity() + ";";
-		// anzeit_woche
-		rueckgabe += act.getTripStartTimeAfterActivityWeekContext() + act.getEstimatedTripTimeAfterActivity() + ";";
-		// abzeit
-		rueckgabe += act.getEndTime() + ";";		
-		// abzeit_woche
-		rueckgabe += act.getEndTimeWeekContext() + ";";  
-		// Dauer
-		rueckgabe += act.getEstimatedTripTimeAfterActivity() + ";";
-		// Zweck ist hier immer HOME, da letzter Weg in Tour nach Hause
-		rueckgabe += "H" + ";";
-		// jointStatus - aktuell immer 4 (keine Gemeinsamkeit, da Gemeinsamkeiten bei NachHause Wegen noch nicht modelliert werden!
-		rueckgabe += (Configuration.model_joint_actions ? "4": "-99") + "";
 		
 		rueckgabe +="\n";
 		return rueckgabe;		

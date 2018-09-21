@@ -108,7 +108,7 @@ public class HActivity
 	public HActivity(HTour parent, int index, char type, int duration, int starttime, int jointStatus, int tripdurationbefore)
 	{
 	    this(parent, index, type, duration, starttime, jointStatus);
-	    tripbeforeactivity = new HTrip(this, tripdurationbefore);
+	    tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, tripdurationbefore);
 	}  
 	
 	/**
@@ -126,7 +126,7 @@ public class HActivity
 	    this(parent, index);
 	    setStartTime(starttime);
 	    setJointStatus(jointStatus);
-	    tripbeforeactivity = new HTrip(this, tripdurationbefore);
+	    tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, tripdurationbefore);
 	}  
 	
 	
@@ -237,7 +237,7 @@ public class HActivity
 	public int getEstimatedTripTimeBeforeActivity() 
 	{
 		assert tripBeforeActivityisScheduled() : "Trip vor der Aktvitität ist zum Zugriffszeitpunkt nicht initialisiert";
-		int tmptriptimebefore = tripbeforeactivity.getTripduration();
+		int tmptriptimebefore = tripbeforeactivity.getDuration();
 		return tmptriptimebefore;
 	}
 
@@ -247,7 +247,7 @@ public class HActivity
 	public int getEstimatedTripTimeAfterActivity() 
 	{
 		assert tripAfterActivityisScheduled() : "Trip nach der Aktvitität ist zum Zugriffszeitpunkt nicht initialisiert // nur bei letzter Aktivität in Tour gesetzt";
-		int tmptriptimeafter = tripafteractivity.getTripduration();
+		int tmptriptimeafter = tripafteractivity.getDuration();
 		return tmptriptimeafter;
 	}
 	
@@ -775,15 +775,16 @@ public class HActivity
 	public int getTripStartTimeBeforeActivity()
 	{
 		// return getStartTime() - getEstimatedTripTime();
-		return getStartTime() - tripbeforeactivity.getTripduration();
+		return getStartTime() - tripbeforeactivity.getDuration();
 	}
 
 	public int getTripStartTimeBeforeActivityWeekContext()
 	{
 		// return getStartTimeWeekContext() - getEstimatedTripTime();
-		return getStartTimeWeekContext() - tripbeforeactivity.getTripduration();
+		return getStartTimeWeekContext() - tripbeforeactivity.getDuration();
 	}
 	
+//TODO Change to trip methods	
 	public int getTripStartTimeAfterActivity()
 	{
 		return getEndTime();
@@ -879,11 +880,11 @@ public class HActivity
     if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
 		if (tripbeforeactivity==null)
 		{   
-			tripbeforeactivity = new HTrip(this, actualTripTime_beforeTrip);
+			tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime_beforeTrip);
 		}
 		else
 		{
-			tripbeforeactivity.setTripduration(actualTripTime_beforeTrip);
+			tripbeforeactivity.setDuration(actualTripTime_beforeTrip);
 		}
 
 		/*
@@ -899,11 +900,11 @@ public class HActivity
 	    if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_education();
 	    if (tripafteractivity==null)
 	    {
-	    	tripafteractivity = new HTrip(this, actualTripTime_afterTrip);
+	    	tripafteractivity = new HTrip(this, TripStatus.TRIP_AFTER_ACT, actualTripTime_afterTrip);
 	    }
 	    else
 	    {
-	    	tripafteractivity.setTripduration(actualTripTime_afterTrip);
+	    	tripafteractivity.setDuration(actualTripTime_afterTrip);
 	    }
 	    
 		}
@@ -921,12 +922,12 @@ public class HActivity
 	
 	public boolean tripBeforeActivityisScheduled()
 	{
-		return tripbeforeactivity!=null && tripbeforeactivity.getTripduration()!=-1;
+		return tripbeforeactivity!=null && tripbeforeactivity.isScheduled();
 	}
 	
 	public boolean tripAfterActivityisScheduled()
 	{
-		return tripafteractivity!=null && tripafteractivity.getTripduration()!=-1;
+		return tripafteractivity!=null && tripafteractivity.isScheduled();
 	}
 	
 	public boolean durationisScheduled()

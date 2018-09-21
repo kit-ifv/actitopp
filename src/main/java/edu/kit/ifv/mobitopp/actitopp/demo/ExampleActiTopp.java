@@ -19,24 +19,24 @@ public class ExampleActiTopp {
 	 */
 	public static void main(String[] args) 
 	{
-	
+/*	
 		createAndModelOnePerson_Example1();
-/*
+
 		createAndModelOnePerson_Example2();
 		
 	  createAndModelOnePerson_Example3();
 	
 		createAndModelMultiplePersons_Example1();
-		*/
-		//createAndModelMultiplePersons_Example2();
-		
+	
+		createAndModelMultiplePersons_Example2();
+*/		
 		/*beispielhafte Verwendung eines Debug-Loggers für Entscheidung 2A*/
-/*		debugloggers.addDebugLogger("2A");
+		debugloggers.addDebugLogger("2A");
 
 		createAndModelMultiplePersons_Example2();
 
 		debugloggers.exportLoggerInfos("2A", "D:/DemoLogger2A.csv");
-*/		
+		
 	}
 	
 	
@@ -209,7 +209,7 @@ public class ExampleActiTopp {
 		try
 		{			
 			CSVPersonInputReader loader = new CSVPersonInputReader(ModelFileBase.class.getResourceAsStream("demo/Demopersonen.csv"));
-			HashMap<Number, ActitoppPerson> personmap = loader.loadInput();
+			HashMap<Number, ActitoppPerson> personmap = loader.loadInput_withouthouseholdcontexts();
 			
 			for (Number key : personmap.keySet())
 			{
@@ -278,26 +278,24 @@ public class ExampleActiTopp {
 				
 		/*
 		 * 
-		 * Inputpersonen aus SAS-Export-Datei einlesen
+		 * read input information from file system
 		 * 
 		 */
 		HashMap<Number, ActiToppHousehold> householdmap = null;
-		HashMap<Number, ActitoppPerson> personmap = null;;
 				
 		try
 		{
 			CSVHouseholdInputReader hhloader = new CSVHouseholdInputReader(ModelFileBase.class.getResourceAsStream("demo/Demo_HHInfo.csv"));
 			CSVPersonInputReader personloader = new CSVPersonInputReader(ModelFileBase.class.getResourceAsStream("demo/Demo_Personen_mitHHIndex.csv"));
 			householdmap = hhloader.loadInput();			
-			personmap = personloader.loadInput_withHHIndex(householdmap);
+			personloader.loadInput(householdmap);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 		
-		assert householdmap!=null : "HouseholdMap konnte nicht eingelesen werden.";
-		assert personmap !=null : "PersonMap konnte nicht eingelesen werden.";
+		assert householdmap!=null : "could not create householdmap.";
 		
 		// Model Household using parallel streams
 		householdmap.values().parallelStream().forEach(ExampleActiTopp::runHousehold);
@@ -306,11 +304,11 @@ public class ExampleActiTopp {
 		{
 			// Output der Wege als CSV-Datei
 			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
-			tripwriter.exportTripData(personmap);
-			
+			tripwriter.exportTripData(householdmap);
+						
 			// Output der Aktivitäten als CSV-Datei
 			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
-			activitywriter.exportActivityData(personmap);
+			activitywriter.exportActivityData(householdmap);
 		}
 		catch (IOException e)
 		{
@@ -330,13 +328,13 @@ public class ExampleActiTopp {
 		System.out.println("Duration total: " + dauer_msec + " milli sec"); 
 		double dauer_msec_perhh = dauer_msec / householdmap.size();
 		System.out.println("Duration per HH: " + dauer_msec_perhh + " milli sec");
-		double dauer_msec_perpers = dauer_msec / personmap.size();
-		System.out.println("Duration per Pers: " + dauer_msec_perpers + " milli sec");
+
 
 	}
 
 
-	private static void runHousehold(ActiToppHousehold acthousehold) {
+	private static void runHousehold(ActiToppHousehold acthousehold) 
+	{
 		System.out.println("HH: " + acthousehold.getHouseholdIndex() + " HHGRO: " + acthousehold.getNumberofPersonsinHousehold());
 		
 						
@@ -356,11 +354,17 @@ public class ExampleActiTopp {
 			try
 			{
 				
+				//DebugLogger explizit für diesen Haushalt erzeugen
+				DebugLoggers hhlogger = new DebugLoggers(debugloggers);
+				
 				// Pläne für den gesamten Haushalt generieren
-				acthousehold.generateSchedules(fileBase, randomgenerator, debugloggers);
+				acthousehold.generateSchedules(fileBase, randomgenerator, hhlogger);
 
 				//System.out.println("HHdone: " + key);
 				householdscheduleOK = true;
+				
+				//Die DebugInformationen zu dem übergeordneten Logger hinzufügen
+				debugloggers.addHouseholdDebugInfotoOverallLogger(hhlogger);
 				
 			}
 			catch (InvalidPatternException e)
@@ -369,7 +373,6 @@ public class ExampleActiTopp {
 				
 		    // Setze die Modellierungsergebnisse dieses Haushalts zurück für neuen Versuch
 		    acthousehold.resetHouseholdModelingResults();
-		    debugloggers.deleteInformationforHousehold(acthousehold);
 			}
 		}
 	}

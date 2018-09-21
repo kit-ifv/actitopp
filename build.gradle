@@ -3,6 +3,7 @@ apply plugin: 'maven'
 
 group = 'edu.kit.ifv.mobitopp'
 version = '1.x'
+wrapper.gradleVersion = '4.10'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'

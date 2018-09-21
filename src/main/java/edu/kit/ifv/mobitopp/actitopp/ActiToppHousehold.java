@@ -14,10 +14,9 @@ public class ActiToppHousehold {
 	
 	private int householdIndex;
 	
-	// Enthält alle Haushaltsmitglieder
 	private Map<Integer, ActitoppPerson> householdmembers;
 	
-	// Haushaltseigenschaften
+	// household properties
 	private int children0_10;
 	private int children_u18;
 	private int areatype;
@@ -25,7 +24,7 @@ public class ActiToppHousehold {
 	
 	/**
 	 * 
-	 * Konstruktor
+	 * constructor
 	 *
 	 * @param householdIndex
 	 * @param children0_10
@@ -44,6 +43,29 @@ public class ActiToppHousehold {
 		this.numberofcarsinhousehold = numberofcarsinhousehold;
 
 		this.householdmembers = new HashMap<Integer, ActitoppPerson>();
+	}
+	
+	/**
+	 * 
+	 * constructor used to "clone" household including all persons in the household
+	 *
+	 * @param tmphh
+	 */
+	public ActiToppHousehold(ActiToppHousehold tmphh)
+	{
+
+		this (tmphh.getHouseholdIndex(),
+					tmphh.getChildren0_10(),
+					tmphh.getChildren_u18(),
+					tmphh.getAreatype(),
+					tmphh.getNumberofcarsinhousehold());
+		
+		// "clone" all householdmembers
+		for (ActitoppPerson tmppers : tmphh.getHouseholdmembersasList())
+		{
+			new ActitoppPerson(tmppers, this);		
+		}
+		
 	}
 
 	/**
@@ -155,15 +177,15 @@ public class ActiToppHousehold {
 	}
 	
 	/**
-	 * Gibt die Anzahl der Personen im Haushalt zurück
-	 * @return
+	 * 
+	 * @return the numberofpersonsinhousehold
 	 */
 	public int getNumberofPersonsinHousehold() {
 		return this.householdmembers.size();
 	}
 	
 	/**
-	 * Setzt alle Modellierungsergebnisse für diesen Haushalt zurück!
+	 * resets all modeling results for this household
 	 */
 	public void resetHouseholdModelingResults()
 	{
@@ -181,31 +203,31 @@ public class ActiToppHousehold {
 	public String toString()	{
   	StringBuffer message = new StringBuffer();
 
-  	message.append("\n Haushaltsinformationen");
+  	message.append("\n household information");
   	
-		message.append("\n - HHIndex : ");
+		message.append("\n - HH-index : ");
 		message.append(getHouseholdIndex());
 		
-		message.append("\n - Anzahl HHMember : ");
+		message.append("\n - #HH-members : ");
 		message.append(getNumberofPersonsinHousehold());		
 		
-		message.append("\n - Anzahl Kinder 0-10 : ");
+		message.append("\n - #children 0-10 : ");
 		message.append(getChildren0_10());
 		
-		message.append("\n - Anzahl Kinder unter 18 : ");
+		message.append("\n - #children <18 : ");
 		message.append(getChildren_u18());
 		
-		message.append("\n - Raumtyp : ");
+		message.append("\n - area type : ");
 		message.append(getAreatype());
 		
-		message.append("\n - Pkw im HH : ");
+		message.append("\n - #car in HH : ");
 		message.append(getNumberofcarsinhousehold());		
 		
 		return message.toString();
 	}
 	
 	/**
-	 * Methode erzeugt Wochenaktivitätenplan für einen gesamten Haushalt
+	 * generates activity for the household (i.e. for each hh member)
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
@@ -225,10 +247,10 @@ public class ActiToppHousehold {
 	    {
 	      try
 	      {
-					// Setzte Modellierungsnummer im HH als Attribut der Person
+					// stores the modeling ordner of persons within the household
 					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
 					
-	    		// Erzeuge Wochenaktivitätenplan
+	    		// generates week schedule
 	      	actperson.generateSchedule(fileBase, randomgenerator);
 	    			      	
 	        personscheduleOK = true;                
@@ -238,9 +260,11 @@ public class ActiToppHousehold {
 	        //System.err.println(e.getReason());
 	         
 	        /*
-	         * Bei der Modellierung von gemeinsamen Aktivitäten werden Fehler auf der Personenebene wetergereicht.
-	         * In diesen Fällen muss der gesamte Haushalt neu modelliert werden, da gegenseitige Abhängigkeiten durch 
-	         * gemeinsame Aktivitäten und Wege bestehen können.
+	         * When modeling joint actions, errors on person level are passed to household level (here). As household members
+	         * are connected through joint actions, we need to remodel the whole household.
+	         * 
+	         * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
+	         * person only.
 	         */
 	        if (Configuration.model_joint_actions)
 	        {
@@ -273,10 +297,10 @@ public class ActiToppHousehold {
 	    {
 	      try
 	      {
-					// Setzte Modellierungsnummer im HH als Attribut der Person
+					// stores the modeling ordner of persons within the household
 					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
 					
-	    		// Erzeuge Wochenaktivitätenplan
+	    		// generates week schedule
 	      	actperson.generateSchedule(fileBase, randomgenerator, debugloggers);
 	    			      	
 	        personscheduleOK = true;                
@@ -287,9 +311,11 @@ public class ActiToppHousehold {
 	        debugloggers.deleteInformationforPerson(actperson);
 	        
 	        /*
-	         * Bei der Modellierung von gemeinsamen Aktivitäten werden Fehler auf der Personenebene wetergereicht.
-	         * In diesen Fällen muss der gesamte Haushalt neu modelliert werden, da gegenseitige Abhängigkeiten durch 
-	         * gemeinsame Aktivitäten und Wege bestehen können.
+	         * When modeling joint actions, errors on person level are passed to household level (here). As household members
+	         * are connected through joint actions, we need to remodel the whole household.
+	         * 
+	         * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
+	         * person only.
 	         */
 	        if (Configuration.model_joint_actions)
 	        {

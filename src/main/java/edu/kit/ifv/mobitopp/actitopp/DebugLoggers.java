@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 /**
  * @author Tim Hilgert
@@ -26,12 +27,28 @@ public class DebugLoggers
 	
 	/**
 	 * 
-	 * Konstruktor
+	 * Konstruktor für einen übergeordnete DebugLoggers (für mehrere Haushalte)
 	 *
 	 */
 	public DebugLoggers()
 	{	
 		debugloggers = 	new HashMap<String,LinkedHashMap<Object,String>>();
+	}
+	
+	
+	/**
+	 * 
+	 * Konstruktor für einen untergeordneten DebugLogger (für einen Haushalt)
+	 *
+	 * @param overallLogger
+	 */
+	public DebugLoggers(DebugLoggers overallLogger)
+	{
+		this();
+		for (String s : overallLogger.debugloggers.keySet())
+		{
+			this.addDebugLogger(s);
+		}
 	}
 	
 
@@ -82,6 +99,24 @@ public class DebugLoggers
 		debugloggers.get(key).put(referenceobject, decision);
 	}
 
+	
+	/**
+	 * 
+	 * Fügt alle Informationen eines LoggerObjects zu dem aktuellen Logger hinzu
+	 * 
+	 * @param householdlogger
+	 */
+	public void addHouseholdDebugInfotoOverallLogger(DebugLoggers householdlogger)
+	{
+		for (Entry<String,LinkedHashMap<Object,String>> entry : householdlogger.debugloggers.entrySet())
+		{
+			String loggerid = entry.getKey();
+			LinkedHashMap<Object,String> logger = entry.getValue();
+			
+			getLogger(loggerid).putAll(logger);
+		}
+	}
+	
 
 	/**
 	 * Export aller verfügbaren Logger
@@ -269,6 +304,7 @@ public class DebugLoggers
 	 * 
 	 * @param tmphousehold
 	 */
+	@Deprecated
 	public void deleteInformationforHousehold(ActiToppHousehold tmphousehold)
 	{
 		int hhindex = tmphousehold.getHouseholdIndex();

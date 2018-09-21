@@ -182,14 +182,35 @@ public class ActitoppPerson
 			int gender,
 			double commutingdistance_work,
 			double commutingdistance_education
-	) {
+	) 
+	{
 		
 		this(household,persnrinhousehold,PersIndex,age,employment,gender);
 		
 		this.setCommutingdistance_work(commutingdistance_work);
 		this.setCommutingdistance_education(commutingdistance_education);
 	
-		}
+	}
+	
+	
+	/**
+	 * 
+	 * constructor to "clone" household including all persons in the household
+	 *
+	 * @param tmppers
+	 * @param tmphh
+	 */
+	public ActitoppPerson(ActitoppPerson tmppers, ActiToppHousehold tmphh)
+	{
+		this(tmphh,
+				tmppers.getPersNrinHousehold(),
+				tmppers.getPersIndex(),
+				tmppers.getAge(),
+				tmppers.getEmployment(),
+				tmppers.getGender(),
+				tmppers.getCommutingdistance_work(),
+				tmppers.getCommutingdistance_education());
+	}
 
 
 	/**
