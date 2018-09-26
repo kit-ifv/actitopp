@@ -9,18 +9,13 @@ import java.util.Random;
  */
 public class RNGHelper {
 	
-	// Seed des Zufallszahlengenerators
 	private long seed;
-	
-	// Zufallszahlengenerator
   private Random rng;
-  
-  // letzte generierte Zufallszahl
   private double lastRandomValue;
 
   /**
    * 
-   * Konstruktor
+   * constructor
    * 
    * @param seed
    */
@@ -42,8 +37,6 @@ public class RNGHelper {
   
   
   /**
-   * 
-   * Rückgabe des letzten erzeugten Zufallszahlenwerts
    *   
    * @return
    */
@@ -55,16 +48,14 @@ public class RNGHelper {
 
   /**
    * 
-   * Erzeugung einer Zufallszahl
-   * 
    * @return
    */
   public double getRandomValue()
   {
-  	// Zufallszahl erzeugen
+  	// create randomValue
   	double randomvalue = rng.nextDouble();
   	
-  	// Zum späteren Zugriff zwischenspeichern
+  	// Save for access possibility
   	lastRandomValue = randomvalue;
   	
   	return randomvalue;
@@ -72,7 +63,8 @@ public class RNGHelper {
   
   /**
    * 
-   * Erzeugt eine ganzzahlige Zufallszahl für Personenwahl
+   * creates a random key between 0 and bound
+   * used to draw a random person out of a list 
    * 
    * @param bound
    * @return

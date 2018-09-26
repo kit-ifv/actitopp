@@ -108,8 +108,6 @@ public class ActiToppHousehold {
 	
 	/**
 	 * 
-	 * Fügt dem Haushalt eine neue Person mit der übergebenen Nummer hinzu
-	 * 
 	 * @param member
 	 * @param persnr
 	 */
@@ -227,7 +225,7 @@ public class ActiToppHousehold {
 	}
 	
 	/**
-	 * generates activity for the household (i.e. for each hh member)
+	 * generates activity schedules for the household (i.e. for each hh member)
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
@@ -235,12 +233,12 @@ public class ActiToppHousehold {
 	 */
 	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator)	throws InvalidPatternException
 	{
-		List<ActitoppPerson> hhmitglieder = getHouseholdmembersasList();
-		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmitglieder, fileBase);
+		List<ActitoppPerson> hhmembers = getHouseholdmembersasList();
+		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmembers, fileBase);
 		
-		for (int i=0; i<hhmitglieder.size(); i++)
+		for (int i=0; i<hhmembers.size(); i++)
 		{
-			ActitoppPerson actperson = hhmitglieder.get(i);
+			ActitoppPerson actperson = hhmembers.get(i);
 
 			boolean personscheduleOK = false;
 	    while (!personscheduleOK)
@@ -276,7 +274,7 @@ public class ActiToppHousehold {
 	}
 
 	/**
-	 * Methode erzeugt Wochenaktivitätenplan für einen gesamten Haushalt
+	 * generates activity schedules for the household (i.e. for each hh member) using debug loggers to log results
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
@@ -285,12 +283,12 @@ public class ActiToppHousehold {
 	 */
 	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator, DebugLoggers debugloggers)	throws InvalidPatternException
 	{
-		List<ActitoppPerson> hhmitglieder = getHouseholdmembersasList();
-		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmitglieder, fileBase);
+		List<ActitoppPerson> hhmembers = getHouseholdmembersasList();
+		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmembers, fileBase);
 		
-		for (int i=0; i<hhmitglieder.size(); i++)
+		for (int i=0; i<hhmembers.size(); i++)
 		{
-			ActitoppPerson actperson = hhmitglieder.get(i);
+			ActitoppPerson actperson = hhmembers.get(i);
 	
 			boolean personscheduleOK = false;
 	    while (!personscheduleOK)

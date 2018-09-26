@@ -49,8 +49,6 @@ public class HWeekPattern
 
 	/**
    * 
-   * Gibt den spezifischen Tag mit dem Index zurück
-   * 
    * @param index
    * @return
    */
@@ -59,39 +57,10 @@ public class HWeekPattern
   	return days.get(index);
   }
     
-  /**
-   * 
-   * Gibt Anzahl an Touren an einem spezifischen Tag zurück
-   * 
-   * @param day
-   * @return
-   */
-  public int getAmountOfToursForASpecificDay(int day)
-  {
-    return days.get(day).getAmountOfTours();
-  }
 
   /**
    * 
-   * Gibt Gesamtzahl der Aktivitäten in der Woche an.
-   * Ohne Home-Aktivitäten
-   * 
-   * @return
-   */
-  public int getTotalAmountOfOutofHomeActivities()
-  {
-    int activities = 0;
-    for(HDay d : this.getDays())
-    {
-      activities += d.getTotalAmountOfActivitites();           
-    }
-    
-    return activities;
-  }
-    
-  /**
-   * 
-   * Gibt alle außer-Haus Aktivitäten der Woche in einer Liste zurück
+   * returns activities of the week (only out of home, no home activities) in a list
    * 
    * @return
    */
@@ -111,6 +80,12 @@ public class HWeekPattern
 	  return actList;
   }
   
+  /**
+   * 
+   * returns activities of the week (only joint activities) in a list
+   * 
+   * @return
+   */
   public List<HActivity> getAllJointActivities()
   {
   	List<HActivity> tmpliste = new ArrayList<HActivity>();
@@ -123,6 +98,8 @@ public class HWeekPattern
   
   /**
    * 
+   * returns activities of the week (only home activities) in a list
+   * 
    * @return
    */
   public List<HActivity> getAllHomeActivities()
@@ -132,6 +109,8 @@ public class HWeekPattern
 
   
   /**
+   * 
+   * returns all activities of the week (out of home + home activities) in a list
    * 
    * @return
    */
@@ -147,6 +126,8 @@ public class HWeekPattern
   
   /**
    * 
+   * returns all trips of the week in a list
+   * 
    * @return
    */
   public List<HTrip> getAllTrips()
@@ -161,10 +142,9 @@ public class HWeekPattern
   }
   
   
-  
   /**
    * 
-   * Gibt alle Touren der Woche in einer Liste zurück
+   * returns all tours of the week in a list
    * 
    * @return
    */
@@ -183,8 +163,27 @@ public class HWeekPattern
     
 
   /**
+	 * 
+	 * returns number of activities in the week (only out of home, no home activities)
+	 * 
+	 * @return
+	 */
+	public int getTotalAmountOfOutofHomeActivities()
+	{
+	  int activities = 0;
+	  for(HDay d : this.getDays())
+	  {
+	    activities += d.getTotalAmountOfActivitites();           
+	  }
+	  
+	  return activities;
+	}
+
+
+
+	/**
    * 
-   * Zählt die Anzahl an Aktivitäten eines Typs in der Woche
+   * returns number of activities in the week (only out of home, no home activities) for a specific activity type
    * 
    * @param activityType
    * @return
@@ -205,9 +204,9 @@ public class HWeekPattern
 	  return ctr;  	
   }
   
-  /**
+	/**
    * 
-   * Zählt die Anzahl an Touren eines Typs in der Woche
+   * returns number of tours in the week for a specific activity type
    * 
    * @param activityType
    * @return
@@ -226,9 +225,9 @@ public class HWeekPattern
 	  return ctr;  	
   }
   
-  /**
+	/**
    * 
-   * Zählt die Tage, an denen eine spezifischer Aktivitätentyp auftritt
+   * returns number of days in the week where an activity of a specific activity type exists 
    * 
    * @param activityType
    * @return
@@ -246,76 +245,54 @@ public class HWeekPattern
 	
 	public void printOutofHomeActivitiesList()
   {  	
-		List<HActivity> listenkopie = new ArrayList<HActivity>();
-		listenkopie = getAllOutofHomeActivities();
-		
-  	HActivity.sortActivityListbyWeekStartTimes(listenkopie);
-
-  	System.out.println("");
-  	System.out.println(" -------------- AKTIVITÄTENLISTE --------------");
-  	System.out.println("");
- 	
-  	for (int i=0 ; i< listenkopie.size() ; i++)
-  	{
-  		HActivity act = listenkopie.get(i);   		
-  		if (act.getEstimatedTripTimeBeforeActivity()!=0)
-  		{
-  			System.out.println(i + " Weg : Start " + act.getTripStartTimeBeforeActivityWeekContext() + " Ende " + (act.getTripStartTimeBeforeActivityWeekContext()+act.getEstimatedTripTimeBeforeActivity()));
-  		}
-  		System.out.println(i + " Akt : " + act);
-  	}
+		printActivities(getAllOutofHomeActivities());
   }
 	
 	public void printAllActivitiesList()
-  {  	
-		List<HActivity> listenkopie = new ArrayList<HActivity>();
-		listenkopie = getAllActivities();
-		
-  	HActivity.sortActivityListbyWeekStartTimes(listenkopie);
+  {  		
+  	printActivities(getAllActivities());
+  }
 
+
+	private void printActivities(List<HActivity> listtoprint) 
+	{
+		HActivity.sortActivityListbyWeekStartTimes(listtoprint);
+  	
   	System.out.println("");
-  	System.out.println(" -------------- AKTIVITÄTENLISTE --------------");
+  	System.out.println(" -------------- activity list --------------");
   	System.out.println("");
  	
-  	for (int i=0 ; i< listenkopie.size() ; i++)
+  	for (int i=0 ; i< listtoprint.size() ; i++)
   	{
-  		HActivity act = listenkopie.get(i);   		
-  		if (!act.isHomeActivity() && act.getEstimatedTripTimeBeforeActivity()!=0)
+  		HActivity act = listtoprint.get(i);   		
+  		if (!act.isHomeActivity())
   		{
-  			System.out.println(i 		+ " Weg : Start " + act.getTripStartTimeBeforeActivityWeekContext() 
-  															+ " Ende " + (act.getTripStartTimeBeforeActivityWeekContext()+act.getEstimatedTripTimeBeforeActivity())
-  															+ " Dauer " + act.getEstimatedTripTimeBeforeActivity()
-  												);
+  			System.out.println(i + " " + act.getTripbeforeactivity());
   		}
   		
-  		System.out.println(i + " Akt : " + act);
+  		System.out.println(i + " act : " + act);
   		
   		if (!act.isHomeActivity() && act.isActivityLastinTour())
   		{
-  			System.out.println(i 		+ " Weg (letzter in Tour) : Start " + act.getTripStartTimeAfterActivityWeekContext() 
-  															+ " Ende " + (act.getTripStartTimeAfterActivityWeekContext()+act.getEstimatedTripTimeAfterActivity())
-  															+ " Dauer " + act.getEstimatedTripTimeAfterActivity()
-  												);
+  			System.out.println(i + " last " + act.getTripafteractivity());
   		}
   	}
-  }
+	}
 	
 	
 	public void printJointActivitiesList()
   {  	
-		List<HActivity> listenkopie = new ArrayList<HActivity>();
-		listenkopie = getAllJointActivities();
-		
-  	HActivity.sortActivityListbyWeekStartTimes(listenkopie);
+		List<HActivity> listtoprint = getAllJointActivities();
+  	HActivity.sortActivityListbyWeekStartTimes(listtoprint);
 
   	System.out.println("");
-  	System.out.println(" -------------- LISTE gemeinsamer AKTIVITÄTEN --------------");
+  	System.out.println(" -------------- list of joint activities --------------");
   	System.out.println("");
  	
-  	for (int i=0 ; i< listenkopie.size() ; i++)
+  	for (int i=0 ; i< listtoprint.size() ; i++)
   	{
-  		HActivity act = listenkopie.get(i);   		
-  		System.out.println(i + " Akt : " + act + " // Creator: " + act.getCreatorPersonIndex()); 
+  		HActivity act = listtoprint.get(i);   		
+  		System.out.println(i + " akt : " + act + " // creator: " + act.getCreatorPersonIndex()); 
   	}
   }
   
@@ -324,13 +301,13 @@ public class HWeekPattern
 	 * @param act
 	 */
 	public void addHomeActivity(HActivity act){
-		assert act.getType()=='H' : "keine Heimaktivität";
+		assert act.getType()=='H' : "no home activity";
 		homeactivitities.add(act);
 	}
 	
 	/**
 	 * 
-	 * Prüft, ob WeekPattern überlappende Aktivitäten enthält
+	 * check if pattern has activity overlaps
 	 * 
 	 * @param weekpattern
 	 * @return

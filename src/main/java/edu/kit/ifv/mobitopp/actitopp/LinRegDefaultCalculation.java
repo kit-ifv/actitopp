@@ -19,26 +19,20 @@ public class LinRegDefaultCalculation {
 		this.estimatesMap = new HashMap<String, LinRegEstimate>();
 	}
 	
-	/**
-	 * 
-	 * Initialisierung der Estimates mit Belegung der Attributwerte
-	 * 
-	 */
 	public void initializeEstimates()
 	{
 		
-		// Parameter laden und in Map für diese Entscheidung kopieren
+		// copy the parameters loaded frome file base to the decision of this modeling step
 		for (String key : fileBase.getLinearRegressionEstimates(regressionname).keySet())
 		{
-			LinRegEstimate vorlage = fileBase.getLinearRegressionEstimates(regressionname).get(key);
-			LinRegEstimate estimate = new LinRegEstimate(vorlage.getName(), vorlage.getEstimateValue(), vorlage.getContextIdentifier());
+			LinRegEstimate fromFileBase = fileBase.getLinearRegressionEstimates(regressionname).get(key);
+			LinRegEstimate estimate = new LinRegEstimate(fromFileBase.getName(), fromFileBase.getEstimateValue(), fromFileBase.getContextIdentifier());
 			estimatesMap.put(key, estimate);
 		}
 		
-		// Attributwerte auslesen
+		// read attribute values for estimates
 		for (String key : estimatesMap.keySet())
 		{
-	  	
 			LinRegEstimate estimate = estimatesMap.get(key);
 			
 			if (key.equals("Grundnutzen") || key.equals("Intercept"))
@@ -55,8 +49,7 @@ public class LinRegDefaultCalculation {
 	}
 	
 	/**
-	 * 
-	 * Berechnung der Linearkombination der Regression
+	 * calculate the linear combination of the estimates and the according attributes
 	 * 
 	 * @return
 	 */

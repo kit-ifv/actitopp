@@ -197,7 +197,7 @@ public class HTrip {
 	@Override
 	public String toString()
 	{
-		return "duration: " + getDuration();
+		return "trip: start(week): " + getStartTime_WeekContext() + " / end(week): " + getEndTimeWeekContext() + " / duration: " + getDuration();
 	}
 	
 }

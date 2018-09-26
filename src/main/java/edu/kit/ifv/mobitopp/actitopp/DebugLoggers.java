@@ -11,24 +11,22 @@ import java.util.Map.Entry;
 /**
  * @author Tim Hilgert
  * 
- * Diese Klasse ermöglicht die Benutzung von Debug-Loggern.
- * Diese Logger speichern im Modell getroffene Entscheidungen in Maps.
- * Können verwendet werden, um explizit Entscheidungen von verschiedenen Stufen zu evaluieren
+ * debugloggers store modeling decision in maps.
+ * debug loggers may be used to explictly monitor specific decision during modeling that may not be directly 
+ * visible when only analysing overall modeling result (i.e. activity schedules).
  *
  */
 public class DebugLoggers 
 {
 
 	/*
-	 * Übergeordnete Map mit allen Loggern
+	 * Overall HashMap including all generated loggers
 	 */
 	public HashMap<String,LinkedHashMap<Object,String>> debugloggers = null;
 	
 	
 	/**
-	 * 
-	 * Konstruktor für einen übergeordnete DebugLoggers (für mehrere Haushalte)
-	 *
+	 * constructor to create debug loggers object
 	 */
 	public DebugLoggers()
 	{	
@@ -38,7 +36,8 @@ public class DebugLoggers
 	
 	/**
 	 * 
-	 * Konstruktor für einen untergeordneten DebugLogger (für einen Haushalt)
+	 * constructor to create a subordinate logger (storing information for one household only)
+	 * create a logger object and created empty loggers for all elements that are already in the superordinate logger object
 	 *
 	 * @param overallLogger
 	 */
@@ -53,7 +52,7 @@ public class DebugLoggers
 	
 
 	/**
-	 * Methode zum Erzeugen eines neuen Loggers
+	 * add a new logger element
 	 * 
 	 * @param key
 	 */
@@ -64,7 +63,6 @@ public class DebugLoggers
 	
 	
 	/**
-	 * Methode zum Prüfen, ob Logger existiert
 	 * 
 	 * @param key
 	 * @return
@@ -77,7 +75,6 @@ public class DebugLoggers
 	}
 	
 	/**
-	 * Methode gibt referenzierten Loggers zurück
 	 * 
 	 * @param key
 	 * @return
@@ -88,7 +85,7 @@ public class DebugLoggers
 	}
 	
 	/**
-	 * Methode zum Hinzufügen von Informationen zu einem Logger
+	 * add information to a logger
 	 * 
 	 * @param key
 	 * @param referenceobject
@@ -101,8 +98,7 @@ public class DebugLoggers
 
 	
 	/**
-	 * 
-	 * Fügt alle Informationen eines LoggerObjects zu dem aktuellen Logger hinzu
+	 * add all information of a subordinate logger to the superordinate logger
 	 * 
 	 * @param householdlogger
 	 */
@@ -119,7 +115,7 @@ public class DebugLoggers
 	
 
 	/**
-	 * Export aller verfügbaren Logger
+	 * export of all logger elements to the file system
 	 * 
 	 * @param basepath
 	 */
@@ -133,7 +129,7 @@ public class DebugLoggers
 
 
 	/**
-	 * Methode zum Export der Ergebnisse eines Loggers
+	 * export of a single logger element to the file system
 	 * 
 	 * @param key
 	 * @param filename
@@ -143,15 +139,12 @@ public class DebugLoggers
 		
 		try 
 		{
-			/*
-			 * FileWriter erzeugen
-			 */
 			FileWriter writer = new FileWriter(filename);
 			
-			boolean headergeschrieben=false;
+			boolean wroteheader=false;
 				
 			/*
-			 * Alle Objekte eines DebugLoggers durchgehen
+			 * Loop through all entries of the logger element
 			 */
 			LinkedHashMap<Object, String> relevantmap = debugloggers.get(key);
 			
@@ -164,18 +157,18 @@ public class DebugLoggers
 				{
 					ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
 					
-					if(!headergeschrieben)
+					if(!wroteheader)
 					{
 						// Header
 				  	writer.append("HHIndex;Decision");
 				  	writer.append('\n');
 				  	writer.flush();
-				  	headergeschrieben=true;
+				  	wroteheader=true;
 					}
 	
 					// HHIndex
 					rowcontent += acthousehold.getHouseholdIndex() + ";";		
-					//Decision
+					// Decision
 					rowcontent += relevantmap.get(referenceobject);					
 				}
 				
@@ -184,20 +177,20 @@ public class DebugLoggers
 				{
 					ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
 					
-					if(!headergeschrieben)
+					if(!wroteheader)
 					{
 						// Header
 				  	writer.append("HHIndex;PersIndex;Decision");
 				  	writer.append('\n');
 				  	writer.flush();
-				  	headergeschrieben=true;
+				  	wroteheader=true;
 					}
 	
 					// HHIndex
 					rowcontent += actperson.getHousehold().getHouseholdIndex() + ";";		
 					// PersIndex
 					rowcontent += actperson.getPersIndex() + ";";
-					//Decision
+					// Decision
 					rowcontent += relevantmap.get(referenceobject);					
 				}
 				
@@ -206,22 +199,22 @@ public class DebugLoggers
 				{
 					HDay actday = ((HDay) referenceobject);
 					
-					if(!headergeschrieben)
+					if(!wroteheader)
 					{
 						// Header
 				  	writer.append("HHIndex;PersIndex;WOTAG;Decision");
 				  	writer.append('\n');
 				  	writer.flush();
-				  	headergeschrieben=true;
+				  	wroteheader=true;
 					}
 					
 					// HHIndex
 					rowcontent += actday.getPerson().getHousehold().getHouseholdIndex() + ";";		
 					// PersIndex
 					rowcontent += actday.getPerson().getPersIndex() + ";";
-					// WOTAG
+					// WOTAG - WeekDay
 					rowcontent += actday.getWeekday() + ";";
-					//Decision
+					// Decision
 					rowcontent += relevantmap.get(referenceobject);					
 				}
 				
@@ -230,13 +223,13 @@ public class DebugLoggers
 				{
 					HTour acttour = ((HTour) referenceobject);
 					
-					if(!headergeschrieben)
+					if(!wroteheader)
 					{
 						// Header
 				  	writer.append("HHIndex;PersIndex;WOTAG;TourIndex;Decision");
 				  	writer.append('\n');
 				  	writer.flush();
-				  	headergeschrieben=true;
+				  	wroteheader=true;
 					}
 					
 					// HHIndex
@@ -247,7 +240,7 @@ public class DebugLoggers
 					rowcontent += acttour.getDay().getWeekday() + ";";
 					// TourIndex
 					rowcontent += acttour.getIndex() + ";";
-					//Decision
+					// Decision
 					rowcontent += relevantmap.get(referenceobject);					
 				}
 				
@@ -256,13 +249,13 @@ public class DebugLoggers
 				{
 					HActivity actact = ((HActivity) referenceobject);
 					
-					if(!headergeschrieben)
+					if(!wroteheader)
 					{
 						// Header
 				  	writer.append("HHIndex;PersIndex;WOTAG;TourIndex;AktIndex;Decision");
 				  	writer.append('\n');
 				  	writer.flush();
-				  	headergeschrieben=true;
+				  	wroteheader=true;
 					}
 					
 					// HHIndex
@@ -275,11 +268,11 @@ public class DebugLoggers
 					rowcontent += actact.getTourIndex() + ";";
 					// AktIndex
 					rowcontent += actact.getIndex() + ";";
-					//Decision
+					// Decision
 					rowcontent += relevantmap.get(referenceobject);					
 				}				
 				
-				// Zeile schreiben
+				// write row
 				
 				rowcontent +="\n";
 				
@@ -297,69 +290,10 @@ public class DebugLoggers
 		}		
 	}
 
-	/**
-	 * 
-	 * Entfernt alle Logging Ergebnisse für einen Haushalt
-	 * Ist notwendig, falls der Haushalt beispielsweise erneut modelliert wird
-	 * 
-	 * @param tmphousehold
-	 */
-	@Deprecated
-	public void deleteInformationforHousehold(ActiToppHousehold tmphousehold)
-	{
-		int hhindex = tmphousehold.getHouseholdIndex();
-		for (String key : debugloggers.keySet())
-		{
-			/*
-			 * Alle Objekte eines DebugLoggers durchgehen
-			 */
-			LinkedHashMap<Object, String> relevantmap = debugloggers.get(key);
-			
-			for(Iterator<Object> it = relevantmap.keySet().iterator(); it.hasNext();)
-	    {			
-				Object referenceobject = it.next();	
-				// HouseholdLogger
-				if (referenceobject instanceof ActiToppHousehold)
-				{
-					ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
-					if (acthousehold.getHouseholdIndex()==hhindex) it.remove();			
-				}
-				
-				// PersonLogger
-				if (referenceobject instanceof ActitoppPerson)
-				{
-					ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
-					if (actperson.getHousehold().getHouseholdIndex()==hhindex) it.remove();
-				}
-				
-				// Daylogger
-				if (referenceobject instanceof HDay)
-				{
-					HDay actday = ((HDay) referenceobject);
-					if (actday.getPerson().getHousehold().getHouseholdIndex()==hhindex) it.remove();						
-				}
-				
-				// Tourlogger
-				if (referenceobject instanceof HTour)
-				{
-					HTour acttour = ((HTour) referenceobject);
-					if (acttour.getPerson().getHousehold().getHouseholdIndex()==hhindex) it.remove();
-				}
-				
-				// Activitylogger
-				if (referenceobject instanceof HActivity)
-				{
-					HActivity actact = ((HActivity) referenceobject);
-					if (actact.getPerson().getHousehold().getHouseholdIndex()==hhindex) it.remove();	
-				}				
-	    }
-		}
-	}
 	
 	/**
-	 * 
-	 * Entfernt alle Logging Ergebnisse für eine Person
-	 * Ist notwendig, falls die Person beispielsweise erneut modelliert wird
+	 * delete all information of a single person from the debug logger object
+	 * e.g. when a person needs to be modeled again
 	 * 
 	 * @param tmpperson
 	 */
@@ -369,7 +303,7 @@ public class DebugLoggers
 		for (String key : debugloggers.keySet())
 		{
 			/*
-			 * Alle Objekte eines DebugLoggers durchgehen
+			 * Loop all debug logger elements
 			 */
 			LinkedHashMap<Object, String> relevantmap = debugloggers.get(key);
 			

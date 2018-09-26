@@ -19,7 +19,7 @@ public class ExampleActiTopp {
 	 */
 	public static void main(String[] args) 
 	{
-/*	
+	
 		createAndModelOnePerson_Example1();
 
 		createAndModelOnePerson_Example2();
@@ -29,7 +29,7 @@ public class ExampleActiTopp {
 		createAndModelMultiplePersons_Example1();
 	
 		createAndModelMultiplePersons_Example2();
-*/		
+		
 		/*beispielhafte Verwendung eines Debug-Loggers für Entscheidung 2A*/
 		debugloggers.addDebugLogger("2A");
 

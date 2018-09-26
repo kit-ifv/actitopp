@@ -18,7 +18,7 @@ public class CSVLinRegEstimatesLoader
 
 	/**
 	 * 
-	 * Methode liest Estimates Werte aus Inputdatei ein und speichert diese in einer HashMap
+	 * read estimate values from file system and store them in a hash map
 	 * 
 	 * @param input
 	 * @return

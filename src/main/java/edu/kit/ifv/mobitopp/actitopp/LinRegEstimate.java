@@ -1,29 +1,23 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
 /**
+ * object from this class represent modeling elements for linear regression models consisting of:
  * 
- * 	Objekte dieser Klasse stellen Modellparameter für lineare Regressionsmodelle dar.
- * 	Besteht aus:
- * 
- * 	- name : Name des entsprechenden Parameters, bspw. alter10bis17
- *  - contextIdentifier: Kontextzuordnung der Variable zu Person, Tag, Tour, ...
- *  - estimateValue : Wert des Estimates für die Berechnung der Linearen FUnktion
- *  - attributevalue : Ausprägungswert der Variable im Modellverlauf
+ * 	- name : name of the parameter, e.g. alter10bis17
+ *  - contextIdentifier: corresponding context, e.g. person, day, tour, ...
+ *  - estimateValue : value of the estimate for regression calculation (readed as input from file base)
+ *  - attributevalue : value of the attribute (determined at runtime for the corresponding object, e.g. person)
  *  
- *  atributevalue wird mit -99999 initialisiert und muss bei der Berechnung dann mit der konkreten Ausprägung überschrieben worden sein
- * 
+ *  attributevalue is initialized with -99999. During the modeling execution it will be overwritten with the runtime value
+ *  
  * @author Tim Hilgert
  *
  */
 public class LinRegEstimate {
 	
-	// Name der Variable
 	private String name;
-	// Kontextzuordnung der Variable zu Person, Tag, Tour, ...
 	private String contextIdentifier;
-	// Wert des Estimates für die Berechnung
-	private double estimateValue = -99999;
-	// Ausprägungswert der Variable im Modellverlauf
+	private double estimateValue  = -99999;
 	private double attributeValue = -99999;
 	
 	/**
@@ -73,7 +67,7 @@ public class LinRegEstimate {
 	 * @return the estimateValue
 	 */
 	public double getEstimateValue() {
-		assert estimateValue!=-99999 : "Estimate wurde nicht korrekt initialisiert - " + estimateValue;
+		assert estimateValue!=-99999 : "no correct initialisation of estimate value - " + estimateValue;
 		return estimateValue;
 	}
 
@@ -88,7 +82,7 @@ public class LinRegEstimate {
 	 * @return the attributeValue
 	 */
 	public double getAttributeValue() {
-		assert attributeValue!=-99999 : "Attribut wurde nicht korrekt initialisiert - " + attributeValue;
+		assert attributeValue!=-99999 : "no correct initialisation of attribute value - " + attributeValue;
 		return attributeValue;
 	}
 
@@ -101,7 +95,7 @@ public class LinRegEstimate {
 
 	public String toString()
 	{
-		return "Variable: " + name + " (" + contextIdentifier + ") value:" + estimateValue + " Attribut: " + attributeValue;
+		return name + " (" + contextIdentifier + ") estimate value:" + estimateValue + " attribute value: " + attributeValue;
 	}
 
 }

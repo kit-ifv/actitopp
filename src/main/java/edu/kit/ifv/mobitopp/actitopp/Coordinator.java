@@ -2367,13 +2367,13 @@ public class Coordinator
 	  if(categories && tour.getIndex()== tourday.getLowestTourIndex())
 	  {
 	    // Setze die Zeiten in Kategorien um
-	      for (int i=0; i<Configuration.NUMBER_OF_MAIN_START_TIME_CLASSES; i++)
+	      for (int i=0; i<Configuration.NUMBER_OF_FIRST_START_TIME_CLASSES; i++)
 	      {
-	      	if (lowerbound>=Configuration.MAIN_TOUR_START_TIMECLASSES_LB[i] && lowerbound<=Configuration.MAIN_TOUR_START_TIMECLASSES_UB[i])
+	      	if (lowerbound>=Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] && lowerbound<=Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i])
 	      	{
 	      		lowercat =i;
 	      	}
-	      	if (upperbound>=Configuration.MAIN_TOUR_START_TIMECLASSES_LB[i] && upperbound<=Configuration.MAIN_TOUR_START_TIMECLASSES_UB[i])
+	      	if (upperbound>=Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] && upperbound<=Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i])
 	      	{
 	      		uppercat =i;
 	      	}

@@ -13,7 +13,7 @@ public class AttributeLookup {
 	
 	/**
 	 * 
-	 * Konstruktor
+	 * constructor
 	 * 
 	 * @param currentPerson
 	 */
@@ -24,7 +24,7 @@ public class AttributeLookup {
 	
 	/**
 	 * 
-	 * Konstruktor
+	 * constructor
 	 * 
 	 * @param currentPerson
 	 * @param currentDay
@@ -37,7 +37,7 @@ public class AttributeLookup {
 
 	/**
 	 * 
-	 * Konstruktor
+	 * constructor
 	 * 
 	 * @param currentPerson
 	 * @param currentDay
@@ -51,7 +51,7 @@ public class AttributeLookup {
 	
 	/**
 	 * 
-	 * Konstruktor
+	 * constructor
 	 * 
 	 * @param currentPerson
 	 * @param currentDay
@@ -81,24 +81,24 @@ public class AttributeLookup {
   	{
   		case "default":
 	  	case "person":
-	  		assert currentPerson!=null : "Person nicht initialisiert";
+	  		assert currentPerson!=null : "no person!";
 	  		attributeValue = ActitoppPersonParameters.getEnumValue(attributeName).getAttribute(currentPerson);
 	  		break;
 	  	case "day":
-	  		assert currentDay!=null : "Tag nicht intialisiert";
+	  		assert currentDay!=null : "no day!";
 	  		attributeValue = HDayParameters.getEnumValue(attributeName).getAttribute(currentDay);
 	  		break;
 	  	case "tour":
-	  		assert currentTour!=null : "Tour nicht initialisiert";
+	  		assert currentTour!=null : "no tour!";
 	  		attributeValue = HTourParameters.getEnumValue(attributeName).getAttribute(currentTour);
 	  		break;
 	  	case "activity":
-	  		assert currentActivity!=null : "Aktivität nicht initialisiert";
+	  		assert currentActivity!=null : "no activity!";
 	  		attributeValue = HActivityParameters.getEnumValue(attributeName).getAttribute(currentActivity);
 	  		break;		
   	}
 
-  	assert attributeValue != 999999 : "AttributeValue couldn't be read! - Reference: " + reference + " - Attribut: " + attributeName;
+  	assert attributeValue != 999999 : "AttributeValue couldn't be read! - Reference: " + reference + " - Attribute: " + attributeName;
   	return attributeValue;
   }
 

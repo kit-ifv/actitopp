@@ -20,8 +20,7 @@ public class ModelFileBase
  
   private HashMap<String, DCModelSteplnformation> modelInformationDCsteps;
   private HashMap<String, WRDModelSteplnformation> modelInformationWRDsteps;
-  
-  // Map mit Objekten, die Estimates einfacher Regressionsmodelle enthalten
+
   private HashMap<String,HashMap<String, LinRegEstimate>> linearregressionestimatesmap;
   
   
@@ -40,7 +39,7 @@ public class ModelFileBase
   
     try
     {
-    	// Initialisierungen
+    	// initialisations
     	initDCStepInformation();
     	initDCStepParameters();
     	initWRDSteps();
@@ -83,7 +82,7 @@ public class ModelFileBase
   
   /**
    * 
-   * Gibt die Map der Regressionsestimates für die gewünschte Regression
+   * return linear regression estimated map for speicified regressionname
    * 
    * @param regressionname
    * @return
@@ -95,7 +94,7 @@ public class ModelFileBase
     
 	/**
    * 
-   * read all relevant model flow information from files fpor dc steps
+   * read all relevant model flow information from files for dc steps
    * 
    * @throws FileNotFoundException
    * @throws IOException
@@ -120,7 +119,7 @@ public class ModelFileBase
   
   /**
 	 * 
-	 * Initialisierung der Parameter für Logit-Steps
+	 * read all relevant parameter from files for dc steps 
    * @throws IOException 
 	 * 
 	 */
@@ -129,7 +128,6 @@ public class ModelFileBase
 		// parameters need to be available for all DC model steps
     for (String keyString : modelInformationDCsteps.keySet())
     {
-    	// Referenz auf eine Modelflowliste des spezifischen Schritts
       DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
       
       String sourceLocation = Configuration.parameterset + "/"+ keyString +"Params.csv";
@@ -165,7 +163,8 @@ public class ModelFileBase
         String sourceLocation = Configuration.parameterset + "/"+ stepid +"_KAT_"+ index +".csv";
         CSVWRDDistributionLoader loader = new CSVWRDDistributionLoader();
         
-				try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
+				try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+				{
 					WRDModelDistributionInformation wrddist = loader.loadDistributionInformation(input);
 					modelstep.addDistributionInformation(String.valueOf(index), wrddist);
 				}
@@ -174,18 +173,18 @@ public class ModelFileBase
   }
   
   /**
+   * initialize estimated for linear regression steps
    * 
-   * Initialisierung der Estimates für einfache Regressionsparameter
    * @throws IOException
    */
   private void initLinearRegressionEstimates() throws IOException
   {
-    // Initialisierung der Listen aller Dateien
     for(String s : Configuration.linregsteps_filenames)
     {   
       String sourceLocation = Configuration.parameterset + "/"+ s +".csv";
       CSVLinRegEstimatesLoader loader = new CSVLinRegEstimatesLoader();
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
+			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+			{
 				HashMap<String, LinRegEstimate> tmpmap = loader.getEstimates(input);
 				linearregressionestimatesmap.put(s, tmpmap);
 			}

@@ -1353,7 +1353,7 @@ public enum ActitoppPersonParameters {
 	private final String name;
 
 	/**
-	 * privater Konstruktor
+	 * private constructor
 	 * 
 	 * @param name
 	 */
@@ -1364,17 +1364,16 @@ public enum ActitoppPersonParameters {
 	
 	/**
 	 * 
-	 * Methode zur Rückgabe des EnumValues für einen gegebenen String
+	 * get ENUM Value for a given string
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static ActitoppPersonParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitsprüfung
 		checkUniqueness(name);
 		
-		// Rückgabe des passenden Enums
+		// search for correct ENUM
 		for (ActitoppPersonParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -1385,7 +1384,7 @@ public enum ActitoppPersonParameters {
 
 	/**
 	 * 
-	 * Methode zur Prüfung der Eindeutigkeit der Enum-Namensvariable
+	 * method to check uniqueness of ENUM Variable
 	 * 
 	 * @param name
 	 */

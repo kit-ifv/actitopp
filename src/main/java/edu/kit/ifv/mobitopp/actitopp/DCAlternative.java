@@ -15,14 +15,15 @@ public class DCAlternative
   private boolean enabled = true;
   
   /*
-   * Faktor, mit denen der Nutzen gewichtet wird.
-   * In der Regel 1, wird bei manchen Modellteilen aus
-   * Stabilitätsaspekten angepasst, bspw. auf 1.1
-   * Das heißt der Nutzen wird um 10% erhöht!
+   * Faktor to weight utility.
+   * by default, factor is equal to 1, i.e. no additional
+   * weithing. Some model steps used weighting factor to ensure
+   * stability aspects, i.e. setting it to 1.1 is equal to a 10%
+   * raising of the utility.
    * 
-   * Der utillityFactor wird bei getUtility Methode verrechnet!
+   * factor is inclued when getUtility
    */
-  private double utilityfactor=1.0;
+  private double utilityweithingfactor=1.0;
   
   /**
    * 
@@ -46,7 +47,7 @@ public class DCAlternative
 	 * @param utilityfactor the utilityfactor to set
 	 */
 	public void setUtilityfactor(double utilityfactor) {
-		this.utilityfactor = utilityfactor;
+		this.utilityweithingfactor = utilityfactor;
 	}
 
 	public String getName()
@@ -64,7 +65,7 @@ public class DCAlternative
 	 */
   public double getUtility()
   {
-    return utilityFunction.getUtility() * utilityfactor;
+    return utilityFunction.getUtility() * utilityweithingfactor;
   }
   
 	/**
@@ -100,8 +101,4 @@ public class DCAlternative
   	return getName();
   }
 	
-	
-
-
-
 }

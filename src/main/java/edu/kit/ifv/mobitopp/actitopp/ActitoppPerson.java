@@ -16,10 +16,10 @@ import java.util.Map;
 public class ActitoppPerson
 {
 	
-	//zugehöriger Haushalt
+	//corresponding household
 	private ActiToppHousehold household;
 	
-	// Enthält alle Attribute, die nicht direkt über Variablen ausgelesen werden können
+	// stores all attributes that are not directly accessible by variables
 	private Map<String, Double> attributes;
 	
 	private HWeekPattern weekPattern;
@@ -30,21 +30,21 @@ public class ActitoppPerson
 	private int gender;
 	private int employment;
 	
-	// Pendeldistanzen sind als Default = 0, das heißt nicht verfügbar oder Person pendelt nicht
+	// commuting distance are 0 by default, i.e. not available or person is not commuting
 	private double commutingdistance_work = 0.0;
 	private double commutingdistance_education = 0.0;
 	
-	// Variablen für gemeinsame Aktivitäten
+	// Variables used for modeling of joint actions
 
-	// basiert auf Regressionsmodell und dient der Feestlegung der Modellierungsreihenfolge der Personen im HH
-	private double probableshareofjointactions=-1;
-	// Liste zu berücksichtigender gemeinsamer Wege/Aktivitäten der Person im HH
-	private List<HActivity> jointActivitiesforConsideration;
+		// based on lineare regression model to determine modeling order within the household
+		private double probableshareofjointactions=-1;
+		// List of joint actions to consider that are first created from other household members
+		private List<HActivity> jointActivitiesforConsideration;
 
 	
 	
 	/**
-	 * Konstruktor zum Erstellen einer Person ohne Haushaltskontext
+	 * constructor to create a peron without household context
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -67,10 +67,9 @@ public class ActitoppPerson
 	) {
 		
 		/*
-		 * Zur Abwärtskompatibilität können Personen nach wie vor ohne Haushaltsbezug erstellt
-		 * werden. Es wird intern allerdings ein Haushaltsobjekt erzeugt, um den Variablenzugriff
-		 * auf Haushaltsvariablen nach außen einheitlich zu gestalten. Die Personen werden so alle
-		 * in 1-Personen Haushalten verwaltet.
+		 * Person can be generated without having household context.
+		 * To simplify the internal modeling process, a household object 
+		 * containing this person only will be created for these cases.
 		 */
 		this.household = new ActiToppHousehold(
 				PersIndex, 
@@ -89,13 +88,12 @@ public class ActitoppPerson
 		this.attributes = new HashMap<String, Double>();
 		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
 		
-		// Setzte Modellierungsnummer im HH als Attribut der Person
 		this.addAttributetoMap("numbermodeledinhh", (double) (1));	
 		}
 	
 	
 	/**
-	 * Konstruktor zum Erstellen einer Person - mit Pendelentfernung, ohne Haushaltskontext
+	 * constructor to create a peron without household context but with commuting distances
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -129,7 +127,7 @@ public class ActitoppPerson
 	
 	
 	/**
-	 * Konstruktor zum Erstellen einer Person mit Haushaltskontext
+	 * constructor to create a peron with household context
 	 * 
 	 * @param household
 	 * @param PersIndex
@@ -157,13 +155,17 @@ public class ActitoppPerson
 		this.attributes = new HashMap<String, Double>();
 		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
 		
-		// Setzte Modellierungsnummer im HH als Attribut der Person - Default-Wert (kann durch Reihenfolge für gemAkt verändert werden)
+		/*
+		 * set modeling order within the household.
+		 * When modeling joint actions, this will be changed depending on linear regression model
+		 * to determine probable share of joint actions
+		 */
 		this.addAttributetoMap("numbermodeledinhh", (double) persnrinhousehold);
 		}	
 
 	
   /**
-	 * Konstruktor zum Erstellen einer Person mit Haushaltskontext & Pendelentfernung
+	 * constructor to create a peron with household context and commuting distances
 	 * 
 	 * @param household
 	 * @param PersIndex
@@ -379,8 +381,10 @@ public class ActitoppPerson
 	 */
 	public int getCommutingDuration_work()
 	{
-		// mittlere Pendelgeschwindigkeit in km/h wird je gruppierter Pendelentfernung festgelegt
-		// die mittleren Geschwindigkeiten wurden über alle Pendelwege des MOP 2004-2013 ermittelt
+		/*
+		 * mean commuting speed in kilometers/hour is calculated using commuting distance groups
+		 * based on data of commuting trips of the German Mobility Panel (2004-2013)
+		 */
 		double commutingspeed_work;
 		if 			(commutingdistance_work>0  && commutingdistance_work <= 5)  commutingspeed_work = 16;
 		else if (commutingdistance_work>5  && commutingdistance_work <= 10) commutingspeed_work = 29;
@@ -389,7 +393,7 @@ public class ActitoppPerson
 		else if (commutingdistance_work>50) 																commutingspeed_work = 67;
 		else																																commutingspeed_work = 32;
 		
-		// Mindestdauer jedes Wegs: 1 Minute
+		// minimum trip duration: 1 Minute
 		return (int) Math.max(1, Math.round((commutingdistance_work/commutingspeed_work)*60));
 	}
 	
@@ -400,8 +404,10 @@ public class ActitoppPerson
 	 */
 	public int getCommutingDuration_education()
 	{
-		// mittlere Pendelgeschwindigkeit in km/h wird je gruppierter Pendelentfernung festgelegt
-		// die mittleren Geschwindigkeiten wurden über alle Pendelwege des MOP 2004-2013 ermittelt
+		/*
+		 * mean commuting speed in kilometers/hour is calculated using commuting distance groups
+		 * based on data of commuting trips of the German Mobility Panel (2004-2013)
+		 */
 		double commutingspeed_education;
 		if 			(commutingdistance_education>0  && commutingdistance_education <= 5)  commutingspeed_education = 12;
 		else if (commutingdistance_education>5  && commutingdistance_education <= 10) commutingspeed_education = 21;
@@ -410,13 +416,13 @@ public class ActitoppPerson
 		else if (commutingdistance_education>50) 																			commutingspeed_education = 55;
 		else																																					commutingspeed_education = 21;
 		
-		// Mindestdauer jedes Wegs: 1 Minute
+		// minimum trip duration: 1 Minute
 		return (int) Math.max(1, Math.round((commutingdistance_education/commutingspeed_education)*60));
 	}
 	
 
 	/**
-	 * @param attributes spezifischesAttribut für Map
+	 * @param attributes
 	 */
 	public void addAttributetoMap(String name, Double value) {
 		this.attributes.put(name, value);
@@ -424,7 +430,7 @@ public class ActitoppPerson
 	
 	/**
 	 * 
-	 * @param name spezifisches Attribut aus Map
+	 * @param name
 	 * @return
 	 */
 	public double getAttributefromMap(String name) {
@@ -432,7 +438,7 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * Prüft, ob ein Attribut in der Map existiert
+	 * check existence of attribute
 	 * 
 	 * @param name
 	 * @return
@@ -450,21 +456,21 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * Entfernt alle gespeicherten Attribute aus der Map
+	 * delete all attributes from map
 	 */
 	public void clearAttributesMap() {
 		attributes.clear();
 	}
 	
 	/**
-	 * Entfernt das gespeicherte WeekPattern von der Person
+	 * delete weekpattern of person
 	 */
 	public void clearWeekPattern() {
 		weekPattern = null;
 	}
 
 	/**
-	 * Entfernt alle gemeinsamen Aktivitäten anderer Haushaltsmitglieder aus der Liste  
+	 * delete all joint actions to consider
 	 */
 	public void clearJointActivitiesforConsideration()
 	{
@@ -478,15 +484,20 @@ public class ActitoppPerson
 		return probableshareofjointactions;
 	}
 
+	/**
+	 * calculates the probable share of joint actions based on person characteristics
+	 * this share is used to determine the modeling order within the household
+	 * 
+	 * @param fileBase
+	 */
 	public void calculateProbableshareofjointactions(ModelFileBase fileBase) {
 		
-		// AttributeLookup erzeugen
+		// create attribute lookup
 		AttributeLookup lookup = new AttributeLookup(this);
 		
-		// Modellobjekt erzeugen (97estimates.csv enthält die Modellparameter)
+		// create modeling object (97estimates.csv contains modeling information)
 		LinRegDefaultCalculation regression = new LinRegDefaultCalculation("97estimates", fileBase, lookup);
 		
-		// Initialisierung und Regressionskalkulation
 		regression.initializeEstimates();				
 		this.probableshareofjointactions = regression.calculateRegression();
 
@@ -497,40 +508,40 @@ public class ActitoppPerson
 	public String toString()	{
   	StringBuffer message = new StringBuffer();
 
-  	message.append("\n Personeninformationen");
+  	message.append("\n person information");
   	
-		message.append("\n - PersIndex : ");
+		message.append("\n - persindex : ");
 		message.append(PersIndex);
 				
-		message.append("\n - Alter : ");
+		message.append("\n - age : ");
 		message.append(getAge());
 
-		message.append("\n - Beruf : ");
+		message.append("\n - employment type : ");
 		message.append(getEmployment());
 		
-		message.append("\n - Geschlecht : ");
+		message.append("\n - gender : ");
 		message.append(getGender());
 		
-		message.append("\n - Pendeldistanz Arbeiten : ");
+		message.append("\n - commuting distance work : ");
 		message.append(getCommutingdistance_work());		
 		
-		message.append("\n - Pendeldistanz Bildung : ");
+		message.append("\n - commuting distance education : ");
 		message.append(getCommutingdistance_education());		
 		
-		message.append("\n - Haushaltsebene ");
+		message.append("\n - household ");
 		message.append(getHousehold());
 		
 		return message.toString();
 	}
 	
 	/**
-   * Sortiert eine Liste mit Personen absteigend nach deren wahrscheinlichem Anteil an gemeinsamen Aktivitäten
+	 * sort list of household members descending by their probable share of joint actions
    * 
-   * @param personListe
+   * @param personList
    */
   public static void sortPersonListOnProbabilityofJointActions_DESC(List<ActitoppPerson> personList, ModelFileBase fileBase)
   {
-  	assert personList != null : "Liste zum Sortieren ist leer";
+  	assert personList != null : "nothing to sort!";
   	
   	for (ActitoppPerson tmpperson : personList)
   	{
@@ -560,7 +571,7 @@ public class ActitoppPerson
   }
 	
 	/**
-	 * Methode erzeugt Wochenaktivitätenplan für Person
+	 * create activity schedule for this person
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
@@ -579,7 +590,7 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * Methode erzeugt Wochenaktivitätenplan für Person
+	 * create activity schedule for this person using debug loggers to log results
 	 * 
 	 * @param modelbase
 	 * @param rnghelper
@@ -608,7 +619,6 @@ public class ActitoppPerson
   }
   
   /**
-   * Setzt die übergebene Liste als neue Liste für konfliktfreie Aktivitäten
    * 
    * @param aktliste
    */
@@ -618,27 +628,27 @@ public class ActitoppPerson
   }
   
 	/**
-	 * Fügt die Aktivität der Liste gemeinsamer Aktivitäten hinzu falls kein Konflikt vorliegt
+	 * add activity to list of joint actions to consider when there if no conflict
 	 * 
 	 * @param act
 	 */
 	public void addJointActivityforConsideration(HActivity act){
 		
-		//Sicherstellen, dass es eine gemeinsame Akt ist
+		//make sure the activity is joint
 		assert act.getJointStatus()>=1 && act.getJointStatus()<=3 : "no jointAct!";
 		
-		// Prüfe, ob es bereits eine Aktivität in dem Zeitraum oder in der Tour gibt
+		// check if there is already an activitx at the same time
 		boolean activityconflict = false;
 		for (HActivity tmpact : jointActivitiesforConsideration)
 		{
 			if(HActivity.checkActivityOverlapping(act,tmpact))
 			{
 				activityconflict = true;
-				System.err.println("HH" + getHousehold().getHouseholdIndex() + "/P" + getPersIndex() + ": Aktivität wurde wegen Konflikt mit bereits existierender Aktivität nicht als gemeinsame Aktivität aufgenommen!");
+				System.err.println("HH" + getHousehold().getHouseholdIndex() + "/P" + getPersIndex() + ": activity was not added as joint acticity due to conflict with existing activity!");
 				if (Configuration.debugenabled)
 				{
-					System.err.println("aufzunehmende Akt: " + act);
-					System.err.println("existierende Akt: " + tmpact);
+					System.err.println("act to add: " + act);
+					System.err.println("existing act: " + tmpact);
 				}
 
 				break;
@@ -652,7 +662,7 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * bestimmt, ob Person erwerbstätig ist (Vollzeit, Teilzeit oder Azubi)
+	 * determined if a person is anyway employed (full time, part time or in vocational program)
 	 * 
 	 * @return
 	 */
@@ -663,7 +673,7 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * bestimmt, ob Person Schüler/Student ist
+	 * determined if a person is in school or student
 	 * 
 	 * @return
 	 */
@@ -675,9 +685,6 @@ public class ActitoppPerson
 	
 	
 	/**
-	 * 
-	 * Methode zum Überprüfen der Vorbedingung von Schritt 9
-	 * 
 	 * @return
 	 */
 	public boolean isPersonWorkorSchoolCommuterAndMainToursAreScheduled()
@@ -701,10 +708,5 @@ public class ActitoppPerson
     }
     return false;
 	}
-	
-
-
-
-
 	
 }
