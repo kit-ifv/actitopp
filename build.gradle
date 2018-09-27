@@ -13,3 +13,12 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 artifacts {
     archives sourcesJar
 }
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+           repository(url: project.ext["mobitopp.repository.url"])
+        }
+    }
+}
