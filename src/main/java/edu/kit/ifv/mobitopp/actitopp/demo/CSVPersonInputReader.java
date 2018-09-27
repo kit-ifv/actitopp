@@ -52,12 +52,12 @@ public class CSVPersonInputReader
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public HashMap<Number, ActitoppPerson> loadInput_withouthouseholdcontexts() throws FileNotFoundException, IOException
+	public HashMap<Integer, ActitoppPerson> loadInput_withouthouseholdcontexts() throws FileNotFoundException, IOException
 	{
 		      
     // Initialisierungen
 
-		HashMap<Number, ActitoppPerson> personmap = new HashMap<Number, ActitoppPerson>();
+		HashMap<Integer, ActitoppPerson> personmap = new HashMap<Integer, ActitoppPerson>();
 
 		
     String line = null;
@@ -193,7 +193,7 @@ public class CSVPersonInputReader
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void loadInput(HashMap<Number, ActiToppHousehold> householdmap) throws FileNotFoundException, IOException
+	public void loadInput(HashMap<Integer, ActiToppHousehold> householdmap) throws FileNotFoundException, IOException
 	{
 		      	
 	  String line = null;

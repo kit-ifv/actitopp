@@ -52,12 +52,12 @@ public class CSVHouseholdInputReader
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public HashMap<Number, ActiToppHousehold> loadInput() throws FileNotFoundException, IOException
+	public HashMap<Integer, ActiToppHousehold> loadInput() throws FileNotFoundException, IOException
 	{
 		      
     // Initialisierungen
 
-		HashMap<Number, ActiToppHousehold> householdmap = new HashMap<Number, ActiToppHousehold>();
+		HashMap<Integer, ActiToppHousehold> householdmap = new HashMap<Integer, ActiToppHousehold>();
 
 		
     String line = null;

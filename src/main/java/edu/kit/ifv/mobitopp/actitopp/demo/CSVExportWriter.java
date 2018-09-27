@@ -33,7 +33,7 @@ public class CSVExportWriter
 	 * @param maptoexport
 	 * @throws IOException
 	 */
-	public void exportTripData(HashMap<Number,?> maptoexport) throws IOException
+	public void exportTripData(HashMap<Integer,?> maptoexport) throws IOException
 	{ 	
   	exportTripData_header();
 
@@ -135,7 +135,7 @@ public class CSVExportWriter
 	 * @param maptoexport
 	 * @throws IOException
 	 */
-	public void exportActivityData(HashMap<Number,?> maptoexport) throws IOException
+	public void exportActivityData(HashMap<Integer,?> maptoexport) throws IOException
 	{
 						  	
   	exportActivityData_header();

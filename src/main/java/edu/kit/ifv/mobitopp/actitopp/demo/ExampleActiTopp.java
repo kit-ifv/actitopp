@@ -209,7 +209,7 @@ public class ExampleActiTopp {
 		try
 		{			
 			CSVPersonInputReader loader = new CSVPersonInputReader(ModelFileBase.class.getResourceAsStream("demo/Demopersonen.csv"));
-			HashMap<Number, ActitoppPerson> personmap = loader.loadInput_withouthouseholdcontexts();
+			HashMap<Integer, ActitoppPerson> personmap = loader.loadInput_withouthouseholdcontexts();
 			
 			for (Number key : personmap.keySet())
 			{
@@ -281,7 +281,7 @@ public class ExampleActiTopp {
 		 * read input information from file system
 		 * 
 		 */
-		HashMap<Number, ActiToppHousehold> householdmap = null;
+		HashMap<Integer, ActiToppHousehold> householdmap = null;
 				
 		try
 		{
