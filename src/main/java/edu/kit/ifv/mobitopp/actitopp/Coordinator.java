@@ -2596,7 +2596,7 @@ public class Coordinator
     		}
     	}
     	
-    	// Prüfe, ob nach der letzten Aktivität noch Zeit für Heim-Aktivität ist
+    	// Prüfe, wieviel Zeit nach der letzten Aktivität noch für die Heim-Aktivität ist
     	HActivity lastact = allmodeledActivities.get(allmodeledActivities.size()-1);
     	int ende_lastTour = lastact.getTour().getEndTimeWeekContext();
     	if (ende_lastTour<10080)
@@ -2607,6 +2607,11 @@ public class Coordinator
     		int day = (int) ende_lastTour/1440;
     		// Füge Heimaktivität in Liste hinzu
     		pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration3, ende_lastTour%1440));
+    	}
+    	// Füge ansonsten nur 1-Minute Heimaktivität ein, damit die Woche immer zuhause endet
+    	else
+    	{
+    		pattern.addHomeActivity(new HActivity(pattern.getDay(6), homeact, 1, ende_lastTour%1440));
     	}
   	}
   	// In diesem Fall ist die Aktivitätenliste komplett leer - erzeuge eine Heimaktivität für die ganze Woche
