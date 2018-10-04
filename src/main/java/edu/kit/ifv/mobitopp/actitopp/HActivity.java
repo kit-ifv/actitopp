@@ -30,8 +30,9 @@ public class HActivity
   
   private HTrip tripbeforeactivity;
   private HTrip tripafteractivity;
- 
-  private int jointStatus = -1;
+  
+  private JointStatus jointStatus = JointStatus.UNKNOWN;
+  
   private List<ActitoppPerson> jointParticipants  = new ArrayList<ActitoppPerson>();
  
   private byte mobiToppActType		= -1;
@@ -80,7 +81,7 @@ public class HActivity
 	 * @param duration
 	 * @param starttime
 	 */
-	public HActivity(HTour parent, int index, ActivityType type, int duration, int starttime, int jointStatus)
+	public HActivity(HTour parent, int index, ActivityType type, int duration, int starttime, JointStatus jointStatus)
 	{
 	    this(parent, index, type);
 	    setDuration(duration);
@@ -100,7 +101,7 @@ public class HActivity
 	 * @param jointStatus
 	 * @param tripdurationbefore
 	 */
-	public HActivity(HTour parent, int index, ActivityType type, int duration, int starttime, int jointStatus, int tripdurationbefore)
+	public HActivity(HTour parent, int index, ActivityType type, int duration, int starttime, JointStatus jointStatus, int tripdurationbefore)
 	{
 	    this(parent, index, type, duration, starttime, jointStatus);
 	    tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, tripdurationbefore);
@@ -116,7 +117,7 @@ public class HActivity
 	 * @param jointStatus
 	 * @param tripdurationbefore
 	 */
-	public HActivity(HTour parent, int index, int starttime, int jointStatus, int tripdurationbefore)
+	public HActivity(HTour parent, int index, int starttime, JointStatus jointStatus, int tripdurationbefore)
 	{
 	    this(parent, index);
 	    setStartTime(starttime);
@@ -142,7 +143,7 @@ public class HActivity
 	  setActivityType(type);
 		setDuration(duration);
 		setStartTime(starttime);
-		setJointStatus(4);
+		setJointStatus(JointStatus.NOJOINTELEMENT);
 	}
 
 
@@ -215,13 +216,13 @@ public class HActivity
 		this.starttime = starttime;
 	}
 
-	public int getJointStatus() {
-		assert jointStatus!=-1 : "jointStatus not set";
+	public JointStatus getJointStatus() {
+		assert jointStatus!=JointStatus.UNKNOWN : "jointStatus not set";
 		return jointStatus;
 	}
 
-	public void setJointStatus(int jointStatus) {
-		assert jointStatus>=1 && jointStatus<=4 : "invalid value for jointStatus - actual value: " + jointStatus;
+	public void setJointStatus(JointStatus jointStatus) {
+		assert JointStatus.FULLSET.contains(jointStatus) : "invalid value for jointStatus - actual value: " + jointStatus;
 		this.jointStatus = jointStatus;
 	}
 
@@ -839,7 +840,7 @@ public class HActivity
 	
 	public boolean isScheduled()
 	{
-		return durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (Configuration.model_joint_actions ? this.jointStatus!=-1 : true);
+		return durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (Configuration.model_joint_actions ? this.jointStatus!=JointStatus.UNKNOWN : true);
 	}
 	
 	public boolean activitytypeisScheduled()
@@ -958,7 +959,7 @@ public class HActivity
 		jointParticipants.remove(person);
 		
 		// if there is no other jointParticipant left, remove jointStatus of the activity
-		if (jointParticipants.size()==0) setJointStatus(4);
+		if (jointParticipants.size()==0) setJointStatus(JointStatus.NOJOINTELEMENT);
 	}
 	
 	/**

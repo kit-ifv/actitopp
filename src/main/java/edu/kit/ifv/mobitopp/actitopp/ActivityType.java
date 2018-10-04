@@ -65,36 +65,4 @@ public enum ActivityType {
 		}
 		return null;
 	}
-
-	/*
-	
-	public static ActivityType getEnumValue(String name)
-	{
-		ActivityType result=null;
-	
-		switch(name.toUpperCase())
-		{
-			case "W":
-				result = ActivityType.WORK;
-		    break;
-		  case "E":
-		  	result = ActivityType.EDUCATION;
-		    break;
-		  case "L":
-		  	result = ActivityType.LEISURE;
-		    break;
-		  case "S":
-		  	result = ActivityType.SHOPPING;
-		    break; 
-		  case "T":
-		  	result = ActivityType.TRANSPORT;
-		    break; 
-		  default:
-				throw new IllegalArgumentException(name + " not found");
-		}
-		return result;
-	}
-*/
-	
-
 }

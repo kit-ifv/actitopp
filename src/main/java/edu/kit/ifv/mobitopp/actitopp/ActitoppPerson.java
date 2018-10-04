@@ -635,7 +635,7 @@ public class ActitoppPerson
 	public void addJointActivityforConsideration(HActivity act){
 		
 		//make sure the activity is joint
-		assert act.getJointStatus()>=1 && act.getJointStatus()<=3 : "no jointAct!";
+		assert JointStatus.JOINTELEMENTS.contains(act.getJointStatus()) : "no jointAct!";
 		
 		// check if there is already an activitx at the same time
 		boolean activityconflict = false;

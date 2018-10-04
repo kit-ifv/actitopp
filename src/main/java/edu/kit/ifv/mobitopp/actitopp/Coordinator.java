@@ -714,9 +714,9 @@ public class Coordinator
 			// Aktindex der Aktivit�t bestimmen
 			int gemakt_aktindex = gemakt.getIndex();
 			// JointStatus der Aktivit�t bestimmen
-			int gemakt_jointStatus = gemakt.getJointStatus();
+			JointStatus gemakt_jointStatus = gemakt.getJointStatus();
 			
-			assert gemakt_jointStatus>=1 && gemakt_jointStatus<=3 : "keine gemeinsame Aktivit�t in der Liste der gemeinsamen Aktivit�ten!"; 
+			assert JointStatus.JOINTELEMENTS.contains(gemakt_jointStatus) : "keine gemeinsame Aktivit�t in der Liste der gemeinsamen Aktivit�ten!"; 
 			
 			
 	  	/*
@@ -760,11 +760,11 @@ public class Coordinator
 	    		 * 
 	    		 * Entferne die erste Akt zum Tauschen ebenfalls, falls diese zeitlich mit der letzten getauschten Akt �berlagert
 	    		 */
-	    		if ((letzteaktgetauscht.getJointStatus()!=3 && 
+	    		if ((letzteaktgetauscht.getJointStatus()!=JointStatus.JOINTTRIP && 
 	    				HActivity.getTimebetweenTwoActivities(letzteaktgetauscht, gemakt)!=0 && 
 	    				!letzteaktgetauscht.isActivityLastinTour())
 	    				||
-	    				(letzteaktgetauscht.getJointStatus()!=3 && 
+	    				(letzteaktgetauscht.getJointStatus()!=JointStatus.JOINTTRIP && 
 	    				HActivity.getTimebetweenTwoActivities(letzteaktgetauscht, gemakt)<0))	
 	    			possibleact.remove(0);
 	    	}
@@ -812,7 +812,7 @@ public class Coordinator
 	  	 *  					arbeite mit der neuen Liste weiter
 	  	 */
 	  	{
-	    	if ((gemakt_jointStatus==1 || gemakt_jointStatus==3) && gemakt.isActivityFirstinTour())
+	    	if ((gemakt_jointStatus==JointStatus.JOINTTRIPANDACTIVITY || gemakt_jointStatus==JointStatus.JOINTTRIP) && gemakt.isActivityFirstinTour())
 	    	{
 	    		List<HActivity> possibleactersteaktintour = new ArrayList<HActivity>();
 	    		for (HActivity act : possibleact)
@@ -932,7 +932,7 @@ public class Coordinator
 	    	switch(gemakt_jointStatus)
 				{
 					// Weg davor und Aktivit�t werden gemeinsam durchgef�hrt
-					case 1:
+					case JOINTTRIPANDACTIVITY:
 					{			
 						// Akteigenschaften ersetzen
 						actforreplacement.setDuration(gemakt_duration);
@@ -950,7 +950,7 @@ public class Coordinator
 						break;
 					}
 					// Nur Aktivit�t wird gemeinsam durchgef�hrt
-					case 2:
+					case JOINTACTIVITY:
 					{
 						// Akteigenschaften ersetzen
 						actforreplacement.setDuration(gemakt_duration);
@@ -965,7 +965,7 @@ public class Coordinator
 						break;
 					}		
 					// Nur Weg davor wird gemeinsam durchgef�hrt
-					case 3:
+					case JOINTTRIP:
 					{
 						// Akteigenschaften ersetzen
 						actforreplacement.setJointStatus(gemakt_jointStatus);
@@ -977,6 +977,8 @@ public class Coordinator
 						
 						break;
 					}
+				default:
+						throw new RuntimeException();
 				}			
 	  	}
 	  	
@@ -1762,12 +1764,12 @@ public class Coordinator
       	    }
 	
 	          // Status festlegen
-	    	    currentActivity.setJointStatus(Integer.parseInt(step.getAlternativeChosen()));
+	    	    currentActivity.setJointStatus(JointStatus.getTypeFromInt(Integer.parseInt(step.getAlternativeChosen())));
 	    		}
 	  	    else
 	  	    {
 	  	    	// Falls letzte Person, sind keine weiteren gemeinsamen Aktionen m�glich
-	    	    currentActivity.setJointStatus(4);
+	    	    currentActivity.setJointStatus(JointStatus.NOJOINTELEMENT);
 	  	    }
 	      }
 	    }
@@ -2627,7 +2629,7 @@ public class Coordinator
 			 * des Ursprungs einer anderen Person ist)
 			 * 
 			 */
-			if (tmpactivity.getJointStatus()!=4 && tmpactivity.getCreatorPersonIndex()==person.getPersIndex()) 
+			if (tmpactivity.getJointStatus()!=JointStatus.NOJOINTELEMENT && tmpactivity.getCreatorPersonIndex()==person.getPersIndex()) 
 			{
 				
 				// Erstelle Map mit allen anderen Personennummern im Haushalt, die noch nicht modelliert wurden und w�hle zuf�llig eine

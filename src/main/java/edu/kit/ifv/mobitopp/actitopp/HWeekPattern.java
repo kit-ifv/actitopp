@@ -91,7 +91,7 @@ public class HWeekPattern
   	List<HActivity> tmpliste = new ArrayList<HActivity>();
   	for (HActivity act : getAllActivities())
   	{
-  		if (act.getJointStatus()!=4) tmpliste.add(act);
+  		if (JointStatus.JOINTELEMENTS.contains(act.getJointStatus())) tmpliste.add(act);
   	}
   	return tmpliste;
   }

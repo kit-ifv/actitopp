@@ -20,7 +20,7 @@ public class HTrip {
 	public HTrip(HActivity parent, TripStatus type, int tripduration)
 	{
 		assert parent!=null :	"corresponding activity NULL!";
-		assert tripduration>0 :	"duration is 0!";
+		assert tripduration>0 :	"duration is less or equal 0!";
 		
 		this.activity = parent;
 		this.status = type;
@@ -171,9 +171,9 @@ public class HTrip {
 	 * 
 	 * @return
 	 */
-	public int getJointStatus()
+	public JointStatus getJointStatus()
 	{
-		int jointStatus=-1;
+		JointStatus jointStatus= JointStatus.UNKNOWN;
 		
 		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
 		{
@@ -186,10 +186,10 @@ public class HTrip {
 		 */
 		if (status.equals(TripStatus.TRIP_AFTER_ACT))
 		{
-			jointStatus = 4;
+			jointStatus = JointStatus.NOJOINTELEMENT;
 		}
 		
-		assert jointStatus!=-1 : "could not get jointStatus";		
+		assert jointStatus!=JointStatus.UNKNOWN : "could not get jointStatus";		
 		return jointStatus;
 	}
 	
