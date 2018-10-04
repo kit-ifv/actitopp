@@ -98,7 +98,7 @@ public enum HDayParameters {
 	
 	
 	/*
-	 * Tag hat X Aktivitäten
+	 * Tag hat X Aktivitï¿½ten
 	 */
 	taghat1akt("taghat1akt") 
 	{
@@ -150,14 +150,14 @@ public enum HDayParameters {
 	},	
 
 	/*
-	 * Tag hat Aktivitäten eines Typs
+	 * Tag hat Aktivitï¿½ten eines Typs
 	 */	
 	taghattakt("taghattakt") 
 	{
 		@Override
 		public double getAttribute(HDay day) 
 		{
-			return ((day.getTotalAmountOfActivitites('T') > 0) ? 1.0 : 0.0);
+			return ((day.getTotalNumberOfActivitites(ActivityType.TRANSPORT) > 0) ? 1.0 : 0.0);
 		}
 	},	
 	
@@ -170,7 +170,7 @@ public enum HDayParameters {
 		@Override
 		public double getAttribute(HDay day) 
 		{
-			return ((day.getMainTourType() == 'W') ? 1.0 : 0.0);
+			return ((day.getMainTourType() == ActivityType.WORK) ? 1.0 : 0.0);
 		}
 	},		
 	haupttour_education("haupttour_education") 
@@ -178,7 +178,7 @@ public enum HDayParameters {
 		@Override
 		public double getAttribute(HDay day) 
 		{
-			return ((day.getMainTourType() == 'E') ? 1.0 : 0.0);
+			return ((day.getMainTourType() == ActivityType.EDUCATION) ? 1.0 : 0.0);
 		}
 	},	
 	haupttour_leisure("haupttour_leisure") 
@@ -186,7 +186,7 @@ public enum HDayParameters {
 		@Override
 		public double getAttribute(HDay day) 
 		{
-			return ((day.getMainTourType() == 'L') ? 1.0 : 0.0);
+			return ((day.getMainTourType() == ActivityType.LEISURE) ? 1.0 : 0.0);
 		}
 	},	
 	haupttour_shopping("haupttour_shopping") 
@@ -194,7 +194,7 @@ public enum HDayParameters {
 		@Override
 		public double getAttribute(HDay day) 
 		{
-			return ((day.getMainTourType() == 'S') ? 1.0 : 0.0);
+			return ((day.getMainTourType() == ActivityType.SHOPPING) ? 1.0 : 0.0);
 		}
 	},	
 	haupttour_transport("haupttour_transport") 
@@ -202,7 +202,7 @@ public enum HDayParameters {
 		@Override
 		public double getAttribute(HDay day) 
 		{
-			return ((day.getMainTourType() == 'T') ? 1.0 : 0.0);
+			return ((day.getMainTourType() == ActivityType.TRANSPORT) ? 1.0 : 0.0);
 		}
 	},		
 	
@@ -504,17 +504,17 @@ public enum HDayParameters {
 	
 	/**
 	 * 
-	 * Methode zur Rückgabe des EnumValues für einen gegebenen String
+	 * Methode zur Rï¿½ckgabe des EnumValues fï¿½r einen gegebenen String
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static HDayParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitsprüfung
+		// Eindeutigkeitsprï¿½fung
 		checkUniqueness(name);
 		
-		// Rückgabe des passenden Enums
+		// Rï¿½ckgabe des passenden Enums
 		for (HDayParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -525,7 +525,7 @@ public enum HDayParameters {
 	
 	/**
 	 * 
-	 * Methode zur Prüfung der Eindeutigkeit der Enum-Namensvariable
+	 * Methode zur Prï¿½fung der Eindeutigkeit der Enum-Namensvariable
 	 * 
 	 * @param name
 	 */

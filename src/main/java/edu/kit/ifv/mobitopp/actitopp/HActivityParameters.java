@@ -7,14 +7,14 @@ package edu.kit.ifv.mobitopp.actitopp;
 public enum HActivityParameters {
 
 	/*
-	 * Aktivitätenzweck
+	 * Aktivitï¿½tenzweck
 	 */
 	aktzweck_work("aktzweck_work") 
 	{
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getType() == 'W') ? 1.0 : 0.0);
+			return ((act.getActivityType() == ActivityType.WORK) ? 1.0 : 0.0);
 		}
 	},
 	aktzweck_education("aktzweck_education") 
@@ -22,7 +22,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getType() == 'E') ? 1.0 : 0.0);
+			return ((act.getActivityType() == ActivityType.EDUCATION) ? 1.0 : 0.0);
 		}
 	},
 	aktzweck_leisure("aktzweck_leisure") 
@@ -30,7 +30,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getType() == 'L') ? 1.0 : 0.0);
+			return ((act.getActivityType() == ActivityType.LEISURE) ? 1.0 : 0.0);
 		}
 	},
 	aktzweck_shopping("aktzweck_shopping") 
@@ -38,7 +38,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getType() == 'S') ? 1.0 : 0.0);
+			return ((act.getActivityType() == ActivityType.SHOPPING) ? 1.0 : 0.0);
 		}
 	},	
 	aktzweck_transport("aktzweck_transport") 
@@ -46,13 +46,13 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getType() == 'T') ? 1.0 : 0.0);
+			return ((act.getActivityType() == ActivityType.TRANSPORT) ? 1.0 : 0.0);
 		}
 	},
 	
 
 	/*
-	 * Dauer Aktivität
+	 * Dauer Aktivitï¿½t
 	 */
 	dauer_akt("dauer_akt") 
 	{
@@ -184,7 +184,7 @@ public enum HActivityParameters {
 	},
 	
 	/*
-	 * Erste Aktivität Tag/Tour
+	 * Erste Aktivitï¿½t Tag/Tour
 	 */
 	ersteaktamtag("ersteaktamtag") 
 	{
@@ -329,14 +329,14 @@ public enum HActivityParameters {
 	},
 	
 	/*
-	 * Anzahl Aktivitäten = Anzahl Tage mit diesem Zweck
+	 * Anzahl Aktivitï¿½ten = Anzahl Tage mit diesem Zweck
 	 */
 	anzaktwieanztagemitzweck("anzaktwieanztagemitzweck") 
 	{
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return (act.getWeekPattern().countActivitiesPerWeek(act.getType()) == act.getWeekPattern().countDaysWithSpecificActivity(act.getType()) ? 1.0 : 0.0);
+			return (act.getWeekPattern().countActivitiesPerWeek(act.getActivityType()) == act.getWeekPattern().countDaysWithSpecificActivity(act.getActivityType()) ? 1.0 : 0.0);
 		}
 	},
 	
@@ -348,7 +348,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getPerson().getAttributefromMap(act.getType()+"budget_category_alternative") == 1) ? 1.0 : 0.0);
+			return ((act.getPerson().getAttributefromMap(act.getActivityType()+"budget_category_alternative") == 1) ? 1.0 : 0.0);
 		}
 	},
 	wochenzbudget_zweck_kat2("wochenzbudget_zweck_kat2") 
@@ -356,7 +356,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getPerson().getAttributefromMap(act.getType()+"budget_category_alternative") == 2) ? 1.0 : 0.0);
+			return ((act.getPerson().getAttributefromMap(act.getActivityType()+"budget_category_alternative") == 2) ? 1.0 : 0.0);
 		}
 	},
 	wochenzbudget_zweck_kat3("wochenzbudget_zweck_kat3") 
@@ -364,7 +364,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getPerson().getAttributefromMap(act.getType()+"budget_category_alternative") == 3) ? 1.0 : 0.0);
+			return ((act.getPerson().getAttributefromMap(act.getActivityType()+"budget_category_alternative") == 3) ? 1.0 : 0.0);
 		}
 	},
 	wochenzbudget_zweck_kat4("wochenzbudget_zweck_kat4") 
@@ -372,7 +372,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getPerson().getAttributefromMap(act.getType()+"budget_category_alternative") == 4) ? 1.0 : 0.0);
+			return ((act.getPerson().getAttributefromMap(act.getActivityType()+"budget_category_alternative") == 4) ? 1.0 : 0.0);
 		}
 	},
 	wochenzbudget_zweck_kat5("wochenzbudget_zweck_kat5") 
@@ -380,7 +380,7 @@ public enum HActivityParameters {
 		@Override
 		public double getAttribute(HActivity act) 
 		{
-			return ((act.getPerson().getAttributefromMap(act.getType()+"budget_category_alternative") == 5) ? 1.0 : 0.0);
+			return ((act.getPerson().getAttributefromMap(act.getActivityType()+"budget_category_alternative") == 5) ? 1.0 : 0.0);
 		}
 	},	
 	
@@ -495,17 +495,17 @@ public enum HActivityParameters {
 	
 	/**
 	 * 
-	 * Methode zur Rückgabe des EnumValues für einen gegebenen String
+	 * Methode zur Rï¿½ckgabe des EnumValues fï¿½r einen gegebenen String
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static HActivityParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitsprüfung
+		// Eindeutigkeitsprï¿½fung
 		checkUniqueness(name);
 		
-		// Rückgabe des passenden Enums
+		// Rï¿½ckgabe des passenden Enums
 		for (HActivityParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -515,7 +515,7 @@ public enum HActivityParameters {
 	
 	/**
 	 * 
-	 * Methode zur Prüfung der Eindeutigkeit der Enum-Namensvariable
+	 * Methode zur Prï¿½fung der Eindeutigkeit der Enum-Namensvariable
 	 * 
 	 * @param name
 	 */

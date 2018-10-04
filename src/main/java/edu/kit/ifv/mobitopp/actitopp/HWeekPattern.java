@@ -188,7 +188,7 @@ public class HWeekPattern
    * @param activityType
    * @return
    */
-  public int countActivitiesPerWeek(char activityType)
+  public int countActivitiesPerWeek(ActivityType activityType)
   {
   	int ctr=0;
   	for(HDay day : this.getDays())
@@ -197,7 +197,7 @@ public class HWeekPattern
 	    {
 	      for(HActivity act : tour.getActivities())
 	      {
-	        if(act.getType()==activityType)ctr++;;
+	        if(act.getActivityType()==activityType)ctr++;;
 	      }
 	    }
 	  }
@@ -211,7 +211,7 @@ public class HWeekPattern
    * @param activityType
    * @return
    */
-  public int countToursPerWeek(char activityType)
+  public int countToursPerWeek(ActivityType activityType)
   {
   	
   	int ctr=0;
@@ -219,7 +219,7 @@ public class HWeekPattern
 	  {
 	    for(HTour tour : day.getTours())
 	    {
-	      if(tour.getActivity(0).getType()==activityType)ctr++;;
+	      if(tour.getActivity(0).getActivityType()==activityType)ctr++;;
 	    }
 	  }
 	  return ctr;  	
@@ -232,12 +232,12 @@ public class HWeekPattern
    * @param activityType
    * @return
    */
-  public int countDaysWithSpecificActivity(char activityType)
+  public int countDaysWithSpecificActivity(ActivityType activityType)
   {
   	int ctr=0;  	
   	for (HDay currentDay : getDays())
 		{
-			if (currentDay.getTotalAmountOfActivitites(activityType)>0) ctr++; 
+			if (currentDay.getTotalNumberOfActivitites(activityType)>0) ctr++; 
 		}
   	return ctr;
   }
@@ -301,7 +301,7 @@ public class HWeekPattern
 	 * @param act
 	 */
 	public void addHomeActivity(HActivity act){
-		assert act.getType()=='H' : "no home activity";
+		assert act.getActivityType()==ActivityType.HOME : "no home activity";
 		homeactivitities.add(act);
 	}
 	

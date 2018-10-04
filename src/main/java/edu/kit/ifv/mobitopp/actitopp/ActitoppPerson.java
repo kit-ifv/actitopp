@@ -695,7 +695,7 @@ public class ActitoppPerson
       {
         for (HTour tour : day.getTours())
         {
-          if (tour.getActivity(0).getType() == 'W' || tour.getActivity(0).getType() == 'E')
+          if (tour.getActivity(0).getActivityType() == ActivityType.WORK || tour.getActivity(0).getActivityType() == ActivityType.EDUCATION)
         	{
           	return true;
           }

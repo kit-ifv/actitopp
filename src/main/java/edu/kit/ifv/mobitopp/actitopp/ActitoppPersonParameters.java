@@ -337,7 +337,7 @@ public enum ActitoppPersonParameters {
 	},	
 	
 	/*
-	 * Pendeln über 50 Kilometer
+	 * Pendeln ï¿½ber 50 Kilometer
 	 */	
 	pendeln_ueber50km("pendeln_ueber50km") 
 	{
@@ -742,14 +742,14 @@ public enum ActitoppPersonParameters {
 	},	
 	
 	/*
-	 * Properties für Anzahl an Aktivitäten in der Woche
+	 * Properties fï¿½r Anzahl an Aktivitï¿½ten in der Woche
 	 */
 	wakt_prowoche_1bis3("wakt_prowoche_1bis3") 
 	{
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('W');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.WORK);
 			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
 		}
 	},	
@@ -758,7 +758,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('W');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.WORK);
 			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
 		}
 	},		
@@ -767,7 +767,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('E');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.EDUCATION);
 			return ((amountofactivities > 0) ? 1.0 : 0.0);
 		}
 	},	
@@ -776,7 +776,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('E');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.EDUCATION);
 			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
 		}
 	},	
@@ -785,7 +785,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('L');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
 			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
 		}
 	},	
@@ -794,7 +794,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('L');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
 			return ((amountofactivities >= 4 && amountofactivities <= 6) ? 1.0 : 0.0);
 		}
 	},	
@@ -803,7 +803,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('L');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
 			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
 		}
 	},	
@@ -812,7 +812,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('S');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
 			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
 		}
 	},	
@@ -821,7 +821,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('S');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
 			return ((amountofactivities >= 4 && amountofactivities <= 6) ? 1.0 : 0.0);
 		}
 	},	
@@ -830,7 +830,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('S');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
 			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
 		}
 	},	
@@ -839,7 +839,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('T');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
 			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
 		}
 	},	
@@ -848,7 +848,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('T');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
 			return ((amountofactivities >= 4 && amountofactivities <= 6) ? 1.0 : 0.0);
 		}
 	},	
@@ -857,7 +857,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek('T');
+			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
 			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
 		}
 	},	
@@ -867,7 +867,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek('W');
+			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.WORK);
 		}
 	},	
 	anzakt_woche_e("anzakt_woche_e") 
@@ -875,7 +875,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek('E');
+			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.EDUCATION);
 		}
 	},
 	anzakt_woche_l("anzakt_woche_l") 
@@ -883,7 +883,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek('L');
+			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
 		}
 	},
 	anzakt_woche_s("anzakt_woche_s") 
@@ -891,7 +891,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek('S');
+			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
 		}
 	},
 	anzakt_woche_t("anzakt_woche_t") 
@@ -899,7 +899,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek('T');
+			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
 		}
 	},
 	
@@ -911,7 +911,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek('W');
+			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.WORK);
 		}
 	},	
 	anztouren_woche_e("anztouren_woche_e") 
@@ -919,7 +919,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek('E');
+			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.EDUCATION);
 		}
 	},	
 	anztouren_woche_l("anztouren_woche_l") 
@@ -927,7 +927,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek('L');
+			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.LEISURE);
 		}
 	},	
 	anztouren_woche_s("anztouren_woche_s") 
@@ -935,7 +935,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek('S');
+			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.SHOPPING);
 		}
 	},	
 	anztouren_woche_t("anztouren_woche_t") 
@@ -943,19 +943,19 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek('T');
+			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.TRANSPORT);
 		}
 	},	
 	
 	/*
-	 * Anzahl Tage mit spezifischen Aktivitätentypen
+	 * Anzahl Tage mit spezifischen Aktivitï¿½tentypen
 	 */
 	tagemit_wakt_1("tagemit_wakt_1") 
 	{
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 1 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 1 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_wakt_2("tagemit_wakt_2") 
@@ -963,7 +963,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 2 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 2 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_wakt_3("tagemit_wakt_3") 
@@ -971,7 +971,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 3 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 3 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_wakt_4("tagemit_wakt_4") 
@@ -979,7 +979,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 4 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 4 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_wakt_5("tagemit_wakt_5") 
@@ -987,7 +987,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 5 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 5 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_wakt_6("tagemit_wakt_6") 
@@ -995,7 +995,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 6 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 6 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_wakt_7("tagemit_wakt_7") 
@@ -1003,7 +1003,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('W') == 7 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 7 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_eakt_1("tagemit_eakt_1") 
@@ -1011,7 +1011,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 1 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 1 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_eakt_2("tagemit_eakt_2") 
@@ -1019,7 +1019,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 2 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 2 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_eakt_3("tagemit_eakt_3") 
@@ -1027,7 +1027,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 3 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 3 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_eakt_4("tagemit_eakt_4") 
@@ -1035,7 +1035,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 4 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 4 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_eakt_5("tagemit_eakt_5") 
@@ -1043,7 +1043,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 5 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 5 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_eakt_6("tagemit_eakt_6") 
@@ -1051,7 +1051,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 6 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 6 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_eakt_7("tagemit_eakt_7") 
@@ -1059,7 +1059,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('E') == 7 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 7 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_lakt_1("tagemit_lakt_1") 
@@ -1067,7 +1067,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 1 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 1 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_lakt_2("tagemit_lakt_2") 
@@ -1075,7 +1075,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 2 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 2 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_lakt_3("tagemit_lakt_3") 
@@ -1083,7 +1083,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 3 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 3 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_lakt_4("tagemit_lakt_4") 
@@ -1091,7 +1091,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 4 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 4 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_lakt_5("tagemit_lakt_5") 
@@ -1099,7 +1099,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 5 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 5 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_lakt_6("tagemit_lakt_6") 
@@ -1107,7 +1107,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 6 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 6 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_lakt_7("tagemit_lakt_7") 
@@ -1115,7 +1115,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('L') == 7 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 7 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_sakt_1("tagemit_sakt_1") 
@@ -1123,7 +1123,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 1 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 1 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_sakt_2("tagemit_sakt_2") 
@@ -1131,7 +1131,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 2 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 2 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_sakt_3("tagemit_sakt_3") 
@@ -1139,7 +1139,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 3 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 3 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_sakt_4("tagemit_sakt_4") 
@@ -1147,7 +1147,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 4 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 4 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_sakt_5("tagemit_sakt_5") 
@@ -1155,7 +1155,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 5 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 5 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_sakt_6("tagemit_sakt_6") 
@@ -1163,7 +1163,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 6 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 6 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_sakt_7("tagemit_sakt_7") 
@@ -1171,7 +1171,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('S') == 7 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 7 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_takt_1("tagemit_takt_1") 
@@ -1179,7 +1179,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 1 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 1 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_takt_2("tagemit_takt_2") 
@@ -1187,7 +1187,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 2 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 2 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_takt_3("tagemit_takt_3") 
@@ -1195,7 +1195,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 3 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 3 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_takt_4("tagemit_takt_4") 
@@ -1203,7 +1203,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 4 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 4 ? 1.0 : 0.0);
 		}
 	},		
 	tagemit_takt_5("tagemit_takt_5") 
@@ -1211,7 +1211,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 5 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 5 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_takt_6("tagemit_takt_6") 
@@ -1219,7 +1219,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 6 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 6 ? 1.0 : 0.0);
 		}
 	},	
 	tagemit_takt_7("tagemit_takt_7") 
@@ -1227,7 +1227,7 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity('T') == 7 ? 1.0 : 0.0);
+			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 7 ? 1.0 : 0.0);
 		}
 	},	
 	
@@ -1329,7 +1329,7 @@ public enum ActitoppPersonParameters {
 		}
 	},
 	/*
-	 * Standard-Startzeitraum für T1
+	 * Standard-Startzeitraum fï¿½r T1
 	 */
 	std_start_T1_6_7_Uhr("std_start_T1_6_7_Uhr") 
 	{

@@ -141,10 +141,7 @@ public class Configuration {
 /*
  * activity types
  */	
-	
-	public static final ArrayList<Character> ACTIVITY_TYPES = new ArrayList<Character>(Arrays.asList('W', 'E', 'L', 'S', 'T'));
 	public static final ArrayList<Byte> ACTIVITY_TYPES_mobiTopp = new ArrayList<Byte>(Arrays.asList((byte)1,(byte)2,(byte)3,(byte)6,(byte)7,(byte)11,(byte)12,(byte)41,(byte)42,(byte)51,(byte)52,(byte)53,(byte)77));
-	public static final int NUMBER_OF_ACTIVITY_TYPES = ACTIVITY_TYPES.size();
 
 	
 /*

@@ -131,17 +131,17 @@ public class Coordinator
     	placeJointActivitiesIntoPattern();
     }
 
-    executeStep7DC("7A", 'W');
-    executeStep7DC("7B", 'E');
-    executeStep7DC("7C", 'L');
-    executeStep7DC("7D", 'S');
-    executeStep7DC("7E", 'T');
+    executeStep7DC("7A", ActivityType.WORK);
+    executeStep7DC("7B", ActivityType.EDUCATION);
+    executeStep7DC("7C", ActivityType.LEISURE);
+    executeStep7DC("7D", ActivityType.SHOPPING);
+    executeStep7DC("7E", ActivityType.TRANSPORT);
     
-    executeStep7WRD("7K", 'W');
-    executeStep7WRD("7L", 'E');
-    executeStep7WRD("7M", 'L');
-    executeStep7WRD("7N", 'S');
-    executeStep7WRD("7O", 'T');
+    executeStep7WRD("7K", ActivityType.WORK);
+    executeStep7WRD("7L", ActivityType.EDUCATION);
+    executeStep7WRD("7M", ActivityType.LEISURE);
+    executeStep7WRD("7N", ActivityType.SHOPPING);
+    executeStep7WRD("7O", ActivityType.TRANSPORT);
   
     executeStep8A("8A");
     executeStep8_MainAct("8B", "8C");
@@ -294,8 +294,8 @@ public class Coordinator
   	    {
 	  	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivit�ten erreicht sind!
 	  	    if (
-	  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
-	  	    		currentDay.getTotalAmountOfActivitites('W') == 0 &&
+	  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
+	  	    		currentDay.getTotalNumberOfActivitites(ActivityType.WORK) == 0 &&
 	  	    		person.personisAnywayEmployed()
 	  	    		)
 	  	    {
@@ -304,8 +304,8 @@ public class Coordinator
 	  	    
 	  	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivit�ten erreicht sind!
 	  	    if (
-	  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
-	  	    		currentDay.getTotalAmountOfActivitites('E') == 0 &&
+	  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) &&
+	  	    		currentDay.getTotalNumberOfActivitites(ActivityType.EDUCATION) == 0 &&
 	  	    		person.personisinEducation()
 	  	    		)
 	  	    {
@@ -327,7 +327,7 @@ public class Coordinator
    
   	    // Auswahl durchf�hren
   	    step.doStep();
-  	    char activityType = step.getAlternativeChosen().charAt(0);
+  	    ActivityType activityType = ActivityType.getTypeFromChar(step.getAlternativeChosen().charAt(0));
   	    
   	    // DebugLogger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -335,7 +335,7 @@ public class Coordinator
   	    	debugloggers.getLogger(id).put(currentDay, String.valueOf(activityType));
   	    }
     		
-  	    if (activityType!='H')
+  	    if (activityType!=ActivityType.HOME)
         {	
           // F�ge die Tour in das Pattern ein, falls sie noch nicht existiert
   	    	HTour mainTour = null;
@@ -359,7 +359,7 @@ public class Coordinator
   	    	else
   	    	{
   	    		activity = currentDay.getTour(0).getActivity(0);
-  	    		activity.setType(activityType);
+  	    		activity.setActivityType(activityType);
   	    	}
         }
     	}		    
@@ -471,8 +471,8 @@ public class Coordinator
     	    
     	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivit�ten erreicht sind!
     	    if (
-    	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
-    	    		currentDay.getTotalAmountOfActivitites('W') == 0
+    	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
+    	    		currentDay.getTotalNumberOfActivitites(ActivityType.WORK) == 0
     	    		)
     	    {
     	    	step.disableAlternative("W"); 
@@ -480,8 +480,8 @@ public class Coordinator
     	    
     	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivit�ten erreicht sind!
     	    if (
-    	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
-    	    		currentDay.getTotalAmountOfActivitites('E') == 0
+    	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) &&
+    	    		currentDay.getTotalNumberOfActivitites(ActivityType.EDUCATION) == 0
     	    		)
     	    {
     	    	step.disableAlternative("E"); 
@@ -489,14 +489,12 @@ public class Coordinator
   	    
     	    //Auswahl durchf�hren
     	    step.doStep();
-
-          // Speichere gew�hlte Entscheidung f�r weitere Verwendung
-          char chosenActivityType = step.getAlternativeChosen().charAt(0);
+    	    ActivityType activityType = ActivityType.getTypeFromChar(step.getAlternativeChosen().charAt(0));
           
           // DebugLogger schreiben falls aktiviert
     	    if(debugloggers!= null && debugloggers.existsLogger(id))
     	    {
-    	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(chosenActivityType));
+    	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(activityType));
     	    }
           
   	    	HActivity activity = null;
@@ -505,12 +503,12 @@ public class Coordinator
   	    	if (currentDay.existsActivity(currentTour.getIndex(),0))
           {
   	    		activity = currentTour.getActivity(0);
-  	    		activity.setType(chosenActivityType);
+  	    		activity.setActivityType(activityType);
           }
   	    	// Erstelle die Aktivit�t mit entsprechendem Typ, falls Sie noch nicht exisitert
   	    	else
   	    	{ 	    		
-  	    		activity = new HActivity(currentTour, 0, chosenActivityType);
+  	    		activity = new HActivity(currentTour, 0, activityType);
   	    		currentTour.addActivity(activity);
   	    	}
         }
@@ -624,8 +622,8 @@ public class Coordinator
       	    
       	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivit�ten erreicht sind!
       	    if (
-      	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity('W') &&
-      	    		currentDay.getTotalAmountOfActivitites('W') == 0
+      	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
+      	    		currentDay.getTotalNumberOfActivitites(ActivityType.WORK) == 0
       	    		)
       	    {
       	    	step.disableAlternative("W"); 
@@ -633,8 +631,8 @@ public class Coordinator
       	    
       	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivit�ten erreicht sind!
       	    if (
-      	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity('E') &&
-      	    		currentDay.getTotalAmountOfActivitites('E') == 0
+      	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) &&
+      	    		currentDay.getTotalNumberOfActivitites(ActivityType.EDUCATION) == 0
       	    		)
       	    {
       	    	step.disableAlternative("E"); 
@@ -644,13 +642,13 @@ public class Coordinator
       	    step.doStep();
 
             // Aktivit�tstyp festlegen
-      	    char chosenActivityType = step.getAlternativeChosen().charAt(0);
-      	    currentActivity.setType(chosenActivityType);
+      	    ActivityType activityType = ActivityType.getTypeFromChar(step.getAlternativeChosen().charAt(0));
+      	    currentActivity.setActivityType(activityType);
       	    
       	    // DebugLogger schreiben falls aktiviert
       	    if(debugloggers!= null && debugloggers.existsLogger(id))
       	    {
-      	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(chosenActivityType));
+      	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(activityType));
       	    }
           }
         }
@@ -671,7 +669,7 @@ public class Coordinator
 	    {
 	    	for (HActivity act : tour.getActivities())
 	      {
-	    		act.calculateAndSetTripTimes();
+	    		act.createTripsforActivity();
 	      }
 	    }
 	  }	
@@ -922,7 +920,7 @@ public class Coordinator
 	    	// Aktivit�teneigenschaften ermitteln
 	    	int gemakt_duration = gemakt.getDuration();
 	    	int gemakt_starttime = gemakt.getStartTime();
-	    	char gemakt_acttype = gemakt.getType(); 		
+	    	ActivityType gemakt_acttype = gemakt.getActivityType(); 		
 	    	int gemakt_creatorPersonIndex = gemakt.getCreatorPersonIndex();		
 	    	
 	    	int gemakt_durationtripbefore = gemakt.getEstimatedTripTimeBeforeActivity();
@@ -939,12 +937,12 @@ public class Coordinator
 						// Akteigenschaften ersetzen
 						actforreplacement.setDuration(gemakt_duration);
 						actforreplacement.setStartTime(gemakt_starttime);
-						actforreplacement.setType(gemakt_acttype);
+						actforreplacement.setActivityType(gemakt_acttype);
 						actforreplacement.setJointStatus(gemakt_jointStatus);
 						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
 						// Wegzeiten aufgrund m�glichen anderen Aktivit�tentyps neu berechnen
-						actforreplacement.calculateAndSetTripTimes();
+						actforreplacement.createTripsforActivity();
 						
 						// Hinweg erzeugen und ersetzen
 						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, TripStatus.TRIP_BEFORE_ACT, gemakt_durationtripbefore));
@@ -957,12 +955,12 @@ public class Coordinator
 						// Akteigenschaften ersetzen
 						actforreplacement.setDuration(gemakt_duration);
 						actforreplacement.setStartTime(gemakt_starttime);
-						actforreplacement.setType(gemakt_acttype);
+						actforreplacement.setActivityType(gemakt_acttype);
 						actforreplacement.setJointStatus(gemakt_jointStatus);
 						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
 						// Wegzeiten aufgrund m�glichen anderen Aktivit�tentyps neu berechnen
-						actforreplacement.calculateAndSetTripTimes();
+						actforreplacement.createTripsforActivity();
 						
 						break;
 					}		
@@ -1014,7 +1012,7 @@ public class Coordinator
 	 * @param id
 	 * @param variablenname
 	 */
-	private void executeStep7DC(String id, char activitytype)
+	private void executeStep7DC(String id, ActivityType activitytype)
 	{
 		// Wird nur ausgef�hrt, wenn es zu dem Aktivit�tentyp auch Aktivit�ten gibt
 	  if (pattern.countActivitiesPerWeek(activitytype)>0)
@@ -1039,7 +1037,7 @@ public class Coordinator
 	  
 	  // special case: if there is exactly no activity allocated for work, than we must set cat to 0
 	  // needed to achieve value for Attribute zeitbudget_work_ueber_kat2
-    if (activitytype=='W' && pattern.countActivitiesPerWeek(activitytype)==0)
+    if (activitytype==ActivityType.WORK && pattern.countActivitiesPerWeek(activitytype)==0)
     {
     	person.addAttributetoMap(activitytype+"budget_category_alternative", 0.0d);
     } 
@@ -1050,7 +1048,7 @@ public class Coordinator
 	 * @param id
 	 * @param activitytype
 	 */
-	private void executeStep7WRD(String id, char activitytype)
+	private void executeStep7WRD(String id, ActivityType activitytype)
     {
 	  	// Wird nur ausgef�hrt, wenn es zu dem Aktivit�tentyp auch Aktivit�ten gibt
 	  	if (pattern.countActivitiesPerWeek(activitytype)>0)
@@ -1181,10 +1179,6 @@ public class Coordinator
 		    	    {
 		    	    	debugloggers.getLogger("meantime").put(currentActivity, String.valueOf(timeCategory));
 		    	    }
-		    	    if(debugloggers!= null && debugloggers.existsLogger("meantime2"))
-		    	    {
-		    	    	debugloggers.getLogger("meantime2").put(currentActivity, String.valueOf(currentActivity.getType()));
-		    	    }
 	    	      	
 	    	      // untere Grenze kann minimal 0 werden
 	    	      int from = Math.max(timeCategory - 1,0);
@@ -1245,7 +1239,7 @@ public class Coordinator
 	    	     */
           	// Objekt basierend auf der gew�hlten Zeitkategorie initialisieren
 			      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-			      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getType(), this);
+			      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getActivityType(), this);
 			      			      
 			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
 			      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
@@ -1357,7 +1351,7 @@ public class Coordinator
 	    	     */
           	// Objekt basierend auf der gew�hlten Zeitkategorie initialisieren
           	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
-  		      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getType(), this);
+  		      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getActivityType(), this);
   		     
 			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
   		      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
@@ -1432,8 +1426,8 @@ public class Coordinator
 	      
 	      // Bestimme erste Tour des Tages und deren Tourtyp
 	      HTour currentTour = currentDay.getFirstTourOfDay();
-	    	char tourtype = currentTour.getActivity(0).getType();
-	      if (tourtype == 'W' || tourtype == 'E')
+	    	ActivityType tourtype = currentTour.getActivity(0).getActivityType();
+	      if (tourtype == ActivityType.WORK || tourtype == ActivityType.EDUCATION)
 	      {
 	      	// AttributeLookup erzeugen
 	    		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
@@ -1609,7 +1603,7 @@ public class Coordinator
 	      double chosenStartCategory = (double) currentTour.getAttributesMap().get("tourStartCat_index");
 	      
 	      // Vorbereitungen und Objekte erzeugen
-	      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int)chosenStartCategory), currentTour.getActivity(0).getType(), this);
+	      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int)chosenStartCategory), currentTour.getActivity(0).getActivityType(), this);
 	      
 	      int[] bounds_mc = calculateStartingBoundsForTours(currentTour, false);
 	      step_wrd.setRangeBounds(bounds_mc[0], bounds_mc[1]);
@@ -1690,7 +1684,7 @@ public class Coordinator
 	    	    // 10T
 	    	    
 	    	    // Vorbereitungen und Objekte erzeugen
-	    	    WRDDefaultModelStep step_wrd = new WRDDefaultModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), currentTour.getActivity(0).getType(), this);
+	    	    WRDDefaultModelStep step_wrd = new WRDDefaultModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), currentTour.getActivity(0).getActivityType(), this);
 	    	    int[] wrdbounds = calculateBoundsForHomeTime(currentTour, false);
 	          step_wrd.setRangeBounds(wrdbounds[0], wrdbounds[1]);
 	          
@@ -2547,7 +2541,7 @@ public class Coordinator
    */
   private void createHomeActivities(List<HActivity> allmodeledActivities)
   {
-  	char homeact = 'H';
+  	ActivityType homeact = ActivityType.HOME;
   	
   	if(allmodeledActivities.size()!=0)
   	{	
@@ -2718,31 +2712,31 @@ public class Coordinator
 	{
 		for (HActivity act : allActivities_inclHome)
 		{
-			switch (act.getType())
+			switch (act.getActivityType())
 			{
-				case 'W':
+				case WORK:
 					//DECISION notwendig - 1 oder 2
 					executeStep98(act, "98C");
 					break;
-				case 'E':
+				case EDUCATION:
 					act.setMobiToppActType((byte) 3);
 					break;
-				case 'S':
+				case SHOPPING:
 					//DECISION notwendig - 11 oder 41 oder 42	
 					executeStep98(act, "98A");
 					break;
-				case 'L':
+				case LEISURE:
 					//DECISION notwendig - 12 oder 51 oder 52 oder 53 oder 77
 					executeStep98(act, "98B");
 					break;
-				case 'T':
+				case TRANSPORT:
 					act.setMobiToppActType((byte) 6);
 					break;
-				case 'H':
+				case HOME:
 					act.setMobiToppActType((byte) 7);
 					break;
 				default:
-					System.err.println("Ung�ltiger Modellaktivit�tentyp");
+					System.err.println("unknown activity type");
 			}
 		}
 	}
@@ -2759,12 +2753,12 @@ public class Coordinator
 	}
 
    
-	public WRDDiscreteDistribution getpersonalWRDdistribution(String id, String categoryName, char activityType)
+	public WRDDiscreteDistribution getpersonalWRDdistribution(String id, String categoryName, ActivityType activityType)
   {
   	return personalWRDDistributions.get(id+categoryName+activityType);
   }
 	
-	public void addpersonalWRDdistribution(String id, String categoryName, char activityType, WRDDiscreteDistribution wrddist)
+	public void addpersonalWRDdistribution(String id, String categoryName, ActivityType activityType, WRDDiscreteDistribution wrddist)
   {
   	personalWRDDistributions.put(id+categoryName+activityType,wrddist);
   }

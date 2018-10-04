@@ -114,7 +114,7 @@ public class CSVExportWriter
 		// abzeit (starttime)
 		rueckgabe += trip.getStartTime() + ";";		
 		// abzeit_woche (starttime_week)
-		rueckgabe += trip.getStartTime_WeekContext() + ";";  
+		rueckgabe += trip.getStartTimeWeekContext() + ";";  
 		// duration
 		rueckgabe += trip.getDuration() + ";";
 		// type of trip
@@ -174,7 +174,7 @@ public class CSVExportWriter
 	
 	private void exportActivityData_singlePerson(ActitoppPerson actperson) throws IOException 
 	{
-		// Füge alle Aktivitäten hinzu
+		// Fï¿½ge alle Aktivitï¿½ten hinzu
 		for (HActivity act : actperson.getWeekPattern().getAllActivities())
 		{
 			if (act.isScheduled())
@@ -188,7 +188,7 @@ public class CSVExportWriter
 
 	/**
 	 * 
-	 * Schreibe Zeile mit Aktivitäteninfos
+	 * Schreibe Zeile mit Aktivitï¿½teninfos
 	 * 
 	 * @param act
 	 * @return
@@ -199,8 +199,8 @@ public class CSVExportWriter
 		String rueckgabe="";
 		
 		/*
-		 * TourINdex und Aktindex für Heimaktivitäten bestimmen
-		 * Falls Tag ein kompletter Heimtag ist, dann wird 0/0 zurückgegeben, ansonsten -99/-99
+		 * TourINdex und Aktindex fï¿½r Heimaktivitï¿½ten bestimmen
+		 * Falls Tag ein kompletter Heimtag ist, dann wird 0/0 zurï¿½ckgegeben, ansonsten -99/-99
 		 */
 		int tmptourindex=0;
 		int tmpaktindex=0;
@@ -233,7 +233,7 @@ public class CSVExportWriter
 		// Dauer
 		rueckgabe += act.getDuration() + ";";
 		// Zweck
-		rueckgabe += act.getType() + ";";
+		rueckgabe += act.getActivityType().getTypeasChar() + ";";
 		// joint Status
 		rueckgabe += (Configuration.model_joint_actions ? act.getJointStatus(): "-99") + "";
 		

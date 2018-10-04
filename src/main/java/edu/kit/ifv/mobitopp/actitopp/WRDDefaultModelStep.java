@@ -11,7 +11,7 @@ public class WRDDefaultModelStep extends AbsHModelStep
 	// category to get a random draw
 	private String category;
 	// activitytype for personal, activity type specific distributions
-	private char activityType;
+	private ActivityType activityType;
 	
 	// Distribution element that is used to pick a random number
 	private WRDDiscreteDistribution wrddist;
@@ -30,7 +30,7 @@ public class WRDDefaultModelStep extends AbsHModelStep
    * @param activityType
    * @param modelCoordinator
    */
-  public WRDDefaultModelStep(String id, String category, char activityType, Coordinator modelCoordinator)
+  public WRDDefaultModelStep(String id, String category, ActivityType activityType, Coordinator modelCoordinator)
   {
     super(id, modelCoordinator);
     
@@ -59,7 +59,7 @@ public class WRDDefaultModelStep extends AbsHModelStep
    */
   public WRDDefaultModelStep(String id, String category, Coordinator modelCoordinator)
   {
-    this(id, category, 'x', modelCoordinator);
+    this(id, category, ActivityType.UNKNOWN, modelCoordinator);
   }
   
   

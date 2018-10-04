@@ -104,7 +104,7 @@ public class HTrip {
 	 * 
 	 * @return
 	 */
-	public int getStartTime_WeekContext()
+	public int getStartTimeWeekContext()
 	{
 		int starttime=-1;
 		
@@ -146,13 +146,13 @@ public class HTrip {
 	 * 
 	 * @return
 	 */
-	public char getType()
+	public ActivityType getType()
 	{
-		char type='x';
+		ActivityType type=ActivityType.UNKNOWN;
 		
 		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
 		{
-			type = activity.getType();
+			type = activity.getActivityType();
 		}
 		
 		/*
@@ -160,10 +160,10 @@ public class HTrip {
 		 */
 		if (status.equals(TripStatus.TRIP_AFTER_ACT))
 		{
-			type = 'H';
+			type = ActivityType.HOME;
 		}
 		
-		assert type!='x' : "could not get TripType";		
+		assert type!=ActivityType.UNKNOWN : "could not get TripType";		
 		return type;
 	}
 	
@@ -197,7 +197,7 @@ public class HTrip {
 	@Override
 	public String toString()
 	{
-		return "trip: start(week): " + getStartTime_WeekContext() + " / end(week): " + getEndTimeWeekContext() + " / duration: " + getDuration();
+		return "trip: start(week): " + getStartTimeWeekContext() + " / end(week): " + getEndTimeWeekContext() + " / duration: " + getDuration();
 	}
 	
 }

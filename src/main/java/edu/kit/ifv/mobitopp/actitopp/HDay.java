@@ -13,7 +13,7 @@ import java.util.Map;
 public class HDay
 {
 	
-	// Enthält alle Attribute, die nicht direkt über Variablen ausgelesen werden können
+	// Enthï¿½lt alle Attribute, die nicht direkt ï¿½ber Variablen ausgelesen werden kï¿½nnen
 	private Map<String, Double> attributes;
 	
 	private HWeekPattern pattern;
@@ -70,7 +70,7 @@ public class HDay
 	
 	/**
 	 * 
-	 * Gibt den Wochentag zurück
+	 * Gibt den Wochentag zurï¿½ck
 	 * 1 - Montag
 	 * 2 - Dienstag
 	 * 3 - Mittwoch
@@ -109,7 +109,7 @@ public class HDay
 		
 		for (HActivity tmpact : getAllActivitiesoftheDay())
 		{
-			result = result + " " + tmpact.getIndex() + " " + tmpact.getType(); 
+			result = result + " " + tmpact.getIndex() + " " + tmpact.getActivityType().getTypeasChar(); 
 			if (tmpact.isActivityLastinTour()) result = result + " //";		
 		}
 		return result;
@@ -129,7 +129,7 @@ public class HDay
   
   /**
    * 
-   * Liste mit allen Akivititäten des Tages
+   * Liste mit allen Akivititï¿½ten des Tages
    * 
    * @return
    */
@@ -145,19 +145,19 @@ public class HDay
     
   /**
    * 
-   * Gibt den Haupttourtyp des Tages zurück
+   * Gibt den Haupttourtyp des Tages zurï¿½ck
    * 
    * @return
    */
-  public char getMainTourType()
+  public ActivityType getMainTourType()
 	{
-		return this.getTour(0).getActivity(0).getType();
+		return this.getTour(0).getActivity(0).getActivityType();
 	}
 
 
 	/**
    * 
-   * Gibt die Anzahl an Aktivitäten zurück - ohne Home-Aktivitäten
+   * Gibt die Anzahl an Aktivitï¿½ten zurï¿½ck - ohne Home-Aktivitï¿½ten
    * 
    * @return
    */
@@ -174,19 +174,19 @@ public class HDay
     
   /**
    * 
-   * Gibt die Anzahl an Aktivitäten eines spezifischen Typs zurück
+   * Gibt die Anzahl an Aktivitï¿½ten eines spezifischen Typs zurï¿½ck
    * 
    * @param acttype
    * @return
    */
-  public int getTotalAmountOfActivitites(char acttype)
+  public int getTotalNumberOfActivitites(ActivityType acttype)
   {
       int sum = 0;
       for(HTour tour : this.tours)
       {
           for(HActivity act : tour.getActivities())
           {
-          	if (act.activitytypeisScheduled() && act.getType()== acttype) sum++;
+          	if (act.activitytypeisScheduled() && act.getActivityType()== acttype) sum++;
           }
       }
       return sum;
@@ -217,7 +217,7 @@ public class HDay
   			index = tour.getIndex();
   		}
   	}
-  	assert index<=0 : "minimaler TourIndex des Tages ist größer 0 - index: " + index;
+  	assert index<=0 : "minimaler TourIndex des Tages ist grï¿½ï¿½er 0 - index: " + index;
   	return index;
   }
   
@@ -233,7 +233,7 @@ public class HDay
   
   /**
    * 
-   * Gibt explizit die Tour mit dem gesuchten Index zurück
+   * Gibt explizit die Tour mit dem gesuchten Index zurï¿½ck
    * 
    * @param index
    * @return
@@ -255,7 +255,7 @@ public class HDay
   
   /**
    * 
-   * Prüft, ob Tour existiert
+   * Prï¿½ft, ob Tour existiert
    * 
    * @param index
    * @return
@@ -278,7 +278,7 @@ public class HDay
   
   /**
    * 
-   * Prüft, ob Aktivität mit dem Tour- und Aktivitätsindex als Objekt existiert
+   * Prï¿½ft, ob Aktivitï¿½t mit dem Tour- und Aktivitï¿½tsindex als Objekt existiert
    * 
    * @param index
    * @return
@@ -303,8 +303,8 @@ public class HDay
   
   /**
    * 
-   * Prüft ob für die Aktivität mit dem Tour- und Aktivitätsindex bereits ein Aktivitätstyp festgelegt wurde.
-   * Falls die Aktivität selbst noch nicht existiert, wird ebenfalls false zurückgegeben
+   * Prï¿½ft ob fï¿½r die Aktivitï¿½t mit dem Tour- und Aktivitï¿½tsindex bereits ein Aktivitï¿½tstyp festgelegt wurde.
+   * Falls die Aktivitï¿½t selbst noch nicht existiert, wird ebenfalls false zurï¿½ckgegeben
    * 
    * @param tourindex
    * @param activityindex
@@ -326,7 +326,7 @@ public class HDay
     
   /**
    * 
-   * Gibt die gesamte Aktivitätszeit aller Touren an diesem Tag zurück
+   * Gibt die gesamte Aktivitï¿½tszeit aller Touren an diesem Tag zurï¿½ck
    * 
    * @return
    */
@@ -342,7 +342,7 @@ public class HDay
   
   /**
    * 
-   * Gibt die gesamte Wegzeit aller Touren an diesem Tag zurück
+   * Gibt die gesamte Wegzeit aller Touren an diesem Tag zurï¿½ck
    * 
    * @return
    */
@@ -359,7 +359,7 @@ public class HDay
    
   /**
    * 
-   * Gibt die Zeit für Touren bis zur letzten Tour des Tages zurück (inkl. default-Trip-Times)
+   * Gibt die Zeit fï¿½r Touren bis zur letzten Tour des Tages zurï¿½ck (inkl. default-Trip-Times)
    * 
    * @param referencePoint
    * @return
@@ -378,7 +378,7 @@ public class HDay
   
   /**
    * 
-   * Gibt die Zeit für Touren bis zur Haupttour zurück (inkl. default-Trip-Times)
+   * Gibt die Zeit fï¿½r Touren bis zur Haupttour zurï¿½ck (inkl. default-Trip-Times)
    * 
    * @param referencePoint
    * @return
@@ -398,7 +398,7 @@ public class HDay
   
   /**
    * 
-   * Gibt die Zeit für Touren bis zur letzten Tour des Tages zurück (reine Aktivitätenzeit)
+   * Gibt die Zeit fï¿½r Touren bis zur letzten Tour des Tages zurï¿½ck (reine Aktivitï¿½tenzeit)
    * 
    * @param referencePoint
    * @return
@@ -417,7 +417,7 @@ public class HDay
   
   /**
    * 
-   * Gibt die Zeit für Touren bis zur Haupttour zurück (reine Aktivitätenzeit)
+   * Gibt die Zeit fï¿½r Touren bis zur Haupttour zurï¿½ck (reine Aktivitï¿½tenzeit)
    * 
    * @param referencePoint
    * @return
@@ -437,7 +437,7 @@ public class HDay
 
   /**
    * 
-   * Gibt den Wochentag als Feldindex zurück
+   * Gibt den Wochentag als Feldindex zurï¿½ck
    * 0 - Montag
    * 1 - Dienstag
    * 2 - Mittwoch
@@ -455,7 +455,7 @@ public class HDay
 	
   /**
 	 * 
-	 * Gibt den vorherigen Tag als Objekt zurück
+	 * Gibt den vorherigen Tag als Objekt zurï¿½ck
 	 * 
 	 * @return
 	 */
@@ -477,7 +477,7 @@ public class HDay
 	
 	/**
 	 * 
-	 * Gibt den folgenden Tag als Objekt zurück
+	 * Gibt den folgenden Tag als Objekt zurï¿½ck
 	 * 
 	 * @return
 	 */
@@ -498,7 +498,7 @@ public class HDay
 	}
 	
 	/**
-	 * @param attributes spezifischesAttribut für Map
+	 * @param attributes spezifischesAttribut fï¿½r Map
 	 */
 	public void addAttributetoMap(String name, Double value) {
 		this.attributes.put(name, value);
@@ -513,7 +513,7 @@ public class HDay
 	}
 
 	/**
-	 * Methode berechnet die Dauern aller Hauptaktivitäten von Touren des Tages
+	 * Methode berechnet die Dauern aller Hauptaktivitï¿½ten von Touren des Tages
 	 * 
 	 * @return
 	 */

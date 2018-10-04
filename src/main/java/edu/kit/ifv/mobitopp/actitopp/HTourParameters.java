@@ -15,7 +15,7 @@ public enum HTourParameters {
 		@Override
 		public double getAttribute(HTour tour) 
 		{
-			return ((tour.getActivity(0).getType() == 'W') ? 1.0 : 0.0);
+			return ((tour.getActivity(0).getActivityType() == ActivityType.WORK) ? 1.0 : 0.0);
 		}
 	},
 	tourtyp_education("tourtyp_education") 
@@ -23,7 +23,7 @@ public enum HTourParameters {
 		@Override
 		public double getAttribute(HTour tour) 
 		{
-			return ((tour.getActivity(0).getType() == 'E') ? 1.0 : 0.0);
+			return ((tour.getActivity(0).getActivityType() == ActivityType.EDUCATION) ? 1.0 : 0.0);
 		}
 	},
 	tourtyp_leisure("tourtyp_leisure") 
@@ -31,7 +31,7 @@ public enum HTourParameters {
 		@Override
 		public double getAttribute(HTour tour) 
 		{
-			return ((tour.getActivity(0).getType() == 'L') ? 1.0 : 0.0);
+			return ((tour.getActivity(0).getActivityType() == ActivityType.LEISURE) ? 1.0 : 0.0);
 		}
 	},
 	tourtyp_shopping("tourtyp_shopping") 
@@ -39,7 +39,7 @@ public enum HTourParameters {
 		@Override
 		public double getAttribute(HTour tour) 
 		{
-			return ((tour.getActivity(0).getType() == 'S') ? 1.0 : 0.0);
+			return ((tour.getActivity(0).getActivityType() == ActivityType.SHOPPING) ? 1.0 : 0.0);
 		}
 	},
 	
@@ -48,7 +48,7 @@ public enum HTourParameters {
 		@Override
 		public double getAttribute(HTour tour) 
 		{
-			return ((tour.getActivity(0).getType() == 'T') ? 1.0 : 0.0);
+			return ((tour.getActivity(0).getActivityType() == ActivityType.TRANSPORT) ? 1.0 : 0.0);
 		}
 	},
 	
@@ -630,7 +630,7 @@ public enum HTourParameters {
 			{
 				 tmptour = tmptour.getPreviousTourinPattern();
 				 if (tmptour==null)	break;
-				 if (tmptour.isFirstTouroftheDay() && (tmptour.getActivity(0).getType()=='W' || tmptour.getActivity(0).getType()=='E'))
+				 if (tmptour.isFirstTouroftheDay() && (tmptour.getActivity(0).getActivityType()==ActivityType.WORK || tmptour.getActivity(0).getActivityType()==ActivityType.EDUCATION))
 				 {
 					 tourgefunden = true;
 				 }
@@ -657,17 +657,17 @@ public enum HTourParameters {
 	
 	/**
 	 * 
-	 * Methode zur Rückgabe des EnumValues für einen gegebenen String
+	 * Methode zur Rï¿½ckgabe des EnumValues fï¿½r einen gegebenen String
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static HTourParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitsprüfung
+		// Eindeutigkeitsprï¿½fung
 		checkUniqueness(name);
 		
-		// Rückgabe des passenden Enums
+		// Rï¿½ckgabe des passenden Enums
 		for (HTourParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -677,7 +677,7 @@ public enum HTourParameters {
 	
 	/**
 	 * 
-	 * Methode zur Prüfung der Eindeutigkeit der Enum-Namensvariable
+	 * Methode zur Prï¿½fung der Eindeutigkeit der Enum-Namensvariable
 	 * 
 	 * @param name
 	 */
