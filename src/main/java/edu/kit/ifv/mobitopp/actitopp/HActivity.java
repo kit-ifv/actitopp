@@ -68,64 +68,9 @@ public class HActivity
 	public HActivity(HTour parent, int index, ActivityType type)
 	{
 	    this(parent, index);
+	    assert type!=ActivityType.UNKNOWN : "unknown activity type!";
 	    setActivityType(type);
-	}  
-	
-	/**
-	 * 
-	 * construtor for activities where only the activity itself is done jointly
-	 *
-	 * @param parent
-	 * @param index
-	 * @param type
-	 * @param duration
-	 * @param starttime
-	 */
-	public HActivity(HTour parent, int index, ActivityType type, int duration, int starttime, JointStatus jointStatus)
-	{
-	    this(parent, index, type);
-	    setDuration(duration);
-	    setStartTime(starttime);
-	    setJointStatus(jointStatus);
-	}  
-	
-	/**
-	 * 
-	 * construtor for activities where the activity itself and the trip to arrive at the place of the activity is done jointly
-	 *
-	 * @param parent
-	 * @param index
-	 * @param type
-	 * @param duration
-	 * @param starttime
-	 * @param jointStatus
-	 * @param tripdurationbefore
-	 */
-	public HActivity(HTour parent, int index, ActivityType type, int duration, int starttime, JointStatus jointStatus, int tripdurationbefore)
-	{
-	    this(parent, index, type, duration, starttime, jointStatus);
-	    tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, tripdurationbefore);
-	}  
-	
-	/**
-	 * 
-	 * construtor for activities where only the trip to arrive at the place of the activity is done jointly
-	 *
-	 * @param parent
-	 * @param index
-	 * @param starttime
-	 * @param jointStatus
-	 * @param tripdurationbefore
-	 */
-	public HActivity(HTour parent, int index, int starttime, JointStatus jointStatus, int tripdurationbefore)
-	{
-	    this(parent, index);
-	    setStartTime(starttime);
-	    setJointStatus(jointStatus);
-	    tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, tripdurationbefore);
-	}  
-	
-	
+	}  	
 
 	/**
 	 * 
