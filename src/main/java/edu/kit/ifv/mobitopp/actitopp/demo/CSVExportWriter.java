@@ -35,10 +35,7 @@ public class CSVExportWriter
 	 */
 	public void exportTripData(HashMap<Integer,?> maptoexport) throws IOException
 	{ 	
-  	exportTripData_header();
-
-//  	if (maptoexport instanceof HashMap<Number, ActiToppHousehold>);
-//TODO Lars fragen! 		
+  	exportTripData_header();	
   	
   	for(Object referenceobject : maptoexport.values())
     {
@@ -118,7 +115,7 @@ public class CSVExportWriter
 		// duration
 		rueckgabe += trip.getDuration() + ";";
 		// type of trip
-		rueckgabe += trip.getType() + ";";
+		rueckgabe += trip.getType().getTypeasChar() + ";";
 		// jointStatus
 		rueckgabe += (Configuration.model_joint_actions ? trip.getJointStatus(): "-99") + "";
 		
