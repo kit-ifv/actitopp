@@ -644,9 +644,9 @@ public class ActitoppPerson
 			if(HActivity.checkActivityOverlapping(act,tmpact))
 			{
 				activityconflict = true;
-				System.err.println("HH" + getHousehold().getHouseholdIndex() + "/P" + getPersIndex() + ": activity was not added as joint acticity due to conflict with existing activity!");
 				if (Configuration.debugenabled)
 				{
+					System.err.println("HH" + getHousehold().getHouseholdIndex() + "/P" + getPersIndex() + ": activity was not added as joint acticity due to conflict with existing activity!");
 					System.err.println("act to add: " + act);
 					System.err.println("existing act: " + tmpact);
 				}

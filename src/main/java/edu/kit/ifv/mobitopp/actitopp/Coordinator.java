@@ -798,7 +798,7 @@ public class Coordinator
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 4");
+	  		if (Configuration.debugenabled) System.err.println("Akt konnte nicht ersetzt werden! Schritt 4");
 	  		gemakt.removeJointParticipant(person);
 	  		break;
 	  	}
@@ -830,7 +830,7 @@ public class Coordinator
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 6");
+	  		if (Configuration.debugenabled) System.err.println("Akt konnte nicht ersetzt werden! Schritt 6");
 	  		gemakt.removeJointParticipant(person);
 	  		break;
 	  	}
@@ -902,7 +902,7 @@ public class Coordinator
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		System.err.println("Akt konnte nicht ersetzt werden! Schritt 9");
+	  		if (Configuration.debugenabled) System.err.println("Akt konnte nicht ersetzt werden! Schritt 9");
 	  		gemakt.removeJointParticipant(person);
 	  		break;
 	  	}

@@ -892,7 +892,7 @@ public class HActivity
 	 */
 	public void addJointParticipant (ActitoppPerson person)
 	{
-			jointParticipants.add(person);
+		jointParticipants.add(person);
 	}
 	
 	

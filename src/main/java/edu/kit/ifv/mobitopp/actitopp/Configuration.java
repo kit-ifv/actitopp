@@ -150,7 +150,7 @@ public class Configuration {
 		
 	// activity durations - categories - Lower Bounds
 	public static final int[] ACT_TIME_TIMECLASSES_LB = { 1, 15, 30, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720 };
-	// activity durations - categoriesn - Upper Bounds
+	// activity durations - categories - Upper Bounds
 	public static final int[] ACT_TIME_TIMECLASSES_UB = { 14, 29, 59, 119, 179, 239, 299, 359, 419, 479, 539, 599, 659, 719, 1440 };
 	// activity durations - number of categories
 	public static final int NUMBER_OF_ACT_DURATION_CLASSES = ACT_TIME_TIMECLASSES_LB.length;
@@ -176,7 +176,7 @@ public class Configuration {
 	public static final int[] FIRST_TOUR_START_TIMECLASSES_LB = { 0, 120, 240, 360, 420, 480, 540, 600, 660, 780, 900, 960, 1020, 1080, 1200, 1320 };
 	// start time for first tour of the day  - Upper Bounds 
 	public static final int[] FIRST_TOUR_START_TIMECLASSES_UB = { 119, 239, 359, 419, 479, 539, 599, 659, 779, 899, 959, 1019, 1079, 1199, 1319, 1439 };
-	// start time for first tour of the day - nuber of categories
+	// start time for first tour of the day - number of categories
 	public static final int NUMBER_OF_FIRST_START_TIME_CLASSES = FIRST_TOUR_START_TIMECLASSES_LB.length;
 
 	
@@ -189,7 +189,7 @@ public class Configuration {
 	public static final int[] SECTHR_TOUR_START_TIMECLASSES_LB = { 0, 540, 660, 780, 840, 900, 960, 1020, 1080, 1140, 1200};
 	// start time for second and third tour of the day - Upper Bounds 
 	public static final int[] SECTHR_TOUR_START_TIMECLASSES_UB = { 539, 659, 779, 839, 899, 959, 1019, 1079, 1139, 1199, 1439};
-	// start time for second and third tour of the day - nuber of categories
+	// start time for second and third tour of the day - number of categories
 	public static final int NUMBER_OF_SECTHR_START_TIME_CLASSES = SECTHR_TOUR_START_TIMECLASSES_LB.length;
 
 	
