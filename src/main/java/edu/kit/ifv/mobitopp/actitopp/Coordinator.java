@@ -2481,9 +2481,7 @@ public class Coordinator
 	  // Maximaldauer berechnet sich aus verbleibendem Zeitpuffer zwischen Ende der vorhergehenden Tour und dem Endzeitpunkt des Tages - verbleibende Tour/Wegzeiten 
 	  upperbound = starttime_nexttourscheduled - tmptourdurations - tourday.getTour(tour.getIndex()-1).getEndTime();
 	  if (upperbound>1439) upperbound=1439;
-	  
-	  assert upperbound!=-1 : "Konnte UpperBound nicht bestimmen!";
-	        
+	
 	  // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
 	  if (upperbound<lowerbound)
 	  {
