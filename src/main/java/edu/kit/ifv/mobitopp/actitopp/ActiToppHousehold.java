@@ -245,7 +245,7 @@ public class ActiToppHousehold {
 	    {
 	      try
 	      {
-					// stores the modeling ordner of persons within the household
+					// stores the modeling order of persons within the household
 					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
 					
 	    		// generates week schedule

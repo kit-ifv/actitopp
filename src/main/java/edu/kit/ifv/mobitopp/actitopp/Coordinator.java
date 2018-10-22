@@ -2534,32 +2534,29 @@ public class Coordinator
 
 	/**
    * 
-   * Methode erzeugt Home-Aktivit�ten zwischen den Touren
+   * method to create home activities between two tours
    * 
    * @param allmodeledActivities
    * @throws InvalidPersonPatternException
    */
-  private void createHomeActivities(List<HActivity> allmodeledActivities)
+  private void createHomeActivities(List<HActivity> allmodeledActivities) throws InvalidPatternException 
   {
   	ActivityType homeact = ActivityType.HOME;
   	
   	if(allmodeledActivities.size()!=0)
   	{	
-    	// Erstelle zun�chst eine Home-Aktivit�t vor Beginn der ersten Tour
+    	// create home activity before starting the first tour
     	int duration1 = allmodeledActivities.get(0).getTripStartTimeBeforeActivityWeekContext();
 
-    	// Es muss immer eine H-Akt zu Beginn m�glich sein
-    	assert duration1>0 : "Fehler - keine Home-Aktivit�t zu Beginn m�glich!";
-    	if (duration1>0)
-    	{
-    		pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, duration1, 0));
-    	}
+    	//assert duration1>0 : "person error - no home activity possible at beginning of the week!";
+    	if (duration1<=0) throw new InvalidPatternException("person",this.pattern,"person error - no home activity possible at beginning of the week!");
     	
-    	// Durchlaufe alle Aktivit�ten in der Woche - bis auf die letzte
+    	pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, duration1, 0));
+    	    	
+    	// loop through all activities and create home activities after last activity in a tour
     	for (int i=0; i<allmodeledActivities.size()-1; i++)
     	{
     		HActivity act = allmodeledActivities.get(i);
-    		// Wenn Aktivit�t die letzte der Tour ist, erzeuge Heimaktivit�t
     		if (act.isActivityLastinTour())
     		{
     			HTour acttour = act.getTour();
@@ -2568,42 +2565,40 @@ public class Coordinator
     			int ende_tour = acttour.getEndTimeWeekContext();
     			int start_next_tour = nexttour.getStartTimeWeekContext();
     			
-    			// Bestimme Puffer
+    			// calculate buffer
     			int duration2 = start_next_tour - ende_tour;
    			
-    			assert duration2>0 : "Fehler - keine Home-Aktivit�t nach Ende der Tour m�glich! - " + start_next_tour + " // " + ende_tour;
-    			// Bestimme zugeh�rigen Tag zu der Heimaktivit�t
+    			//assert (duration2>0) : "person error - no home activity possible after end of the tour! - " + start_next_tour + " // " + ende_tour;
+    			if (duration2<=0) throw new InvalidPatternException("person",this.pattern,"person error - no home activity possible after end of the tour! - " + start_next_tour + " // " + ende_tour);
+    			// get corresponding day for home activity
     			int day = (int) ende_tour/1440;
-    			int startzeit = ende_tour%1440;
-    			// Sonderbehandlung f�r Heim-Aktivit�ten, die nach dem 7. Tag um 0 Uhr liegen. Diese werden dem letzten Tag zugeordnet.
+    			int starttime = ende_tour%1440;
+
+    			// if an activity start after end of day 7, the activity will still be part of day 7 since there is no day 8 modeled
     			if (day==7)
     			{
     				day=6;
-    				startzeit = startzeit+1440; 
+    				starttime = starttime+1440; 
     			}
-    			// F�ge Heimaktivit�t in Liste hinzu
-    			//TODO Falsche Zuordnung von Heimaktivit�ten, die zwischen 0 und 3 Uhr des Folgetages beginnen! bzw. nach den 7 Tagen stattfinden!
-    			if (duration2>0)
-    			{
-    				pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration2, startzeit));
-    			}
+    			// add home activity
+    			pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration2, starttime));
     		}
     	}
     	
-    	// Pr�fe, wieviel Zeit nach der letzten Aktivit�t noch f�r die Heim-Aktivit�t ist
+    	// check the remaining time after the last activity of the week
     	HActivity lastact = allmodeledActivities.get(allmodeledActivities.size()-1);
     	int ende_lastTour = lastact.getTour().getEndTimeWeekContext();
     	if (ende_lastTour<10080)
     	{
-    		// Bestimme Puffer
+    		// calculate buffer
     		int duration3 = 10080 - ende_lastTour;
-    		// Bestimme zugeh�rigen Tag zu der Heimaktivit�t
+    		// get corresponding day for home activity
     		int day = (int) ende_lastTour/1440;
-    		// F�ge Heimaktivit�t in Liste hinzu
+    		// add home activity
     		pattern.addHomeActivity(new HActivity(pattern.getDay(day), homeact, duration3, ende_lastTour%1440));
     	}
   	}
-  	// In diesem Fall ist die Aktivit�tenliste komplett leer - erzeuge eine Heimaktivit�t f�r die ganze Woche
+  	// otherwise the activity list is empty - generate home activity for the whole week
     else
     {
     	pattern.addHomeActivity(new HActivity(pattern.getDay(0), homeact, 10080, 0));
