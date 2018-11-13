@@ -67,7 +67,10 @@ public enum ActitoppPersonParameters {
 		@Override
 		public double getAttribute(ActitoppPerson actitoppPerson) 
 		{
-			return ((actitoppPerson.getEmployment() == 3) ? 1.0 : 0.0);
+			int employmentType = actitoppPerson.getEmployment();
+	    double returnvalue = 0.0;
+	    if (employmentType == 3 || employmentType == 6) returnvalue = 1.0;
+	    return returnvalue;
 		}
 	},
 	beruf_schueler("beruf_schueler") 
