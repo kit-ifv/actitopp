@@ -23,6 +23,7 @@ The following input variables for actiTopp are expected in the following order a
 	3 - not occupied
 	4 - student (school or university)
 	5 - worker in vocational program 
+	6 - housewife, househusband
 	7 - retired person / pensioner
 6. gender type
 	Coding:
