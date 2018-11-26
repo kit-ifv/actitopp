@@ -34,6 +34,7 @@ public class CSVDCModelInformationLoader
       while ((line = inRead.readLine()) != null)
       {
         String paramName = "";
+        String paramvalue = "";
         boolean in = false;
         boolean alt = false;
 
@@ -47,17 +48,13 @@ public class CSVDCModelInformationLoader
         paramName = splitted[0];
         
         if (splitted[1].equals("yes"))	in = true;
-        /*
-         * splitted[2] contains outParamInformation - not used anymore
-         * Tim (29.08.2018)
-         */
-        // if (splitted[2].equals("yes"))	out = true;
-        if (splitted[3].equals("yes"))	alt = true;
+        if (splitted[2].equals("yes"))	alt = true;
 
         if (in)
         {
-            assert (splitted[4].equals("default") || splitted[4].equals("person") || splitted[4].equals("day") || splitted[4].equals("tour") || splitted[4].equals("activity")) : "wrong Reference Value for InputParamMap - " + splitted[1] + " - " + splitted[4] + " - SourceLocation: " + input;
-            paramNamesContexts.put(paramName,splitted[4]);
+        	paramvalue = splitted[3];
+          assert (paramvalue.equals("default") || paramvalue.equals("person") || paramvalue.equals("day") || paramvalue.equals("tour") || paramvalue.equals("activity")) : "wrong Reference Value for InputParamMap - " + paramName + " - " + paramvalue + " - SourceLocation: " + input;
+          paramNamesContexts.put(paramName,paramvalue);
         }
 
         if (alt)	alternativesList.add(paramName);

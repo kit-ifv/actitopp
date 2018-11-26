@@ -54,14 +54,13 @@ public class CSVDCParameterLoader
         
         String[] splitted = line.split(";");
         
-        String parameterName = splitted[1];
-        //String alternativeNr = splitted[2];
-        String alternativeName = splitted[3];
+        String parameterName = splitted[0];
+        String alternativeName = splitted[1];
         double parameterValue = 0d;
         NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
         try
         {
-          parameterValue = nf.parse(splitted[4]).doubleValue();
+          parameterValue = nf.parse(splitted[2]).doubleValue();
         }
         catch (ParseException e)
         {
