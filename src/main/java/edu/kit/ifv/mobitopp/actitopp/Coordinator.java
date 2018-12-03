@@ -132,16 +132,19 @@ public class Coordinator
     }
 
     executeStep7DC("7A", ActivityType.WORK);
-    executeStep7DC("7B", ActivityType.EDUCATION);
-    executeStep7DC("7C", ActivityType.LEISURE);
-    executeStep7DC("7D", ActivityType.SHOPPING);
-    executeStep7DC("7E", ActivityType.TRANSPORT);
+    executeStep7WRD("7B", ActivityType.WORK);
     
-    executeStep7WRD("7K", ActivityType.WORK);
-    executeStep7WRD("7L", ActivityType.EDUCATION);
-    executeStep7WRD("7M", ActivityType.LEISURE);
-    executeStep7WRD("7N", ActivityType.SHOPPING);
-    executeStep7WRD("7O", ActivityType.TRANSPORT);
+    executeStep7DC("7C", ActivityType.EDUCATION);
+    executeStep7WRD("7D", ActivityType.EDUCATION);
+    
+    executeStep7DC("7E", ActivityType.LEISURE);
+    executeStep7WRD("7F", ActivityType.LEISURE);
+    
+    executeStep7DC("7G", ActivityType.SHOPPING);
+    executeStep7WRD("7H", ActivityType.SHOPPING);
+    
+    executeStep7DC("7I", ActivityType.TRANSPORT);
+    executeStep7WRD("7J", ActivityType.TRANSPORT);
   
     executeStep8A("8A");
     executeStep8_MainAct("8B", "8C");
@@ -156,10 +159,7 @@ public class Coordinator
     
     executeStep10("10M","10N", 1);
     executeStep10("10O","10P", 2);
-    /*
-     * Tim (27.08.2018): Schritt 10Q,R abgeschaltet. Startzeit wird �ber Heimzeit in 110S,T bestimmt.
-    executeStep10("10Q","10R", 3);
-    */
+
     executeStep10ST();
     
     if (Configuration.model_joint_actions) 

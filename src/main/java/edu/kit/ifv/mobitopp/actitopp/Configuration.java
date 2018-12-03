@@ -75,10 +75,10 @@ public class Configuration {
   	dcsteps.add("6A");
   	
   	dcsteps.add("7A");
-  	dcsteps.add("7B");
   	dcsteps.add("7C");
-  	dcsteps.add("7D");
   	dcsteps.add("7E");
+  	dcsteps.add("7G");
+  	dcsteps.add("7I");
   	
   	dcsteps.add("8A");
   	dcsteps.add("8B");
@@ -90,7 +90,6 @@ public class Configuration {
   	dcsteps.add("10A");
   	dcsteps.add("10M");
   	dcsteps.add("10O");
-  	dcsteps.add("10Q");
   	dcsteps.add("10S");
   	/*"10B", "10D", "10G", "10J",*/ /*Stufe 10B-J are no longer included since actiTopp version 1.4 */
   	
@@ -109,11 +108,11 @@ public class Configuration {
   static
   {
   	wrdsteps = new HashMap<String, Integer>();
-  	wrdsteps.put("7K", 8);
-  	wrdsteps.put("7L", 5);
-  	wrdsteps.put("7M", 5);
-  	wrdsteps.put("7N", 4);
-  	wrdsteps.put("7O", 3);
+  	wrdsteps.put("7B", 8);
+  	wrdsteps.put("7D", 5);
+  	wrdsteps.put("7F", 5);
+  	wrdsteps.put("7H", 4);
+  	wrdsteps.put("7J", 3);
   	
   	wrdsteps.put("8C", 14);
   	wrdsteps.put("8E", 14);
@@ -121,7 +120,6 @@ public class Configuration {
   	
   	wrdsteps.put("10N", 15);
   	wrdsteps.put("10P", 10);
-  	wrdsteps.put("10R", 10);
   	wrdsteps.put("10T", 9);
   }
   

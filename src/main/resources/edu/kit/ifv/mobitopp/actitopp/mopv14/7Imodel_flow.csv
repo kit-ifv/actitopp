@@ -1,0 +1,12 @@
+paramname;in;alternative;contextIdentifier
+anzakt_woche_w;yes;no;person
+anzakt_woche_s;yes;no;person
+anzakt_woche_t;yes;no;person
+beruf_vollzeit;yes;no;default
+beruf_teilzeit;yes;no;default
+beruf_schueler;yes;no;default
+tagemit_takt_1;yes;no;person
+1;no;yes;person
+2;no;yes;person
+3;no;yes;person
+4;no;yes;person
