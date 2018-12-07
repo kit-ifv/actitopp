@@ -1111,7 +1111,7 @@ public class Coordinator
     	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(step.getAlternativeChosen()));
     	    }
 
-    	    // Eigenschaft abspeichern
+    	    // Save Attribute
     	    if (Configuration.coordinated_modelling && (currentActivity.getActivityType()==ActivityType.WORK || currentActivity.getActivityType()==ActivityType.EDUCATION))
     	    {
     	    	currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
