@@ -14,8 +14,7 @@ public abstract class AbsHModelStep
         this.modelCoordinator = modelCoordinator;
 
     }
-    
-    
+        
     protected abstract int doStep() throws IllegalArgumentException;
 
 }

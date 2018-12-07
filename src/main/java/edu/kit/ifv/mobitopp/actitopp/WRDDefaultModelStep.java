@@ -15,7 +15,10 @@ public class WRDDefaultModelStep extends AbsHModelStep
 	
 	// Distribution element that is used to pick a random number
 	private WRDDiscreteDistribution wrddist;
-		
+	
+	// decision if the distribution should be adapted after drawing 
+	private boolean modifydistribution = false;
+			
 	// element that is finally chosen based on weighted random draw
   private int chosenDistributionElement;
        
@@ -70,7 +73,7 @@ public class WRDDefaultModelStep extends AbsHModelStep
     // pick a random number within the given boundaries
     chosenDistributionElement = wrddist.getRandomPickFromDistribution(this.lowerBoundLimiter, this.upperBoundLimiter, modelCoordinator.getRandomGenerator());
         
-    if(Configuration.coordinated_modelling)
+    if(modifydistribution)
     {
     	wrddist.modifydistributionelement(chosenDistributionElement);
     }     
@@ -104,5 +107,10 @@ public class WRDDefaultModelStep extends AbsHModelStep
   {
     return chosenDistributionElement;
   }  
+  
+	public void setModifydistribution(boolean modifydistribution) 
+	{
+		this.modifydistribution = modifydistribution;
+	}
 
 }

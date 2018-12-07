@@ -1112,7 +1112,7 @@ public class Coordinator
     	    }
 
     	    // Eigenschaft abspeichern
-    	    if (Configuration.coordinated_modelling)
+    	    if (Configuration.coordinated_modelling && (currentActivity.getActivityType()==ActivityType.WORK || currentActivity.getActivityType()==ActivityType.EDUCATION))
     	    {
     	    	currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
     	    }
@@ -1245,6 +1245,9 @@ public class Coordinator
 			      			      
 			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
 			      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
+			      
+			      // Bestimme, ob Verteilung danach modifiziert wird für Stabilität
+			      if (currentActivity.getAttributesMap().get("standarddauer") == 1.0d) step_wrd.setModifydistribution(true);
 			      
 			      // Wahlentscheidung durchf�hren
 			      step_wrd.doStep();
