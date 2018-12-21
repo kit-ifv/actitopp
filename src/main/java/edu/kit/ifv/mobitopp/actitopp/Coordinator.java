@@ -2742,12 +2742,12 @@ public class Coordinator
 	
 	public ModelFileBase getFileBase()
 	{
-	    return fileBase;
+    return fileBase;
 	}
 	
 	public RNGHelper getRandomGenerator()
 	{
-	    return randomgenerator;
+    return randomgenerator;
 	}
 
    
