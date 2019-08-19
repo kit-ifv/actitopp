@@ -115,6 +115,22 @@ public class ModelFileBase
 				modelInformationDCsteps.put(s, modelStep);
 			}
     }
+    
+    // input information for detailed purpose modeling
+    for (String s : Configuration.dcsteps_purposes)
+    {
+      String sourceLocation = Configuration.parameterset_purposes + "/" + s + "model_flow.csv";
+      CSVDCModelInformationLoader loader = new CSVDCModelInformationLoader();
+			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
+				
+				// Creates ModelInformationOject
+				DCModelSteplnformation modelStep = new DCModelSteplnformation();
+				// Load ParameterNames, Contexts and Alternatives
+				loader.loadModelFlowData(input, modelStep);
+				// Adds the modelinformation to the map
+				modelInformationDCsteps.put(s, modelStep);
+			}
+    }
   }
   
   /**
@@ -126,11 +142,25 @@ public class ModelFileBase
 	private void initDCStepParameters() throws IOException
 	{
 		// parameters need to be available for all DC model steps
-    for (String keyString : modelInformationDCsteps.keySet())
+    for (String keyString : Configuration.dcsteps)
     {
       DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
       
       String sourceLocation = Configuration.parameterset + "/"+ keyString +"Params.csv";
+      CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
+      
+			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+			{
+				parameterLoader.loadParameterValues(input, modelstep);		
+			}
+    }
+    
+    // input information for detailed purpose modeling
+    for (String keyString : Configuration.dcsteps_purposes)
+    {
+      DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
+      
+      String sourceLocation = Configuration.parameterset_purposes + "/"+ keyString +"Params.csv";
       CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
       
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 

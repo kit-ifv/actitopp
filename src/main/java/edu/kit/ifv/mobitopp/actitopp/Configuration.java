@@ -26,8 +26,15 @@ public class Configuration {
  */
 	
 	public static final String parameterset = "mopv14";
-	
-	
+
+/*
+ * input parameter set for detailed modeling of activity purposes used by mobitopp (modeling step 98)
+ * 
+ * purposes_stuttgart			= use parameter sets for stuttgart area 
+ * purposes_regiomove			= use parameter sets for regiomove project
+ * 
+ */
+	public static final String parameterset_purposes = "purposes_regiomove";
 	
 /*
  * when modeling a whole week, we need to consider stability aspects in behavior (e.g. leaving the house at the same time every morning).
@@ -95,10 +102,19 @@ public class Configuration {
   	
   	dcsteps.add("11");
   	/* step 11 is available since actiTopp version 1.3 */
-  	
-  	dcsteps.add("98A");
-  	dcsteps.add("98B");
-  	dcsteps.add("98C");
+  }  
+  
+  
+	/*
+	 * steps that use discrete choice modeling
+	 */
+  public static final HashSet<String> dcsteps_purposes;
+  static
+  {
+  	dcsteps_purposes = new HashSet<String>(); 	
+  	dcsteps_purposes.add("98A");
+  	dcsteps_purposes.add("98B");
+  	dcsteps_purposes.add("98C");
   }  
   
   /*

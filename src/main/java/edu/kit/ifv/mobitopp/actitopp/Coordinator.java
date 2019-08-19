@@ -2713,18 +2713,23 @@ public class Coordinator
 			switch (act.getActivityType())
 			{
 				case WORK:
-					//DECISION notwendig - 1 oder 2
 					executeStep98(act, "98C");
 					break;
 				case EDUCATION:
-					act.setMobiToppActType((byte) 3);
+					if (person.getAge()<10) {
+						act.setMobiToppActType((byte) 31);
+					} 
+					else if ((person.getAge()<19)) {
+						act.setMobiToppActType((byte) 32);						
+					} 
+					else {
+						act.setMobiToppActType((byte) 33);
+					}
 					break;
 				case SHOPPING:
-					//DECISION notwendig - 11 oder 41 oder 42	
 					executeStep98(act, "98A");
 					break;
 				case LEISURE:
-					//DECISION notwendig - 12 oder 51 oder 52 oder 53 oder 77
 					executeStep98(act, "98B");
 					break;
 				case TRANSPORT:
