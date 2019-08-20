@@ -13,7 +13,7 @@ import java.util.Map;
 public class HDay
 {
 	
-	// Enth�lt alle Attribute, die nicht direkt �ber Variablen ausgelesen werden k�nnen
+	//stores all attributes that are not directly accessible by variables	
 	private Map<String, Double> attributes;
 	
 	private HWeekPattern pattern;
@@ -23,14 +23,14 @@ public class HDay
    
   /**
    * 
-   * Konstruktor
+   * Constructor
    * 
    * @param parent
    * @param weekday
    */
   public HDay(HWeekPattern parent, int weekday)
   {
-		assert parent != null : "Pattern nicht initialisiert";
+		assert parent != null : "pattern is not initialized";
     this.pattern = parent;
     setWeekday(weekday);       
       
@@ -40,7 +40,7 @@ public class HDay
     
   public HWeekPattern getPattern() 
 	{
-		assert pattern != null : "Pattern nicht initialisiert";
+		assert pattern != null : "pattern is not initialized";
 		return pattern;
 	}
   
@@ -51,46 +51,46 @@ public class HDay
 
   public List<HTour> getTours()
 	{
-		assert tours != null : "Tourliste nicht initilaisiert";
+		assert tours != null : "list of tours is not initialized";
 	  return tours;
 	}
   
   
   public void addTour(HTour tour)
   {
-  	assert tour.getIndex()!=-99 : "Index der Tour nicht initialisiert";
+  	assert tour.getIndex()!=-99 : "index of the tour is not initialized";
   	boolean tourindexexisitiert = false;
   	for (HTour tmptour : tours)
   	{
   		if (tmptour.getIndex() == tour.getIndex()) tourindexexisitiert = true;
   	}
-  	assert !tourindexexisitiert : "Es gibt bereits eine Tour mit diesem Index";
+  	assert !tourindexexisitiert : "a tour using this index already exists";
   	tours.add(tour);
   }
 	
 	/**
 	 * 
-	 * Gibt den Wochentag zur�ck
-	 * 1 - Montag
-	 * 2 - Dienstag
-	 * 3 - Mittwoch
-	 * 4 - Donnerstag
-	 * 5 - Freitag
-	 * 6 - Samstag
-	 * 7 - Sonntag
+	 * returns the weekday number
+	 * 1 - Monday
+	 * 2 - Tuesday
+	 * 3 - Wednesday
+	 * 4 - Thursday
+	 * 5 - Friday
+	 * 6 - Saturday
+	 * 7 - Sunday
 	 * 
 	 * @return
 	 */
 	public int getWeekday() 
 	{
-		assert weekday>=1 && weekday<=7 : "Wochentag nicht im richtigen Bereich - weekday: " + weekday;
-		return weekday;
+		assert this.weekday>=1 && this.weekday<=7 : "week day is out of range - weekday: " + weekday;
+		return this.weekday;
 	}
 
 
 	public void setWeekday(int weekday) 
 	{
-		assert weekday>=1 && weekday<=7 : "Wochentag nicht im richtigen Bereich - weekday: " + weekday;
+		assert weekday>=1 && weekday<=7 : "week day is out of range - weekday: " + weekday;
 		this.weekday = weekday;
 	}
 
@@ -115,24 +115,11 @@ public class HDay
 		return result;
 	}
 	
-	
-  /**
-   * 
-   * Abfrage, ob der Tag ein HomeDay ist
-   * 
-   * @return
-   */
   public boolean isHomeDay()
   {
   	return (getAmountOfTours()==0);
   }
   
-  /**
-   * 
-   * Liste mit allen Akivitit�ten des Tages
-   * 
-   * @return
-   */
   public List<HActivity> getAllActivitiesoftheDay()
   {
   	List<HActivity> allactivities = new ArrayList<HActivity>();
@@ -143,12 +130,6 @@ public class HDay
   	return allactivities;
   }
     
-  /**
-   * 
-   * Gibt den Haupttourtyp des Tages zur�ck
-   * 
-   * @return
-   */
   public ActivityType getMainTourType()
 	{
 		return this.getTour(0).getActivity(0).getActivityType();
@@ -156,8 +137,7 @@ public class HDay
 
 
 	/**
-   * 
-   * Gibt die Anzahl an Aktivit�ten zur�ck - ohne Home-Aktivit�ten
+   * returns the amount of activities without home activities
    * 
    * @return
    */
@@ -171,14 +151,7 @@ public class HDay
       
       return sum;
   }
-    
-  /**
-   * 
-   * Gibt die Anzahl an Aktivit�ten eines spezifischen Typs zur�ck
-   * 
-   * @param acttype
-   * @return
-   */
+   
   public int getTotalNumberOfActivitites(ActivityType acttype)
   {
       int sum = 0;
@@ -202,7 +175,7 @@ public class HDay
   			index = tour.getIndex();
   		}
   	}
-  	assert index>=0 : "maximaler  TourIndex des Tages ist kleiner 0 - index: " + index;
+  	assert index>=0 : "maximum tour index is below 0 - index: " + index;
   	return index;
   }
 
@@ -217,7 +190,7 @@ public class HDay
   			index = tour.getIndex();
   		}
   	}
-  	assert index<=0 : "minimaler TourIndex des Tages ist gr��er 0 - index: " + index;
+  	assert index<=0 : "minimum tour index is over 0 - index: " + index;
   	return index;
   }
   
@@ -233,8 +206,6 @@ public class HDay
   
   /**
    * 
-   * Gibt explizit die Tour mit dem gesuchten Index zur�ck
-   * 
    * @param index
    * @return
    */
@@ -248,14 +219,12 @@ public class HDay
   			indextour = tour;
   		}
   	}
-  	assert indextour != null : "Tour konnte nicht gefunden werden - Index: " + index;
+  	assert indextour != null : "could not determine tour - index: " + index;
   	return indextour;
   }  
   
   
   /**
-   * 
-   * Pr�ft, ob Tour existiert
    * 
    * @param index
    * @return
@@ -277,8 +246,7 @@ public class HDay
   
   
   /**
-   * 
-   * Pr�ft, ob Aktivit�t mit dem Tour- und Aktivit�tsindex als Objekt existiert
+   * check if activity given tour and activity index exists on that day
    * 
    * @param index
    * @return
@@ -302,9 +270,7 @@ public class HDay
   }  
   
   /**
-   * 
-   * Pr�ft ob f�r die Aktivit�t mit dem Tour- und Aktivit�tsindex bereits ein Aktivit�tstyp festgelegt wurde.
-   * Falls die Aktivit�t selbst noch nicht existiert, wird ebenfalls false zur�ckgegeben
+   * check if activity given tour and activity index exists on that day and has a scheduled activity type
    * 
    * @param tourindex
    * @param activityindex
@@ -319,30 +285,28 @@ public class HDay
 
 	public int getAmountOfTours()
   {
-  	assert tours != null : "Tourliste nicht initilaisiert";
-      return tours.size();
+  	assert tours != null : "list of tour is not initialized";
+    return tours.size();
   }
 
     
   /**
-   * 
-   * Gibt die gesamte Aktivit�tszeit aller Touren an diesem Tag zur�ck
+   * returns total activity duration on that day
    * 
    * @return
    */
   public int getTotalAmountOfActivityTime()
   {
-      int totalTime = 0;
-      for(HTour tour: this.tours)
-      {
-          totalTime += tour.getActDuration();
-      }
-      return totalTime;
+    int totalTime = 0;
+    for(HTour tour: this.tours)
+    {
+      totalTime += tour.getActDuration();
+    }
+    return totalTime;
   }
   
   /**
-   * 
-   * Gibt die gesamte Wegzeit aller Touren an diesem Tag zur�ck
+   * returns total trip duration on that day
    * 
    * @return
    */
@@ -351,15 +315,14 @@ public class HDay
     int totalTime = 0;
     for(HTour tour: this.tours)
     {
-        totalTime += tour.getTripDuration();
+      totalTime += tour.getTripDuration();
     }
     return totalTime;
   }
   
    
   /**
-   * 
-   * Gibt die Zeit f�r Touren bis zur letzten Tour des Tages zur�ck (inkl. default-Trip-Times)
+   * returns total tour time (activities + trips) from reference tour until last tour of the day 
    * 
    * @param referencePoint
    * @return
@@ -367,8 +330,7 @@ public class HDay
   public int getTotalAmountOfRemainingTourTime(HTour referencePoint)
   {
     int totalTime = 0;
-    
-    // Starte mit der Referenztour und addiere alle Tourdauern bis zur letzten Tour des Tages
+
     for (int i= referencePoint.getIndex(); i<=getHighestTourIndex(); i++)
   	{
   		totalTime += this.getTour(i).getTourDuration();
@@ -377,8 +339,7 @@ public class HDay
   }
   
   /**
-   * 
-   * Gibt die Zeit f�r Touren bis zur Haupttour zur�ck (inkl. default-Trip-Times)
+   * returns total tour time (activities + trips) from reference tour until main tour of the day 
    * 
    * @param referencePoint
    * @return
@@ -387,7 +348,6 @@ public class HDay
   {
     int totalTime = 0;
 
-    // Starte mit der Referenztour und addiere alle Tourdauern bis zur Haupttour
     for (int i= referencePoint.getIndex(); i<0; i++)
   	{
   		totalTime += this.getTour(i).getTourDuration();
@@ -398,7 +358,7 @@ public class HDay
   
   /**
    * 
-   * Gibt die Zeit f�r Touren bis zur letzten Tour des Tages zur�ck (reine Aktivit�tenzeit)
+   * returns total activity time (without trips) from reference tour until last tour of the day 
    * 
    * @param referencePoint
    * @return
@@ -406,8 +366,7 @@ public class HDay
   public int getTotalAmountOfRemainingActivityTime(HTour referencePoint)
   {
     int totalTime = 0;
-    
-    // Starte mit der Referenztour und addiere alle Aktdauern bis zur letzten Tour des Tages
+
     for (int i= referencePoint.getIndex(); i<=getHighestTourIndex(); i++)
   	{
   		totalTime += this.getTour(i).getActDuration();
@@ -417,7 +376,7 @@ public class HDay
   
   /**
    * 
-   * Gibt die Zeit f�r Touren bis zur Haupttour zur�ck (reine Aktivit�tenzeit)
+   * returns total activity time (without trips) from reference tour until main tour of the day
    * 
    * @param referencePoint
    * @return
@@ -426,7 +385,6 @@ public class HDay
   {
     int totalTime = 0;
 
-    // Starte mit der Referenztour und addiere alle Aktdauern bis zur Haupttour
     for (int i= referencePoint.getIndex(); i<0; i++)
   	{
   		totalTime += this.getTour(i).getActDuration();
@@ -436,15 +394,15 @@ public class HDay
 
 
   /**
+   * returns the weekday index
    * 
-   * Gibt den Wochentag als Feldindex zur�ck
-   * 0 - Montag
-   * 1 - Dienstag
-   * 2 - Mittwoch
-   * 3 - Donnerstag
-   * 4 - Freitag
-   * 5 - Samstag
-   * 6 - Sonntag
+	 * 0 - Monday
+	 * 1 - Tuesday
+	 * 2 - Wednesday
+	 * 3 - Thursday
+	 * 4 - Friday
+	 * 5 - Saturday
+	 * 6 - Sunday
    * 
    * @return
    */
@@ -453,12 +411,6 @@ public class HDay
 		return getWeekday()-1;
 	}
 	
-  /**
-	 * 
-	 * Gibt den vorherigen Tag als Objekt zur�ck
-	 * 
-	 * @return
-	 */
 	public HDay getPreviousDay()
 	{
 		HDay previousDay;
@@ -475,12 +427,6 @@ public class HDay
 		return previousDay;
 	}
 	
-	/**
-	 * 
-	 * Gibt den folgenden Tag als Objekt zur�ck
-	 * 
-	 * @return
-	 */
 	public HDay getNextDay()
 	{
 		HDay nextDay;
@@ -498,7 +444,9 @@ public class HDay
 	}
 	
 	/**
-	 * @param attributes spezifischesAttribut f�r Map
+	 * 
+	 * @param name specific attribute for map
+	 * @param value
 	 */
 	public void addAttributetoMap(String name, Double value) {
 		this.attributes.put(name, value);
@@ -512,11 +460,6 @@ public class HDay
 		return attributes;
 	}
 
-	/**
-	 * Methode berechnet die Dauern aller Hauptaktivit�ten von Touren des Tages
-	 * 
-	 * @return
-	 */
 	public int calculatedurationofmainactivitiesonday()
 	{
 		int totalActivityTime = 0;

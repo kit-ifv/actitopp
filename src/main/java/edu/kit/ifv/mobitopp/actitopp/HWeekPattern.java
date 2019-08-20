@@ -17,7 +17,7 @@ public class HWeekPattern
   
   /**
    * 
-   * Konstruktor
+   * Constructor
    * 
    */
   public HWeekPattern(ActitoppPerson person)

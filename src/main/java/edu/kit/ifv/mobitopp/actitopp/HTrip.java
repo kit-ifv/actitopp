@@ -182,7 +182,6 @@ public class HTrip {
 		
 		/*
 		 * until now, trip after activities are home trips and joint home trips are not yet supported
-		 * 
 		 */
 		if (status.equals(TripStatus.TRIP_AFTER_ACT))
 		{

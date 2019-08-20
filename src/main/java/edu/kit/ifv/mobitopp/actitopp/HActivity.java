@@ -74,7 +74,7 @@ public class HActivity
 
 	/**
 	 * 
-	 * contructor for home activities
+	 * constructor for home activities
 	 * 
 	 * @param parent
 	 * @param ActType
@@ -205,7 +205,7 @@ public class HActivity
 	}
 	
 	/**
-	 * sorts list of activites ascending by week-order start time
+	 * sorts list of activities ascending by week-order start time
    * 
    * @param actList
    */
@@ -236,7 +236,7 @@ public class HActivity
     
   /**
    * 
-   * sorts list of activites ascending by week-order indices
+   * sorts list of activities ascending by week-order indices
    * 
    * @param list
    */
@@ -610,31 +610,21 @@ public class HActivity
 		return getStartTime() + getDuration(); 
 	}
 
-	/**
-	 * @return
-	 */
 	public int getWeekDay()
 	{
 		return getDay().getWeekday();
 	}
 
-	/**
-	 * @return
-	 */
 	public int getDayIndex()
 	{
 		return getDay().getIndex();
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getTourIndex()
 	{
 		return getTour().getIndex();
 	}
 	
-
 	public int getStartTimeWeekContext()
 	{
 		return 1440*getDayIndex() + getStartTime();
@@ -644,30 +634,25 @@ public class HActivity
 	{
 		return getStartTimeWeekContext() + getDuration();
 	}
-
 	
 	public int getTripStartTimeBeforeActivity()
 	{
 		return getTripbeforeactivity().getStartTime();
-		//return getStartTime() - tripbeforeactivity.getDuration();
 	}
 
 	public int getTripStartTimeBeforeActivityWeekContext()
 	{
 		return getTripbeforeactivity().getStartTimeWeekContext();
-		//return getStartTimeWeekContext() - tripbeforeactivity.getDuration();
 	}
 	
 	public int getTripStartTimeAfterActivity()
 	{
 		return getTripafteractivity().getStartTime();
-		//return getEndTime();
 	}
 	
 	public int getTripStartTimeAfterActivityWeekContext()
 	{
 		return getTripafteractivity().getStartTimeWeekContext();
-		//return getEndTimeWeekContext();
 	}
 	
 	/**

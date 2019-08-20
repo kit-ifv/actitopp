@@ -9,16 +9,16 @@ import java.util.Map;
  * 
  * @author Tim Hilgert
  * 
- * Coordinator-Klasse, die die Erstellung der Wochen-Aktivit�tenpl�ne koordiniert.
- * Wird aufgerufen von ActiToppPerson zur Erstellung der Schedules
- *
+ * class to coordinate the modeling of week activity schedules
+ * will be called from {@link ActitoppPerson} to generate schedules
+ * 
  */
 public class Coordinator
 {
 
     ////////////////
     
-    //	VARIABLEN-DEKLARATIONEN
+    //	declaration of variables
     
     //////////////// 
 	
@@ -34,7 +34,7 @@ public class Coordinator
      * - they are dependent from step id, category and activity type
      * 
      * They are needed to store modified distributions after modeling decisions (e.g. when people decide to perform
-     * a 8-hour working acitivity, the distribution element (8 hours) will get a bonus that it is more likely to choose 
+     * a 8-hour working activity, the distribution element (8 hours) will get a bonus that it is more likely to choose 
      * 8 hours again the next time for this person. This ensures better stability of duration and starttime modeling.		
      */
     private HashMap<String, WRDDiscreteDistribution> personalWRDDistributions;
@@ -48,7 +48,7 @@ public class Coordinator
     
     /**
      * 
-     * Konstruktor
+     * Constructor
      * 
      * @param person
      * @param personIndex
@@ -70,7 +70,7 @@ public class Coordinator
     
     /**
      * 
-     * Konstruktor
+     * Constructor including debug-loggers
      * 
      * @param person
      * @param personIndex
@@ -86,15 +86,13 @@ public class Coordinator
     
   /**
    * 
-   * (Main-)Methode zur Koordination der einzelnen Modellschritte
+   * main method to coordinate all model steps
    *
    * @return
    * @throws InvalidPatternException
    */
   public void executeModel() throws InvalidPatternException
   {
-  	
-  	// Durchf�hrung der Modellschritte
   
     if (Configuration.model_joint_actions) 
     {
@@ -125,7 +123,7 @@ public class Coordinator
     
     createTripTimesforActivities();
 
-    // Gemeinsame Aktivit�ten
+    // joint activities
     if (Configuration.model_joint_actions) 
     {
     	placeJointActivitiesIntoPattern();
@@ -165,21 +163,21 @@ public class Coordinator
     if (Configuration.model_joint_actions) 
     {
     	executeStep11("11");
-  		// Bestimme, welche gemeinsamen Wege/Aktivit�ten mit welchen anderen Personen durchgef�hrt werden sollen
+  		// select other persons to join activity or trip
   		selectWithWhomforJointActions();		
     }
     
 					 
-    // Finalisierung der Wochenaktivit�tenpl�ne 
+    // finalizing activity schedules
     
-    // 1) Erstelle eine Liste mit allen Aktivit�ten der Woche
+    // 1) create and sort a list including all modeled activities of the whole week
     List<HActivity> allModeledActivities = pattern.getAllOutofHomeActivities();    	
     HActivity.sortActivityListbyWeekStartTimes(allModeledActivities);
 	
-    // 2) Erzeuge Zuhause-Aktivit�ten zwischen den Touren
+    // 2) create home activities to be performed between tours
     createHomeActivities(allModeledActivities);
     
-    // 3) Wandel die Aktivit�tenzwecke des Modells zur�ck in mobiTopp-Aktivit�tenzwecke
+    // 3) convert actiTopp purpose types to mobiTopp ones
     convertactiToppPurposesTomobiToppPurposeTypes(pattern.getAllActivities());
     
     // DEBUG
@@ -188,52 +186,40 @@ public class Coordinator
     	pattern.printAllActivitiesList();
     }
     
-    // first sanity checks: check for overlapping activities. if found,
-    // throw exception and redo activityweek
+    // first sanity checks: check for overlapping activities. if found, throw exception and redo activityweek
     pattern.weekPatternisFreeofOverlaps();
 
   }
   
   /**
-   * Bestimmt untere Grenzen f�r die Anzahl an Touren und Aktivit�ten an jedem Tag
-   * Basierend auf der Liste gemeinsamer Aktivit�ten wird vorgegeben, wieviele Touren bzw. Aktivit�ten 
-   * an dem jeweiligen Tag mindestens vorhanden sein m�ssen.
+   * select the minimum number of tours and activities for each day
+   * based on the list of known joint activities, the method decides for a minimum number of tours
+   * and activities that are needed to perform these known joint activities
    */
   private void determineMinimumTourActivityBounds()
   {
   	
   	/*
-  	 * Idee:
+  	 * idea:
   	 * 
-  	 * - Bestimme untere Grenzen f�r die Anzahl an Touren und Aktivit�ten an jedem Tag basierend auf der Liste gemeinsamer Aktivit�ten
-  	 * 
-  	 * - Modelliere Anzahl an Touren und Aktivit�ten (siehe Schritte 1-6)
-  	 * 		- Es muss an jedem Tag mit gemeinsamen Aktivit�ten mindestens eine Tour geben!
-  	 * 		- Bei mehr als 2 gemeinsamen Aktivit�ten mindestens 2 Touren!
-  	 * 		- Es gibt f�r Haupt- und Vorheraktivit�tenzahl keine Mindestanzahlen. Aktualisiere die Zahl der bereits modellierten Aktivit�ten
-  	 * 		  und lege die Grenze nur bei den Nachheraktivit�ten fest. Bei mehreren Touren auf jede Tour aufteilen!
-  	 * 
-  	 * - Nach Schritt 6: Aktivit�ten platzieren
+  	 * - decide for a minimum number of tours and activities for each day based on the list of known joint activities
+  	 *
+  	 * - model number of tours and activities (modeling steps 1-6) using the following the following constraints
+  	 * 		- there has to be at least one tour if joint activities or trips exists for the day
+  	 * 		- if there are more than 2 joint actions --> at least two tours
   	 * 
   	 */
-  	
-  	/*
-  	 * Bestimme Mindestzahl an Touren und Aktivit�ten basierend auf den bereits vorhandenen gemeinsamen Aktivit�ten
-  	 */
-  	  	
+
   	for (HActivity act : person.getAllJointActivitiesforConsideration())
   	{
-  		// Z�hle Anzahl der Aktivit�ten hoch
+  		// Count number of activities
   		numberofactsperday_lowerboundduetojointactions[act.getDayIndex()] += 1;
   		
-  		// Bestimme Mindestzahl an Touren
-  		// Bei max. 2 Aktivit�ten nur eine Tour mindestens
+  		// Determine number of tours
   		if (numberofactsperday_lowerboundduetojointactions[act.getDayIndex()] <= 2) 
   		{
   			numberoftoursperday_lowerboundduetojointactions[act.getDayIndex()] = 1;
   		}
-  		//TODO ggf. deaktivieren, da dadurch die Anzahl an Touren zu hoch wird!
-  		// Bei mehr als 2 Aktivit�ten mindestens zwei Touren
   		else
   		{
   			numberoftoursperday_lowerboundduetojointactions[act.getDayIndex()] = 2;
@@ -249,14 +235,14 @@ public class Coordinator
    */
 	private void executeStep1(String id, String variablenname)
 	{
-		// AttributeLookup erzeugen
+		// create attribute lookup
 		AttributeLookup lookup = new AttributeLookup(person);
 		
-    // Step-Objekt erzeugen
+    // create step object
     DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     step.doStep();
     
-    // Ergebnis zu Personen-Map hinzuf�gen
+    // save result
     double decision = Double.parseDouble(step.getAlternativeChosen());
     person.addAttributetoMap(variablenname, decision);
     
@@ -275,16 +261,16 @@ public class Coordinator
     // STEP 2A Main tour and main activity
     for (HDay currentDay : pattern.getDays())
     {
-    	// Schritt wird ausgef�hrt, falls die Hauptaktivit�t noch nicht exisitiert oder noch keinen Aktivit�tstyp hat
+    	// execute step if main activity type does not exist
     	if(!currentDay.existsActivityTypeforActivity(0,0))
     	{
-      	// AttributeLookup erzeugen
+      	// create attribute lookup
     		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
       	
-  	    // Step-Objekt erzeugen
+  	    // create step object
   	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
   	    
-  	    // Falls es schon Touren gibt (aus gemeinsamen Akt), H als Aktivit�tstyp ausschlie�en
+  	    // if there are existing tours (e.g., from joint activities) , disable H as alternative as being at home is no longer a valid alternative
   	    if (currentDay.getAmountOfTours()>0 || numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]>0)
   	    {
   	    	step.disableAlternative("H"); 
@@ -292,17 +278,16 @@ public class Coordinator
   	    
   	    if (Configuration.coordinated_modelling)
   	    {
-	  	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivit�ten erreicht sind!
-	  	    if (
+	  	    // if number of working days is achieved, disable W as alternative
+ 	  	    if (
 	  	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
 	  	    		currentDay.getTotalNumberOfActivitites(ActivityType.WORK) == 0 &&
 	  	    		person.personisAnywayEmployed()
 	  	    		)
 	  	    {
 	  	    	step.disableAlternative("W"); 
-	  	    }
-	  	    
-	  	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivit�ten erreicht sind!
+	  	    }	  	    
+ 	  	    // if number of education days is achieved, disable E as alternative
 	  	    if (
 	  	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) &&
 	  	    		currentDay.getTotalNumberOfActivitites(ActivityType.EDUCATION) == 0 &&
@@ -312,24 +297,22 @@ public class Coordinator
 	  	    	step.disableAlternative("E"); 
 	  	    }
 	  	    
-	  	    // Nutzenbonus f�r Alternative W, falls Person erwerbst�tig und Wochentag
+	  	    // utility bonus for alternative W if person is employed and day is from Monday to Friday
 	  	    if (person.personisAnywayEmployed() && currentDay.getWeekday()<6 && step.alternativeisEnabled("W"))
 	  	    {
 	  	    	step.adaptUtilityFactor("W", 1.3);
 	  	    }
-	  	    
-	  	    // Nutzenbonus f�r Alternative E, falls Person Sch�ler/Student ist und Wochentag
+	  	    // utility bonus for alternative E if person is in Education and day is from Monday to Friday
 	  	    if (person.personisinEducation() && currentDay.getWeekday()<6 && step.alternativeisEnabled("E"))
 	  	    {
 	  	    	step.adaptUtilityFactor("E", 1.3);
 	  	    }
   	    }
    
-  	    // Auswahl durchf�hren
+  	    // make selection
   	    step.doStep();
   	    ActivityType activityType = ActivityType.getTypeFromChar(step.getAlternativeChosen().charAt(0));
   	    
-  	    // DebugLogger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id))
   	    {
   	    	debugloggers.getLogger(id).put(currentDay, String.valueOf(activityType));
@@ -337,7 +320,7 @@ public class Coordinator
     		
   	    if (activityType!=ActivityType.HOME)
         {	
-          // F�ge die Tour in das Pattern ein, falls sie noch nicht existiert
+          // add a new tour into the pattern if not existing
   	    	HTour mainTour = null;
   	    	if (!currentDay.existsTour(0))
           {
@@ -349,7 +332,7 @@ public class Coordinator
   	    		mainTour = currentDay.getTour(0);
   	    	}
   	    	
-  	    	// F�ge die Aktivit�t in das Pattern ein, falls sie noch nicht existiert
+  	    	// add a new activity into the pattern if not existing or set activity type
   	    	HActivity activity = null;
   	    	if (!currentDay.existsActivity(0,0))
           {
@@ -374,60 +357,59 @@ public class Coordinator
 	{
     for (HDay currentDay : pattern.getDays())
     {   	
-    	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+    	// skip day if person is at home
       if (currentDay.isHomeDay())
       {
       	continue;
       }
       
-      // AttributeLookup erzeugen
+      // create attribute lookup
   		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
     	
-	    // Step-Objekt erzeugen
+	    // create step object
 	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    
-	    // Mindesttourzahl festlegen, falls es schon Touren aus gemeinsamen Aktivit�ten gibt
-	    int mindesttourzahl=0;
+	    // initialize minimum number of tours
+	    int minnumberoftours=0;
 	    
-	    // Pr�fe, ob Mindesttourzahl aus lowerBound bereits erreicht wurde
+	    // check if minimum number bound is already achieved
 	    if (currentDay.getAmountOfTours() < numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()])
 	    {
-	    	int verbleibendetouren = numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()] - currentDay.getAmountOfTours();
-	    	// Bei 3A werden verbleibende Touren halbiert, da auch ggf. noch Touren in 3B modelliert werden k�nnen
-	    	if (id.equals("3A")) mindesttourzahl = Math.round(verbleibendetouren/2);
-	    	// 3B bekommt als Mindesttourenzahl alle bis dahin noch verbliebenen Touren
-	    	if (id.equals("3B")) mindesttourzahl = verbleibendetouren;
+	    	int remainingnumberoftours = numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()] - currentDay.getAmountOfTours();
+	    	// Half number of tours for step 3A as some of them will be modeled using step 3B
+	    	if (id.equals("3A")) minnumberoftours = Math.round(remainingnumberoftours/2);
+	    	// set all remaining tours for step 3B
+	    	if (id.equals("3B")) minnumberoftours = remainingnumberoftours;
 	    }  
 	    
-	    // Alternativen limitieren basierend auf Mindestourzahl
-	    step.limitLowerBoundOnly(mindesttourzahl);
+	    // limit alternatives (lower bounds)
+	    step.limitLowerBoundOnly(minnumberoftours);
 	    
-	    // Limitiere die Alternativen nach oben basierend auf dem Ergebnis von Schritt 1k
+	    // limit alternatives (upper bound using result from step 1k)
 	    if (Configuration.coordinated_modelling)
 	    {
-	    	int maxtourzahl=-1;
-	    	if (person.getAttributefromMap("anztourentag_mean")==1.0d) maxtourzahl=1;
-	    	if (person.getAttributefromMap("anztourentag_mean")==2.0d) maxtourzahl=2;
-	    	if (maxtourzahl!=-1) step.limitUpperBoundOnly((maxtourzahl>=mindesttourzahl ? maxtourzahl : mindesttourzahl));
+	    	int maxnumberoftours=-1;
+	    	if (person.getAttributefromMap("anztourentag_mean")==1.0d) maxnumberoftours=1;
+	    	if (person.getAttributefromMap("anztourentag_mean")==2.0d) maxnumberoftours=2;
+	    	if (maxnumberoftours!=-1) step.limitUpperBoundOnly((maxnumberoftours>=minnumberoftours ? maxnumberoftours : minnumberoftours));
 	    }
 	    
 	    
-	    // Entscheidung durchf�hren
+	    // make selection
 	    step.doStep();
 	    
-	    // DebugLogger schreiben falls aktiviert
 	    if(debugloggers!= null && debugloggers.existsLogger(id))
 	    {
 	    	debugloggers.getLogger(id).put(currentDay, String.valueOf(step.getDecision()));
 	    }
             
-      // Erstelle die weiteren Touren an diesem Tag basierend auf der Entscheidung und f�ge Sie in das Pattern ein, falls sie noch nicht existieren
-      for (int j = 1; j <= step.getDecision(); j++)
+      // create tours based on the decision and add them to the pattern
+	    for (int j = 1; j <= step.getDecision(); j++)
       {
       	HTour tour = null;
-      	// 3A - Touren vor der Haupttour
+      	// 3A - tours before main tour
         if (id.equals("3A") && !currentDay.existsTour(-1*j)) tour = new HTour(currentDay, (-1) * j);
-      	// 3B - Touren nach der Haupttour
+      	// 3B - tours after main tour
         if (id.equals("3B") && !currentDay.existsTour(+1*j)) tour = new HTour(currentDay, (+1) * j);        
         
         if (tour!=null) currentDay.addTour(tour);
@@ -448,7 +430,7 @@ public class Coordinator
     // STEP 4A Main activity for all other tours
     for (HDay currentDay : pattern.getDays())
     {
-    	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+    	// skip day if person is at home
     	if (currentDay.isHomeDay())
       {
       	continue;
@@ -457,19 +439,17 @@ public class Coordinator
       for (HTour currentTour : currentDay.getTours())
       {
         /*
-         * Ignoriere Touren, deren Hauptaktivit�t schon festgelegt ist
-         * 	- Hauptouren des Tages (siehe Schritt 2)
-         *  - andere Hauptaktivit�ten, welche �ber gemeinsame Aktivit�ten ins Pattern gekommen sind
+         * ignore tours if main activity purpose is already set
          */
       	if(!currentDay.existsActivityTypeforActivity(currentTour.getIndex(),0))
         {
-        	// AttributeLookup erzeugen
+        	// create attribute lookup
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
         	
-    	    // Step-Objekt erzeugen
+    	    // create step object
     	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     	    
-    	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivit�ten erreicht sind!
+    	    // if number of working days is achieved, disable W as alternative
     	    if (
     	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
     	    		currentDay.getTotalNumberOfActivitites(ActivityType.WORK) == 0
@@ -477,8 +457,7 @@ public class Coordinator
     	    {
     	    	step.disableAlternative("W"); 
     	    }
-    	    
-    	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivit�ten erreicht sind!
+    	    // if number of education days is achieved, disable E as alternative
     	    if (
     	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) &&
     	    		currentDay.getTotalNumberOfActivitites(ActivityType.EDUCATION) == 0
@@ -487,11 +466,10 @@ public class Coordinator
     	    	step.disableAlternative("E"); 
     	    }
   	    
-    	    //Auswahl durchf�hren
+    	    // make selection
     	    step.doStep();
     	    ActivityType activityType = ActivityType.getTypeFromChar(step.getAlternativeChosen().charAt(0));
           
-          // DebugLogger schreiben falls aktiviert
     	    if(debugloggers!= null && debugloggers.existsLogger(id))
     	    {
     	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(activityType));
@@ -499,13 +477,13 @@ public class Coordinator
           
   	    	HActivity activity = null;
   	    	
-  	    	// Falls die Aktivit�t existiert wird nur deren Typ bestimmt
+  	    	// if activity already exits, set activity type only
   	    	if (currentDay.existsActivity(currentTour.getIndex(),0))
           {
   	    		activity = currentTour.getActivity(0);
   	    		activity.setActivityType(activityType);
           }
-  	    	// Erstelle die Aktivit�t mit entsprechendem Typ, falls Sie noch nicht exisitert
+  	    	// otherwise create activity and set activity type
   	    	else
   	    	{ 	    		
   	    		activity = new HActivity(currentTour, 0, activityType);
@@ -524,7 +502,7 @@ public class Coordinator
 	{
     for (HDay currentDay : pattern.getDays())
     {
-    	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+    	// skip day if person is at home
     	if (currentDay.isHomeDay())
       {
       	continue;
@@ -534,53 +512,50 @@ public class Coordinator
       {
       	HTour currentTour = currentDay.getTour(i);
       	
-      	// AttributeLookup erzeugen
+      	// create attribute lookup
     		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
       	
-    	  // Step-Objekt erzeugen
+    	  // create step object
   	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     		
-  	    // Mindesaktzahl festlegen, falls es schon Aktivit�ten aus gemeinsamen Aktivit�ten gibt
-  	    int mindestaktzahl =0;
+  	    // initialize minimum number of activities
+  	    int minimumnumberofactivities =0;
   	    
-  	    // Pr�fe, ob Mindestaktzahl aus lowerBound bereits erreicht wurde
+  	    // check if minimum number bound is already achieved
   	    if (currentDay.getTotalAmountOfActivitites() < numberofactsperday_lowerboundduetojointactions[currentDay.getIndex()])
   	    {
-  	    	// Bestimme noch nicht verplante Aktivit�ten basierend auf Mindestzahl aus gemeinsamen Akt und bereits verplanten
-  	    	int verbleibendeakt = numberofactsperday_lowerboundduetojointactions[currentDay.getIndex()] - currentDay.getTotalAmountOfActivitites();
+  	    	// calculate number of missing activities until bound is achieved
+  	    	int remainingnumberofactivities = numberofactsperday_lowerboundduetojointactions[currentDay.getIndex()] - currentDay.getTotalAmountOfActivitites();
   		
   	    	/*
-  	    	 * Bestimme, wieviele Aktivit�tensch�tzungen in Schritt 5 noch durchgef�hrt werden
-					 *
-  	    	 * Formel: verbleibendenAnzahlanTouren * 2 (wegen 5A und 5B) - 1 (falls es schon Schritt 5B ist und damit 5A schon durchgef�hrt wurde
-  	    	 * verbleibendeAnzahlanTouren =  currentDay.getHighestTourIndex() - aktuellerTourIndex(i) + 1
+  	    	 * calculate number of remaining activity executions of step 5
+  				 *
+  	    	 * Equation: remainingnumberoftours * 2 (because 5A and 5B will be executed for each tour) - 1 (if this is step 5B and 5A is done)
   	    	 */
-  	    	int verbleibendeaktschaetzungen =  2*(currentDay.getHighestTourIndex() - i + 1) - (id.equals("5B") ? 1 : 0);
-  	    	// Bestimme Mindestzahl aufgrund verbleibender Akt im Verh�ltnis zu verbleibenden Sch�tzungen 
-  	    	mindestaktzahl = Math.round(verbleibendeakt/verbleibendeaktschaetzungen);
-  	    	// bei der letzten Tour des Tages und der NACH-Aktivit�tenzahl muss Mindestanzahl zwingend erreicht werden
-  	    	if (id.equals("5B") && currentTour.getIndex() == currentDay.getHighestTourIndex()) mindestaktzahl = verbleibendeakt;
+  	    	int reaminingstepexecutions =  2*(currentDay.getHighestTourIndex() - i + 1) - (id.equals("5B") ? 1 : 0); 
+  	    	minimumnumberofactivities = Math.round(remainingnumberofactivities/reaminingstepexecutions);
+  	    	// if this is the last tour of the day and step 5B, i.e., last executions of step 5 for the day, bound needs to be achieved
+  	    	if (id.equals("5B") && currentTour.getIndex() == currentDay.getHighestTourIndex()) minimumnumberofactivities = remainingnumberofactivities;
   	    }
   	    
-  	    // Alternativen limitieren basierend auf Mindesaktzahl
-  	    step.limitLowerBoundOnly(mindestaktzahl);
+  	    // limit alternatives
+  	    step.limitLowerBoundOnly(minimumnumberofactivities);
   	    
-  	    // Entscheidung durchf�hren
+  	    // make selection
   	    step.doStep();    		
 
-  	    // DebugLogger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id))
   	    {
   	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(step.getDecision()));
   	    }
   	    
-  	    // Erstelle die weiteren Aktivit�ten in dieser Tour basierend auf der Entscheidung und f�ge Sie in das Pattern ein
+  	    // create activities based on the decision and add them to the pattern
         for (int j = 1; j <= step.getDecision(); j++)
         {
         	HActivity act = null;
-        	// 5A - Touren vor der Haupttour
+        	// 5A - activity before main activity
           if (id.equals("5A") && !currentDay.existsActivity(currentTour.getIndex(),-1*j)) act = new HActivity(currentTour, (-1) * j);
-        	// 5B - Touren nach der Haupttour
+        	// 5B - activity after main activity
           if (id.equals("5B") && !currentDay.existsActivity(currentTour.getIndex(),+1*j)) act = new HActivity(currentTour, (+1) * j);
           
           if (act!=null) currentTour.addActivity(act);
@@ -601,7 +576,7 @@ public class Coordinator
     // STEP 6A Non-Main-Activity Type Decision
     for (HDay currentDay : pattern.getDays())
     {
-    	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+    	// skip day if person is at home
     	if (currentDay.isHomeDay())
       {
       	continue;
@@ -614,13 +589,13 @@ public class Coordinator
         	// only use activities whose type has not been decided yet
           if (!currentActivity.activitytypeisScheduled())
           {
-          	// AttributeLookup erzeugen
+          	// create attribute lookup
         		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
           	
-      	    // Step-Objekt erzeugen
+      	    // create step object
       	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
       	    
-      	    // Entferne die Alternative W, falls bereits Anzahl der Tage mit Arbeitsaktivit�ten erreicht sind!
+      	    // if number of working days is achieved, disable W as alternative
       	    if (
       	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
       	    		currentDay.getTotalNumberOfActivitites(ActivityType.WORK) == 0
@@ -629,7 +604,7 @@ public class Coordinator
       	    	step.disableAlternative("W"); 
       	    }
       	    
-      	    // Entferne die Alternative E, falls bereits Anzahl der Tage mit Bildungsaktivit�ten erreicht sind!
+      	    // if number of education days is achieved, disable E as alternative
       	    if (
       	    		person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) &&
       	    		currentDay.getTotalNumberOfActivitites(ActivityType.EDUCATION) == 0
@@ -638,14 +613,13 @@ public class Coordinator
       	    	step.disableAlternative("E"); 
       	    }
     	    
-      	    //Auswahl durchf�hren
+      	    //make selection
       	    step.doStep();
 
-            // Aktivit�tstyp festlegen
+            // set activity type
       	    ActivityType activityType = ActivityType.getTypeFromChar(step.getAlternativeChosen().charAt(0));
       	    currentActivity.setActivityType(activityType);
       	    
-      	    // DebugLogger schreiben falls aktiviert
       	    if(debugloggers!= null && debugloggers.existsLogger(id))
       	    {
       	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(activityType));
@@ -657,9 +631,7 @@ public class Coordinator
 	}
 
 	/**
-	 * 
-	 * Festlegung von Default-Wegzeiten f�r alle Aktivit�ten
-	 * 
+	 * determination of default trip times for all activities
 	 */
 	private void createTripTimesforActivities() 
 	{
@@ -678,57 +650,56 @@ public class Coordinator
 
 
 	/**
-	 * Regelbasiert:
-	 * - Wenn Tourindex der urspr�nglichen Aktivit�t vorhanden ist, dann f�ge Sie in diese Tour ein
-	 * - Wenn Aktindex der ursp�nglichen Aktivit�t in der Tour vorhanden ist, f�ge Sie an dem Platz ein	
+	 * Placing of joint activities (and trips) created by another household member into an existing pattern.
+	 * Replaces an existing activity of the pattern with this joint activity
 	 * 
-	 * - Wenn Tour oder Aktindex noch nicht vorhanden sind, nehme den n�chstgelegenen Index, der noch nicht durch gemeinsame Akt belegt ist
-	 * 		Bsp. einzuf�gende Akt ist 1/1/3, h�chster Index ist aber 1/1/2, dann ersetze Akt 1/1/2 mit der gemeinsamen Akt
-	 * 
-	 * - Zeit�berlappungen beachten! Wenn Liste chronologisch abgearbeitet wird, bestimmt die Position der zuvor eingef�gten Aktivit�t die untere Grenze
-	 * 
-	 * - Gemeinsame Akt mit Typ 1 oder 3 von zuhause aus muss immer erste Akt in Tour sein, auch bei eingef�gter Tour	
-	 * 
+	 * rule-based:
+	 *  - if tour index of the originating activity exist, place it into this tour if possible
+	 *  - if activity index of the originating activity exists, replace this activity if possible
+	 *  
+	 *  - if tour or activity in this tour does not exist, use the nearest exiting activity that is no joint activity
+	 *  example: originating activity is 1/1/3 (day/tour/act). Highest index is 1/1/2, so use this for replacement
+	 *  
+	 *  - consider time overlaps. if list of joint activities is processed one by one, the last processed activity defines
+	 *  	lower temporal bound for the new one.
+	 *  
+	 *  - joint activities of type 1 and type 3 starting at home are only possible as first activity in a tour
+	 *   
 	 * @throws InvalidPatternException
 	 * 
 	 */
 	private void placeJointActivitiesIntoPattern() throws InvalidPatternException
 	{
 		
-	 	List<HActivity> listgemakt = person.getAllJointActivitiesforConsideration();
-		HActivity.sortActivityListbyWeekStartTimes(listgemakt);
+	 	List<HActivity> listjointact = person.getAllJointActivitiesforConsideration();
+		HActivity.sortActivityListbyWeekStartTimes(listjointact);
 	
 		/*
-		 * Aktivit�tenliste in Wochensortierung durchgehen und bestehenden Aktivit�t durch gemeinsame aus der Liste ersetzen
-		 * 
+		 * loop the list in week order and look for an existing activity to be replaced by activity actually processed
 		 */
 		
-		for (int indexinliste=0 ; indexinliste < listgemakt.size(); indexinliste++)
+		for (int indexinliste=0 ; indexinliste < listjointact.size(); indexinliste++)
 		{
-			HActivity gemakt = listgemakt.get(indexinliste);
+			HActivity jointact = listjointact.get(indexinliste);
 			
-			// Indextag der Aktivit�t bestimmen
-			int gemakt_tagindex = gemakt.getDayIndex();
-			// Tourindex der Aktivit�t bestimmen
-			int gemakt_tourindex = gemakt.getTour().getIndex();
-			// Aktindex der Aktivit�t bestimmen
-			int gemakt_aktindex = gemakt.getIndex();
-			// JointStatus der Aktivit�t bestimmen
-			JointStatus gemakt_jointStatus = gemakt.getJointStatus();
+			int jointact_dayindey = jointact.getDayIndex();
+			int jointact_tourindex = jointact.getTour().getIndex();
+			int jointact_actindex = jointact.getIndex();
+			JointStatus jointact_jointStatus = jointact.getJointStatus();
 			
-			assert JointStatus.JOINTELEMENTS.contains(gemakt_jointStatus) : "keine gemeinsame Aktivit�t in der Liste der gemeinsamen Aktivit�ten!"; 
+			assert JointStatus.JOINTELEMENTS.contains(jointact_jointStatus) : "keine gemeinsame Aktivit�t in der Liste der gemeinsamen Aktivit�ten!"; 
 			
 			
 	  	/*
-	  	 * Bestimme m�gliche Aktivit�ten, die ersetzt werden k�nnen
+	  	 * possible activities for replacement
 	  	 */
 			List <HActivity> possibleact = new ArrayList<HActivity>();
 			
 			/*
-			 *  Schritt 1: Alle verf�gbaren Aktivit�ten des Tages
+			 *  Step 1: All available activities of the day
 			 */
 			{
-	    	for (HActivity act : pattern.getDay(gemakt_tagindex).getAllActivitiesoftheDay())
+	    	for (HActivity act : pattern.getDay(jointact_dayindey).getAllActivitiesoftheDay())
 	    	{
 	    		possibleact.add(act);
 	    	}
@@ -736,54 +707,50 @@ public class Coordinator
 			}
 			
 	  	/*
-	  	 *  Schritt 2: 	Bestimme, ob es bereits getauschte Aktivit�ten an diesem Tag gibt. F�ge nur Aktivit�ten, die nach der letzten
-	  	 *  						getauschten liegen in eine neue Liste hinzu und arbeite mit dieser weiter
-	  	 */
+	  	 *  Step 2: Check if there are already joint activities on that day. If yes new joint activities need to be AFTER the last joint activity
+	  	 */  
 	  	{
-	    	HActivity letzteaktgetauscht=null;
+	    	HActivity lastactreplaced=null;
 	    	for (HActivity act : possibleact)
 	    	{
-	    		if ((act.getAttributefromMap("actreplacedbyjointact")!= null ? act.getAttributefromMap("actreplacedbyjointact") : 0) == 1.0) letzteaktgetauscht=act;
+	    		if ((act.getAttributefromMap("actreplacedbyjointact")!= null ? act.getAttributefromMap("actreplacedbyjointact") : 0) == 1.0) lastactreplaced=act;
 	    	}
-	    	if (letzteaktgetauscht!=null)
+	    	if (lastactreplaced!=null)
 	    	{
 	    		List<HActivity> possibleactlaterinweek = new ArrayList<HActivity>();
 	    		for (HActivity act : possibleact)
 	    		{
-	    			if (act.compareTo(letzteaktgetauscht) < 0) possibleactlaterinweek.add(act);
+	    			if (act.compareTo(lastactreplaced) < 0) possibleactlaterinweek.add(act);
 	    		}
 	    		possibleact = possibleactlaterinweek;
 	    		
 	    		/*
-	    		 * Falls die letzte getauschte Akt nicht unmittelbar zeitlich vor der aktuellen liegt, entferne die erste m�gliche Akt zum Tauschen aus
-	    		 * der Liste, damit keine Touren mit L�cken entstehen!
-	    		 * 
-	    		 * Entferne die erste Akt zum Tauschen ebenfalls, falls diese zeitlich mit der letzten getauschten Akt �berlagert
+	    		 * - if the last joint act is not directly before the new activity, replace the first possible act for replacement to avoid temporal gaps
+	    		 * - remove the first possible activity if this will cause time overlaps
 	    		 */
-	    		if ((letzteaktgetauscht.getJointStatus()!=JointStatus.JOINTTRIP && 
-	    				HActivity.getTimebetweenTwoActivities(letzteaktgetauscht, gemakt)!=0 && 
-	    				!letzteaktgetauscht.isActivityLastinTour())
+	    		if ((lastactreplaced.getJointStatus()!=JointStatus.JOINTTRIP && 
+	    				HActivity.getTimebetweenTwoActivities(lastactreplaced, jointact)!=0 && 
+	    				!lastactreplaced.isActivityLastinTour())
 	    				||
-	    				(letzteaktgetauscht.getJointStatus()!=JointStatus.JOINTTRIP && 
-	    				HActivity.getTimebetweenTwoActivities(letzteaktgetauscht, gemakt)<0))	
+	    				(lastactreplaced.getJointStatus()!=JointStatus.JOINTTRIP && 
+	    				HActivity.getTimebetweenTwoActivities(lastactreplaced, jointact)<0))	
 	    			possibleact.remove(0);
 	    	}
 	  	}
 	  	
 	  	/*
-	  	 * Schritt 3:	Bestimme, ob es weitere gemeinsame Aktivit�ten an dem Tag gibt, die noch getauscht werden m�ssen
-	  	 * 						Entferne entsprechend die letzten X Eintr�ge aus der Liste m�glicher Aktivit�ten, damit diese noch Platz finden!
-	  	 */
+	  	 * step 3: 	check for further joint activities on that day and remove the last X activities of that day for replacement 
+	  	 */ 
 	  	{
-		  	int anzweiteregemaktamtag=0;
-	    	for (int i=indexinliste+1; i<listgemakt.size(); i++)
+		  	int furtherjointactonday=0;
+	    	for (int i=indexinliste+1; i<listjointact.size(); i++)
 	    	{
-	    		HActivity act = listgemakt.get(i);
-	    		if (act.getDayIndex()== gemakt_tagindex) anzweiteregemaktamtag += 1;
+	    		HActivity act = listjointact.get(i);
+	    		if (act.getDayIndex()== jointact_dayindey) furtherjointactonday += 1;
 	    	}
-	    	if (anzweiteregemaktamtag>0)
+	    	if (furtherjointactonday>0)
 	    	{
-	    		for (int i=1; i<=anzweiteregemaktamtag; i++)
+	    		for (int i=1; i<=furtherjointactonday; i++)
 	    		{
 	    			int letzterindex = possibleact.size()-1;
 	    			possibleact.remove(letzterindex);
@@ -793,26 +760,24 @@ public class Coordinator
 
 
 	  	/*
-	  	 * Schritt 4: Pr�fen, ob List aufgrund von Schritt 2&3 m�glicherweise leer ist.
-	  	 * 						Falls ja, kann Aktivit�t nicht eigef�gt werden.
+	  	 * step 4: check if list is empty (because of rules in step 2 and 3)
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		if (Configuration.debugenabled) System.err.println("Akt konnte nicht ersetzt werden! Schritt 4");
-	  		gemakt.removeJointParticipant(person);
+	  		if (Configuration.debugenabled) System.err.println("could not replace activity! step 4");
+	  		jointact.removeJointParticipant(person);
 	  		break;
 	  	}
 	  	
 	  	
 	  	/*
-	  	 * Schritt 5: Gemeinsame Akt von Typ 1 oder 3, d.h. mit gemeinsamem Hinweg muss, falls es sich um die erste Aktivit�t
-	  	 *  					auf der Tour handelt auch bei der eingef�gten Aktivit�t die erste der Tour sein.
-	  	 *  
-	  	 *  					Such in solchen F�llen alle andere ersten Aktivit�t von Touren in der Liste m�glicher Aktivit�ten und 
-	  	 *  					arbeite mit der neuen Liste weiter
+	  	 * step 5: 	if joint type is 1 or 3, i.e., there is a joint trip included, the acitivity needs to be the first in the tour if the originating 
+	  	 * 					one is the first on in the tour too (of the household member created the activity)
+	  	 * 
+	  	 * 					for such cases, only use the remaining activities that are the first one in their tour
 	  	 */
 	  	{
-	    	if ((gemakt_jointStatus==JointStatus.JOINTTRIPANDACTIVITY || gemakt_jointStatus==JointStatus.JOINTTRIP) && gemakt.isActivityFirstinTour())
+	    	if ((jointact_jointStatus==JointStatus.JOINTTRIPANDACTIVITY || jointact_jointStatus==JointStatus.JOINTTRIP) && jointact.isActivityFirstinTour())
 	    	{
 	    		List<HActivity> possibleactersteaktintour = new ArrayList<HActivity>();
 	    		for (HActivity act : possibleact)
@@ -825,63 +790,59 @@ public class Coordinator
 	  	
 	  	
 	  	/*
-	  	 * Schritt 6: Pr�fen, ob List aufgrund von Schritt 5 m�glicherweise leer ist.
-	  	 * 						Falls ja, kann Aktivit�t nicht eigef�gt werden.
+	  	 * step 6: check if list is empty (because of rules in step 5)
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		if (Configuration.debugenabled) System.err.println("Akt konnte nicht ersetzt werden! Schritt 6");
-	  		gemakt.removeJointParticipant(person);
+	  		if (Configuration.debugenabled) System.err.println("could not replace activity! step 6");
+	  		jointact.removeJointParticipant(person);
 	  		break;
 	  	}
 	  	
 	  	
 	  	/*
-	  	 * Schritt 7: Pr�fen, ob der Tourindex der gemeinsamen Akt in den m�glichen Akt vorhanden ist (Prio zum Ersetzen!)
-	  	 * 						Falls ja, dann pr�fen, ob es den Aktindex auf der Tour auch gibt (Prio zum Ersetzen!)
+	  	 * step 7:	check if tourindex of the originating activity still exists for replacement (first priority for replacement)
+	  	 * 					if yes check the same for the activityindex
 	  	 */
 	  	{
-	    	// F�ge alle Akt mit gleichem Tourindex in eine eigene Liste ein
-	    	List<HActivity> possibleactgleichertourindex = new ArrayList<HActivity>();
+	    	// add all activities with the same tour index into an own list
+	    	List<HActivity> possibleactsametourindex = new ArrayList<HActivity>();
 	    	for (HActivity act : possibleact)
 	    	{
-	    		if (act.getTour().getIndex() == gemakt_tourindex)
+	    		if (act.getTour().getIndex() == jointact_tourindex)
 	    		{
-	    			possibleactgleichertourindex.add(act);
+	    			possibleactsametourindex.add(act);
 	    		}
 	    	}
-	    	// Falls Aktivit�t mit gleichen Tourindex existieren, arbeite mit dieser Liste weiter
-	    	if (possibleactgleichertourindex.size()!=0)
+	    	// use this list for further processing if not empty
+	    	if (possibleactsametourindex.size()!=0)
 	    	{
-	    		possibleact = possibleactgleichertourindex;
+	    		possibleact = possibleactsametourindex;
 	    	
-	    		// F�ge alle Akt mit gleichem Aktindex in eine eigene Liste ein
-	    		List<HActivity> possibleactgleicheraktindex = new ArrayList<HActivity>();
+	    	// add all activities with the same act index into an own list
+	    		List<HActivity> possibleactsameactindex = new ArrayList<HActivity>();
 	      	for (HActivity act : possibleact)
 	      	{
-	      		if (act.getIndex() == gemakt_aktindex)
+	      		if (act.getIndex() == jointact_actindex)
 	      		{
-	      			possibleactgleicheraktindex.add(act);
+	      			possibleactsameactindex.add(act);
 	      		}
 	      	}
-	      	// Falls Aktivit�t mit gleichen Aktindex existiert, arbeite mit dieser Liste weiter
-	      	if (possibleactgleicheraktindex.size()!=0)
+	      	// use this list for further processing if not empty
+	      	if (possibleactsameactindex.size()!=0)
 	      	{
-	      		possibleact = possibleactgleicheraktindex;
+	      		possibleact = possibleactsameactindex;
 	      	}
 	    	}
 	  	}
 	  	
 	  	/*
-	  	 * Schritt 8: Falls eine Aktivit�t die letzte einer Tour ist und unmittelbar anschlie�end eine weitere gemeinsame Aktivit�t folgt,
-	  	 * 						dann wird diese Aktivit�t entfernt, da keine Zeit f�r Heimaktivit�t �brig bleibt.
-	  	 * 
-	  	 * 						Anders ausgedr�ckt: Falls direkt anschlie�ende gemeinsame Aktivit�t, dann entferne alle letzten Aktivit�ten einer Tour
+	  	 * step 8: if an activity is the last one of a tour and is followed directly by a joint activity, remove this activity from list as there is
+	  	 * 				 no time left for the home activity
 	  	 */
 	  	{
-	  		if (indexinliste < listgemakt.size()-1 && HActivity.getTimebetweenTwoActivities(gemakt,  listgemakt.get(indexinliste+1))==0)
+	  		if (indexinliste < listjointact.size()-1 && HActivity.getTimebetweenTwoActivities(jointact,  listjointact.get(indexinliste+1))==0)
 	  		{
-	  			// F�ge alle Akt, die nicht letzte Akt sind in eine eigene Liste ein
 	    		List<HActivity> possibleactnichtletzte = new ArrayList<HActivity>();
 	      	for (HActivity act : possibleact)
 	      	{
@@ -895,83 +856,79 @@ public class Coordinator
 	  	}
 	
 	  	/*
-	  	 * Schritt 9: 
-	  	 *
-	  	 * Aufgrund von Schritt 8 kann es vorkommen, dass keine Aktivit�ten mehr �brig bleiben zum Ersetzen.
-	  	 * Falls das der Fall ist kann die Aktivit�t nicht ersetzt werden! 
+	  	 * step 9: check if list is empty (because of rules in step 8)
 	  	 */
 	  	if (possibleact.size()==0) 
 	  	{
-	  		if (Configuration.debugenabled) System.err.println("Akt konnte nicht ersetzt werden! Schritt 9");
-	  		gemakt.removeJointParticipant(person);
+	  		if (Configuration.debugenabled) System.err.println("could not replace activity! step 9");
+	  		jointact.removeJointParticipant(person);
 	  		break;
 	  	}
 	
 	  	/*
-	  	 * Schritt 10: W�hle zuf�llig eine der verbleibenden m�glichen Aktivit�ten
+	  	 * step 10: choose randomly on of the remaining activities
 	  	 */
-	  	int zufallszahl = randomgenerator.getRandomValueBetween(0, possibleact.size()-1, 1);
-	  	HActivity actforreplacement = possibleact.get(zufallszahl);
+	  	int rnd = randomgenerator.getRandomValueBetween(0, possibleact.size()-1, 1);
+	  	HActivity actforreplacement = possibleact.get(rnd);
 	  	
 	  	/*
-	  	 * Schritt 11: Aktivit�t durch gemeinsame Aktivit�t ersetzen
+	  	 * step 11: replace activity
 	  	 */
 	  	{
-	    	// Aktivit�teneigenschaften ermitteln
-	    	int gemakt_duration = gemakt.getDuration();
-	    	int gemakt_starttime = gemakt.getStartTime();
-	    	ActivityType gemakt_acttype = gemakt.getActivityType(); 		
-	    	int gemakt_creatorPersonIndex = gemakt.getCreatorPersonIndex();		
+	    	// get activity properties
+	    	int gemakt_duration = jointact.getDuration();
+	    	int gemakt_starttime = jointact.getStartTime();
+	    	ActivityType gemakt_acttype = jointact.getActivityType(); 		
+	    	int gemakt_creatorPersonIndex = jointact.getCreatorPersonIndex();		
 	    	
-	    	int gemakt_durationtripbefore = gemakt.getEstimatedTripTimeBeforeActivity();
+	    	int gemakt_durationtripbefore = jointact.getEstimatedTripTimeBeforeActivity();
 	    	
-	    	// Aktivit�t markieren
 	    	actforreplacement.addAttributetoMap("actreplacedbyjointact", 1.0);
 	    	
-	    	// Je nach Art der Gemeinsamkeit unterschiedliche Aktivit�teneigenschaften ersetzen
-	    	switch(gemakt_jointStatus)
+	    	// replace different properties depending on type of joint action
+	    	switch(jointact_jointStatus)
 				{
-					// Weg davor und Aktivit�t werden gemeinsam durchgef�hrt
+					// activity and trip to the activities are done jointly
 					case JOINTTRIPANDACTIVITY:
 					{			
-						// Akteigenschaften ersetzen
+						// replace properties
 						actforreplacement.setDuration(gemakt_duration);
 						actforreplacement.setStartTime(gemakt_starttime);
 						actforreplacement.setActivityType(gemakt_acttype);
-						actforreplacement.setJointStatus(gemakt_jointStatus);
+						actforreplacement.setJointStatus(jointact_jointStatus);
 						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
-						// Wegzeiten aufgrund m�glichen anderen Aktivit�tentyps neu berechnen
+						// recalculate trip times
 						actforreplacement.createTripsforActivity();
 						
-						// Hinweg erzeugen und ersetzen
+						// generate trip to the activity
 						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, TripStatus.TRIP_BEFORE_ACT, gemakt_durationtripbefore));
 			
 						break;
 					}
-					// Nur Aktivit�t wird gemeinsam durchgef�hrt
+					// only activity is done jointly
 					case JOINTACTIVITY:
 					{
-						// Akteigenschaften ersetzen
+						// replace properties
 						actforreplacement.setDuration(gemakt_duration);
 						actforreplacement.setStartTime(gemakt_starttime);
 						actforreplacement.setActivityType(gemakt_acttype);
-						actforreplacement.setJointStatus(gemakt_jointStatus);
+						actforreplacement.setJointStatus(jointact_jointStatus);
 						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
-						// Wegzeiten aufgrund m�glichen anderen Aktivit�tentyps neu berechnen
+						// recalculate trip times
 						actforreplacement.createTripsforActivity();
 						
 						break;
 					}		
-					// Nur Weg davor wird gemeinsam durchgef�hrt
+					// only trip to the activity is done jointly
 					case JOINTTRIP:
 					{
-						// Akteigenschaften ersetzen
-						actforreplacement.setJointStatus(gemakt_jointStatus);
+					// replace properties
+						actforreplacement.setJointStatus(jointact_jointStatus);
 						actforreplacement.setCreatorPersonIndex(gemakt_creatorPersonIndex); 
 						
-						// Weg erzeugen
+						// generate trip
 						actforreplacement.setTripbeforeactivity(new HTrip(actforreplacement, TripStatus.TRIP_BEFORE_ACT, gemakt_durationtripbefore));
 						actforreplacement.setStartTime(gemakt_starttime);
 						
@@ -982,8 +939,8 @@ public class Coordinator
 				}			
 	  	}
 	  	
-	  	// Schritt 12: Pr�fen, ob die Aktivi�t aufgrund m�glicher ge�nderter Wegzeiten nicht vielleicht doch mit einer anderen kollidiert
-    	for (HActivity act : pattern.getDay(gemakt_tagindex).getAllActivitiesoftheDay())
+	  	// step 12: check again for temporal overlaps
+    	for (HActivity act : pattern.getDay(jointact_dayindey).getAllActivitiesoftheDay())
     	{
     		if (
     				(act.startTimeisScheduled() 
@@ -1003,7 +960,7 @@ public class Coordinator
 		}
 	
 		
-		//TODO  Sicherstellen, dass die Reihenfolge sortiert nach Index mit der nach Startzeit �bereinstimmt!
+		//TODO  ensure order of the activities by index is identical with order by start time
 		
 	}
 
@@ -1016,23 +973,20 @@ public class Coordinator
 	 */
 	private void executeStep7DC(String id, ActivityType activitytype)
 	{
-		// Wird nur ausgef�hrt, wenn es zu dem Aktivit�tentyp auch Aktivit�ten gibt
 	  if (pattern.countActivitiesPerWeek(activitytype)>0)
 	  {
-			// AttributeLookup erzeugen
+			// create attribute lookup
 			AttributeLookup lookup = new AttributeLookup(person);
 			
-	    // Step-Objekt erzeugen
+	    // create step object
 	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    step.doStep();
 	    
-	    //Debug-Logger schreiben falls aktiviert
 	    if(debugloggers!= null && debugloggers.existsLogger(id))
 	    {
 	    	debugloggers.getLogger(id).put(person, String.valueOf(step.getDecision()));
 	    }
 	    
-	    // Ergebnis als Index und Alternative zu Personen-Map hinzuf�gen f�r sp�tere Verwendung
 	    person.addAttributetoMap(activitytype+"budget_category_index", (double) step.getDecision());
 	    person.addAttributetoMap(activitytype+"budget_category_alternative", Double.parseDouble(step.getAlternativeChosen()));
 	  }
@@ -1052,10 +1006,9 @@ public class Coordinator
 	 */
 	private void executeStep7WRD(String id, ActivityType activitytype)
     {
-	  	// Wird nur ausgef�hrt, wenn es zu dem Aktivit�tentyp auch Aktivit�ten gibt
 	  	if (pattern.countActivitiesPerWeek(activitytype)>0)
       {
-        // Entscheidung aus Schritt 7A-E ermitteln
+        // get decision from step 7 DC
         double chosenIndex = person.getAttributefromMap(activitytype+"budget_category_index");
 
         WRDDefaultModelStep step = new WRDDefaultModelStep(id, String.valueOf((int) chosenIndex), activitytype, this);
@@ -1063,13 +1016,11 @@ public class Coordinator
         
         int chosenTime = step.getchosenDistributionElement();
         
-  	    //Debug-Logger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id))
   	    {
   	    	debugloggers.getLogger(id).put(person, String.valueOf(chosenTime));
   	    }
-  	    
-        //Entscheidungsindex als Property speichern
+
         person.addAttributetoMap(activitytype+"budget_exact",(double) chosenTime);
       }
     }	
@@ -1084,7 +1035,7 @@ public class Coordinator
     // only applies to main activities
     for (HDay currentDay : pattern.getDays())
     {
-    	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+    	// skip day if person is at home
     	if (currentDay.isHomeDay())
       {
       	continue;
@@ -1092,33 +1043,29 @@ public class Coordinator
   	
       for (HTour currentTour : currentDay.getTours())
       {
-      	// Anwendung des Modellschritts nur auf Hauptaktivit�ten
         HActivity currentActivity = currentTour.getActivity(0);
         
-        // Schritt wird nur durchgef�hrt, falls Dauer der Aktivit�t noch nicht feststeht
         if(!currentActivity.durationisScheduled())
         {
-        	// AttributeLookup erzeugen
+        	// create attribute lookup
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
         	
-    	    // Step-Objekt erzeugen
+    	    // create step object
     	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
     	    step.doStep();
     	    
-    	    //Debug-Logger schreiben falls aktiviert
     	    if(debugloggers!= null && debugloggers.existsLogger(id))
     	    {
     	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(step.getAlternativeChosen()));
     	    }
 
-    	    // Save Attribute
+    	    // save attribute for work and education activities if coordinated modeling is enabled 
     	    if (Configuration.coordinated_modelling && (currentActivity.getActivityType()==ActivityType.WORK || currentActivity.getActivityType()==ActivityType.EDUCATION))
     	    {
     	    	currentActivity.addAttributetoMap("standarddauer",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
     	    }
     	    else
     	    {
-      	    // Bei unkoordinierter Modellierung ohne Stabilit�tsaspekte wird der Wert immer mit 0 �berschrieben!
      	     currentActivity.addAttributetoMap("standarddauer", 0.0d);    	    	
     	    }
         }
@@ -1138,18 +1085,17 @@ public class Coordinator
 		
 	  for (HDay currentDay : pattern.getDays())
 	  {
-	  	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+	  	// skip day if person is at home
 	  	if (currentDay.isHomeDay())
 	    {
 	    	continue;
 	    }
-		
-	  	// Anwendung des Modellschritts nur auf Hauptaktivit�ten
+
 			for (HTour currentTour : currentDay.getTours())
 			{
 				boolean running=false;
-				if (id_dc.equals("8B") && currentTour.isFirstTouroftheDay()) running=true;  // 8B gilt nur f�r erste Tour des Tages
-				if (id_dc.equals("8D") && !currentTour.isFirstTouroftheDay()) running=true;	// 8D gilt nur ab der zweiten Tour des Tages)
+				if (id_dc.equals("8B") && currentTour.isFirstTouroftheDay()) running=true;  // 8B for first tour of the day
+				if (id_dc.equals("8D") && !currentTour.isFirstTouroftheDay()) running=true;	// 8D for all other tours
 					
 				if (running)
 				{
@@ -1157,34 +1103,31 @@ public class Coordinator
 	        
 	  	    /*
 	  	     * 
-	  	     * DC-Schritt (8B, 8D)
+	  	     * DC-step (8B, 8D)
 	  	     * 
 	  	     */
-	        
-	        // Schritt nur durchf�hren, falls Dauer noch nicht festgelegt wurde
+
 	        if (!currentActivity.durationisScheduled())
 	        {
-	          // AttributeLookup erzeugen
+	          // create attribute lookup
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
-	    	    // Step-Objekt erzeugen
+	    	    // create step object
 	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
 	    	    
-	    	    // Alternativen ggf. auf Standardzeitkategorie einschr�nken
+	    	    // limit alternatives if needed
 	    	    if (currentActivity.getAttributesMap().get("standarddauer") == 1.0d)
 	    	    {
-	    	    	// Ermittle die Standard-Zeitkategorie f�r den Tag und den Zweck
 	    	      int timeCategory = currentActivity.calculateMeanTimeCategory();
 	    	      
-		    	    //Debug-Logger schreiben falls aktiviert
 		    	    if(debugloggers!= null && debugloggers.existsLogger("meantime"))
 		    	    {
 		    	    	debugloggers.getLogger("meantime").put(currentActivity, String.valueOf(timeCategory));
 		    	    }
 	    	      	
-	    	      // untere Grenze kann minimal 0 werden
+	    	      // lower bound minimum is 0
 	    	      int from = Math.max(timeCategory - 1,0);
-	    	      // obere Grenze kann maximal in letzter Zeitklasse liegen
+	    	      // upper bound maximum is last time category
 	    	      int to = Math.min(timeCategory + 1,Configuration.NUMBER_OF_ACT_DURATION_CLASSES-1);
 	    	        
 	    	      step_dc.limitUpperandLowerBound(from, to);
@@ -1192,46 +1135,40 @@ public class Coordinator
 	    	      step_dc.adaptUtilityFactor(timeCategory, 1.1);
 	    	    } 	    
 	    	    
-	    	    // Grenzen aufgrund ggf. bereits festgelgten Dauern beschr�nken
+	    	    // set durations bound because of other determined activities
 	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
 	    	    int loc_lowerbound = getDurationTimeClassforExactDuration(durationBounds[0]);
 	    	    int loc_upperbound = getDurationTimeClassforExactDuration(durationBounds[1]);
 	    	    
-	    	    // Sicherstellen, dass die unter Grenze nicht �ber der oberen Grenze liegt
 	    	    assert loc_lowerbound<=loc_upperbound;
 
-	    	    // Beide Grenzen sind gleich, das hei�t Dauer ist gesetzt
+	    	    // if bounds are identical, duration is set
 	    	    if (loc_lowerbound==loc_upperbound)
 	    	    {
 	    	    	step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
 	    	    }
-	    	    // Beide Grenzen sind NICHT gleich
 	    	    else
 	    	    {   	    
-		    	    // Limitiere die obere Grenze, falls diese kleiner ist als die bisherige oder nicht gesetzt ist
+		    	    // limit upper bound if not yet set or below old upper bound
 		    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
 	    	    
-		    	    // Limitiere die untere Grenze, falls diese gr��er ist als die bisherige untere Grenze
+		    	    // limit lower bound if higher than old lower bound
 		    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound);   
 		    	    
-		    	    // Limitiere die unter Grenze, falls diese jetzt h�her ist als die obere Grenze
+		    	    // limit lower bound if bound is now higher than upper bound
 		    	    if (step_dc.getLowerBound() >= step_dc.getUpperBound()) step_dc.limitLowerBoundOnly(step_dc.getUpperBound());   
 	    	    }
 
-	    	    		
-	    	    // Sicherstellen, dass die unter Grenze nicht �ber der oberen Grenze liegt
 	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
    	    		
-	    	    // Wahlentscheidung durchf�hren
+	    	    // make selection
 	    	    step_dc.doStep();
 
-	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
 	    	    {
 	    	    	debugloggers.getLogger(id_dc).put(currentActivity, String.valueOf(step_dc.getDecision()));
 	    	    }
-	
-	    	    // Entscheidungsindex abspeichern
+
 	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step_dc.getDecision()); 	
 	    	    
 	    	    /*
@@ -1239,30 +1176,25 @@ public class Coordinator
 	    	     * WRD-step (8C, 8E)
 	    	     * 
 	    	     */
-          	// Objekt basierend auf der gew�hlten Zeitkategorie initialisieren
+          	// initialize object based on chosen time category
 			      double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
 			      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getActivityType(), this);
 			      			      
-			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
 			      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
 			      
-			      // Bestimme, ob Verteilung danach modifiziert wird für Stabilität
 			      if (currentActivity.getAttributesMap().get("standarddauer") == 1.0d) step_wrd.setModifydistribution(true);
 			      
-			      // Wahlentscheidung durchf�hren
+			      // make selection
 			      step_wrd.doStep();
 			      int chosenTime = (int) step_wrd.getchosenDistributionElement();
 			      		      
-	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
 	    	    {
 	    	    	debugloggers.getLogger(id_wrd).put(currentActivity, String.valueOf(chosenTime));
 	    	    }
 			     
-			      // Speichere Ergebnisse ab
 			      currentActivity.setDuration(chosenTime);
 			      
-			      // Lege m�gliche weitere Startzeiten von Aktivit�ten fest
 			      HActivity.createPossibleStarttimes(currentTour.getActivities());
 	        }
 				}		
@@ -1283,7 +1215,7 @@ public class Coordinator
 
 	  for (HDay currentDay : pattern.getDays())
 	  {
-	  	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+	  	// skip day if person is at home
 	  	if (currentDay.isHomeDay())
 	    {
 	    	continue;
@@ -1295,86 +1227,76 @@ public class Coordinator
 	      {
 	  	    /*
 	  	     * 
-	  	     * DC-Schritt
+	  	     * DC-step
 	  	     * 
 	  	     */    		
 	        
-	      	// Schritt nur durchf�hren, falls keine Hauptaktivit�t und Dauer noch nicht festgelegt wurde
 	        if (currentActivity.getIndex() != 0 && !currentActivity.durationisScheduled())
 	        {   	     
-	          // AttributeLookup erzeugen
+	          // create attribute lookup
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
-	    	    // Step-Objekt erzeugen
+	    	    // create step object
 	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
 	    	   
-	    	    // Grenzen aufgrund ggf. bereits festgelgten Dauern beschr�nken
+	    	    // limit bounds because of determined durations
 	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
 	    	    int loc_lowerbound = getDurationTimeClassforExactDuration(durationBounds[0]);
 	    	    int loc_upperbound = getDurationTimeClassforExactDuration(durationBounds[1]);
 	    	    
-	    	    // Sicherstellen, dass die unter Grenze nicht �ber der oberen Grenze liegt
 	    	    assert loc_lowerbound<=loc_upperbound;
 
-	    	    // Beide Grenzen sind gleich, das hei�t Dauer ist gesetzt
+	    	    // duration is set if bounds are identical
 	    	    if (loc_lowerbound==loc_upperbound)
 	    	    {
 	    	    	step_dc.limitUpperandLowerBound(loc_lowerbound, loc_upperbound);
 	    	    }
-	    	    // Beide Grenzen sind NICHT gleich
 	    	    else
 	    	    {   	    
-		    	    // Limitiere die obere Grenze, falls diese kleiner ist als die bisherige oder nicht gesetzt ist
+	    	    	// limit upper bound if not yet set or below old upper bound
 		    	    if (loc_upperbound <= step_dc.getUpperBound() || step_dc.getUpperBound()==-1) step_dc.limitUpperBoundOnly(loc_upperbound); 
 	    	    
-		    	    // Limitiere die untere Grenze, falls diese gr��er ist als die bisherige untere Grenze
+		    	    // limit lower bound if higher than old lower bound
 		    	    if (loc_lowerbound >= step_dc.getLowerBound()) step_dc.limitLowerBoundOnly(loc_lowerbound);   
 		    	    
-		    	    // Limitiere die unter Grenze, falls diese jetzt h�her ist als die obere Grenze
+		    	    // limit lower bound if bound is now higher than upper bound
 		    	    if (step_dc.getLowerBound() >= step_dc.getUpperBound()) step_dc.limitLowerBoundOnly(step_dc.getUpperBound());   
 	    	    }
 	    	    		
-	    	    // Sicherstellen, dass die unter Grenze nicht �ber der oberen Grenze liegt
 	    	    assert step_dc.getLowerBound()<=step_dc.getUpperBound();
 
-	    	    // Wahlentscheidung durchf�hren
+	    	    // make selection
 	    	    step_dc.doStep();
 	    	    
-	    	    //Debug-Logger schreiben falls aktiviert
 	    	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
 	    	    {
 	    	    	debugloggers.getLogger(id_dc).put(currentActivity, String.valueOf(step_dc.getDecision()));
 	    	    }
 	
-	    	    // Entscheidungsindex abspeichern
 	    	    currentActivity.addAttributetoMap("actdurcat_index",(double) step_dc.getDecision()); 	
 	    	    
 	    	    /*
 	    	     * 
-	    	     * WRD-Schritt
+	    	     * WRD-step
 	    	     * 
 	    	     */
-          	// Objekt basierend auf der gew�hlten Zeitkategorie initialisieren
+	    	    // initialize object based on chosen time category
           	double chosenTimeCategory = currentActivity.getAttributesMap().get("actdurcat_index");
   		      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int) chosenTimeCategory), currentActivity.getActivityType(), this);
   		     
-			      // Limitiere die Grenzen entsprechend der ermittelten Min- und Maxdauern
   		      step_wrd.setRangeBounds(durationBounds[0], durationBounds[1]);
 			      
-			      // Wahlentscheidung durchf�hren
+			      // make selection
   		      step_wrd.doStep();
 			      int chosenTime = (int) step_wrd.getchosenDistributionElement();
-			      
-	    	    //Debug-Logger schreiben falls aktiviert
-	    	    if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
+
+			      if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
 	    	    {
 	    	    	debugloggers.getLogger(id_wrd).put(currentActivity, String.valueOf(chosenTime));
 	    	    }
 			     
-			      // Speichere Ergebnisse ab
 			      currentActivity.setDuration(chosenTime);
   		      
-			      // Lege m�gliche weitere Startzeiten von Aktivit�ten fest
 			      HActivity.createPossibleStarttimes(currentTour.getActivities()); 
 	        }
 				}		
@@ -1393,22 +1315,20 @@ public class Coordinator
     	
     if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled())
     {
-    	 // AttributeLookup erzeugen
+    	 // create attribute lookup
   		AttributeLookup lookup = new AttributeLookup(person);   	
     	
-	    // Step-Objekt erzeugen
+	    // create step object
 	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    step.doStep();
-	    
-	    //Debug-Logger schreiben falls aktiviert
+
 	    if(debugloggers!= null && debugloggers.existsLogger(id))
 	    {
 	    	debugloggers.getLogger(id).put(person, String.valueOf(step.getDecision()));
 	    }
 
-	    // Eigenschaft abspeichern
 	    person.addAttributetoMap("first_tour_default_start_cat",(double) step.getDecision());
-	   }
+  	}
 	}
 	
 	
@@ -1428,26 +1348,22 @@ public class Coordinator
 	      {
 	      	continue;
 	      }
-	      
-	      // Bestimme erste Tour des Tages und deren Tourtyp
 	      HTour currentTour = currentDay.getFirstTourOfDay();
 	    	ActivityType tourtype = currentTour.getActivity(0).getActivityType();
 	      if (tourtype == ActivityType.WORK || tourtype == ActivityType.EDUCATION)
 	      {
-	      	// AttributeLookup erzeugen
+	      	// create attribute lookup
 	    		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	      	
-	  	    // Step-Objekt erzeugen
+	  	    // create step object
 	  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	  	    step.doStep();
 	  	    
-	  	    //Debug-Logger schreiben falls aktiviert
 	  	    if(debugloggers!= null && debugloggers.existsLogger(id))
 	  	    {
 	  	    	debugloggers.getLogger(id).put(currentTour, String.valueOf(step.getAlternativeChosen()));
 	  	    }
-	
-	  	    // Eigenschaft abspeichern
+
 	  	    currentTour.addAttributetoMap("default_start_cat_yes",(step.getAlternativeChosen().equals("yes") ? 1.0d : 0.0d));
 	      }
 	    }
@@ -1457,9 +1373,8 @@ public class Coordinator
 
 
 	/**
+	 * determine tour start times for tours where start time is known because of joint activities originating from other household members
 	 * 
-	 * Legt die Startzeiten f�r Touren fest bei denen es bereits festgelegte Startzeiten f�r Aktivit�ten gibt, 
-	 * bspw. durch bereits festgelegte gemeinsame Aktivit�ten von anderen Personen
 	 * @throws InvalidPatternException 
 	 * 
 	 */
@@ -1467,7 +1382,6 @@ public class Coordinator
 	{
 		for (HDay currentDay : pattern.getDays())
 	  {
-			// Falls zu wenig Touren oder ein Heimtag vorliegt, wird der Tag �bersprungen
 	    if (currentDay.isHomeDay())
 	    {
 	    	continue;
@@ -1475,11 +1389,8 @@ public class Coordinator
 	  	
 	    for (HTour currentTour : currentDay.getTours())
 	    {
-		  	// F�hre Schritt nur f�r Touren aus, die noch keine festgelegte Startzeit haben
 		  	if (!currentTour.isScheduled())
 		    {
-		  		
-		  		// Pr�fe, ob es eine Aktivit�t in der Tour gibt, deren Startzeit bereits festgelegt wurde (bspw. durch gemeinsame Aktivit�ten)
 		  		int startTimeDueToScheduledActivities=99999;
 		  		
 	  			int tripdurations=0;
@@ -1489,8 +1400,7 @@ public class Coordinator
 		  		for (HActivity tmpact : currentTour.getActivities())
 		  		{
 		  			/*
-		  			 *  Wenn die Startzeit der Aktivit�t festgelegt ist, rechne von dem Punkt aus 
-		  			 *  r�ckw�rts und ziehe alle Dauern bisheriger Wege und Aktivit�ten in der Tour ab
+		  			 * if start time of an activity is determined, set this as fixed element and subtract all activity and trip durations until then
 		  			 */		  			
 		  			if (tmpact.startTimeisScheduled())
 		  			{
@@ -1498,7 +1408,7 @@ public class Coordinator
 		  				break;
 		  			}
 		  			/*
-		  			 * Andernfalls addiere die Tour und Aktivit�tszeit auf
+		  			 * otherwise add activity and trip times
 		  			 */
 		  			else
 		  			{
@@ -1508,21 +1418,18 @@ public class Coordinator
 		  		}
 		  		
 		  		/*
-		  		 * Durch bereits festgelegte gemeinsame Aktivit�ten kann es vorkommen, dass negative Tourstartzeiten entstehen.
-		  		 * Bsp: Die Aktivit�t stammt von einer anderen Person und ist sehr nahe an 0 Uhr. Falls die aktuelle Personen einen 
-		  		 * l�ngeren Default-Pendelweg hat, kann dadurch der Startzeitpunkt der Tour unter 0 Uhr fallen!
+		  		 * there may be negative tour start times because of other determined activities in rare cases
+		  		 * example: the activity is generated by another person and close to midnight. if the actual person has another commuting duration
+		  		 * the start time (leaving the house) for this tour may be negative!
 		  		 */
 		  		if (startTimeDueToScheduledActivities<0)
 		  		{
 		  			throw new InvalidPatternException("Person", pattern, "TourStartTimes <0 " + currentTour);
 		  		}
 		  		
-		  		// Lege Startzeit fest falls durch bereits festgelegte Aktivit�ten bestimmt 
 		  		if (startTimeDueToScheduledActivities!=99999)
 		  		{
-		  			// Startzeit der Tour festlegen
 		  			currentTour.setStartTime(startTimeDueToScheduledActivities);   
-		  			// Setze die Startzeiten der Aktivit�ten in dieser Tour
 		  			currentTour.createStartTimesforActivities();
 		  		}
 		    }
@@ -1545,32 +1452,29 @@ public class Coordinator
 	  // STEP 10: determine time class for the start of the x tour of the day
 		for (HDay currentDay : pattern.getDays())
 	  {
-			// Falls zu wenig Touren oder ein Heimtag vorliegt, wird der Tag �bersprungen
 	    if (currentDay.isHomeDay()|| currentDay.getAmountOfTours()<tournrdestages)
 	    {
 	    	continue;
 	    }
 	  	
-	    // Bestimme x-te Tour des Tages
 	    HTour currentTour = currentDay.getTour(currentDay.getLowestTourIndex()+(tournrdestages-1));
 	  	
-	  	// F�hre Schritt nur f�r Touren aus, die noch keine festgelegte Startzeit haben
 	  	if (!currentTour.isScheduled())
 	    {
 			
 				/*
 				 * 
-				 * DC-Schritt
+				 * DC-step
 				 * 
 				 */
 			
-	  		// AttributeLookup erzeugen
+	  		// create attribute lookup
 	  		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	    	
-		    // Step-Objekt erzeugen
+		    // create step object
 		    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
 		     		
-	      // Bestimme Ober- und Untergrenze und schr�nke Alternativenmenge ein
+	      // limit alternatives
 	      int bounds_dc[] = calculateStartingBoundsForTours(currentTour, true);
 		    int lowerbound = bounds_dc[0];
 		    int upperbound = bounds_dc[1];
@@ -1585,52 +1489,44 @@ public class Coordinator
 			    }
 		    }
 		    
-		    // F�hre Entscheidungswahl durch
+		    // make selection
 		    step_dc.doStep();
 		    
-  	    //Debug-Logger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id_dc))
   	    {
   	    	debugloggers.getLogger(id_dc).put(currentTour, String.valueOf(step_dc.getDecision()));
   	    }
-	
-		    // Eigenschaft abspeichern
+
 		    currentTour.addAttributetoMap("tourStartCat_index",(double) step_dc.getDecision());
 		    
 		    
 		    /*
 		     * 
-		     * WRD-Schritt
+		     * WRD-step
 		     * 
 		     */
-		    
-		    // Ermittle Entscheidung aus Schritt DC-Modellschritt  		
+
 	      double chosenStartCategory = (double) currentTour.getAttributesMap().get("tourStartCat_index");
-	      
-	      // Vorbereitungen und Objekte erzeugen
 	      WRDDefaultModelStep step_wrd = new WRDDefaultModelStep(id_wrd, String.valueOf((int)chosenStartCategory), currentTour.getActivity(0).getActivityType(), this);
 	      
 	      int[] bounds_mc = calculateStartingBoundsForTours(currentTour, false);
 	      step_wrd.setRangeBounds(bounds_mc[0], bounds_mc[1]);
 	      
-	      // Entscheidung durchf�hren
+	      // make selection
 	      step_wrd.doStep();
 	      int chosenStartTime = step_wrd.getchosenDistributionElement();
 	      
-  	    //Debug-Logger schreiben falls aktiviert
   	    if(debugloggers!= null && debugloggers.existsLogger(id_wrd))
   	    {
   	    	debugloggers.getLogger(id_wrd).put(currentTour, String.valueOf(chosenStartTime));
   	    }
 	      
-	      // Speichere Ergebnisse ab
 	      currentTour.setStartTime(chosenStartTime);   	  	
-	      
-	      // Setze die Startzeiten der Aktivit�ten in dieser Tour
 	      currentTour.createStartTimesforActivities();
 	      
-//TODO previousTour muss immer scheduled sein bei chronologier Modellierungsreihenfolge	      
-	      // Stelle sicher, dass sich die Touren nicht �berlappen!
+//TODO previousTour needs to be scheduled if modeling is chronological 
+	      
+	      // ensure that there are no temporal overlaps
 	      HTour previousTour = currentTour.getPreviousTourinPattern();
 	      if (previousTour!=null && previousTour.isScheduled()) assert currentTour.getStartTimeWeekContext() > previousTour.getEndTimeWeekContext() : "Tours are overlapping!";
 		  }	       
@@ -1657,59 +1553,51 @@ public class Coordinator
 	    for (int j=currentDay.getLowestTourIndex(); j<=currentDay.getHighestTourIndex(); j++)
 	    {
 	    	HTour currentTour = currentDay.getTour(j);
-	    	// Bestimme Heimzeit vor Tour f�r alle Touren ohne Startzeit
+	    	// determine home time for all non-scheduled tours
 	      if (!currentTour.isScheduled())
 	      {
 	      	// 10S
 	      	      	
-	        	// AttributeLookup erzeugen
-	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
-	        	
-	    	    // Step-Objekt erzeugen
-	    	    DCDefaultModelStep dcstep = new DCDefaultModelStep("10S", this, lookup);
-	    	     		
-	          // Bestimme Ober- und Untergrenze und schr�nke Alternativenmenge ein
-	          int dcbounds[] = calculateBoundsForHomeTime(currentTour, true);
-	    	    int lowerbound = dcbounds[0];
-	    	    int upperbound = dcbounds[1];
-	    	    dcstep.limitUpperandLowerBound(lowerbound, upperbound);
-	    	    
-	    	    // F�hre Entscheidungswahl durch
-	    	    dcstep.doStep();
-	    	    
-	    	    //Debug-Logger schreiben falls aktiviert
-	    	    if(debugloggers!= null && debugloggers.existsLogger("10S"))
-	    	    {
-	    	    	debugloggers.getLogger("10S").put(currentTour, String.valueOf(dcstep.getDecision()));
-	    	    }
-	
-	    	    // Eigenschaft abspeichern
-	    	    int chosenHomeTimeCategory = dcstep.getDecision();
-	      	
-	    	    // 10T
-	    	    
-	    	    // Vorbereitungen und Objekte erzeugen
-	    	    WRDDefaultModelStep step_wrd = new WRDDefaultModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), currentTour.getActivity(0).getActivityType(), this);
-	    	    int[] wrdbounds = calculateBoundsForHomeTime(currentTour, false);
-	          step_wrd.setRangeBounds(wrdbounds[0], wrdbounds[1]);
-	          
-	          // Entscheidung durchf�hren
-	          step_wrd.doStep();
-	          int chosenTime = step_wrd.getchosenDistributionElement();
-	          
-	          
-	    	    //Debug-Logger schreiben falls aktiviert
-	    	    if(debugloggers!= null && debugloggers.existsLogger("10T"))
-	    	    {
-	    	    	debugloggers.getLogger("10T").put(currentTour, String.valueOf(chosenTime));
-	    	    }
-	          
-	          // Speichere Ergebnisse ab
-	          int starttimetour = currentDay.getTour(currentTour.getIndex()-1).getEndTime() + chosenTime;
-	          currentTour.setStartTime(starttimetour);
-	          
-	          // Setze die Startzeiten der Aktivit�ten in dieser Tour
-	          currentTour.createStartTimesforActivities();
+        	// create attribute lookup
+      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
+        	
+    	    // create step object
+    	    DCDefaultModelStep dcstep = new DCDefaultModelStep("10S", this, lookup);
+    	     		
+          // limit alternatives
+          int dcbounds[] = calculateBoundsForHomeTime(currentTour, true);
+    	    int lowerbound = dcbounds[0];
+    	    int upperbound = dcbounds[1];
+    	    dcstep.limitUpperandLowerBound(lowerbound, upperbound);
+    	    
+    	    // make selection
+    	    dcstep.doStep();
+
+    	    if(debugloggers!= null && debugloggers.existsLogger("10S"))
+    	    {
+    	    	debugloggers.getLogger("10S").put(currentTour, String.valueOf(dcstep.getDecision()));
+    	    }
+
+    	    int chosenHomeTimeCategory = dcstep.getDecision();
+      	
+    	    // 10T
+
+    	    WRDDefaultModelStep step_wrd = new WRDDefaultModelStep("10T", String.valueOf((int)chosenHomeTimeCategory), currentTour.getActivity(0).getActivityType(), this);
+    	    int[] wrdbounds = calculateBoundsForHomeTime(currentTour, false);
+          step_wrd.setRangeBounds(wrdbounds[0], wrdbounds[1]);
+          
+          // make selection
+          step_wrd.doStep();
+          int chosenTime = step_wrd.getchosenDistributionElement();
+          
+    	    if(debugloggers!= null && debugloggers.existsLogger("10T"))
+    	    {
+    	    	debugloggers.getLogger("10T").put(currentTour, String.valueOf(chosenTime));
+    	    }
+
+          int starttimetour = currentDay.getTour(currentTour.getIndex()-1).getEndTime() + chosenTime;
+          currentTour.setStartTime(starttimetour);
+          currentTour.createStartTimesforActivities();
 	      }
 	    }
 	  }
@@ -1727,7 +1615,7 @@ public class Coordinator
 	  // STEP 11 - Decision on joint activities
 	  for (HDay currentDay : pattern.getDays())
 	  {
-	  	// Ist der Tag durch Home bestimmt, wird der Schritt nicht ausgef�hrt
+	  	// skip day if person is at home
 	  	if (currentDay.isHomeDay())
 	    {
 	    	continue;
@@ -1738,40 +1626,34 @@ public class Coordinator
 	      for (HActivity currentActivity : currentTour.getActivities())
 	      {
 	      	/* 
-	      	 * Falls die Aktivit�t nicht von der Person selbst erzeugt wurde sondern von einer anderen Person stammt
-	      	 * und als gemeinsame Aktivit�t �bernommen wurde, wird der Schritt �bersprungen
+	      	 * skip the activity if activity was generated by another household member
 	      	 */
 	      	if (currentActivity.getCreatorPersonIndex() != person.getPersIndex())
 	      	{
 	      		continue;
 	      	}
 	      	
-	      	
 	      	/*
-	    		 * Schritte nur durchf�hren, falls Person nicht als letzte Person eines Haushalts modelliert wird
-	    		 * Bei letzter Person im Haushalt k�nnen keine weiteren neuen gemeinsamen Aktivit�ten mehr erzeugt werden!
+	    		 * if person is the last one modeled in the household, no other members are available to join activities. Thus, skip decision then.
 	    		 */
 	    		if ((int) person.getAttributefromMap("numbermodeledinhh") != person.getHousehold().getNumberofPersonsinHousehold())
 	    		{
-	        	// AttributeLookup erzeugen
+	        	// create attribute lookup
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
-	    	    // Step-Objekt erzeugen
+	    	    // create step object
 	    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	    	    step.doStep();
 	    	    
-      	    // DebugLogger schreiben falls aktiviert
       	    if(debugloggers!= null && debugloggers.existsLogger(id))
       	    {
       	    	debugloggers.getLogger(id).put(currentActivity, String.valueOf(step.getAlternativeChosen()));
       	    }
 	
-	          // Status festlegen
 	    	    currentActivity.setJointStatus(JointStatus.getTypeFromInt(Integer.parseInt(step.getAlternativeChosen())));
 	    		}
 	  	    else
 	  	    {
-	  	    	// Falls letzte Person, sind keine weiteren gemeinsamen Aktionen m�glich
 	    	    currentActivity.setJointStatus(JointStatus.NOJOINTELEMENT);
 	  	    }
 	      }
@@ -1783,35 +1665,29 @@ public class Coordinator
 
 	/**
 	 * 
-	 * Bestimmung des genaueren Aktivit�tenzwecks f�r den Zweck Shopping 'S', 'L' und 'W'
+	 * detailed modeling of activity purposes
 	 * 
 	 * @param activity
 	 * @param id
 	 */
 	private void executeStep98(HActivity activity, String id)
-	{
-	  // STEP 98A-C Verfeinerung Aktivit�tenzweck SHOPPING, LEISURE und WORK
-	  
+	{ 
 		HDay currentDay = activity.getDay();
 		HTour currentTour = activity.getTour();
 	
-		// AttributeLookup erzeugen
+		// create attribute lookup
 		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, activity);   	
 		
-	  // Step-Objekt erzeugen
+	  // create step object
 	  DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
 	  step.doStep();
-	  
-    // DebugLogger schreiben falls aktiviert
+
     if(debugloggers!= null && debugloggers.existsLogger(id))
     {
     	debugloggers.getLogger(id).put(activity, String.valueOf(step.getAlternativeChosen()));
     }
 	
-	  // Speichere gew�hlte Entscheidung f�r weitere Verwendung
 	  int chosenActivityType = Integer.parseInt(step.getAlternativeChosen());
-	  
-	  // Aktivit�tstyp festlegen
 	  activity.setMobiToppActType((byte) chosenActivityType);          
 	}
 
@@ -1819,11 +1695,10 @@ public class Coordinator
 
 	
 	/**
-	 * 
-	 * Bestimmt die Obergrenze und Untergrenze f�r die Aktivit�tendauern auf Basis bereits geplanter Aktivit�ten.
+	 * determines lower and upper bound for activity durations due to other planned activities
 	 * 
 	 * @param act
-	 * @return [0] = Untergrenze [1] = Obergrenze
+	 * @return [0] = lower bound [1] = upper bound
 	 * @throws InvalidPatternException
 	 */
 	private int[] calculateDurationBoundsDueToOtherActivities(HActivity act) throws InvalidPatternException
@@ -1831,32 +1706,32 @@ public class Coordinator
 		HDay dayofact = act.getDay();
 		
 		/*
-		 * Grundidee der Bestimmung der unteren Grenze
+		 * main idea of lower bound calculation
 		 * 
-		 * 1. Ausgangspunkt (in absteigender Priorit�t)
-		 * - Es gibt bereits eine vorhergehende Aktivit�t mit festgelegter Startzeit am Tag
-		 * - Die letzte Aktivit�t des Vortags ragt in den aktuellen Tag hinein
-		 * - Anfang des Tages (1 Minute Puffer f�r Heimzeiten)
+		 * 1. starting point (descending priority)
+		 * - There is another activity earlier this day having a determined starting time
+		 * - The last activity of the previous day ends after midnight
+		 * - begin of the day (1 minute past midnight to allow buffer for home time)
 		 * 
-		 * 2. Ermittel alle Aktivit�tendauern zwischen Tagesanfang / letzter Aktivit�t und der aktuellen Akt
-		 * 3. Ermittel alle Wegdauern zwischen Tagesanfang / letzter Aktivit�t und der aktuellen Akt
-		 * 4. Ermittel Puffer f�r Heimzeiten f�r alle Touren zwischen Tagesanfang / Tour der letzten Aktivit�t und der aktuellen Akt
+		 * 2. Calculate all activity durations between actual activity and starting point
+		 * 3. Calculate all trip durations between actual activity and starting point
+		 * 4. Calculate home time buffers for all tours between between actual activity and starting point 
 		 * 
 		 * 
-		 * Grundidee der Bestimmung der oberen Grenze
+		 * main idea of upper bound calculation
 		 * 
-		 * 1. Ausgangspunkt (in absteigender Priorit�t)
-		 * - Es gibt bereits eine nachfolgende Aktivit�t mit festgelegter Startzeit am Tag
-		 * - Ende des Tages
+		 * 1. starting point (descending priority)
+		 * - There is another activity later this day having a determined starting time
+		 * - end of the day
 		 * 
-		 * Schritte 2-4 analog
+		 * step 2-4 identical
 		 */
 		
 		
 		/*
 		 * 1.
 		 * 
-		 * Ermittel die Ausgangspunkte
+		 * starting points
 		 * 
 		 */
 		HActivity last_act_scheduled = null;
@@ -1865,14 +1740,14 @@ public class Coordinator
 		for (HActivity tmpact : dayofact.getAllActivitiesoftheDay())
 		{
 			
-			// Suche nach letzter im Tagesverlauf bereits festgelegter Startzeit einer Aktivit�t
-			if(act.compareTo(tmpact)==-1)		// Findet alle fr�heren Aktivit�t als die Aktivit�t selbst	
+			// Search for earlier activity with determined starting time
+			if(act.compareTo(tmpact)==-1)	
 			{
 				//System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
 				if(tmpact.startTimeisScheduled() && (last_act_scheduled==null || tmpact.getStartTime()>last_act_scheduled.getStartTime())) last_act_scheduled = tmpact;
 			}	
 			
-			// Suche nach n�chster im Tagesverlauf bereits festgelegter Startzeit einer Aktivit�t
+			// Search for later activity with determined starting time
 			if(act.compareTo(tmpact)==+1)
 			{
 				//System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
@@ -1881,63 +1756,62 @@ public class Coordinator
 		}
 		
 		/*
-		 * Bestimme Ausgangspunkt der unteren Grenze
+		 * starting point for lower bound
 		 */
 		
-		int ausgangspunktunteregrenze=1;
+		int startingpointlowerbound=1;
 		if (last_act_scheduled!=null)
 		{
-			ausgangspunktunteregrenze = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : last_act_scheduled.getDefaultActivityTime()); 
+			startingpointlowerbound = last_act_scheduled.getStartTime() + (last_act_scheduled.durationisScheduled() ?  last_act_scheduled.getDuration() : last_act_scheduled.getDefaultActivityTime()); 
 		}
 		else
 		{
-			// Pr�fe, ob letzte Akt des Vortages in den aktuellen Tag ragt!
-			HDay vortag = dayofact.getPreviousDay();
-			if (vortag!=null && !vortag.isHomeDay())
+			// check if last activity of the previous day ends after midnight
+			HDay previousDay = dayofact.getPreviousDay();
+			if (previousDay!=null && !previousDay.isHomeDay())
 			{
-				HActivity letzteaktvortag = vortag.getLastTourOfDay().getLastActivityInTour();
-				if (letzteaktvortag.startTimeisScheduled())
+				HActivity lastactpreviousday = previousDay.getLastTourOfDay().getLastActivityInTour();
+				if (lastactpreviousday.startTimeisScheduled())
 				{
-					int endeletzteaktvortag = letzteaktvortag.getStartTime() +
-							(letzteaktvortag.durationisScheduled() ? letzteaktvortag.getDuration() : 0) + 
-							(letzteaktvortag.tripAfterActivityisScheduled() ? letzteaktvortag.getEstimatedTripTimeAfterActivity() : 0);
-					if (endeletzteaktvortag>1440) 
+					int endlastactpreviousday = lastactpreviousday.getStartTime() +
+							(lastactpreviousday.durationisScheduled() ? lastactpreviousday.getDuration() : 0) + 
+							(lastactpreviousday.tripAfterActivityisScheduled() ? lastactpreviousday.getEstimatedTripTimeAfterActivity() : 0);
+					if (endlastactpreviousday>1440) 
 					{
-						// +1 f�r Heimaktivit�t nach Ende der letzten Tour des Vortages
-						ausgangspunktunteregrenze = endeletzteaktvortag-1440+1;
+						// +1 to allow at least one minute home time
+						startingpointlowerbound = endlastactpreviousday-1440+1;
 					}
 				}
 			}
 		}
 	
 		/*
-		 * Bestimme Ausgangspunkt der oberen Grenze
+		 * starting point for upper bound
 		 */	
 
-		int ausgangspunktoberegrenze=0;
-		// Falls n�chste Aktivit�t bereits bestimmt ist, verwende diese als Richtgr��e
+		int startingpointupperbound=0;
 		if (next_act_scheduled!=null)
 		{
-			ausgangspunktoberegrenze = next_act_scheduled.getStartTime(); 
+			startingpointupperbound = next_act_scheduled.getStartTime(); 
 		}
-		// Andernfalls ist 3 Uhr nachts die Obergrenze, es sei denn in dem Zeitraum bis 3 Uhr des n�chsten Tages ist bereits eine Akt geplant. 
-		// Dann ist der Startzeitpunkt dieser Aktivit�t entsprechend der Ausgangspunkt
+		/*
+		 * Otherwise, the upper bound starts at 3am or with the first planned activity the next day until 3am
+		 */
 		else
 		{
-			ausgangspunktoberegrenze = 1620;
+			startingpointupperbound = 1620;
 			
-			// Pr�fe, ob erste Akt des Folgetages im Zeitraum bis 3 Uhr liegt!
-			HDay folgetag = dayofact.getNextDay();
-			if (folgetag!=null && !folgetag.isHomeDay())
+			HDay nextday = dayofact.getNextDay();
+			if (nextday!=null && !nextday.isHomeDay())
 			{
-				HActivity ersteaktfolgetag = folgetag.getFirstTourOfDay().getFirstActivityInTour();
-				if (ersteaktfolgetag.startTimeisScheduled())
+				HActivity firstactnextday = nextday.getFirstTourOfDay().getFirstActivityInTour();
+				if (firstactnextday.startTimeisScheduled())
 				{
-					int startersteaktfolgetag = ersteaktfolgetag.getTripStartTimeBeforeActivity();
-					if (startersteaktfolgetag<180) 
+					int startingtimefirstactnextday = firstactnextday.getTripStartTimeBeforeActivity();
+					if (startingtimefirstactnextday<180) 
 					{
-						// -1 f�r Heimaktivit�t vor der ersten Akt des Folgetags
-						ausgangspunktoberegrenze = 1440 + startersteaktfolgetag -1;
+						// -1  to allow at least one minute home time
+						startingpointupperbound = 1440 + startingtimefirstactnextday -1;
 					}
 				}
 			}
@@ -1948,7 +1822,7 @@ public class Coordinator
 		/*
 		 * 2.
 		 * 
-		 * Ermittel die Aktivit�tendauern
+		 * calculate activity durations
 		 * 
 		 */
 		
@@ -1958,7 +1832,7 @@ public class Coordinator
 		/*
 		 * 3.
 		 * 
-		 * Ermittel die Wegdauern
+		 * calculate trip durations
 		 * 
 		 */
 		
@@ -1968,74 +1842,68 @@ public class Coordinator
 		/*
 		 * 4.
 		 * 
-		 * Ermittel die Heimzeitpuffer
-		 * Ber�cksichtige jeweils 1 Minute pro Heimakt als Mindestpuffer
+		 * calculate home time buffers (1 minute for each tour)
 		 * 
 		 */
 
 		/*
-		 * Vorher
+		 * Before
 		 */
 		int timeforhomeactsincelastscheduled=0;		
 	  if (last_act_scheduled==null)
 		{
-			// Z�hle wieviele Touren vor der aktuelle Tour liegen
 	  	timeforhomeactsincelastscheduled += (act.getTour().getIndex() - act.getDay().getLowestTourIndex());
 		}
 		else
 		{
-			// Z�hle wieviele Touren zwischen der der letzten festgelegten und der aktuellen liegen
 			timeforhomeactsincelastscheduled += (act.getTour().getIndex() - last_act_scheduled.getTour().getIndex());
 		}
 	  
 	  /*
-	   * Nachher
+	   * Afters
 	   */
 		int timeforhomeactuntilnextscheduled=0;
 	  if (next_act_scheduled==null)
 		{
-			// Z�hle wieviele Touren nach der aktuellen Tour noch kommen
 	  	timeforhomeactuntilnextscheduled += (act.getDay().getHighestTourIndex() - act.getTour().getIndex());
 		}
 		else
 		{
-			// Z�hle wieviele Touren zwischen der der n�chsten festgelegten und der aktuellen liegen
 			timeforhomeactuntilnextscheduled += (next_act_scheduled.getTour().getIndex() - act.getTour().getIndex());
 		}
 		
 		/*
 		 * 5.
 		 * 
-		 * Bestimme Schranken und maximale Dauern
+		 * calculate bound and maximum durations
 		 * 
 		 */	
 		
-		// Bestimme obere und untere Schranken
-		int lowerbound = ausgangspunktunteregrenze + activitydurationsincelastscheduled + tripdurationssincelastscheduled + timeforhomeactsincelastscheduled;
-		int upperbound = ausgangspunktoberegrenze - activitydurationuntilnextscheduled - tripdurationsuntilnextscheduled - timeforhomeactuntilnextscheduled;
+		int lowerbound = startingpointlowerbound + activitydurationsincelastscheduled + tripdurationssincelastscheduled + timeforhomeactsincelastscheduled;
+		int upperbound = startingpointupperbound - activitydurationuntilnextscheduled - tripdurationsuntilnextscheduled - timeforhomeactuntilnextscheduled;
 		
 		/*
-		 * Falls Aktivit�t selbst schon eine festgelegte Startzeit hat, wird dadurch die untere Grenze bestimmt -> ersetze lowerbound
+		 * if activity already has a determined starting time, this is the lower bound
 		 */
 		if (act.startTimeisScheduled()) lowerbound = act.getStartTime();
 		
 		int maxduration = upperbound - lowerbound;
 		int minduration = 1;
 		
-    // Limitiere maximaleDauer auf 1 Tag falls mehr als 1 Tag!
+    // set maximum to one day if upper bound exceeds one day
     maxduration = Math.min(maxduration,1440);
        
-    // Fehlerbehandlung, falls UpperBound kleinergleich LowerBound
+    // error handling if upper bound <= lower bound 
     if (upperbound<=lowerbound)
     {
-    	// Household Exception, da Konflikt aufgrund von gemeinsamen Akt anderer Personen im Haushalt entstanden ist
+    	// household exception as conflict results from joint act of other household members
     	if (next_act_scheduled!= null && next_act_scheduled.getCreatorPersonIndex()!=person.getPersIndex() && 
     			last_act_scheduled!=null && last_act_scheduled.getCreatorPersonIndex()!=person.getPersIndex())
     	{
     		String errorMsg = "Duration Bounds incompatible Act" + act.getDayIndex() + "/" + act.getTour().getIndex() + "/" + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
     		throw new InvalidPatternException("Household",pattern, errorMsg);
     	}
-    	// Person Exception, da Konflikt bei der Modellierung der Person selbst entstanden ist
+    	// household exception as conflict results from the person itself
     	else
     	{
     		String errorMsg = "Duration Bounds incompatible Act " + act.getDayIndex() + "/" + act.getTour().getIndex() + "/" + act.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
@@ -2044,22 +1912,22 @@ public class Coordinator
     }
     
     /*
-     * Pr�fen, ob Aktivit�t innerhalb einer Tour liegt und vorhergehende und nachfolgende Aktivit�t bereits bzgl. der
-     * Startzeit determiniert sind. Falls ja, ist untere Grenze = obere Grenze
+     * check if previous and following activity in this tour are already determined.
+     * If so, duration and thus bounds are fixed.
      */
     if(!act.isActivityFirstinTour() && !act.isActivityLastinTour())
     {
-    	HActivity letzteakt = act.getPreviousActivityinTour();
-    	HActivity naechsteakt = act.getNextActivityinTour();
+    	HActivity lastact = act.getPreviousActivityinTour();
+    	HActivity nextact = act.getNextActivityinTour();
     	
-    	if (letzteakt.startTimeisScheduled() && letzteakt.durationisScheduled() && naechsteakt.startTimeisScheduled())
+    	if (lastact.startTimeisScheduled() && lastact.durationisScheduled() && nextact.startTimeisScheduled())
     	{
     		minduration = maxduration;
     	}
     }
     /*
-     * Pr�fen, ob Aktivit�t und die nachfolgende bereits eine Startzeit haben.
-     * Dann gilt ebenfalls untere Grenze = obere Grenze
+     * check if activity itself and following activity in this tour have a determined starting time.
+     * If so, duration and thus bounds are fixed.
      */
     if (act.startTimeisScheduled() && !act.isActivityLastinTour())
     {
@@ -2068,7 +1936,7 @@ public class Coordinator
     
     
     /*
-     * R�ckgabe der Grenzen f�r die Dauer
+     * return bounds
      */
 		
     int[] durationBounds = new int[2];
@@ -2081,7 +1949,7 @@ public class Coordinator
 	
 	/**
 	 * 
-	 * Bestimmt anhands eines exakten Wertes die entsprechende Zeitklasse
+	 * reverse determination of a time class based on an exact value
 	 * 
 	 * @param maxduration
 	 * @return
@@ -2089,8 +1957,6 @@ public class Coordinator
 	private int getDurationTimeClassforExactDuration (int maxduration)
 	{
     int timeClass=-1;
-    		
-		// Bestimme die daraus resultierende Zeitklasse
     for (int i = 0; i < Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
     {
         if (maxduration >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && maxduration <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
@@ -2098,13 +1964,12 @@ public class Coordinator
         	timeClass = i;
         }
     }  
-    assert timeClass!=-1 : "TimeClass konnte nicht bestimmt werden!";
+    assert timeClass!=-1 : "could not determine timeclass!";
     return timeClass;
 	}
 	
 	/**
-	 * 
-	 * Bestimmt die Aktivit�tendauern zwischen zwei Aktivit�ten eines Tages
+	 * calculates activity durations between two activities
 	 * 
 	 * @param actfrom
 	 * @param actto
@@ -2113,19 +1978,18 @@ public class Coordinator
 	private int countActivityDurationsbetweenActivitiesofOneDay(HActivity actfrom, HActivity actto) 
 	{
 		int result=0;
-		List<HActivity> tagesaktliste;
+		List<HActivity> listofdayactivities;
 		if (actfrom==null)
 		{
-			tagesaktliste = actto.getDay().getAllActivitiesoftheDay();
+			listofdayactivities = actto.getDay().getAllActivitiesoftheDay();
 		}
 		else 
 		{
-			tagesaktliste = actfrom.getDay().getAllActivitiesoftheDay();
+			listofdayactivities = actfrom.getDay().getAllActivitiesoftheDay();
 		}
 		
-		for (HActivity tmpact : tagesaktliste)
+		for (HActivity tmpact : listofdayactivities)
 		{
-			// Suche alle Aktivit�ten die zwischen from und to liegen und addiere die Aktivit�tszeit auf das Ergebnis
 			if (	 (actfrom== null && actto!= null 																&& actto.compareTo(tmpact)<0)
 					|| (actfrom!= null && actto!= null && actfrom.compareTo(tmpact)>0	&& actto.compareTo(tmpact)<0)
 					|| (actfrom!= null && actto== null && actfrom.compareTo(tmpact)>0															)
@@ -2147,8 +2011,7 @@ public class Coordinator
 	
 	
 	/**
-	 * 
-	 * Bestimmt die Wegdauern zwischen zwei Aktivit�ten eines Tages
+	 * calculates trip durations between two activities
 	 * 
 	 * @param actfrom
 	 * @param actto
@@ -2157,19 +2020,18 @@ public class Coordinator
 	private int countTripDurationsbetweenActivitiesofOneDay(HActivity actfrom, HActivity actto) 
 	{
 		int result=0;		
-		List<HActivity> tagesaktliste;
+		List<HActivity> listofdayactivities;
 		if (actfrom==null)
 		{
-			tagesaktliste = actto.getDay().getAllActivitiesoftheDay();
+			listofdayactivities = actto.getDay().getAllActivitiesoftheDay();
 		}
 		else 
 		{
-			tagesaktliste = actfrom.getDay().getAllActivitiesoftheDay();
+			listofdayactivities = actfrom.getDay().getAllActivitiesoftheDay();
 		}
 		
-		for (HActivity tmpact : tagesaktliste)
+		for (HActivity tmpact : listofdayactivities)
 		{
-			// Suche alle Aktivit�ten die zwischen from und to (inkl. to) liegen und addiere die Wegzeiten auf das Ergebnis
 			if (	 (actfrom== null && actto!= null 																  && actto.compareTo(tmpact)<=0)
 					|| (actfrom!= null && actto!= null && actfrom.compareTo(tmpact)>=0	&& actto.compareTo(tmpact)<=0)
 					|| (actfrom!= null && actto== null && actfrom.compareTo(tmpact)>=0															 )
@@ -2195,39 +2057,36 @@ public class Coordinator
 	
 
 	/**
+	 * calculates lower and upper bound for tour starting times based on other determined starting times and durations
 	 * 
-	 * Bestimmt die Ober- und Untergrenze der Startzeiten f�r Touren basierend auf m�glichen schon festgelegten Startzeiten und Dauern
-	 * Boolean-Wert categories bestimmt, ob die Zeitkategorien oder die konkreten Grenzwerte zur�ckgegeben werden
-	 * 
-	 * @param categories
+	 * @param categories decides returning categories or exact values
 	 * @param tour
 	 * @return
 	 * @throws InvalidPatternException
 	 */
 	private int[] calculateStartingBoundsForTours(HTour tour, boolean categories) throws InvalidPatternException
 	{
-			
+		
 		/*
-		 * Grundidee der Bestimmung der unteren Grenze
+		 * main idea of lower bound calculation
 		 * 
-		 * 1. Ausgangspunkt (in absteigender Priorit�t)
-		 * - Die Tour ist nicht die erste Tour des Tages -> Es gibt bereits die Endezeit der vorhergehenden Tour + 1
-		 * - Die letzte Aktivit�t des Vortags ragt in den aktuellen Tag hinein
-		 * - Anfang des Tages
+		 * 1. starting point (descending priority)
+		 * - The tour is not the last tour of the day -> ending time of the previous tour
+		 * - The last activity of the previous day ends after midnight
+		 * - begin of the day (1 minute past midnight to allow buffer for home time)
 		 * 
 		 * 
-		 * Grundidee der Bestimmung der oberen Grenze
+		 * main idea of upper bound calculation
 		 * 
-		 * 1. Ausgangspunkt (in absteigender Priorit�t)
-		 * - Pr�fe, ob es bereits eine weitere geplante Anfangszeit einer Tour im Tagesverlauf gibt
-		 * - Pr�fe, ob es am n�chsten Tag bis 3 Uhr morgens schon eine geplante Aktivit�t gibt
-		 * - 3 Uhr Nachts des Folgetages als sp�testens Ende der Tour = 1620
+		 * 1. starting point (descending priority)
+		 * - There is another tour later this day having a determined starting time
+		 * - There is another tour scheduled until 3am the next day
+		 * - "end of the day" (3am next day)
 		 * 
-		 * 2. Alle noch geplanten Touren inkl. aller Aktivit�ts- und Wegzeiten abziehen zwischen Tagesende bzw. n�chster geplanter Tour
-		 * 3. Puffer f�r Heimaktivit�ten zwischen den Touren
-		 * 
+		 * 2. subtract all planned tours including activity and trip durations until upper bound starting point
+		 * 3. buffer for home times
 		 */
-		  
+					  
 	  HDay tourday = tour.getDay();
 	 
 	  int lowercat = -1;
@@ -2235,35 +2094,33 @@ public class Coordinator
 	  
 		/*
 		 * 
-		 * untere Grenze
+		 * lower bound
 		 * 
 		 */
 
-	  int basisunteregrenze = 1;
+	  int startingpointlowerbound = 1;
 	 
 	  
-	  // Falls es sich nicht um die erste Tour des Tages handelt, wird lowerbound durch das Ende der vorhergehenden Tour bestimmt
+	  // if this is not the first tour, starting point is the end of the previous tour
 	  if (tour.getIndex() != tourday.getLowestTourIndex())
 	  {
-	  	basisunteregrenze = tourday.getTour(tour.getIndex()-1).getEndTime() + 1;
+	  	startingpointlowerbound = tourday.getTour(tour.getIndex()-1).getEndTime() + 1;
 	  }
-	  // Ansonsten pr�fe, ob letzte Aktivit�t des Vortags noch in den aktuellen Tag ragt
 	  else
 	  {
-			// Pr�fe, ob letzte Akt des Vortages in den aktuellen Tag ragt!
-			HDay vortag = tourday.getPreviousDay();
-			if (vortag!=null && !vortag.isHomeDay())
+			HDay previousDay = tourday.getPreviousDay();
+			if (previousDay!=null && !previousDay.isHomeDay())
 			{
-				HActivity letzteaktvortag = vortag.getLastTourOfDay().getLastActivityInTour();
-				if (letzteaktvortag.startTimeisScheduled())
+				HActivity lastactpreviousday = previousDay.getLastTourOfDay().getLastActivityInTour();
+				if (lastactpreviousday.startTimeisScheduled())
 				{
-					int endeletzteaktvortag = letzteaktvortag.getStartTime() +
-							(letzteaktvortag.durationisScheduled() ? letzteaktvortag.getDuration() : 0) + 
-							(letzteaktvortag.tripAfterActivityisScheduled() ? letzteaktvortag.getEstimatedTripTimeAfterActivity() : 0);
-					if (endeletzteaktvortag>1440) 
+					int endlastactpreviousday = lastactpreviousday.getStartTime() +
+							(lastactpreviousday.durationisScheduled() ? lastactpreviousday.getDuration() : 0) + 
+							(lastactpreviousday.tripAfterActivityisScheduled() ? lastactpreviousday.getEstimatedTripTimeAfterActivity() : 0);
+					if (endlastactpreviousday>1440) 
 					{
-						// +1 um noch eine Heimaktivit�t nach der letzten Tour des Vortags zu erm�glichen
-						basisunteregrenze = endeletzteaktvortag-1440+1;
+						// +1 to allow at least one minute home time
+						startingpointlowerbound = endlastactpreviousday-1440+1;
 					}
 				}
 			}
@@ -2272,89 +2129,83 @@ public class Coordinator
 
 		/*
 		 * 
-		 * obere Grenze
+		 * upper bound
 		 * 
 		 */
 
 	  /*
-	   * 1. Ausgangspunkt
+	   * 1. starting point
 	   */
-	  int basisoberegrenze = 1440;
+	  int startingpointupperbound = 1440;
 	  HTour nexttourscheduled=null;
-	  
-	  //Pr�fe, ob es im Tagesverlauf noch weitere geplante Touren gibt
+
 	  for (int i = tour.getIndex()+1; i <= tourday.getHighestTourIndex(); i++)
 	  {
 	  	HTour tmptour = tourday.getTour(i);
-	  	// Sobald eine bereits geplante Tour gefunden wurde wird von diesem Punkt ausgegangen die obere Grenze berechnet
 	  	if (tmptour.isScheduled())
 	  	{
 	  		nexttourscheduled=tmptour;
-	  		basisoberegrenze = tmptour.getStartTime();
+	  		startingpointupperbound = tmptour.getStartTime();
 	  		break;
 	  	}
 	  }
-	  // Pr�fe, ob am Folgetag bis 3 Uhr nachts bereits die erste Aktivit�t geplant ist, falls keine weitere geplante Tour an diesem Tag
 	  if (nexttourscheduled==null)
 	  {
-	  	HDay folgetag = tourday.getNextDay();
-	  	if (folgetag!=null && !folgetag.isHomeDay())
+	  	HDay nextday = tourday.getNextDay();
+	  	if (nextday!=null && !nextday.isHomeDay())
 			{
-				HActivity ersteaktfolgetag = folgetag.getFirstTourOfDay().getFirstActivityInTour();
-				if (ersteaktfolgetag.startTimeisScheduled())
+				HActivity firstactnextday = nextday.getFirstTourOfDay().getFirstActivityInTour();
+				if (firstactnextday.startTimeisScheduled())
 				{
-					int startersteaktfolgetag = ersteaktfolgetag.getStartTime() -
-							(ersteaktfolgetag.tripBeforeActivityisScheduled() ? ersteaktfolgetag.getEstimatedTripTimeBeforeActivity() : 0);
-					if (startersteaktfolgetag<(basisoberegrenze-1440)) 
+					int startfirstactnextday = firstactnextday.getStartTime() -
+							(firstactnextday.tripBeforeActivityisScheduled() ? firstactnextday.getEstimatedTripTimeBeforeActivity() : 0);
+					if (startfirstactnextday<(startingpointupperbound-1440)) 
 					{
-						basisoberegrenze = 1439 + startersteaktfolgetag;
+						startingpointupperbound = 1439 + startfirstactnextday;
 					}
 				}
 			}	  						
 	  }
 	  
-	  
 	  /*
-	   * 2. Aktivit�ts- und Wegzeiten bis Tagesende / n�chster geplanter Tour
-	   * 3. Heimzeitpuffer
+	   * 2. activity and trip durations until upper bound starting point 
+	   * 3. home time buffers
 	   */
 	  int tmptourdurations = 0;
-	  int heimzeitpuffer = 0;
-	  int tourindexfuersuche;
-	  // Bestimme, bis zu welcher Tour die Dauern gez�hlt werden
+	  int hometimebuffer = 0;
+	  int tourindexforsearch;
+
 	  if(nexttourscheduled!=null)
 	  {
-	  	// Falls n�chste Tour bekannt ist, werden alle Touren bis dahin gez�hlt
-	  	tourindexfuersuche = nexttourscheduled.getIndex()-1;
+	  	tourindexforsearch = nexttourscheduled.getIndex()-1;
 	  }
 	  else
 	  {
-	  	// Falls n�chste Tour nicht bekannt ist, werden alle restlichen Touren des Tages gez�hlt
-	  	tourindexfuersuche = tourday.getHighestTourIndex();
+	  	tourindexforsearch = tourday.getHighestTourIndex();
 	  }
-	  for (int i = tour.getIndex(); i <= tourindexfuersuche; i++)
+	  for (int i = tour.getIndex(); i <= tourindexforsearch; i++)
 	  {
 	  	HTour tmptour = tourday.getTour(i);
 	  	tmptourdurations += tmptour.getTourDuration();
 	  	
-	  	heimzeitpuffer += 1;
+	  	hometimebuffer += 1;
 	  }
 	  
 	  
 	  /*
 	   * 
-	   * Grenzen bestimmen und falls notwendig Kategorien bilden
+	   * calculate bound and get categories if needed
 	   * 
 	   */
 	  
-	  int lowerbound = basisunteregrenze;
-	  int upperbound = basisoberegrenze - tmptourdurations - heimzeitpuffer;
+	  int lowerbound = startingpointlowerbound;
+	  int upperbound = startingpointupperbound - tmptourdurations - hometimebuffer;
 	  
-	  // UpperBound falls notwendig auf 1439 k�rzen, da keine sp�teren Anfangszeiten m�glich
+	  // limit upper bound to 1439 as no starting times after midnight are possible
 	  if (upperbound>1439) upperbound=1439;
 	  
 	        
-	  // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
+	  // error handling
 	  if (upperbound<lowerbound)
 	  {
 	  	String errorMsg = "TourStartTimes Tour " + tourday.getIndex() + "/" + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
@@ -2362,10 +2213,9 @@ public class Coordinator
 	  }
 	
 	  
-	  // Zeitklassen f�r erste Tour des Tages
+	  // time classes for first tours of the day
 	  if(categories && tour.getIndex()== tourday.getLowestTourIndex())
 	  {
-	    // Setze die Zeiten in Kategorien um
 	      for (int i=0; i<Configuration.NUMBER_OF_FIRST_START_TIME_CLASSES; i++)
 	      {
 	      	if (lowerbound>=Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] && lowerbound<=Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i])
@@ -2379,10 +2229,9 @@ public class Coordinator
 	      }
 	    }
 	
-	  // Zeitklassen f�r zweite und dritte Tour des Tages
+	  // time classes for all other tours of the day
 	  if(categories && tour.getIndex()!= tourday.getLowestTourIndex())
 	  {
-	    // Setze die Zeiten in Kategorien um
 	    for (int i=0; i<Configuration.NUMBER_OF_SECTHR_START_TIME_CLASSES ; i++)
 	    {
 	    	if (lowerbound>=Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] && lowerbound<=Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i])
@@ -2396,7 +2245,7 @@ public class Coordinator
 	    }
 	  }
 	          
-	  // Fehlerbehandlung, falls Kategorien nicht gesetzt werden konnten
+	  // error handling for non existing categories
 	  if(categories)
 	  {
 	    if (uppercat==-1 || lowercat==-1)
@@ -2421,12 +2270,11 @@ public class Coordinator
 	}
 
   /**
-	 * 
-	 * Bestimme die Grenzen f�r die Dauer der Heimzeit
+	 * calculate bounds for home time
 	 * 
 	 * @param day
 	 * @param tour
-	 * @param categories
+	 * @param categories decides returning categories or exact values
 	 * @return
 	 * @throws InvalidPatternException
 	 */
@@ -2434,7 +2282,6 @@ public class Coordinator
 	{
 		HDay tourday = tour.getDay();
 		
-		// lowerbound startet mit 1 - upperbound mit -1 (wird berechnet)
 	  int lowerbound = 1;
 	  int upperbound = -1;
 	  
@@ -2443,26 +2290,24 @@ public class Coordinator
 	  
 	  int starttime_nexttourscheduled = 1620;
 	  	  
-	  // Bestimme obere Grenze basierend auf bereits festgelegten Startzeitpunkten der im weiteren Tagesverlauf folgenden Touren
+	  // get upper bound based on starting times later this day
 	  int tmptourdurations = 0;
 	  for (int i = tour.getIndex(); i <= tourday.getHighestTourIndex(); i++)
 	  {
 	  	HTour tmptour = tourday.getTour(i);
 	  	
-	  	// Sobald eine bereits geplante Tour gefunden wurde wird von diesem Punkt ausgegangen die obere Grenze berechnet
+	  	// use the first scheduled tour as starting point to calculate
 	  	if (tmptour.isScheduled())
 	  	{
 	  		starttime_nexttourscheduled = tmptour.getStartTime();
 	  		break;
 	  	}
-	  	// Sollte die Tour noch nicht verplant sein wird die Dauer der Tour in die Grenzenberechnung mit einbezogen
 	  	else
 	  	{
-	  		// +1 um jeweils nach der Tour noch eine Heimaktivit�t von min. einer Minute zu erm�glichen
+	  		// +1 to allow at least one minute home time
 	  		tmptourdurations += tmptour.getTourDuration() + 1;
 	  	}
 	  }
-	  // Falls keine weitere Tour geplant ist, pr�fe, ob bis 3 Uhr am Folgetag eine Tour startet
 	  if (starttime_nexttourscheduled==1620)
 	  {
 	  	HDay folgetag = tourday.getNextDay();
@@ -2481,21 +2326,18 @@ public class Coordinator
 			}	 
 	  }
 	  
-	  // Maximaldauer berechnet sich aus verbleibendem Zeitpuffer zwischen Ende der vorhergehenden Tour und dem Endzeitpunkt des Tages - verbleibende Tour/Wegzeiten 
 	  upperbound = starttime_nexttourscheduled - tmptourdurations - tourday.getTour(tour.getIndex()-1).getEndTime();
 	  if (upperbound>1439) upperbound=1439;
 	
-	  // Fehlerbehandlung, falls UpperBound kleiner ist als LowerBound
+	  // error handling
 	  if (upperbound<lowerbound)
 	  {
 	  	String errorMsg = "HomeTime Tour " + tour.getIndex() + " : UpperBound (" + upperbound + ") < LowerBound (" + lowerbound + ")";
 	  	throw new InvalidPatternException("Person", pattern, errorMsg);
 	  }
 	
-	  // Zeitklassen falls erforderlich
 	  if(categories)
 	  {
-	    // Setze die Zeiten in Kategorien um
 	    for (int i=0; i<Configuration.NUMBER_OF_HOME_DURATION_CLASSES; i++)
 	    {
 	    	if (lowerbound>=Configuration.HOME_TIME_TIMECLASSES_LB[i] && lowerbound<=Configuration.HOME_TIME_TIMECLASSES_UB[i])
@@ -2509,7 +2351,7 @@ public class Coordinator
 	    }
 	  }
 	          
-	  // Fehlerbehandlung, falls Kategorien nicht gesetzt werden konnten
+	  // error handling
 	  if(categories)
 	  {
 	    if (uppercat==-1 || lowercat==-1)
@@ -2609,10 +2451,7 @@ public class Coordinator
   }
   
   /**
-   * 
-   * Methode bestimmt, mit welchen anderen Personen, bisher im Haushalt noch nicht modellierten Personen
-   * gemeinsame Aktivit�ten und Wege durchgef�hrt werden und f�gt diese den Listen der Personen hinzu
-   * 
+   * select possible other household members as participants for a joint activity 
    */
 	private void selectWithWhomforJointActions() 
 	{
@@ -2620,19 +2459,15 @@ public class Coordinator
 		for (HActivity tmpactivity : pattern.getAllOutofHomeActivities()) 
 		{
 			/*
-			 * Aktivit�t in die Liste gemeinsamer Aktivit�ten anderer Personen hinzuf�gen, falls
-			 * die Aktivit�t gemeinsam ist UND nicht von einer anderen Person urspr�nglich erzeugt wurde (das hei�t keine gemeinsame Aktivit�t 
-			 * des Ursprungs einer anderen Person ist)
-			 * 
+			 * consider activity if activity has a joint status and was created by the person itself  
 			 */
 			if (tmpactivity.getJointStatus()!=JointStatus.NOJOINTELEMENT && tmpactivity.getCreatorPersonIndex()==person.getPersIndex()) 
 			{
 				
-				// Erstelle Map mit allen anderen Personennummern im Haushalt, die noch nicht modelliert wurden und w�hle zuf�llig eine
 				Map<Integer,ActitoppPerson> otherunmodeledpersinhh = new HashMap<Integer, ActitoppPerson>();
-				// F�ge zun�chst alle Personen des Haushalts hinzu
+				// first add all other household members
 				otherunmodeledpersinhh.putAll(person.getHousehold().getHouseholdmembers());				
-				// Entferne nacheinander alle Personen, die bereits modelliert wurden (= WeekPattern haben) oder die Person selbst sind
+				// delete all members that are already modeled or the person itself
 				List<Integer> keyValues = new ArrayList<>(otherunmodeledpersinhh.keySet());
 				for (Integer key : keyValues) 
 				{
@@ -2645,55 +2480,54 @@ public class Coordinator
 				
 				if (otherunmodeledpersinhh.size()>0)
 				{
-					// Bestimme, mit wievielen Personen die Aktivit�t durchgef�hrt wird
-					int anzahlweiterepersausverteilung=99;
+					// decide number of household members joining the activity
+					int numberofadditionalmembers=99;
 					double randomvalue = randomgenerator.getRandomValue();
 					int hhgro = person.getHousehold().getNumberofPersonsinHousehold();
 					
 					/*
-					 * Wahrscheinlichkeiten f�r die Anzahl mehrerer Personen stammt aus MOP-Auswertungen
+					 * probabilities are calculated using MOP data
 					 */
 					if (hhgro==2)
 					{
-						anzahlweiterepersausverteilung=1;
+						numberofadditionalmembers=1;
 					}
 					if (hhgro==3)
 					{
-						if (randomvalue <  0.75) anzahlweiterepersausverteilung=1;
-						if (randomvalue >= 0.75) anzahlweiterepersausverteilung=2;
+						if (randomvalue <  0.75) numberofadditionalmembers=1;
+						if (randomvalue >= 0.75) numberofadditionalmembers=2;
 					}
 					if (hhgro==4)
 					{
-						if (0 	 <= randomvalue && randomvalue < 0.73) 	anzahlweiterepersausverteilung=1;
-						if (0.73 <= randomvalue && randomvalue < 0.89) 	anzahlweiterepersausverteilung=2;
-						if (0.89 <= randomvalue && randomvalue <= 1) 		anzahlweiterepersausverteilung=3;
+						if (0 	 <= randomvalue && randomvalue < 0.73) 	numberofadditionalmembers=1;
+						if (0.73 <= randomvalue && randomvalue < 0.89) 	numberofadditionalmembers=2;
+						if (0.89 <= randomvalue && randomvalue <= 1) 		numberofadditionalmembers=3;
 					}
 					if (hhgro>=5)
 					{
-						if (0 	 <= randomvalue && randomvalue < 0.79) 	anzahlweiterepersausverteilung=1;
-						if (0.79 <= randomvalue && randomvalue < 0.92) 	anzahlweiterepersausverteilung=2;
-						if (0.92 <= randomvalue && randomvalue < 0.95) 	anzahlweiterepersausverteilung=3;
-						if (0.95 <= randomvalue && randomvalue <= 1) 		anzahlweiterepersausverteilung=4;
+						if (0 	 <= randomvalue && randomvalue < 0.79) 	numberofadditionalmembers=1;
+						if (0.79 <= randomvalue && randomvalue < 0.92) 	numberofadditionalmembers=2;
+						if (0.92 <= randomvalue && randomvalue < 0.95) 	numberofadditionalmembers=3;
+						if (0.95 <= randomvalue && randomvalue <= 1) 		numberofadditionalmembers=4;
 					}
 					
-					//TODO Verbesserungsm�glichkeit: Die Auswahl gemeinsamer Personen kontextsensitiver gestalten, bspw. immer Vater mit Kind, ...
+					//TODO improvement: make the choice sensitive of the context (e.g., two pensioners is more likely than a pensioner and a student, ...)
 								
-					// Maximale Anzahl wird zus�tzlich begrenzt von der Anzahl weitere m�glicher Personen, die noch nicht modelliert wurden
-					int anzahlweiterepers = Math.min(anzahlweiterepersausverteilung, otherunmodeledpersinhh.size());
+					int anzahlweiterepers = Math.min(numberofadditionalmembers, otherunmodeledpersinhh.size());
 					for (int i=1 ; i<= anzahlweiterepers; i++)
 					{
-						// W�hle eine zuf�llige Nummer der verbleibenden Personen
+						// choose randomly one unmodeled member
 						List<Integer> keys = new ArrayList<Integer>(otherunmodeledpersinhh.keySet());
 						Integer randomkey = keys.get(randomgenerator.getRandomPersonKey(keys.size()));
 						
-						// Aktivit�t zur Ber�cksichtigung bei anderer Person aufnehmen
+						// add activity to the other member's schedule
 						ActitoppPerson otherperson = otherunmodeledpersinhh.get(randomkey);
 						otherperson.addJointActivityforConsideration(tmpactivity);
 						
-						// Andere Person als Teilnehmer bei der Aktivit�t eintragen
+						// add other person as participant for the actual person
 						tmpactivity.addJointParticipant(otherperson);
 						
-						// Diese Person aus der Liste entfernen und ggf. noch andere Personen in Akt mit aufnehmen
+						// remove person from map and proceed
 						otherunmodeledpersinhh.remove(randomkey);
 					}
 				}

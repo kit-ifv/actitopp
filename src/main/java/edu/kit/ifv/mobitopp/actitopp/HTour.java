@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class HTour
 {
-	// Enthält alle Attribute, die nicht direkt über Variablen ausgelesen werden können
+	//stores all attributes that are not directly accessible by variables	
 	private Map<String, Double> attributes;
 	
   private HDay day;
@@ -26,14 +26,14 @@ public class HTour
    
   /**
    * 
-   * Konstruktor
+   * Constructor
    *   
    * @param parent
    * @param index
    */
   public HTour(HDay parent, int index)
   {
-  	assert parent!=null : "Tag nicht initialisiert";
+  	assert parent!=null : "day is not initialized";
     this.day = parent;
     setIndex(index);  
     this.activities = new ArrayList<HActivity>();
@@ -45,8 +45,8 @@ public class HTour
     
   public HDay getDay()
 	{
-		assert day != null : "Tag nicht initialisiert";
-	    return day;
+		assert day != null : "day is not initialized";
+	  return day;
 	}
   
   public HWeekPattern getWeekPattern()
@@ -62,74 +62,72 @@ public class HTour
 
   public List<HActivity> getActivities()
 	{
-		assert activities != null : "Aktivitätenliste nicht initialisiert";
+		assert activities != null : "list of activities is not initialized";
 	  return activities;
 	}
 
   public void addActivity(HActivity act)
   {
-  	assert act.getIndex()!=-99 : "Index der Aktivität nicht initialisiert";
+  	assert act.getIndex()!=-99 : "index of the activity is not initialized";
   	boolean actindexexisitiert = false;
   	for (HActivity tmpact : activities)
   	{
   		if (tmpact.getIndex() == act.getIndex()) actindexexisitiert = true;
   	}
-  	assert !actindexexisitiert : "Es gibt bereits eine Aktivität mit diesem Index";
+  	assert !actindexexisitiert : "an activity using this index already exists";
   	activities.add(act);
   }
 
 	public int getIndex()
 	{
-		assert index != -99 : "Index nicht initilialisiert";
+		assert index != -99 : "index is not initialized";
 	  return index;
 	}
 
 
 	public void setIndex(int index)
 	{
-	    this.index = index;
+    this.index = index;
 	}
 
 
 	public int getStartTime()
 	{
-		assert starttime >= 0 : "Startzeit negativ - Startzeit: " + starttime;
-	    return starttime;
+		assert starttime >= 0 : "start time is negative - start time: " + starttime;
+	  return starttime;
 	}
 
 
 	public void setStartTime(int chosenStartTime)
 	{
-		assert chosenStartTime >= 0 : "Startzeit negativ - Startzeit: " + chosenStartTime;
-	    this.starttime = chosenStartTime;
+		assert chosenStartTime >= 0 : "start time is negative - start time: " + chosenStartTime;
+	  this.starttime = chosenStartTime;
 	}
 
 
 	/**
-	 * 
-	 * Sortierung einer Tourliste nach Index
+	 * sort a list of tours by index
 	 * 
 	 * @param list
 	 */
 	public static void sortTourList(List<HTour> list)
 	{
-		assert list != null : "Liste zum Sortieren ist leer";
-		
+		assert list != null : "list to sort is empty";
+			
 	    Collections.sort(list, new Comparator<HTour>()
 	    {
-	        @Override
-	        public int compare(HTour o1, HTour o2)
-	        {
-	            if(o1.getIndex() < o2.getIndex()) return -1;
-	            if(o1.getIndex() > o2.getIndex()) return 1;
-	            return 0;
-	        }
+        @Override
+        public int compare(HTour o1, HTour o2)
+        {
+            if(o1.getIndex() < o2.getIndex()) return -1;
+            if(o1.getIndex() > o2.getIndex()) return 1;
+            return 0;
+        }
 	    });
 	}
 
 	/**
-	 * 
-	 * Prüft, ob die Tour keine Zeitlücken aufweist, das heißt ob Akt und Wege direkt aneinander gereiht sind
+	 * check if tour is free of time gaps, i.e., all trips and activities follow directly one after another
 	 * 
 	 * @param tour
 	 * @return
@@ -141,10 +139,10 @@ public class HTour
 		
 		for (int i=0 ; i<activities.size()-1; i++)
 		{
-			HActivity aktuelleakt = activities.get(i);
-			HActivity naechsteakt = activities.get(i+1);
+			HActivity actualact = activities.get(i);
+			HActivity nextact = activities.get(i+1);
 			
-			if (aktuelleakt.getEndTimeWeekContext() != naechsteakt.getTripStartTimeBeforeActivityWeekContext()) 
+			if (actualact.getEndTimeWeekContext() != nextact.getTripStartTimeBeforeActivityWeekContext()) 
 			{
 				gapfree=false;
 			}
@@ -160,24 +158,22 @@ public class HTour
 		if (this.isScheduled())
 		{
 			tostring = 	getDay().getIndex() + "/" + getIndex() + 
-									" Start " + getStartTimeWeekContext() + 
-    							" Ende " + getEndTimeWeekContext() + 
-    							" Dauer: " + getTourDuration();  
+									" start: " + getStartTimeWeekContext() + 
+    							" end: " + getEndTimeWeekContext() + 
+    							" duration: " + getTourDuration();  
 		}
 		else
 		{
 			tostring = 	getDay().getIndex() + "/" + getIndex() + 
-									" Start --- " + 
-									" Ende --- " +  
-									" Dauer: " + getTourDuration(); 
+									" start: --- " + 
+									" end: --- " +  
+									" duration: " + getTourDuration(); 
 		}
   	return 	tostring;
   }   
 	
 	/**
-   * 
-   * Erstellt Startzeiten für jede Aktivität einer bestimmten Tour
-   * 
+   * create start times for each activity of a tour 
    */
   public void createStartTimesforActivities()
   {
@@ -186,56 +182,34 @@ public class HTour
     
     for (HActivity act : getActivities())
     {
-    	// Bei erster Aktivität in Tour wird die Startzeit durch den Beginn der Tour bestimmt
+    	// first activity: start time is given by tour start time
     	if (!act.startTimeisScheduled())
     	{
     		if (act.isActivityFirstinTour())
       	{
       		act.setStartTime(getStartTime() + act.getEstimatedTripTimeBeforeActivity());
       	}
-      	// Ansonsten durch das Ende der vorherigen Aktivität
+      	// other activity: start time is given by end of previous activity
       	else
       	{
       		act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
       	}
     	}
     }
-    
-    // Prüfe, ob die Tour einen lückenlosen Ablauf hat, das heißt keine Leerzeit zwischen Akt und Wegen
-    if (!tourisFreeofGaps()) System.err.println("Tour hat Lücken! " + this); 
+    if (!tourisFreeofGaps()) System.err.println("tour has gaps! " + this); 
   }
   
   
-	
-	/**
-	 * 
-	 * Prüft, ob die Startzeit der Tour bereits festgelegt wurde
-	 * 
-	 * @return
-	 */
 	public boolean isScheduled()
 	{
 		return starttime!=-1;
 	}
 	
-	/**
-	 * 
-	 * Gibt an, ob es sich um die Haupttour des Tages handelt
-	 * 
-	 * @return
-	 */
 	public boolean isMainTouroftheDay()
 	{
 		return this.getIndex()==0;
 	}
 	
-
-	/**
-	 * 
-	 * Gibt an, ob es sich um die erste Tour des Tages handelt
-	 * 
-	 * @return
-	 */
 	public boolean isFirstTouroftheDay()
 	{
 		return this.getIndex()==day.getLowestTourIndex();
@@ -244,8 +218,7 @@ public class HTour
 
   
   /**
-   * 
-   * Gibt die Tourduration inkl. default Trip times zurück
+   * returns tour duration including default trip durations
    * 
    * @return
    */
@@ -256,7 +229,7 @@ public class HTour
   
   /**
    * 
-   * Gibt die reine Aktivitätenzeit auf der Tour zurück
+   * returns activity durations of this tour only (without default trip durations)
    * 
    * @return
    */
@@ -267,13 +240,12 @@ public class HTour
     {       	
       sum += (act.durationisScheduled() ? act.getDuration() : 0);
     }
-    
     return sum;
   }
   
   /**
    * 
-   * Gibt die reine Wegzeit auf der Tour zurück
+   * returns trip durations of this tour only (without activity durations)
    *     
    * @return
    */
@@ -285,25 +257,16 @@ public class HTour
     	sum += (act.tripBeforeActivityisScheduled() ? act.getEstimatedTripTimeBeforeActivity() : 0);
     	sum += (act.tripAfterActivityisScheduled() ? act.getEstimatedTripTimeAfterActivity() : 0);    	
     }
-    
     return sum;
   }
   
-  /**
-   * 
-   * Gibt die Endzeit der Tour zurück
-   * 
-   * @return
-   */
+
   public int getEndTime()
   {
   	return getLastActivityInTour().getEndTime() + getLastActivityInTour().getEstimatedTripTimeAfterActivity();
   }
 
   /**
-   * 
-   * Gibt explizit die Aktivität mit dem gesuchten Index zurück
-   * 
    * @param index
    * @return
    */
@@ -317,18 +280,12 @@ public class HTour
   			indexact = activity;
   		}
   	}
-  	assert indexact != null : "Aktivität konnte nicht gefunden werden";
+  	assert indexact != null : "could not find activity with index " + index;
   	return indexact;
   	
   }
   
   
-  /**
-   *
-   * Gibt den Index der erste Aktivität der Tour zurück
-   * 
-   * @return
-   */
   public int getLowestActivityIndex()
   {
       int min = +99;
@@ -336,17 +293,10 @@ public class HTour
       {
           if(act.getIndex() < min) min = act.getIndex();
       }
-      assert min<=0 : "minimaler AktIndex der Tour ist größer 0 - index: " + min;
+      assert min<=0 : "minimum activity index of this tour is > 0 - index: " + min;
       return min;
   }
      
-  
-  /**
-  *
-  * Gibt den Index der letzten Aktivität der Tour zurück
-  * 
-  * @return
-  */
   public int getHighestActivityIndex()
   {
       int max = -99;
@@ -357,27 +307,16 @@ public class HTour
           	max = act.getIndex();
           }
       }
-      assert max>=0 : "maximaler AktIndex der Tour ist kleiner 0 - index: " + max;
+      assert max>=0 : "maximum activity index of this tour is < 0  - index: " + max;
       return max;
   }
 
-  /**
-   * 
-   * Gibt die erste Aktivität der Tour zurück
-   * 
-   * @return
-   */
+
   public HActivity getFirstActivityInTour()
   {
   	return getActivity(getLowestActivityIndex());    	
   }
-  
-  /**
-   * 
-   * Gibt die letzte Aktivität der Tour zurück
-   * 
-   * @return
-   */
+
   public HActivity getLastActivityInTour()
   {
   	return getActivity(getHighestActivityIndex());    	
@@ -388,7 +327,6 @@ public class HTour
   	return getActivities().size();
   }
 
-  
   public int getStartTimeWeekContext()
   {
   	return (1440*getDay().getIndex()) + getStartTime();
@@ -401,19 +339,16 @@ public class HTour
 
 
 	/**
-	 * 
-	 * Gibt die vorherige Tour im Pattern zurück
-	 * (letzte Tour des Vortags oder vorherige Tour des aktuellen Tags)
+	 * return the previous tour in the pattern
+	 * (last tour of the previous day of previous tour of this day)
 	 * 
 	 * @return
 	 */
 	public HTour getPreviousTourinPattern()
 	{
 		HTour previousTour;
-		//Prüfe, ob die Tour die erste Tour des Tages ist
     if (index == day.getLowestTourIndex())
     {
-    	// Suche so lange rückwärts, bis ein Tag mit Touren gefunden wird oder es keinen Vortag mehr gibt
     	HDay previousDaywithTour = day;
     	do 
   		{
@@ -422,18 +357,15 @@ public class HTour
   		}
   		while(previousDaywithTour!=null);
     	
-    	// Falls kein Vortag mit Tour existiert wird null zurückgegeben
     	if (previousDaywithTour==null)
     	{
     		previousTour = null;
     	}
-    	// Andernfalls die letzte Tour des Vortags
     	else
     	{
     		previousTour = previousDaywithTour.getLastTourOfDay();
     	}  	
     }
-    // Falls nicht wird die vorherige Tour dieses Tages zurückgegeben
     else
     {
     	previousTour = day.getTour(index-1);
@@ -443,18 +375,16 @@ public class HTour
 	
 	/**
 	 * 
-	 * Gibt die nächste Tour im Pattern zurück
-	 * (erste Tour des Folgetags oder nächste Tour des aktuellen Tags)
+	 * returns the next tour in the pattern
+	 * (first tour of the next day or next tour of this day)
 	 * 
 	 * @return
 	 */
 	public HTour getNextTourinPattern()
 	{
 		HTour nextTour;
-		//Prüfe, ob die Tour die letzte Tour des Tages ist
     if (index == day.getHighestTourIndex())
     {
-    	// Suche so lange vorwärts, bis ein Tag mit Touren gefunden wird oder es keinen Folgetag mehr gibt
     	HDay nextDaywithTour = day;
     	do 
   		{
@@ -462,19 +392,16 @@ public class HTour
   			if (nextDaywithTour!=null && !nextDaywithTour.isHomeDay()) break;
   		}
   		while(nextDaywithTour!=null);
-    	
-    	// Falls kein Folgetag mit Tour existiert wird null zurückgegeben
+
     	if (nextDaywithTour==null)
     	{
     		nextTour = null;
     	}
-    	// Andernfalls die letzte Tour des Vortags
     	else
     	{
     		nextTour = nextDaywithTour.getFirstTourOfDay();
     	}  	
     }
-    // Falls nicht wird die nächste Tour dieses Tages zurückgegeben
     else
     {
     	nextTour = day.getTour(index+1);
@@ -484,22 +411,23 @@ public class HTour
 	
 	/**
 	 * 
-	 * @param name spezifisches Attribut aus Map
+	 * @param name specific attribute from map
 	 * @return
 	 */
 	public double getAttributefromMap(String name) {
 		return this.attributes.get(name);
 	}
 
-	/**
-	 * @param attributes spezifischesAttribut für Map
-	 */
+/**
+ * 
+ * @param name specific attribute for map
+ * @param value
+ */
 	public void addAttributetoMap(String name, Double value) {
 		this.attributes.put(name, value);
 	}
 
 	/**
-	 * Prüft, ob ein Attribut in der Map existiert
 	 * 
 	 * @param name
 	 * @return
