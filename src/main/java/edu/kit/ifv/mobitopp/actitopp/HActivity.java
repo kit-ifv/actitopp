@@ -194,13 +194,11 @@ public class HActivity
 	
 	public byte getMobiToppActType() 
 	{
-		assert Configuration.ACTIVITY_TYPES_mobiTopp.contains(mobiToppActType) : "unknown mobitopp format activity type"; 
 		return mobiToppActType;
 	}
 
 	public void setMobiToppActType(byte mobiToppActType) 
 	{
-		assert Configuration.ACTIVITY_TYPES_mobiTopp.contains(mobiToppActType) : "unknown mobitopp format activity type"; 
 		this.mobiToppActType = mobiToppActType;
 	}
 	

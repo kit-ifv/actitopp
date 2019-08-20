@@ -140,7 +140,7 @@ public class Configuration {
   }
   
   /*
-   * steps that use lineare regression modeling
+   * steps that use linear regression modeling
    */
   public static final HashSet<String> linregsteps_filenames;
   static
@@ -149,13 +149,6 @@ public class Configuration {
   	linregsteps_filenames.add("97estimates");	
   }
   
-
-  
-	
-/*
- * activity types
- */	
-	public static final ArrayList<Byte> ACTIVITY_TYPES_mobiTopp = new ArrayList<Byte>(Arrays.asList((byte)1,(byte)2,(byte)3,(byte)6,(byte)7,(byte)11,(byte)12,(byte)41,(byte)42,(byte)51,(byte)52,(byte)53,(byte)77));
 
 	
 /*
