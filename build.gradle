@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven'
 
 group = 'edu.kit.ifv.mobitopp'
-version = '1.52'
+version = '1.6'
 wrapper.gradleVersion = '4.10'
 
 task sourcesJar(type: Jar, dependsOn: classes) {

@@ -30,50 +30,52 @@ public class ExampleActiTopp {
 	
 		createAndModelMultiplePersons_Example2();
 		
-		/*beispielhafte Verwendung eines Debug-Loggers für Entscheidung 2A*/
+		/*Demonstration of using a Debug-Loggers for decision step 2A*/
 		debugloggers.addDebugLogger("2A");
 
 		createAndModelMultiplePersons_Example2();
 
 		debugloggers.exportLoggerInfos("2A", "D:/DemoLogger2A.csv");
 		
+		Configuration.parameterset = "mopv14_nopkwhh";
+		createAndModelOnePerson_Example1_nocarinfo();		
+		
 	}
 	
 	
 	/**
 	 * 
-	 * Erzeugung einer Person inkl. Aktivitätenplan - Beispiel 1
+	 * Create a person including activity schedule - example 1
 	 * 
 	 */
 	public static void createAndModelOnePerson_Example1()
 	{
 		ActitoppPerson testperson = new ActitoppPerson(
 				10, 	// PersIndex
-				0, 		// Kinder 0-10
-				1, 		// Kinder unter 18
-				55, 	// Alter
-				1, 		// Beruf
-				1, 		// Geschlecht
-				2, 		// Raumtyp
-				2			// Pkw im HH
+				0, 		// number of children 0-10
+				1, 		// number of children below 18
+				55, 	// age
+				1, 		// employment status
+				1, 		// gender
+				2, 		// area of living
+				2			// number of cars in household
 				);		
 		System.out.println(testperson);
 					
 	 /* 
-	  * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
+	  * create schedules for a person until there is a schedule without any mistake
 	  *  
-		* In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-		* in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-		* In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
+	  * there might be overlapping of activities when having a unfavorable stream of random numbers.
+	  * if this occurs, the generation of activity schedules will be repeated with another
+	  * stream of random numbers.
 		*/
 		boolean scheduleOK = false;
     while (!scheduleOK)
     {
       try
       {
-    		// Erzeuge Wochenaktivitätenplan
-     	 testperson.generateSchedule(fileBase, randomgenerator);
-    		
+    		// create week activity schedule
+      	testperson.generateSchedule(fileBase, randomgenerator);
         scheduleOK = true;                
       }
       catch (InvalidPatternException e)
@@ -82,7 +84,45 @@ public class ExampleActiTopp {
         System.err.println("person involved: " + testperson.getPersIndex());
       }
 	  }
-		
+		//testperson.getweekPattern().printOutofHomeActivitiesList();
+		testperson.getWeekPattern().printAllActivitiesList();
+	}
+	
+	public static void createAndModelOnePerson_Example1_nocarinfo()
+	{
+		ActitoppPerson testperson = new ActitoppPerson(
+				10, 	// PersIndex
+				0, 		// number of children 0-10
+				1, 		// number of children below 18
+				55, 	// age
+				1, 		// employment status
+				1, 		// gender
+				2 		// area of living
+				);		
+		System.out.println(testperson);
+					
+	 /* 
+	  * create schedules for a person until there is a schedule without any mistake
+	  *  
+	  * there might be overlapping of activities when having a unfavorable stream of random numbers.
+	  * if this occurs, the generation of activity schedules will be repeated with another
+	  * stream of random numbers.
+		*/
+		boolean scheduleOK = false;
+    while (!scheduleOK)
+    {
+      try
+      {
+    		// create week activity schedule
+      	testperson.generateSchedule(fileBase, randomgenerator);
+        scheduleOK = true;                
+      }
+      catch (InvalidPatternException e)
+      {
+        System.err.println(e.getReason());
+        System.err.println("person involved: " + testperson.getPersIndex());
+      }
+	  }
 		//testperson.getweekPattern().printOutofHomeActivitiesList();
 		testperson.getWeekPattern().printAllActivitiesList();
 	}
@@ -90,40 +130,39 @@ public class ExampleActiTopp {
 	
 	/**
 	 * 
-	 * Erzeugung einer Person inkl. Aktivitätenplan - Beispiel 2
+	 * Create a person including activity schedule - example 2
 	 * 
 	 */
 	public static void createAndModelOnePerson_Example2()
 	{
 		ActitoppPerson testperson = new ActitoppPerson(
 				20, 	// PersIndex
-				0, 		// Kinder 0-10
-				1, 		// Kinder unter 18
-				55, 	// Alter
-				1, 		// Beruf
-				1, 		// Geschlecht
-				2, 		// Raumtyp
-				2,		// Pkw im HH
-				3.0,	// Pendeldistanz zur Arbeit in Kilometern	(0 falls kein Pendeln)
-				0.0		// Pendeldistanz zu Bildungszwecken in Kilometern (0 falls kein Pendeln)
+				0, 		// number of children 0-10
+				1, 		// number of children below 18
+				55, 	// age
+				1, 		// employment status
+				1, 		// gender
+				2, 		// area of living
+				2,		// number of cars in household
+				3.0,	// commuting distance work (kilometers - 0 if no commuting)
+				0.0		// commuting distance education (kilometers - 0 if no commuting)
 				);		
 		System.out.println(testperson);
 		
 	 /* 
-	  * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
+	  * create schedules for a person until there is a schedule without any mistake
 	  *  
-		* In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-		* in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-		* In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
+	  * there might be overlapping of activities when having a unfavorable stream of random numbers.
+	  * if this occurs, the generation of activity schedules will be repeated with another
+	  * stream of random numbers.
 		*/
 		boolean scheduleOK = false;
 		while (!scheduleOK)
 		{
 			 try
 			 {
-				// Erzeuge Wochenaktivitätenplan
+				 // create week activity schedule
 				 testperson.generateSchedule(fileBase, randomgenerator);
-				
 			   scheduleOK = true;                
 			 }
 			 catch (InvalidPatternException e)
@@ -132,7 +171,6 @@ public class ExampleActiTopp {
 			   System.err.println("person involved: " + testperson.getPersIndex());
 			 }
 		}
-		
 		//testperson.getweekPattern().printOutofHomeActivitiesList();
 		testperson.getWeekPattern().printAllActivitiesList();
 	}
@@ -142,49 +180,48 @@ public class ExampleActiTopp {
 	
 	/**
 	 * 
-	 * Erzeugung einer Person inkl. Haushaltskontext und Aktivitätenplan - Beispiel 3
+	 * Create a person including household context and activity schedule - example 3
 	 * 
 	 */
 	public static void createAndModelOnePerson_Example3()
 	{
 		
 		ActiToppHousehold testhousehold = new ActiToppHousehold(
-				1,		// Haushaltsindex
-				0, 		// Kinder 0-10
-				1, 		// Kinder unter 18
-				2, 		// Raumtyp
-				2			// Pkw im HH
+				1,		// household index
+				0, 		// number of children 0-10
+				1, 		// number of children bwlow 18
+				2, 		// are of living
+				2			// number of cars in household
 				);
 		
 		ActitoppPerson testperson = new ActitoppPerson(
-				testhousehold,  // Haushalt
-				1,							// PersNr im Haushalt
+				testhousehold,  // household
+				1,							// person number in household
 				10, 						// PersIndex
-				55, 						// Alter
-				1, 							// Beruf
-				1 							// Geschlecht
+				55, 						// age
+				1, 							// employment status
+				1 							// gender
 				);		
 		
-		// Person zum Haushalt hinzufügen
+		// add person to household
 		testhousehold.addHouseholdmember(testperson, testperson.getPersIndex());
 		
 		System.out.println(testperson);
 					
 	 /* 
-	  * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
+	  * create schedules for a person until there is a schedule without any mistake
 	  *  
-		* In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-		* in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-		* In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
+	  * there might be overlapping of activities when having a unfavorable stream of random numbers.
+	  * if this occurs, the generation of activity schedules will be repeated with another
+	  * stream of random numbers.
 		*/
 		boolean scheduleOK = false;
     while (!scheduleOK)
     {
       try
       {
-    		// Erzeuge Wochenaktivitätenplan
-     	 testperson.generateSchedule(fileBase, randomgenerator);
-    		
+      	// create week activity schedule
+     	 	testperson.generateSchedule(fileBase, randomgenerator);
         scheduleOK = true;                
       }
       catch (InvalidPatternException e)
@@ -193,7 +230,6 @@ public class ExampleActiTopp {
         System.err.println("person involved: " + testperson.getPersIndex());
       }
 	  }
-		
 		//testperson.getweekPattern().printOutofHomeActivitiesList();
 		testperson.getWeekPattern().printAllActivitiesList();
 	}
@@ -201,7 +237,7 @@ public class ExampleActiTopp {
 	
 	/**
 	 * 
-	 * Erzeugung mehrerer Personen inkl. Aktivitätenplan
+	 * Create multiple persons including activity schedules - example 1
 	 * 
 	 */
 	public static void createAndModelMultiplePersons_Example1()
@@ -216,23 +252,21 @@ public class ExampleActiTopp {
 				ActitoppPerson actperson = personmap.get(key);
 				System.out.println(actperson);
 				// System.out.println(actperson.getPersIndex());
-				
-				
+			
 			 /* 
-			  * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
+			  * create schedules for a person until there is a schedule without any mistake
 			  *  
-				* In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-				* in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-				* In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
+			  * there might be overlapping of activities when having a unfavorable stream of random numbers.
+			  * if this occurs, the generation of activity schedules will be repeated with another
+			  * stream of random numbers.
 				*/
 				boolean scheduleOK = false;
 		    while (!scheduleOK)
 		    {
 	        try
 	        {
-	      		// Erzeuge Wochenaktivitätenplan
+	        	// create week activity schedule
 	        	actperson.generateSchedule(fileBase, randomgenerator);
-	      		
 	          scheduleOK = true;                
 	        }
 	        catch (InvalidPatternException e)
@@ -240,12 +274,10 @@ public class ExampleActiTopp {
 	          System.err.println(e.getReason());
 	        }
 		    }
-				
 				actperson.getWeekPattern().printAllActivitiesList();
-				 
 			}
 				
-			// Output als CSV-Datei
+			// Output as csv file
 			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
 			tripwriter.exportTripData(personmap);
 			
@@ -264,7 +296,7 @@ public class ExampleActiTopp {
 	
 	/**
 	 * 
-	 * Erzeugung mehrerer Personen inkl. Haushaltskontext & Aktivitätenplan
+	 * Create multiple persons including household contexts and activity schedules - example 2
 	 * 
 	 * 
 	 */
@@ -302,11 +334,11 @@ public class ExampleActiTopp {
 		
 		try
 		{
-			// Output der Wege als CSV-Datei
+			// Output of trips as csv file
 			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
 			tripwriter.exportTripData(householdmap);
 						
-			// Output der Aktivitäten als CSV-Datei
+			// Output of activities as csv file
 			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
 			activitywriter.exportActivityData(householdmap);
 		}
@@ -314,21 +346,17 @@ public class ExampleActiTopp {
 		{
 			e.printStackTrace();
 		}
-		
-			
+	
 		System.out.println("all persons processed!");	
-		
 		
 		LocalDateTime end = LocalDateTime.now();
 		long timeende = System.currentTimeMillis();
 		System.out.println("End: " + end.format(df)); 
 		
-		
 		long dauer_msec = (timeende - timestart);
 		System.out.println("Duration total: " + dauer_msec + " milli sec"); 
 		double dauer_msec_perhh = dauer_msec / householdmap.size();
 		System.out.println("Duration per HH: " + dauer_msec_perhh + " milli sec");
-
 
 	}
 
@@ -337,41 +365,37 @@ public class ExampleActiTopp {
 	{
 		System.out.println("HH: " + acthousehold.getHouseholdIndex() + " HHGRO: " + acthousehold.getNumberofPersonsinHousehold());
 		
-						
-		/* 
-		 * Erzeuge Schedules für die Person bis der Schedule keine Fehler mehr hat.
-		 * 
-		 * Reihenfolge der Aktivitätenplanmodellierung orientiert sich an der Wahrscheinlichkeit des Anteils gemeinsamer Aktivitäten
-		 * 
-		 * In einigen Fällen kommt es aufgrund ungünstiger Zufallszahlen zu Überlappungen
-		 * in den Aktivitätenplänen (bspw. nicht genug Zeit für alle Aktivitäten).
-		 * In diesen seltenen Fällen wird die Planerstellung mit einer neuen Zufallszahl wiederholt.
-		 */
 		
+	 /* 
+	  * create schedules for a person until there is a schedule without any mistake
+	  * 
+	  * order of modeling is based in possible share of joint activities
+	  *  
+	  * there might be overlapping of activities when having a unfavorable stream of random numbers.
+	  * if this occurs, the generation of activity schedules will be repeated with another
+	  * stream of random numbers.
+		*/
 		boolean householdscheduleOK = false;
 		while (!householdscheduleOK)
 		{	
 			try
 			{
-				
-				//DebugLogger explizit für diesen Haushalt erzeugen
+				//create DebugLogger
 				DebugLoggers hhlogger = new DebugLoggers(debugloggers);
 				
-				// Pläne für den gesamten Haushalt generieren
+				//create activity schedules for the whole household
 				acthousehold.generateSchedules(fileBase, randomgenerator, hhlogger);
 
 				//System.out.println("HHdone: " + key);
 				householdscheduleOK = true;
 				
-				//Die DebugInformationen zu dem übergeordneten Logger hinzufügen
+				//add debug information to the overall logger
 				debugloggers.addHouseholdDebugInfotoOverallLogger(hhlogger);
-				
 			}
 			catch (InvalidPatternException e)
 			{
 				System.err.println(e.getReason());
-				
-		    // Setze die Modellierungsergebnisse dieses Haushalts zurück für neuen Versuch
+		    //reset results for the whole household when having an error
 		    acthousehold.resetHouseholdModelingResults();
 			}
 		}

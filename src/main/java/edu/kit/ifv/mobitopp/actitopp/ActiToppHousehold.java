@@ -24,7 +24,7 @@ public class ActiToppHousehold {
 	
 	/**
 	 * 
-	 * constructor
+	 * constructor with number of cars in household
 	 *
 	 * @param householdIndex
 	 * @param children0_10
@@ -41,6 +41,27 @@ public class ActiToppHousehold {
 		this.children_u18 = children_u18;
 		this.areatype = areatype;
 		this.numberofcarsinhousehold = numberofcarsinhousehold;
+
+		this.householdmembers = new HashMap<Integer, ActitoppPerson>();
+	}
+	
+	/**
+	 * 
+	 * constructor without number of cars in household
+	 *
+	 * @param householdIndex
+	 * @param children0_10
+	 * @param children_u18
+	 * @param areatype
+	 */
+	public ActiToppHousehold(int householdIndex, int children0_10, int children_u18, int areatype) {
+		
+		super();
+		this.householdIndex = householdIndex;
+
+		this.children0_10 = children0_10;
+		this.children_u18 = children_u18;
+		this.areatype = areatype;
 
 		this.householdmembers = new HashMap<Integer, ActitoppPerson>();
 	}

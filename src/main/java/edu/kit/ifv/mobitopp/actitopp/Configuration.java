@@ -1,7 +1,5 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -25,7 +23,7 @@ public class Configuration {
  * stuttgart			=	use parameter estimation of MOP 2004-2013 calibrated for stuttgart area (only actitopp version 1.0)	
  */
 	
-	public static final String parameterset = "mopv14";
+	public static String parameterset = "mopv14_withpkwhh";
 
 /*
  * input parameter set for detailed modeling of activity purposes used by mobitopp (modeling step 98)
@@ -34,11 +32,11 @@ public class Configuration {
  * purposes_regiomove			= use parameter sets for regiomove project
  * 
  */
-	public static final String parameterset_purposes = "purposes_regiomove";
+	public static String parameterset_purposes = "purposes_regiomove";
 	
 /*
  * when modeling a whole week, we need to consider stability aspects in behavior (e.g. leaving the house at the same time every morning).
- * To demonstrate the siginficance of this aspects, the coordination of the modeling can enabled and disabled.
+ * To demonstrate the significance of this aspects, the coordination of the modeling can enabled and disabled.
  * 
  * i.e: when disabled, different steps (e.g. 8A) will be skipped
  * 	

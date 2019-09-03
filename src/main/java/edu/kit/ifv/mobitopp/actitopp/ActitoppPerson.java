@@ -44,7 +44,7 @@ public class ActitoppPerson
 	
 	
 	/**
-	 * constructor to create a peron without household context
+	 * constructor to create a person without household context
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -90,10 +90,56 @@ public class ActitoppPerson
 		
 		this.addAttributetoMap("numbermodeledinhh", (double) (1));	
 		}
+
+	
+	/**
+	 * constructor to create a person without household context
+	 * 
+	 * @param PersIndex
+	 * @param children0_10
+	 * @param children_u18
+	 * @param age
+	 * @param employment
+	 * @param gender
+	 * @param areatype
+	 */
+	public ActitoppPerson(
+			int PersIndex,
+			int children0_10,
+			int children_u18,
+			int age,
+			int employment,
+			int gender,
+			int areatype
+	) {
+		
+		/*
+		 * Person can be generated without having household context.
+		 * To simplify the internal modeling process, a household object 
+		 * containing this person only will be created for these cases.
+		 */
+		this.household = new ActiToppHousehold(
+				PersIndex, 
+				children0_10, 
+				children_u18, 
+				areatype
+		);
+		this.household.addHouseholdmember(this, 1);
+				
+		this.setPersIndex(PersIndex);
+		this.setAge(age);
+		this.setEmployment(employment);
+		this.setGender(gender);  
+		
+		this.attributes = new HashMap<String, Double>();
+		this.jointActivitiesforConsideration = new ArrayList<HActivity>();
+		
+		this.addAttributetoMap("numbermodeledinhh", (double) (1));	
+		}
 	
 	
 	/**
-	 * constructor to create a peron without household context but with commuting distances
+	 * constructor to create a person without household context but with commuting distances
 	 * 
 	 * @param PersIndex
 	 * @param children0_10
@@ -127,7 +173,39 @@ public class ActitoppPerson
 	
 	
 	/**
-	 * constructor to create a peron with household context
+	 * constructor to create a person without household context but with commuting distances
+	 * 
+	 * @param PersIndex
+	 * @param children0_10
+	 * @param children_u18
+	 * @param age
+	 * @param employment
+	 * @param gender
+	 * @param areatype
+	 * @param commutingdistance_work
+	 * @param commutingdistance_education
+	 */
+	public ActitoppPerson(
+			int PersIndex,
+			int children0_10,
+			int children_u18,
+			int age,
+			int employment,
+			int gender,
+			int areatype,
+			double commutingdistance_work,
+			double commutingdistance_education
+	) {
+		
+		this(PersIndex,children0_10,children_u18,age,employment,gender,areatype);
+		
+		this.setCommutingdistance_work(commutingdistance_work);
+		this.setCommutingdistance_education(commutingdistance_education);
+		}	
+	
+	
+	/**
+	 * constructor to create a person with household context
 	 * 
 	 * @param household
 	 * @param PersIndex
@@ -165,7 +243,7 @@ public class ActitoppPerson
 
 	
   /**
-	 * constructor to create a peron with household context and commuting distances
+	 * constructor to create a person with household context and commuting distances
 	 * 
 	 * @param household
 	 * @param PersIndex
