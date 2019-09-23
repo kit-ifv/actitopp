@@ -6,7 +6,7 @@ More information about the model itself can be found [here](https://trid.trb.org
 
 # Usage
 
-To start using actiTopp, [ExampleActiTopp](https://github.com/mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/ExampleActiTopp.java) shows how a person is created and how a week activity schedule can be generated or how multiple persons can be created using a CSVInputReader.
+To start using actiTopp, [ExampleActiTopp](https://github.com/ifv-mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/demo/ExampleActiTopp.java) shows how a person is created and how a week activity schedule can be generated or how multiple persons can be created using a CSVInputReader.
 
 # Input Variables
 
