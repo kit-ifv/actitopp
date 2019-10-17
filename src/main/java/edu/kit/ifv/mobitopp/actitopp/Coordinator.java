@@ -244,6 +244,9 @@ public class Coordinator
     
     // save result
     double decision = Double.parseDouble(step.getAlternativeChosen());
+    // set anztage_w to 0 if person is not allowed to work (this may be configured for minors)
+    if (variablenname == "anztage_w" && !person.isAllowedToWork()) decision=0;  
+    
     person.addAttributetoMap(variablenname, decision);
     
     if(debugloggers!= null && debugloggers.existsLogger(id))
