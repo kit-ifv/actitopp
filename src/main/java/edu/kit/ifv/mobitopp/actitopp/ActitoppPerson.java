@@ -30,6 +30,8 @@ public class ActitoppPerson
 	private int gender;
 	private int employment;
 	
+	private boolean isAllowedToWork = true;
+	
 	// commuting distance are 0 by default, i.e. not available or person is not commuting
 	private double commutingdistance_work = 0.0;
 	private double commutingdistance_education = 0.0;
@@ -600,6 +602,9 @@ public class ActitoppPerson
 		message.append("\n - gender : ");
 		message.append(getGender());
 		
+		message.append("\n - is allowed to work : ");
+		message.append(isAllowedToWork());
+		
 		message.append("\n - commuting distance work : ");
 		message.append(getCommutingdistance_work());		
 		
@@ -715,7 +720,7 @@ public class ActitoppPerson
 		//make sure the activity is joint
 		assert JointStatus.JOINTELEMENTS.contains(act.getJointStatus()) : "no jointAct!";
 		
-		// check if there is already an activitx at the same time
+		// check if there is already an activity at the same time
 		boolean activityconflict = false;
 		for (HActivity tmpact : jointActivitiesforConsideration)
 		{
@@ -740,7 +745,7 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * determined if a person is anyway employed (full time, part time or in vocational program)
+	 * determines if a person is anyway employed (full time, part time or in vocational program)
 	 * 
 	 * @return
 	 */
@@ -751,7 +756,7 @@ public class ActitoppPerson
 	}
 	
 	/**
-	 * determined if a person is in school or student
+	 * determines if a person is in school or student
 	 * 
 	 * @return
 	 */
@@ -785,6 +790,26 @@ public class ActitoppPerson
         return false;
     }
     return false;
+	}
+
+	/**
+	 * determines if a person is allowed to work
+	 * this may be disabled for minors to totally block them from having working activities
+	 * 
+	 * @return
+	 */
+	public boolean isAllowedToWork() {
+		return isAllowedToWork;
+	}
+
+	/**
+	 * sets if a person is allowed to work
+	 * this may be disabled for minors to totally block them from having working activities
+	 * 
+	 * @param isAllowedToWork
+	 */
+	public void setAllowedToWork(boolean isAllowedToWork) {
+		this.isAllowedToWork = isAllowedToWork;
 	}
 	
 }
