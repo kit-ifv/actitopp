@@ -35,9 +35,6 @@ public class HActivity
   
   private List<ActitoppPerson> jointParticipants  = new ArrayList<ActitoppPerson>();
  
-  private byte mobiToppActType		= -1;
-           
-
 	/**
    * 
    * constructor
@@ -190,16 +187,6 @@ public class HActivity
 		assert tripAfterActivityisScheduled() : "trip after activity in not intialized";
 		int tmptriptimeafter = tripafteractivity.getDuration();
 		return tmptriptimeafter;
-	}
-	
-	public byte getMobiToppActType() 
-	{
-		return mobiToppActType;
-	}
-
-	public void setMobiToppActType(byte mobiToppActType) 
-	{
-		this.mobiToppActType = mobiToppActType;
 	}
 	
 	/**
@@ -416,7 +403,7 @@ public class HActivity
   				" start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
   				" end " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
   				" duration: " + (durationisScheduled() ? this.duration : "n.a.") + 
-  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + " (" + this.mobiToppActType + ")" + 
+  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + 
   				" jointStatus: " + this.jointStatus
   				;  		
   	}
@@ -426,7 +413,7 @@ public class HActivity
 		  				" start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
 		  				" end" + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
 		  				" duration: " + (durationisScheduled() ? this.duration : "n.a.") + 
-		  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + " (" + this.mobiToppActType + ")" + 
+		  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + 
 		  				" jointStatus: " + this.jointStatus +
 		  				" trip before: " + (tripBeforeActivityisScheduled() ? getEstimatedTripTimeBeforeActivity() : "n.a.") + 
 		  				" trip after: " + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : "n.a.")
