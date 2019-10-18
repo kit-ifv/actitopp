@@ -15,18 +15,15 @@ import java.util.Map.Entry;
  *
  */
 public class ModelFileBase
-{
- 
- 
+{ 
   private HashMap<String, DCModelSteplnformation> modelInformationDCsteps;
   private HashMap<String, WRDModelSteplnformation> modelInformationWRDsteps;
-
   private HashMap<String,HashMap<String, LinRegEstimate>> linearregressionestimatesmap;
   
   
   /**
    * 
-   * Konstruktor
+   * Constructor
    * 
    */
   public ModelFileBase()
@@ -39,7 +36,7 @@ public class ModelFileBase
   
     try
     {
-    	// initialisations
+    	// Initializations
     	initDCStepInformation();
     	initDCStepParameters();
     	initWRDSteps();
@@ -82,7 +79,7 @@ public class ModelFileBase
   
   /**
    * 
-   * return linear regression estimated map for speicified regressionname
+   * return linear regression estimated map for specified regressionname
    * 
    * @param regressionname
    * @return
