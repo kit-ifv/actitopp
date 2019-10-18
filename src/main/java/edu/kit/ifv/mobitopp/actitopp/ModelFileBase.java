@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 
 /**
@@ -16,6 +17,9 @@ import java.util.Map.Entry;
  */
 public class ModelFileBase
 { 
+	
+	private String parameterset;
+	
   private HashMap<String, DCModelSteplnformation> modelInformationDCsteps;
   private HashMap<String, WRDModelSteplnformation> modelInformationWRDsteps;
   private HashMap<String,HashMap<String, LinRegEstimate>> linearregressionestimatesmap;
@@ -23,12 +27,29 @@ public class ModelFileBase
   
   /**
    * 
-   * Constructor
+   * Constructor with standard parameters (using Configuration values)
    * 
    */
   public ModelFileBase()
   {
+  	this(Configuration.parameterset, Configuration.dcsteps, Configuration.wrdsteps, Configuration.linregsteps_filenames);  	
+  }
+  
+  
+  /**
+   * 
+   * Constructor to enable custom parametersets or step information
+   * 
+   * @param parameterset
+   * @param dcsteps
+   * @param wrdsteps
+   * @param linregsteps_filenames
+   */
+  public ModelFileBase(String parameterset, HashSet<String> dcsteps, HashMap<String, Integer> wrdsteps, HashSet<String> linregsteps_filenames)
+  {
     super();
+  
+    this.parameterset = parameterset;
     
     this.modelInformationDCsteps = new HashMap<String, DCModelSteplnformation>();
     this.modelInformationWRDsteps = new HashMap<String, WRDModelSteplnformation>();
@@ -37,11 +58,19 @@ public class ModelFileBase
     try
     {
     	// Initializations
-    	initDCStepInformation();
-    	initDCStepParameters();
-    	initWRDSteps();
-    	
-      initLinearRegressionEstimates();
+    	if (dcsteps!=null) 
+    	{
+    		initDCStepInformation(dcsteps);
+    		initDCStepParameters(dcsteps);
+    	}
+    	if (wrdsteps != null)
+    	{
+    		initWRDSteps(wrdsteps);
+    	}
+    	if (linregsteps_filenames != null)
+      {
+    		initLinearRegressionEstimates(linregsteps_filenames);
+      }
     }
     catch (IOException e)
     {
@@ -89,34 +118,19 @@ public class ModelFileBase
   	return linearregressionestimatesmap.get(regressionname);
   }
     
-	/**
-   * 
-   * read all relevant model flow information from files for dc steps
-   * 
-   * @throws FileNotFoundException
-   * @throws IOException
-   */
-  private void initDCStepInformation() throws FileNotFoundException, IOException
+/**
+ * 
+ * read all relevant model flow information from files for dc steps
+ * 
+ * @param dcsteps
+ * @throws FileNotFoundException
+ * @throws IOException
+ */
+  private void initDCStepInformation(HashSet<String> dcsteps) throws FileNotFoundException, IOException
   {
-    for (String s : Configuration.dcsteps)
+    for (String s : dcsteps)
     {
-      String sourceLocation = Configuration.parameterset + "/" + s + "model_flow.csv";
-      CSVDCModelInformationLoader loader = new CSVDCModelInformationLoader();
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
-				
-				// Creates ModelInformationOject
-				DCModelSteplnformation modelStep = new DCModelSteplnformation();
-				// Load ParameterNames, Contexts and Alternatives
-				loader.loadModelFlowData(input, modelStep);
-				// Adds the modelinformation to the map
-				modelInformationDCsteps.put(s, modelStep);
-			}
-    }
-    
-    // input information for detailed purpose modeling
-    for (String s : Configuration.dcsteps_purposes)
-    {
-      String sourceLocation = Configuration.parameterset_purposes + "/" + s + "model_flow.csv";
+      String sourceLocation = parameterset + "/" + s + "model_flow.csv";
       CSVDCModelInformationLoader loader = new CSVDCModelInformationLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
 				
@@ -130,34 +144,21 @@ public class ModelFileBase
     }
   }
   
-  /**
+	/**
 	 * 
 	 * read all relevant parameter from files for dc steps 
-   * @throws IOException 
 	 * 
+	 * @param dcsteps
+	 * @throws IOException
 	 */
-	private void initDCStepParameters() throws IOException
+	private void initDCStepParameters(HashSet<String> dcsteps) throws IOException
 	{
 		// parameters need to be available for all DC model steps
-    for (String keyString : Configuration.dcsteps)
+    for (String keyString : dcsteps)
     {
       DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
       
-      String sourceLocation = Configuration.parameterset + "/"+ keyString +"Params.csv";
-      CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
-      
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
-			{
-				parameterLoader.loadParameterValues(input, modelstep);		
-			}
-    }
-    
-    // input information for detailed purpose modeling
-    for (String keyString : Configuration.dcsteps_purposes)
-    {
-      DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
-      
-      String sourceLocation = Configuration.parameterset_purposes + "/"+ keyString +"Params.csv";
+      String sourceLocation = parameterset + "/"+ keyString +"Params.csv";
       CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
       
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
@@ -168,16 +169,17 @@ public class ModelFileBase
 	}
   
 	/**
-   * 
-   * initialize weighted random draw steps
-   * 
-   * @throws FileNotFoundException
-   * @throws IOException
-   */
-  private void initWRDSteps() throws FileNotFoundException, IOException
+	 * 
+	 * initialize weighted random draw steps
+	 * 
+	 * @param wrdsteps
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+  private void initWRDSteps(HashMap<String, Integer> wrdsteps) throws FileNotFoundException, IOException
   {
     // initialize all steps and all categories for each step
-    for(Entry<String, Integer> mapentry : Configuration.wrdsteps.entrySet())
+    for(Entry<String, Integer> mapentry : wrdsteps.entrySet())
     {
     	String stepid = mapentry.getKey();
     	int maxinidex = mapentry.getValue();
@@ -187,7 +189,7 @@ public class ModelFileBase
     	
       for(int index = 0; index <= maxinidex; index++)
       {	
-        String sourceLocation = Configuration.parameterset + "/"+ stepid +"_KAT_"+ index +".csv";
+        String sourceLocation = parameterset + "/"+ stepid +"_KAT_"+ index +".csv";
         CSVWRDDistributionLoader loader = new CSVWRDDistributionLoader();
         
 				try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
@@ -200,15 +202,17 @@ public class ModelFileBase
   }
   
   /**
+   * 
    * initialize estimated for linear regression steps
    * 
+   * @param linregsteps_filenames
    * @throws IOException
    */
-  private void initLinearRegressionEstimates() throws IOException
+  private void initLinearRegressionEstimates(HashSet<String> linregsteps_filenames) throws IOException
   {
-    for(String s : Configuration.linregsteps_filenames)
+    for(String s : linregsteps_filenames)
     {   
-      String sourceLocation = Configuration.parameterset + "/"+ s +".csv";
+      String sourceLocation = parameterset + "/"+ s +".csv";
       CSVLinRegEstimatesLoader loader = new CSVLinRegEstimatesLoader();
 			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
 			{
