@@ -24,8 +24,6 @@ public class ActitoppPerson
 	
 	// stores all activity information of the week pattern
 	private HWeekPattern weekPattern;
-	
-	private Coordinator modelCoordinator;
 
 	private int PersIndex;
 	
@@ -664,15 +662,19 @@ public class ActitoppPerson
 	 * @throws InvalidPatternException
 	 */
 	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPatternException
-	{		
-		// Erzeuge ein leeres Default-Pattern
+	{
+		//create an empty Default-Pattern
 		weekPattern = new HWeekPattern(this);
 		
-		// Erzeuge einen Coordinator zum Modellablauf
-		this.modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
-	
-		// Erzeuge den Schedule
-		modelCoordinator.executeModel();		
+		if (getAge()<10)
+		{
+			System.err.println("actitopp can only create activity schedules for persons aged 10 years and older!");
+		}
+		else
+		{	
+			Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
+			modelCoordinator.executeModel();		
+		}
 	}
 	
 	/**
@@ -685,14 +687,18 @@ public class ActitoppPerson
 	 */
 	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator, DebugLoggers debugloggers)	throws InvalidPatternException
 	{		
-		// Erzeuge ein leeres Default-Pattern
+		//create an empty Default-Pattern
 		weekPattern = new HWeekPattern(this);
 		
-		// Erzeuge einen Coordinator zum Modellablauf
-		this.modelCoordinator = new Coordinator(this, modelbase, randomgenerator, debugloggers);
-	
-		// Erzeuge den Schedule
-		modelCoordinator.executeModel();		
+		if (getAge()<10)
+		{
+			System.err.println("actitopp can only create activity schedules for persons aged 10 years and older!");
+		}
+		else
+		{
+			Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator, debugloggers);
+			modelCoordinator.executeModel();		
+		}
 	}
 	
   /**
@@ -814,15 +820,6 @@ public class ActitoppPerson
 	public void setAllowedToWork(boolean isAllowedToWork) {
 		this.isAllowedToWork = isAllowedToWork;
 	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public Coordinator getModelCoordinator() {
-		return modelCoordinator;
-	}
-
 
 	
 }
