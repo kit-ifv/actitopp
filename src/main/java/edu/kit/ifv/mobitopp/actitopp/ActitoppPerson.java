@@ -668,7 +668,8 @@ public class ActitoppPerson
 		
 		if (getAge()<10)
 		{
-			System.err.println("actitopp can only create activity schedules for persons aged 10 years and older!");
+			System.err.println("actitopp can only create correct activity schedules for persons aged 10 years and older! - creating full-week home activity instead");
+			weekPattern.addHomeActivity(new HActivity(weekPattern.getDay(0), ActivityType.HOME, 10080, 0));
 		}
 		else
 		{	
@@ -692,7 +693,8 @@ public class ActitoppPerson
 		
 		if (getAge()<10)
 		{
-			System.err.println("actitopp can only create activity schedules for persons aged 10 years and older!");
+			System.err.println("actitopp can only create correct activity schedules for persons aged 10 years and older! - creating full-week home activity instead");
+			weekPattern.addHomeActivity(new HActivity(weekPattern.getDay(0), ActivityType.HOME, 10080, 0));
 		}
 		else
 		{
