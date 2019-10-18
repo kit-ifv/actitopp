@@ -61,19 +61,7 @@ public class DCDefaultModelStep extends AbsHModelStep
     	alternatives.add(new DCAlternative(s));
     }
   }
-  
-  /**
-   * 
-   * @param id
-   * @param modelCoordinator
-   * @param attributeLookup
-   */
-  @Deprecated
-  public DCDefaultModelStep(String id, Coordinator modelCoordinator, AttributeLookup attributeLookup)
-  {
-  	 this(id, modelCoordinator.getFileBase(), attributeLookup, modelCoordinator.getRandomGenerator());
-  }
-  
+   
   
   /**
    * 
