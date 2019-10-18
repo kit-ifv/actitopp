@@ -176,10 +176,7 @@ public class Coordinator
 	
     // 2) create home activities to be performed between tours
     createHomeActivities(allModeledActivities);
-    
-    // 3) convert actiTopp purpose types to mobiTopp ones
-    convertactiToppPurposesTomobiToppPurposeTypes(pattern.getAllActivities());
-    
+        
     // DEBUG
     if (Configuration.debugenabled)
     {
@@ -239,7 +236,7 @@ public class Coordinator
 		AttributeLookup lookup = new AttributeLookup(person);
 		
     // create step object
-    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
     step.doStep();
     
     // save result
@@ -271,7 +268,7 @@ public class Coordinator
     		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
       	
   	    // create step object
-  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+  	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
   	    
   	    // if there are existing tours (e.g., from joint activities) , disable H as alternative as being at home is no longer a valid alternative
   	    if (currentDay.getAmountOfTours()>0 || numberoftoursperday_lowerboundduetojointactions[currentDay.getIndex()]>0)
@@ -370,7 +367,7 @@ public class Coordinator
   		AttributeLookup lookup = new AttributeLookup(person, currentDay);   	
     	
 	    // create step object
-	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
 	    
 	    // initialize minimum number of tours
 	    int minnumberoftours=0;
@@ -450,7 +447,7 @@ public class Coordinator
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
         	
     	    // create step object
-    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+    	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
     	    
     	    // if number of working days is achieved, disable W as alternative
     	    if (
@@ -519,7 +516,7 @@ public class Coordinator
     		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
       	
     	  // create step object
-  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+  	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
     		
   	    // initialize minimum number of activities
   	    int minimumnumberofactivities =0;
@@ -596,7 +593,7 @@ public class Coordinator
         		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
           	
       	    // create step object
-      	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+      	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
       	    
       	    // if number of working days is achieved, disable W as alternative
       	    if (
@@ -982,7 +979,7 @@ public class Coordinator
 			AttributeLookup lookup = new AttributeLookup(person);
 			
 	    // create step object
-	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
 	    step.doStep();
 	    
 	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -1054,7 +1051,7 @@ public class Coordinator
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
         	
     	    // create step object
-    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+    	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
     	    step.doStep();
     	    
     	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -1116,7 +1113,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
 	    	    // create step object
-	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
+	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, fileBase, lookup, randomgenerator);
 	    	    
 	    	    // limit alternatives if needed
 	    	    if (currentActivity.getAttributesMap().get("standarddauer") == 1.0d)
@@ -1240,7 +1237,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
 	    	    // create step object
-	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
+	    	    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, fileBase, lookup, randomgenerator);
 	    	   
 	    	    // limit bounds because of determined durations
 	    	    int[] durationBounds = calculateDurationBoundsDueToOtherActivities(currentActivity);   
@@ -1322,7 +1319,7 @@ public class Coordinator
   		AttributeLookup lookup = new AttributeLookup(person);   	
     	
 	    // create step object
-	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
 	    step.doStep();
 
 	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -1359,7 +1356,7 @@ public class Coordinator
 	    		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	      	
 	  	    // create step object
-	  	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+	  	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
 	  	    step.doStep();
 	  	    
 	  	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -1475,7 +1472,7 @@ public class Coordinator
 	  		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
 	    	
 		    // create step object
-		    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, this, lookup);
+		    DCDefaultModelStep step_dc = new DCDefaultModelStep(id_dc, fileBase, lookup, randomgenerator);
 		     		
 	      // limit alternatives
 	      int bounds_dc[] = calculateStartingBoundsForTours(currentTour, true);
@@ -1565,7 +1562,7 @@ public class Coordinator
       		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour);   	
         	
     	    // create step object
-    	    DCDefaultModelStep dcstep = new DCDefaultModelStep("10S", this, lookup);
+    	    DCDefaultModelStep dcstep = new DCDefaultModelStep("10S", fileBase, lookup, randomgenerator);
     	     		
           // limit alternatives
           int dcbounds[] = calculateBoundsForHomeTime(currentTour, true);
@@ -1645,7 +1642,7 @@ public class Coordinator
 	      		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, currentActivity);   	
 	        	
 	    	    // create step object
-	    	    DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
+	    	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
 	    	    step.doStep();
 	    	    
       	    if(debugloggers!= null && debugloggers.existsLogger(id))
@@ -1663,38 +1660,7 @@ public class Coordinator
 	    }
 	  }
 	}
-
-
-
-	/**
-	 * 
-	 * detailed modeling of activity purposes
-	 * 
-	 * @param activity
-	 * @param id
-	 */
-	private void executeStep98(HActivity activity, String id)
-	{ 
-		HDay currentDay = activity.getDay();
-		HTour currentTour = activity.getTour();
-	
-		// create attribute lookup
-		AttributeLookup lookup = new AttributeLookup(person, currentDay, currentTour, activity);   	
-		
-	  // create step object
-	  DCDefaultModelStep step = new DCDefaultModelStep(id, this, lookup);
-	  step.doStep();
-
-    if(debugloggers!= null && debugloggers.existsLogger(id))
-    {
-    	debugloggers.getLogger(id).put(activity, String.valueOf(step.getAlternativeChosen()));
-    }
-	
-	  int chosenActivityType = Integer.parseInt(step.getAlternativeChosen());
-	  activity.setMobiToppActType((byte) chosenActivityType);          
-	}
-
-   
+  
 
 	
 	/**
@@ -2537,50 +2503,7 @@ public class Coordinator
 			}
 		}
 	}
-  
-
-  /**
-   * 
-   * @param allActivities_inclHome
-   */
-	private void convertactiToppPurposesTomobiToppPurposeTypes(List<HActivity> allActivities_inclHome) 
-	{
-		for (HActivity act : allActivities_inclHome)
-		{
-			switch (act.getActivityType())
-			{
-				case WORK:
-					executeStep98(act, "98C");
-					break;
-				case EDUCATION:
-					if (person.getAge()<10) {
-						act.setMobiToppActType((byte) 31);
-					} 
-					else if ((person.getAge()<19)) {
-						act.setMobiToppActType((byte) 32);						
-					} 
-					else {
-						act.setMobiToppActType((byte) 33);
-					}
-					break;
-				case SHOPPING:
-					executeStep98(act, "98A");
-					break;
-				case LEISURE:
-					executeStep98(act, "98B");
-					break;
-				case TRANSPORT:
-					act.setMobiToppActType((byte) 6);
-					break;
-				case HOME:
-					act.setMobiToppActType((byte) 7);
-					break;
-				default:
-					System.err.println("unknown activity type");
-			}
-		}
-	}
-
+ 
 	
 	public ModelFileBase getFileBase()
 	{
