@@ -4,15 +4,11 @@ public abstract class AbsHModelStep
 {
 
     protected String id;
-    protected Coordinator modelCoordinator;
-
-    public AbsHModelStep(String id, Coordinator modelCoordinator)
+    
+    public AbsHModelStep(String id)
     {
         super();
-
         this.id = id;
-        this.modelCoordinator = modelCoordinator;
-
     }
         
     protected abstract int doStep() throws IllegalArgumentException;

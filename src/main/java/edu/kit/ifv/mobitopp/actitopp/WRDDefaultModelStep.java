@@ -8,6 +8,9 @@ package edu.kit.ifv.mobitopp.actitopp;
  */
 public class WRDDefaultModelStep extends AbsHModelStep
 {
+	// surrounding modelCoordinator for this step
+	private Coordinator modelCoordinator;
+	
 	// category to get a random draw
 	private String category;
 	// activitytype for personal, activity type specific distributions
@@ -35,8 +38,9 @@ public class WRDDefaultModelStep extends AbsHModelStep
    */
   public WRDDefaultModelStep(String id, String category, ActivityType activityType, Coordinator modelCoordinator)
   {
-    super(id, modelCoordinator);
+    super(id);
     
+    this.modelCoordinator = modelCoordinator;
     this.category = category;
     this.activityType = activityType;
     

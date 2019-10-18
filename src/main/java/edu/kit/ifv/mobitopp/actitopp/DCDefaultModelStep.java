@@ -15,7 +15,8 @@ import java.util.Map.Entry;
  */
 public class DCDefaultModelStep extends AbsHModelStep
 {
-
+	
+	private RNGHelper randomgenerator;
 	private AttributeLookup attributeLookup;
 
   private int decision = -1;
@@ -34,13 +35,14 @@ public class DCDefaultModelStep extends AbsHModelStep
   /**
    * 
    * @param id
-   * @param modelCoordinator
+   * @param modelFileBase
    * @param attributeLookup
    */
-  public DCDefaultModelStep(String id, Coordinator modelCoordinator, AttributeLookup attributeLookup)
+  public DCDefaultModelStep(String id, ModelFileBase modelFileBase, AttributeLookup attributeLookup, RNGHelper randomgenerator)
   {
-    super(id, modelCoordinator);
+    super(id);
     
+    this.randomgenerator = randomgenerator;
     this.attributeLookup = attributeLookup;
     this.alternatives = new ArrayList<DCAlternative>();  
     this.choiceFunction = new LogitFunction();   
@@ -48,7 +50,7 @@ public class DCDefaultModelStep extends AbsHModelStep
     /*
      * load model information from file base
      */
-    modelinfo = modelCoordinator.getFileBase().getModelInformationforDCStep(id);
+    modelinfo = modelFileBase.getModelInformationforDCStep(id);
     assert modelinfo != null : "ModelInformationDC Object is null";
     
 		/*
@@ -60,10 +62,22 @@ public class DCDefaultModelStep extends AbsHModelStep
     }
   }
   
+  /**
+   * 
+   * @param id
+   * @param modelCoordinator
+   * @param attributeLookup
+   */
+  @Deprecated
+  public DCDefaultModelStep(String id, Coordinator modelCoordinator, AttributeLookup attributeLookup)
+  {
+  	 this(id, modelCoordinator.getFileBase(), attributeLookup, modelCoordinator.getRandomGenerator());
+  }
+  
   
   /**
    * 
-   * method to to a dc model step
+   * method to do a dc model step
    * 
    */
   @Override
@@ -132,7 +146,7 @@ public class DCDefaultModelStep extends AbsHModelStep
     /*
      * decide for one alternative
      */
-    double randomvalue = modelCoordinator.getRandomGenerator().getRandomValue();
+    double randomvalue = randomgenerator.getRandomValue();
     decision = choiceFunction.chooseAlternative(alternatives, randomvalue);
     alternativeChosen = alternatives.get(decision).getName();
     
@@ -235,7 +249,7 @@ public class DCDefaultModelStep extends AbsHModelStep
 	    }
 	
 	    System.out.println("Chosen alternative: " + alternativeChosen);
-	    System.out.println("Random Value: " + modelCoordinator.getRandomGenerator().getLastRandomValue());
+	    System.out.println("Random Value: " + randomgenerator.getLastRandomValue());
 	    System.out.println("SAVED for: " + attributeLookup);
 	    System.out.println();
 	}
