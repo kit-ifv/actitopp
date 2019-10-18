@@ -22,7 +22,10 @@ public class ActitoppPerson
 	// stores all attributes that are not directly accessible by variables
 	private Map<String, Double> attributes;
 	
+	// stores all activity information of the week pattern
 	private HWeekPattern weekPattern;
+	
+	private Coordinator modelCoordinator;
 
 	private int PersIndex;
 	
@@ -38,7 +41,7 @@ public class ActitoppPerson
 	
 	// Variables used for modeling of joint actions
 
-		// based on lineare regression model to determine modeling order within the household
+		// based on linear regression model to determine modeling order within the household
 		private double probableshareofjointactions=-1;
 		// List of joint actions to consider that are first created from other household members
 		private List<HActivity> jointActivitiesforConsideration;
@@ -666,7 +669,7 @@ public class ActitoppPerson
 		weekPattern = new HWeekPattern(this);
 		
 		// Erzeuge einen Coordinator zum Modellablauf
-		Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
+		this.modelCoordinator = new Coordinator(this, modelbase, randomgenerator);
 	
 		// Erzeuge den Schedule
 		modelCoordinator.executeModel();		
@@ -686,7 +689,7 @@ public class ActitoppPerson
 		weekPattern = new HWeekPattern(this);
 		
 		// Erzeuge einen Coordinator zum Modellablauf
-		Coordinator modelCoordinator = new Coordinator(this, modelbase, randomgenerator, debugloggers);
+		this.modelCoordinator = new Coordinator(this, modelbase, randomgenerator, debugloggers);
 	
 		// Erzeuge den Schedule
 		modelCoordinator.executeModel();		
@@ -811,5 +814,15 @@ public class ActitoppPerson
 	public void setAllowedToWork(boolean isAllowedToWork) {
 		this.isAllowedToWork = isAllowedToWork;
 	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Coordinator getModelCoordinator() {
+		return modelCoordinator;
+	}
+
+
 	
 }
