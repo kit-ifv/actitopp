@@ -276,6 +276,9 @@ public class Coordinator
   	    	step.disableAlternative("H"); 
 	    	}
   	    
+  	    // disable working activity if person is not allowed to work
+  	    if (!person.isAllowedToWork()) step.disableAlternative("W");
+  	    
   	    if (Configuration.coordinated_modelling)
   	    {
 	  	    // if number of working days is achieved, disable W as alternative
@@ -449,6 +452,9 @@ public class Coordinator
     	    // create step object
     	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
     	    
+    	    // disable working activity if person is not allowed to work
+    	    if (!person.isAllowedToWork()) step.disableAlternative("W");
+    	    
     	    // if number of working days is achieved, disable W as alternative
     	    if (
     	    		person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) &&
@@ -594,6 +600,9 @@ public class Coordinator
           	
       	    // create step object
       	    DCDefaultModelStep step = new DCDefaultModelStep(id, fileBase, lookup, randomgenerator);
+      	    
+      	    // disable working activity if person is not allowed to work
+      	    if (!person.isAllowedToWork()) step.disableAlternative("W");
       	    
       	    // if number of working days is achieved, disable W as alternative
       	    if (
@@ -771,7 +780,7 @@ public class Coordinator
 	  	
 	  	
 	  	/*
-	  	 * step 5: 	if joint type is 1 or 3, i.e., there is a joint trip included, the acitivity needs to be the first in the tour if the originating 
+	  	 * step 5: 	if joint type is 1 or 3, i.e., there is a joint trip included, the activity needs to be the first in the tour if the originating 
 	  	 * 					one is the first on in the tour too (of the household member created the activity)
 	  	 * 
 	  	 * 					for such cases, only use the remaining activities that are the first one in their tour
@@ -2436,12 +2445,20 @@ public class Coordinator
 				Map<Integer,ActitoppPerson> otherunmodeledpersinhh = new HashMap<Integer, ActitoppPerson>();
 				// first add all other household members
 				otherunmodeledpersinhh.putAll(person.getHousehold().getHouseholdmembers());				
-				// delete all members that are already modeled or the person itself
+				
 				List<Integer> keyValues = new ArrayList<>(otherunmodeledpersinhh.keySet());
 				for (Integer key : keyValues) 
 				{
 					ActitoppPerson tmpperson = otherunmodeledpersinhh.get(key);
+					// delete all members that are already modeled or the person itself 
 					if (tmpperson.getWeekPattern()!=null || tmpperson.getPersIndex()==person.getPersIndex()) 
+					{
+						otherunmodeledpersinhh.remove(key);
+					}
+					// remove person if activity is working and other person is not allowed to work
+					if (tmpactivity.getActivityType()==ActivityType.WORK && 
+							tmpactivity.getJointStatus()!=JointStatus.JOINTTRIP &&
+							!tmpperson.isAllowedToWork()) 
 					{
 						otherunmodeledpersinhh.remove(key);
 					}

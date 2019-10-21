@@ -125,12 +125,14 @@ public class HActivity
 	public ActivityType getActivityType()
 	{
 		assert ActivityType.FULLSET.contains(acttype) : "unknown activity type:" + acttype;
+		if (!getPerson().isAllowedToWork()) assert acttype!=ActivityType.WORK : "person is not allowed to work!";
 		return acttype;
 	}
 
 	public void setActivityType(ActivityType acttype)
 	{
 		assert ActivityType.FULLSET.contains(acttype) : "unknown activity type:" + acttype;
+		if (!getPerson().isAllowedToWork()) assert acttype!=ActivityType.WORK : "person is not allowed to work!";
 		this.acttype = acttype;
 	}
 
