@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 public class CSVExportLogger 
 {
+	File basepath;
 	
 	FileWriter activitywriter;
 	FileWriter tripwriter;
@@ -22,21 +23,21 @@ public class CSVExportLogger
 	 */
 	public CSVExportLogger(File basepath) throws IOException
 	{
-		activitywriter = new FileWriter(new File(basepath, "actitopp_activities.csv"));
-		tripwriter = new FileWriter(new File(basepath, "actitopp_trips.csv"));
-		personwriter = new FileWriter(new File(basepath, "actitopp_persons.csv"));
+		this.basepath = basepath;
+		openLogging(false);
 		
 		writeActivityData_header();
 		writeTripData_header();
 		writePersonData_header();
+		
+		closeLogging();
 	}
-	
 
 	public void writeLogging(HashMap<Integer,?> maptoexport) throws IOException
 	{
+		openLogging(true);
 		for(Object referenceobject : maptoexport.values())
-    {
-  		
+    {  		
 			// Householdmap
 			if (referenceobject instanceof ActiToppHousehold)
 			{
@@ -45,8 +46,7 @@ public class CSVExportLogger
 				{
 					exportsinglePerson(actperson);					
 				}
-			}
-			
+			}			
 			// Personmap
 			if (referenceobject instanceof ActitoppPerson)
 			{
@@ -54,9 +54,18 @@ public class CSVExportLogger
 				exportsinglePerson(actperson);	
 			}
 		}
+		closeLogging();
 	}
 	
-	public void closeLogging() throws IOException  
+
+	private void openLogging(boolean appendToExistingFile) throws IOException  
+	{
+		activitywriter = new FileWriter(new File(basepath, "actitopp_activities.csv"), appendToExistingFile);
+		tripwriter = new FileWriter(new File(basepath, "actitopp_trips.csv"), appendToExistingFile);
+		personwriter = new FileWriter(new File(basepath, "actitopp_persons.csv"), appendToExistingFile);
+	}
+	
+	private void closeLogging() throws IOException  
 	{
 		activitywriter.close();
 		tripwriter.close();
