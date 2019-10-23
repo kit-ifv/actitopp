@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp.demo;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -283,7 +284,7 @@ public class ExampleActiTopp {
 			
 			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
 			activitywriter.exportActivityData(personmap);
-			
+
 			System.out.println("all persons processed!");	
 			
 		}
@@ -334,13 +335,10 @@ public class ExampleActiTopp {
 		
 		try
 		{
-			// Output of trips as csv file
-			CSVExportWriter tripwriter = new CSVExportWriter("D:/DemoTripList.csv");
-			tripwriter.exportTripData(householdmap);
-						
-			// Output of activities as csv file
-			CSVExportWriter activitywriter = new CSVExportWriter("D:/DemoActivityList.csv");
-			activitywriter.exportActivityData(householdmap);
+			// Output information as csv files
+			CSVExportLogger logger = new CSVExportLogger(new File ("D:"));
+			logger.writeLogging(householdmap);
+			logger.closeLogging();
 		}
 		catch (IOException e)
 		{
