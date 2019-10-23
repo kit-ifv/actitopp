@@ -1,8 +1,10 @@
 package edu.kit.ifv.mobitopp.actitopp;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -18,11 +20,46 @@ import java.util.Map.Entry;
 public class ModelFileBase
 { 
 	
-	private String parameterset;
+	private static interface Input {
+		InputStream newInputStream(String name) throws IOException;
+	}
+	
+	private static class FileInput implements Input {
+		
+		private final File basePath;
+
+		public FileInput(File basePath) {
+			super();
+			this.basePath = basePath;
+		}
+
+		@Override
+		public InputStream newInputStream(String name) throws IOException {
+			System.out.println("loading file: " + name + " from parameter set " + basePath.getAbsolutePath());
+			return Files.newInputStream(new File(this.basePath, name).toPath());
+		}
+	}
+	
+	private static class JarInput implements Input {
+		private final String parameterset;
+		
+		public JarInput(String parameterset) {
+			super();
+			this.parameterset = parameterset;
+		}
+
+		@Override
+		public InputStream newInputStream(String name) {
+			System.out.println("loading file from JAR: " + name + " from parameter set " + parameterset);
+			return ModelFileBase.class.getResourceAsStream(this.parameterset + "/" + name);
+		}
+	}
 	
   private HashMap<String, DCModelSteplnformation> modelInformationDCsteps;
   private HashMap<String, WRDModelSteplnformation> modelInformationWRDsteps;
   private HashMap<String,HashMap<String, LinRegEstimate>> linearregressionestimatesmap;
+
+	private Input inputType;
   
   
   /**
@@ -32,29 +69,40 @@ public class ModelFileBase
    */
   public ModelFileBase()
   {
-  	this(Configuration.parameterset, Configuration.dcsteps, Configuration.wrdsteps, Configuration.linregsteps_filenames);  	
+  	this(Configuration.parameterset);  	
   }
-  
   
   /**
    * 
-   * Constructor to enable custom parametersets or step information
+   * Constructor with custom parameter set (using Configuration values for step information)
    * 
-   * @param parameterset
+   */
+  public ModelFileBase(String parameterset)
+  {
+  	this(new JarInput(parameterset), Configuration.dcsteps, Configuration.wrdsteps, Configuration.linregsteps_filenames);  	
+  }
+  
+  /**
+   * 
+   * Constructor with custom parametersets and step information
+   * 
+   * @param basePath
    * @param dcsteps
    * @param wrdsteps
    * @param linregsteps_filenames
    */
-  public ModelFileBase(String parameterset, HashSet<String> dcsteps, HashMap<String, Integer> wrdsteps, HashSet<String> linregsteps_filenames)
+  public ModelFileBase(File basePath, HashSet<String> dcsteps, HashMap<String, Integer> wrdsteps, HashSet<String> linregsteps_filenames)
   {
-    super();
+    this(new FileInput(basePath), dcsteps, wrdsteps, linregsteps_filenames);
+  }
   
-    this.parameterset = parameterset;
+  private ModelFileBase(Input inputType, HashSet<String> dcsteps, HashMap<String, Integer> wrdsteps, HashSet<String> linregsteps_filenames) {
+    this.inputType = inputType;
     
     this.modelInformationDCsteps = new HashMap<String, DCModelSteplnformation>();
     this.modelInformationWRDsteps = new HashMap<String, WRDModelSteplnformation>();
     this.linearregressionestimatesmap = new HashMap<String, HashMap<String, LinRegEstimate>>();
-  
+    
     try
     {
     	// Initializations
@@ -130,10 +178,9 @@ public class ModelFileBase
   {
     for (String s : dcsteps)
     {
-      String sourceLocation = parameterset + "/" + s + "model_flow.csv";
-      CSVDCModelInformationLoader loader = new CSVDCModelInformationLoader();
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) {
+      try (InputStream input = newInputStream(s + "model_flow")) {
 				
+				CSVDCModelInformationLoader loader = new CSVDCModelInformationLoader();
 				// Creates ModelInformationOject
 				DCModelSteplnformation modelStep = new DCModelSteplnformation();
 				// Load ParameterNames, Contexts and Alternatives
@@ -143,7 +190,7 @@ public class ModelFileBase
 			}
     }
   }
-  
+
 	/**
 	 * 
 	 * read all relevant parameter from files for dc steps 
@@ -158,11 +205,9 @@ public class ModelFileBase
     {
       DCModelSteplnformation modelstep = modelInformationDCsteps.get(keyString);
       
-      String sourceLocation = parameterset + "/"+ keyString +"Params.csv";
-      CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
-      
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+      try (InputStream input = newInputStream(keyString +"Params")) 
 			{
+				CSVDCParameterLoader parameterLoader = new CSVDCParameterLoader();
 				parameterLoader.loadParameterValues(input, modelstep);		
 			}
     }
@@ -189,11 +234,9 @@ public class ModelFileBase
     	
       for(int index = 0; index <= maxinidex; index++)
       {	
-        String sourceLocation = parameterset + "/"+ stepid +"_KAT_"+ index +".csv";
-        CSVWRDDistributionLoader loader = new CSVWRDDistributionLoader();
-        
-				try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+        try (InputStream input = newInputStream(stepid +"_KAT_"+ index)) 
 				{
+					CSVWRDDistributionLoader loader = new CSVWRDDistributionLoader();
 					WRDModelDistributionInformation wrddist = loader.loadDistributionInformation(input);
 					modelstep.addDistributionInformation(String.valueOf(index), wrddist);
 				}
@@ -210,16 +253,25 @@ public class ModelFileBase
    */
   private void initLinearRegressionEstimates(HashSet<String> linregsteps_filenames) throws IOException
   {
-    for(String s : linregsteps_filenames)
+    for(String name : linregsteps_filenames)
     {   
-      String sourceLocation = parameterset + "/"+ s +".csv";
-      CSVLinRegEstimatesLoader loader = new CSVLinRegEstimatesLoader();
-			try (InputStream input = ModelFileBase.class.getResourceAsStream(sourceLocation)) 
+      try (InputStream input = newInputStream(name)) 
 			{
+				CSVLinRegEstimatesLoader loader = new CSVLinRegEstimatesLoader();
 				HashMap<String, LinRegEstimate> tmpmap = loader.getEstimates(input);
-				linearregressionestimatesmap.put(s, tmpmap);
+				linearregressionestimatesmap.put(name, tmpmap);
 			}
     }
+	}
+
+  /**
+   * 
+   * @param name
+   * @return
+   * @throws IOException
+   */
+	private InputStream newInputStream(String name) throws IOException {
+		return inputType.newInputStream(name + ".csv");
 	}
  
 }
