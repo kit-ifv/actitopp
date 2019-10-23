@@ -413,7 +413,7 @@ public class HActivity
   	{
   		result= getDayIndex() + "/" + getTour().getIndex() + "/" + getIndex() + 	
 		  				" start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
-		  				" end" + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
+		  				" end " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
 		  				" duration: " + (durationisScheduled() ? this.duration : "n.a.") + 
 		  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + 
 		  				" jointStatus: " + this.jointStatus +
