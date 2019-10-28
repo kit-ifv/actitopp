@@ -158,7 +158,7 @@ public class CSVExportLogger
 		// CommutingDistance Work
 		returnstring += person.getCommutingdistance_work() + ";";
 		// CommutingDistance Education
-		returnstring += person.getCommutingdistance_education() + ";";		
+		returnstring += person.getCommutingdistance_education() + "";		
 		
 		returnstring +="\n";
 		return returnstring;		
