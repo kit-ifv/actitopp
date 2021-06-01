@@ -43,6 +43,16 @@ publishing {
 					}
 				}
 				developers {
+					developer {
+						id = 'lb'
+						name = 'Lars Briem'
+						email = 'lars.briem@kit.edu'
+					}
+					developer {
+						id = 'jk'
+						name = 'Jelle Kuebler'
+						email = 'jelle.kuebler@kit.edu'
+					}
 				}
 				scm {
 					connection = 'scm:git:git:https://github.com/kit-ifv/actitopp.git'
@@ -82,6 +92,23 @@ publishing {
 
 signing {
 	sign publishing.publications.mavenJava
+}
+
+task publishAndCheckRelease() {
+	dependsOn publishReleasePublicationToInternalRepository
+	
+	if (project.hasProperty('isRelease') && project.property('isRelease').toBoolean()) {
+		print('New Release')
+		dependsOn publishMavenJavaPublicationToExternalRepository
+	} else {
+		print('No Release')
+	}
+	
+}
+
+configure(publishAndCheckRelease) {
+	group = 'publishing'
+	description = 'Publish to internal repo. Also publish staging release to external repo if "isRelease" is set.'
 }
 
 def getPropertyOrDefault(key) {
