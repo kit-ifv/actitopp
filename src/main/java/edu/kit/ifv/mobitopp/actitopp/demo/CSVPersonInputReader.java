@@ -99,7 +99,7 @@ public class CSVPersonInputReader
       catch (NumberFormatException e)
       {
       	// e.printStackTrace();
-      	System.err.println("Ungültige Eingabedaten - NumberFormatException");
+      	System.err.println("Ungueltige Eingabedaten - NumberFormatException");
       	System.err.println("Zeile " + zeilenzaehler + " wird verworfen!");
       }
     }
@@ -166,14 +166,14 @@ public class CSVPersonInputReader
 	  				);		
 	
 	      
-	      // Person der Map hinzufügen
+	      // Person der Map hinzufuegen
 	      personmap.put(Integer.parseInt(splitted[2]), tmpperson);
 	      
 	    }
 	    catch (NumberFormatException e)
 	    {
 	    	// e.printStackTrace();
-	    	System.err.println("Ungültige Eingabedaten - NumberFormatException");
+	    	System.err.println("Ungueltige Eingabedaten - NumberFormatException");
 	    	System.err.println("Zeile " + zeilenzaehler + " wird verworfen!");
 	    }
 	  }

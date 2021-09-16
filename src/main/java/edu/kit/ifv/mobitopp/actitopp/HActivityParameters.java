@@ -502,10 +502,11 @@ public enum HActivityParameters {
 	 */
 	public static HActivityParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitspr�fung
+		
+		//Eindeutigkeitspruefung
 		checkUniqueness(name);
 		
-		// R�ckgabe des passenden Enums
+		//Rueckgabe des passenden Enums
 		for (HActivityParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -515,7 +516,7 @@ public enum HActivityParameters {
 	
 	/**
 	 * 
-	 * Methode zur Pr�fung der Eindeutigkeit der Enum-Namensvariable
+	 * Methode zur Pruefung der Eindeutigkeit der Enum-Namensvariable
 	 * 
 	 * @param name
 	 */
