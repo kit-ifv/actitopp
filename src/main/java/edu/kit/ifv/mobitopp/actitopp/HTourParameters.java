@@ -657,17 +657,17 @@ public enum HTourParameters {
 	
 	/**
 	 * 
-	 * Methode zur R�ckgabe des EnumValues f�r einen gegebenen String
+	 * Methode zur Rueckgabe des EnumValues fuer einen gegebenen String
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static HTourParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitspr�fung
+		// Eindeutigkeitspruefung
 		checkUniqueness(name);
 		
-		// R�ckgabe des passenden Enums
+		// Rueckgabe des passenden Enums
 		for (HTourParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -677,7 +677,7 @@ public enum HTourParameters {
 	
 	/**
 	 * 
-	 * Methode zur Pr�fung der Eindeutigkeit der Enum-Namensvariable
+	 * Methode zur Pruefung der Eindeutigkeit der Enum-Namensvariable
 	 * 
 	 * @param name
 	 */

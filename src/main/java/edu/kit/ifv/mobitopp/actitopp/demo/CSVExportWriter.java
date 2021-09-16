@@ -171,7 +171,7 @@ public class CSVExportWriter
 	
 	private void exportActivityData_singlePerson(ActitoppPerson actperson) throws IOException 
 	{
-		// F�ge alle Aktivit�ten hinzu
+		// Fuege alle Aktivitaeten hinzu
 		for (HActivity act : actperson.getWeekPattern().getAllActivities())
 		{
 			if (act.isScheduled())
@@ -185,7 +185,7 @@ public class CSVExportWriter
 
 	/**
 	 * 
-	 * Schreibe Zeile mit Aktivit�teninfos
+	 * Schreibe Zeile mit Aktivitaeteninfos
 	 * 
 	 * @param act
 	 * @return
@@ -196,8 +196,8 @@ public class CSVExportWriter
 		String rueckgabe="";
 		
 		/*
-		 * TourINdex und Aktindex f�r Heimaktivit�ten bestimmen
-		 * Falls Tag ein kompletter Heimtag ist, dann wird 0/0 zur�ckgegeben, ansonsten -99/-99
+		 * TourINdex und Aktindex fuer Heimaktivitaeten bestimmen
+		 * Falls Tag ein kompletter Heimtag ist, dann wird 0/0 zurueckgegeben, ansonsten -99/-99
 		 */
 		int tmptourindex=0;
 		int tmpaktindex=0;

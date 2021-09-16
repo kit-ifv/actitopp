@@ -7,7 +7,7 @@ package edu.kit.ifv.mobitopp.actitopp;
 public enum HActivityParameters {
 
 	/*
-	 * Aktivit�tenzweck
+	 * Aktivitaetenzweck
 	 */
 	aktzweck_work("aktzweck_work") 
 	{
@@ -52,7 +52,7 @@ public enum HActivityParameters {
 	
 
 	/*
-	 * Dauer Aktivit�t
+	 * Dauer Aktivitaet
 	 */
 	dauer_akt("dauer_akt") 
 	{
@@ -184,7 +184,7 @@ public enum HActivityParameters {
 	},
 	
 	/*
-	 * Erste Aktivit�t Tag/Tour
+	 * Erste Aktivitaet Tag/Tour
 	 */
 	ersteaktamtag("ersteaktamtag") 
 	{
@@ -329,7 +329,7 @@ public enum HActivityParameters {
 	},
 	
 	/*
-	 * Anzahl Aktivit�ten = Anzahl Tage mit diesem Zweck
+	 * Anzahl Aktivitaeten = Anzahl Tage mit diesem Zweck
 	 */
 	anzaktwieanztagemitzweck("anzaktwieanztagemitzweck") 
 	{
@@ -495,7 +495,7 @@ public enum HActivityParameters {
 	
 	/**
 	 * 
-	 * Methode zur R�ckgabe des EnumValues f�r einen gegebenen String
+	 * Methode zur Rueckgabe des EnumValues fuer einen gegebenen String
 	 * 
 	 * @param name
 	 * @return

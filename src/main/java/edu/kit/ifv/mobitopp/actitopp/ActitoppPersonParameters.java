@@ -340,7 +340,7 @@ public enum ActitoppPersonParameters {
 	},	
 	
 	/*
-	 * Pendeln �ber 50 Kilometer
+	 * Pendeln ueber 50 Kilometer
 	 */	
 	pendeln_ueber50km("pendeln_ueber50km") 
 	{
@@ -745,7 +745,7 @@ public enum ActitoppPersonParameters {
 	},	
 	
 	/*
-	 * Properties f�r Anzahl an Aktivit�ten in der Woche
+	 * Properties fuer Anzahl an Aktivitaeten in der Woche
 	 */
 	wakt_prowoche_1bis3("wakt_prowoche_1bis3") 
 	{
@@ -951,7 +951,7 @@ public enum ActitoppPersonParameters {
 	},	
 	
 	/*
-	 * Anzahl Tage mit spezifischen Aktivit�tentypen
+	 * Anzahl Tage mit spezifischen Aktivitaetentypen
 	 */
 	tagemit_wakt_1("tagemit_wakt_1") 
 	{
@@ -1332,7 +1332,7 @@ public enum ActitoppPersonParameters {
 		}
 	},
 	/*
-	 * Standard-Startzeitraum f�r T1
+	 * Standard-Startzeitraum fuer T1
 	 */
 	std_start_T1_6_7_Uhr("std_start_T1_6_7_Uhr") 
 	{

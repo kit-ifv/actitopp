@@ -98,7 +98,7 @@ public enum HDayParameters {
 	
 	
 	/*
-	 * Tag hat X Aktivit�ten
+	 * Tag hat X Aktivitaeten
 	 */
 	taghat1akt("taghat1akt") 
 	{
@@ -150,7 +150,7 @@ public enum HDayParameters {
 	},	
 
 	/*
-	 * Tag hat Aktivit�ten eines Typs
+	 * Tag hat Aktivitaeten eines Typs
 	 */	
 	taghattakt("taghattakt") 
 	{
@@ -504,17 +504,17 @@ public enum HDayParameters {
 	
 	/**
 	 * 
-	 * Methode zur R�ckgabe des EnumValues f�r einen gegebenen String
+	 * Methode zur Rueckgabe des EnumValues fuer einen gegebenen String
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static HDayParameters getEnumValue(String name)
 	{
-		// Eindeutigkeitspr�fung
+		// Eindeutigkeitspruefung
 		checkUniqueness(name);
 		
-		// R�ckgabe des passenden Enums
+		// Rueckgabe des passenden Enums
 		for (HDayParameters parameter : values())
 		{
 			if (parameter.name.equals(name)) return parameter;
@@ -525,7 +525,7 @@ public enum HDayParameters {
 	
 	/**
 	 * 
-	 * Methode zur Pr�fung der Eindeutigkeit der Enum-Namensvariable
+	 * Methode zur Pruefung der Eindeutigkeit der Enum-Namensvariable
 	 * 
 	 * @param name
 	 */

@@ -696,7 +696,7 @@ public class Coordinator
 			int jointact_actindex = jointact.getIndex();
 			JointStatus jointact_jointStatus = jointact.getJointStatus();
 			
-			assert JointStatus.JOINTELEMENTS.contains(jointact_jointStatus) : "keine gemeinsame Aktivit�t in der Liste der gemeinsamen Aktivit�ten!"; 
+			assert JointStatus.JOINTELEMENTS.contains(jointact_jointStatus) : "keine gemeinsame Aktivitaet in der Liste der gemeinsamen Aktivitaeten!"; 
 			
 			
 	  	/*
