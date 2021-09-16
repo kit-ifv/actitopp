@@ -13,6 +13,11 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 artifacts {
     archives sourcesJar
 }
@@ -22,6 +27,7 @@ publishing {
         release(MavenPublication) {
             from components.java
             artifact sourcesJar
+	    artifact javadocJar
             groupId project.group
             artifactId project.name
             version project.version
@@ -29,6 +35,7 @@ publishing {
 		mavenJava(MavenPublication) {
 			from components.java
 			artifact sourcesJar
+			artifact javadocJar
 			groupId project.group
 			artifactId project.name
 			version project.version
