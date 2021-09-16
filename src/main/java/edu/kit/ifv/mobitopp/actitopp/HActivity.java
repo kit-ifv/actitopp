@@ -74,7 +74,7 @@ public class HActivity
 	 * constructor for home activities
 	 * 
 	 * @param parent
-	 * @param ActType
+	 * @param type
 	 * @param duration
 	 * @param starttime
 	 */
@@ -295,10 +295,11 @@ public class HActivity
    * check if two activities are overlapping
    * false = no overlapping
    * true = overlapping
-	 * 
-	 * @param tmpact
-	 * @return
-	 */
+   * 
+   * @param act1
+   * @param act2
+   * @return
+   */
 	public static boolean checkActivityOverlapping(HActivity act1, HActivity act2)
 	{
 		boolean result = false;
@@ -786,7 +787,8 @@ public class HActivity
 	}
 	
 	/**
-	 * @param attributes 
+	 * @param name 
+	 * @param value
 	 */
 	public void addAttributetoMap(String name, Double value) {
 		assert !attributes.containsKey(name) : "attribute is already in map";
@@ -853,7 +855,7 @@ public class HActivity
 	}
 
 	/**
-	 * @param JointParticipants the JointParticipants to set
+	 * @param gemJointParticipants the JointParticipants to set
 	 */
 	public void setJointParticipants(List<ActitoppPerson> gemJointParticipants) {
 		this.jointParticipants = gemJointParticipants;

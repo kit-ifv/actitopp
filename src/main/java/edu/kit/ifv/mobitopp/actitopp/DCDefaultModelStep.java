@@ -161,7 +161,6 @@ public class DCDefaultModelStep extends AbsHModelStep
   
 	/**
    * Limits the DC-process to a certain alternative upperBound. this method must be called before doStep() if necessary
-   * @param from
    * @param to
    */
   public void limitUpperBoundOnly(int to)
@@ -172,7 +171,6 @@ public class DCDefaultModelStep extends AbsHModelStep
 	/**
    * Limits the DC-process to a certain alternative lowerBound. this method must be called before doStep() if necessary
    * @param from
-   * @param to
    */
   public void limitLowerBoundOnly(int from)
   {
@@ -197,7 +195,7 @@ public class DCDefaultModelStep extends AbsHModelStep
    * changes the utilityfactor of an alternative based on an alternativename.
    * utilityfactir is used to influence the utility/significance of alternatives
    * 
-   * @param name
+   * @param alternativename
    * @param utilityfactor
    */
   public void adaptUtilityFactor(String alternativename, double utilityfactor)
@@ -213,7 +211,7 @@ public class DCDefaultModelStep extends AbsHModelStep
    * changes the utilityfactor of an alternative based on an alternativeindex.
    * utilityfactir is used to influence the utility/significance of alternatives
    * 
-   * @param name
+   * @param alternativeindex
    * @param utilityfactor
    */
   public void adaptUtilityFactor(int alternativeindex, double utilityfactor)

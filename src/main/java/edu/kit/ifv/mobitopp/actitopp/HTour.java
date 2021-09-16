@@ -129,7 +129,6 @@ public class HTour
 	/**
 	 * check if tour is free of time gaps, i.e., all trips and activities follow directly one after another
 	 * 
-	 * @param tour
 	 * @return
 	 */
 	public boolean tourisFreeofGaps()

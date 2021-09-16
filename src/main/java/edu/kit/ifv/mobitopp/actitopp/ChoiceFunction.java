@@ -8,7 +8,6 @@ public interface ChoiceFunction
     /**
      * Calculates the probabilitites for the alternatives
      * @param alternatives
-     * @return
      */
     public void calculateProbabilities(List<DCAlternative> alternatives);
     

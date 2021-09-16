@@ -189,7 +189,6 @@ public class CSVPersonInputReader
 	 * Expected input format:
 	 * HHIndex;persnrinHH;PersIndex;alter_in_jahren;Beruf;SEX;pendeldistanz_arbeiten;pendeldistanz_bildung
 	 * 
-	 * @return
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */

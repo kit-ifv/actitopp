@@ -309,9 +309,7 @@ public class HWeekPattern
 	 * 
 	 * check if pattern has activity overlaps
 	 * 
-	 * @param weekpattern
 	 * @return
-	 * @throws InvalidPersonPatternException
 	 */
 	public boolean weekPatternisFreeofOverlaps() 
 	{

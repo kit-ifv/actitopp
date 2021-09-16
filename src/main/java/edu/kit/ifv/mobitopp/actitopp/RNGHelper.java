@@ -81,7 +81,7 @@ public class RNGHelper {
    * 
    * @param from
    * @param to
-   * @param interval
+   * @param stepSize
    * @return
    */
   public int getRandomValueBetween(int from, int to, int stepSize)

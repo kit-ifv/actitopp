@@ -248,11 +248,11 @@ public class ActiToppHousehold {
 	/**
 	 * generates activity schedules for the household (i.e. for each hh member)
 	 * 
-	 * @param modelbase
-	 * @param rnghelper
+	 * @param fileBase
+	 * @param randomgenerator
 	 * @throws InvalidPatternException
 	 */
-	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator)	throws InvalidPatternException
+	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator) throws InvalidPatternException
 	{
 		List<ActitoppPerson> hhmembers = getHouseholdmembersasList();
 		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmembers, fileBase);
@@ -297,8 +297,8 @@ public class ActiToppHousehold {
 	/**
 	 * generates activity schedules for the household (i.e. for each hh member) using debug loggers to log results
 	 * 
-	 * @param modelbase
-	 * @param rnghelper
+	 * @param fileBase
+	 * @param randomgenerator
 	 * @param debugloggers
 	 * @throws InvalidPatternException
 	 */

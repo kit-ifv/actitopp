@@ -51,8 +51,8 @@ public class Coordinator
      * Constructor
      * 
      * @param person
-     * @param personIndex
      * @param fileBase
+     * @param randomgenerator
      */
     public Coordinator(ActitoppPerson person, ModelFileBase fileBase, RNGHelper randomgenerator)
     {
@@ -73,8 +73,9 @@ public class Coordinator
      * Constructor including debug-loggers
      * 
      * @param person
-     * @param personIndex
      * @param fileBase
+     * @param randomgenerator
+     * @param debugloggers
      */
     public Coordinator(ActitoppPerson person, ModelFileBase fileBase, RNGHelper randomgenerator, DebugLoggers debugloggers)
     {
@@ -88,7 +89,6 @@ public class Coordinator
    * 
    * main method to coordinate all model steps
    *
-   * @return
    * @throws InvalidPatternException
    */
   public void executeModel() throws InvalidPatternException

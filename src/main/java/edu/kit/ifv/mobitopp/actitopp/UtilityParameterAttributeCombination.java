@@ -20,8 +20,8 @@ public class UtilityParameterAttributeCombination
   /**
    * 
    * @param name
-   * @param weight
-   * @param property
+   * @param parameterValue
+   * @param attributeValue
    */
   public UtilityParameterAttributeCombination(String name, double parameterValue, double attributeValue)
   {

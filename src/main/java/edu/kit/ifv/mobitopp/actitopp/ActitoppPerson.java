@@ -503,7 +503,8 @@ public class ActitoppPerson
 	
 
 	/**
-	 * @param attributes
+	 * @param name
+	 * @param value
 	 */
 	public void addAttributetoMap(String name, Double value) {
 		this.attributes.put(name, value);
@@ -658,7 +659,7 @@ public class ActitoppPerson
 	 * create activity schedule for this person
 	 * 
 	 * @param modelbase
-	 * @param rnghelper
+	 * @param randomgenerator
 	 * @throws InvalidPatternException
 	 */
 	public void generateSchedule(ModelFileBase modelbase, RNGHelper randomgenerator)	throws InvalidPatternException
@@ -682,7 +683,7 @@ public class ActitoppPerson
 	 * create activity schedule for this person using debug loggers to log results
 	 * 
 	 * @param modelbase
-	 * @param rnghelper
+	 * @param randomgenerator
 	 * @param debugloggers
 	 * @throws InvalidPatternException
 	 */

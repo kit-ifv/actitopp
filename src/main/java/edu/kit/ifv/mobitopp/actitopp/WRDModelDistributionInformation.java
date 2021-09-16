@@ -37,7 +37,7 @@ public class WRDModelDistributionInformation {
 	
 	/**
 	 * 
-	 * @param id
+	 * @param slot
 	 * @param amount
 	 */
 	public void addDistributionElement(Integer slot, Integer amount)

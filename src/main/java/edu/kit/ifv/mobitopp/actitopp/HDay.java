@@ -248,7 +248,8 @@ public class HDay
   /**
    * check if activity given tour and activity index exists on that day
    * 
-   * @param index
+   * @param tourindex
+   * @param activityindex
    * @return
    */
   public boolean existsActivity(int tourindex, int activityindex)
