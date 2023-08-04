@@ -6,7 +6,7 @@ plugins {
 
 group = 'edu.kit.ifv.mobitopp'
 version = project.hasProperty('next-version') ? project.property('next-version') : '0.0-SNAPSHOT'
-wrapper.gradleVersion = '5.2'
+wrapper.gradleVersion = '6.3'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
