@@ -1,124 +1,20 @@
 plugins {
-	id 'java'
-    id 'eclipse'
-    id 'maven'
-  id 'java-library'
-  id 'maven-publish'
-  id 'signing'
+	id("org.jetbrains.kotlin.jvm") version "2.1.20"
 }
 
 group = 'edu.kit.ifv.mobitopp'
 version = project.hasProperty('next-version') ? project.property('next-version') : '0.0-SNAPSHOT'
 wrapper.gradleVersion = '6.3'
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+
+
+repositories {
+    mavenCentral()
 }
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
-
-artifacts {
-    archives sourcesJar
-}
-
-publishing {
-    publications {
-        release(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-	    artifact javadocJar
-            groupId project.group
-            artifactId project.name
-            version project.version
-        }
-		mavenJava(MavenPublication) {
-			from components.java
-			artifact sourcesJar
-			artifact javadocJar
-			groupId project.group
-			artifactId project.name
-			version project.version
-			pom {
-				name = 'actiTopp'
-				description = 'actiTopp is a model to generate week activity schedules'
-				url = 'https://github.com/kit-ifv/actitopp'
-				licenses {
-					license {
-						name = 'GNU GENERAL PUBLIC LICENSE, Version 3'
-						url = 'https://www.gnu.org/licenses/gpl-3.0-standalone.html'
-					}
-				}
-				developers {
-					developer {
-						id = 'lb'
-						name = 'Lars Briem'
-						email = 'lars.briem@kit.edu'
-					}
-					developer {
-						id = 'jk'
-						name = 'Jelle Kuebler'
-						email = 'jelle.kuebler@kit.edu'
-					}
-				}
-				scm {
-					connection = 'scm:git:git:https://github.com/kit-ifv/actitopp.git'
-					developerConnection = 'scm:git:ssh:git@github.com:kit-ifv/actitopp.git'
-					url = 'https://github.com/kit-ifv/actitopp'
-				}
-			}
-		
-		}
-    }
-	
-    repositories {
-        maven {
-			name = 'Internal'
-            credentials {
-                username getPropertyOrDefault('repositoryUsername')
-                password getPropertyOrDefault('repositoryPassword')
-            }
-            def repositoryUrl = getPropertyOrDefault('repositoryUrl')
-            def releasesRepoUrl = "${repositoryUrl}/repository/maven-releases/"
-            def snapshotsRepoUrl = "${repositoryUrl}/repository/maven-snapshots"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-        }
-		maven {
-			name = 'External'
-			credentials {
-				username getPropertyOrDefault('user_oss')
-				password getPropertyOrDefault('pw_oss')
-			}
-
-			def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-			def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-		}
-    }
-}
-
-signing {
-	sign publishing.publications.mavenJava
-}
-
-task publishAndCheckRelease() {
-	dependsOn publishReleasePublicationToInternalRepository
-	
-	if (project.hasProperty('isRelease') && project.property('isRelease').toBoolean()) {
-		print('New Release')
-		dependsOn publishMavenJavaPublicationToExternalRepository
-	} else {
-		print('No Release')
-	}
-	
-}
-
-configure(publishAndCheckRelease) {
-	group = 'publishing'
-	description = 'Publish to internal repo. Also publish staging release to external repo if "isRelease" is set.'
+compileKotlin {
 }
 
 def getPropertyOrDefault(key) {

@@ -1,68 +1,49 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Collections
+import java.util.EnumSet
 
-public enum ActivityType {
-	
-	WORK ('W'),
-	EDUCATION ('E'),
-	LEISURE ('L'),
-	SHOPPING ('S'),
-	TRANSPORT ('T'),
-	HOME ('H'),
-	UNKNOWN('x')
-	;
-	
+enum class ActivityType(val typeasChar: Char) {
+    WORK('W'),
+    EDUCATION('E'),
+    LEISURE('L'),
+    SHOPPING('S'),
+    TRANSPORT('T'),
+    HOME('H'),
+    UNKNOWN('x');
 
-	public static final Set<ActivityType> OUTOFHOMEACTIVITY;
-	public static final Set<ActivityType> FULLSET;
-	
-	static 
-	{
-		OUTOFHOMEACTIVITY = Collections.unmodifiableSet(EnumSet.of(
-																														ActivityType.WORK,
-																														ActivityType.EDUCATION,
-																														ActivityType.LEISURE,
-																														ActivityType.SHOPPING,
-																														ActivityType.TRANSPORT
-																									));
-		
-		FULLSET = Collections.unmodifiableSet(EnumSet.of(
-																														ActivityType.WORK,
-																														ActivityType.EDUCATION,
-																														ActivityType.LEISURE,
-																														ActivityType.SHOPPING,
-																														ActivityType.TRANSPORT,
-																														ActivityType.HOME
-																										));
-	}
-	
-	
-	private char charValue;
-	
-	private ActivityType(char charValue) 
-	{
-		this.charValue=charValue;	
-	}
-	
-	public char getTypeasChar() 
-	{ 
-		return this.charValue; 
-	}
 
-	public static ActivityType getTypeFromChar(char charValue) 
-	{
-		Character tocompare = Character.toUpperCase(charValue);
-		
-		for (ActivityType type : EnumSet.allOf(ActivityType.class)) 
-		{
-			if (type.getTypeasChar() ==  tocompare) 
-			{
-				return type;
-			}
-		}
-		return null;
-	}
+    companion object {
+        val OUTOFHOMEACTIVITY: Set<ActivityType> = Collections.unmodifiableSet(
+            EnumSet.of(
+                WORK,
+                EDUCATION,
+                LEISURE,
+                SHOPPING,
+                TRANSPORT
+            )
+        )
+
+        val FULLSET: Set<ActivityType> = Collections.unmodifiableSet(
+            EnumSet.of(
+                WORK,
+                EDUCATION,
+                LEISURE,
+                SHOPPING,
+                TRANSPORT,
+                HOME
+            )
+        )
+
+        fun getTypeFromChar(charValue: Char): ActivityType {
+            val tocompare = charValue.uppercaseChar()
+
+            for (type in EnumSet.allOf(ActivityType::class.java)) {
+                if (type.typeasChar == tocompare) {
+                    return type
+                }
+            }
+            throw NoSuchElementException("There is no type $charValue as activity in actiTopp")
+        }
+    }
 }

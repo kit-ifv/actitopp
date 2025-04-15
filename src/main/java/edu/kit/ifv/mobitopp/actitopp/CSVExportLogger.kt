@@ -1,265 +1,239 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
 
+class CSVExportLogger(var basepath: File) {
+    var activitywriter: FileWriter? = null
+    var tripwriter: FileWriter? = null
+    var personwriter: FileWriter? = null
 
-public class CSVExportLogger 
-{
-	File basepath;
-	
-	FileWriter activitywriter;
-	FileWriter tripwriter;
-	FileWriter personwriter;
-	
-	/**
-	 * 
-	 * constructor with basepath
-	 *
-	 * @param basepath
-	 * @throws IOException
-	 */
-	public CSVExportLogger(File basepath) throws IOException
-	{
-		this.basepath = basepath;
-		openLogging(false);
-		
-		writeActivityData_header();
-		writeTripData_header();
-		writePersonData_header();
-		
-		closeLogging();
-	}
+    /**
+     * constructor with basepath
+     *
+     * @param basepath
+     * @throws IOException
+     */
+    init {
+        openLogging(false)
 
-	public void writeLogging(HashMap<Integer,?> maptoexport) throws IOException
-	{
-		openLogging(true);
-		for(Object referenceobject : maptoexport.values())
-    {  		
-			// Householdmap
-			if (referenceobject instanceof ActiToppHousehold)
-			{
-				ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
-				for (ActitoppPerson actperson : acthousehold.getHouseholdmembersasList())
-				{
-					exportsinglePerson(actperson);					
-				}
-			}			
-			// Personmap
-			if (referenceobject instanceof ActitoppPerson)
-			{
-				ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
-				exportsinglePerson(actperson);	
-			}
-		}
-		closeLogging();
-	}
-	
+        writeActivityData_header()
+        writeTripData_header()
+        writePersonData_header()
 
-	private void openLogging(boolean appendToExistingFile) throws IOException  
-	{
-		activitywriter = new FileWriter(new File(basepath, "actitopp_activities.csv"), appendToExistingFile);
-		tripwriter = new FileWriter(new File(basepath, "actitopp_trips.csv"), appendToExistingFile);
-		personwriter = new FileWriter(new File(basepath, "actitopp_persons.csv"), appendToExistingFile);
-	}
-	
-	private void closeLogging() throws IOException  
-	{
-		activitywriter.close();
-		tripwriter.close();
-		personwriter.close();
-	}
-	
-	
-	private void writeActivityData_header() throws IOException
-	{
-		// Header
-		activitywriter.append("HHIndex;PersNr;PersIndex;WOTAG;TourIndex;AktIndex;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus");
-		activitywriter.append('\n');
-		activitywriter.flush();
-	}
+        closeLogging()
+    }
+
+    @Throws(IOException::class)
+    fun writeLogging(maptoexport: HashMap<Int?, *>) {
+        openLogging(true)
+        for (referenceobject in maptoexport.values) {
+            // Householdmap
+            if (referenceobject is ActiToppHousehold) {
+                for (actperson in referenceobject.householdmembersasList) {
+                    exportsinglePerson(actperson)
+                }
+            }
+            // Personmap
+            if (referenceobject is ActitoppPerson) {
+                exportsinglePerson(referenceobject)
+            }
+        }
+        closeLogging()
+    }
 
 
-	private void writeTripData_header() throws IOException  
-	{
-		// Header
-		tripwriter.append("HHIndex;PersNr;PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus");
-		tripwriter.append('\n');
-		tripwriter.flush();
-	}
+    @Throws(IOException::class)
+    private fun openLogging(appendToExistingFile: Boolean) {
+        activitywriter = FileWriter(File(basepath, "actitopp_activities.csv"), appendToExistingFile)
+        tripwriter = FileWriter(File(basepath, "actitopp_trips.csv"), appendToExistingFile)
+        personwriter = FileWriter(File(basepath, "actitopp_persons.csv"), appendToExistingFile)
+    }
+
+    @Throws(IOException::class)
+    private fun closeLogging() {
+        activitywriter!!.close()
+        tripwriter!!.close()
+        personwriter!!.close()
+    }
 
 
-	private void writePersonData_header() throws IOException
-	{
-		// Header
-		personwriter.append("HHIndex;numberofhhmembers;children010;childrenunder18;areatype;numberofcarsinhh;PersNr;PersIndex;Age;Employment;Gender;isAllowedToWork;CommutingdistanceWork;CommutingdistanceEducation");
-		personwriter.append('\n');
-		personwriter.flush();
-	}
-	
-	private void exportsinglePerson(ActitoppPerson person) throws IOException
-	{
-		// Export activity data
-		for (HActivity act : person.getWeekPattern().getAllActivities())
-		{
-			if (act.isScheduled())
-			{
-				activitywriter.append(writeActivity(act));
-				activitywriter.flush();
-			}
-		}
-		// Export trip data
-		for (HTrip trip : person.getWeekPattern().getAllTrips())
-		{
-			if (trip.getDuration()>0)
-			{
-				tripwriter.append(writeTrip(trip));
-				tripwriter.flush();
-			}
-		}
-		// Export person information
-		personwriter.append(writePersonInformation(person));
-		personwriter.flush();
-	}
+    @Throws(IOException::class)
+    private fun writeActivityData_header() {
+        // Header
+        activitywriter!!.append("HHIndex;PersNr;PersIndex;WOTAG;TourIndex;AktIndex;startzeit;startzeit_woche;endzeit;endzeit_woche;Dauer;zweck;jointStatus")
+        activitywriter!!.append('\n')
+        activitywriter!!.flush()
+    }
 
 
-	private String writePersonInformation(ActitoppPerson person)
-	{
-		String returnstring="";
-					
-		
-		// HHIndex
-		returnstring += person.getHousehold().getHouseholdIndex() + ";";
-		// Number of HH members
-		returnstring += person.getHousehold().getNumberofPersonsinHousehold() + ";";
-		// Children 0-10
-		returnstring += person.getHousehold().getChildren0_10() + ";";
-		// Children under 18
-		returnstring += person.getHousehold().getChildren_u18() + ";";
-		// AreaType
-		returnstring += person.getHousehold().getAreatype() + ";";
-		// Number of cars in HH
-		returnstring += person.getHousehold().getNumberofcarsinhousehold() + ";";
-		
-		// PersNr
-		returnstring += person.getPersNrinHousehold() + ";";
-		// PersIndex
-		returnstring += person.getPersIndex() + ";";
-		// Age
-		returnstring += person.getAge() + ";";		
-		// Employment
-		returnstring += person.getEmployment() + ";";		
-		// Gender
-		returnstring += person.getGender() + ";";
-		// isAllowedToWork
-		returnstring += person.isAllowedToWork() + ";";
-		// CommutingDistance Work
-		returnstring += person.getCommutingdistance_work() + ";";
-		// CommutingDistance Education
-		returnstring += person.getCommutingdistance_education() + "";		
-		
-		returnstring +="\n";
-		return returnstring;		
-	}
-	
-	
-	
-	/**
-	 * 
-	 * create output activity information
-	 * 
-	 * @param act
-	 * @return
-	 */
-	private String writeActivity(HActivity act)
-	{
-		assert act.isScheduled():"Activity is not fully scheduled";
-		String returnstring="";
-		
-		/*
-		 * estimate tourindex and activityindex for home activities
-		 * if day is home-day only, return 0/0, otherwise -99/-99
-		 */
-		int tmptourindex=0;
-		int tmpaktindex=0;
-		if (act.getDay().getAmountOfTours()>0)
-		{
-			tmptourindex=-99;
-			tmpaktindex=-99;
-		}
-			
-		// HHIndex
-		returnstring += act.getPerson().getHousehold().getHouseholdIndex() + ";";		
-		// PersNr
-		returnstring += act.getPerson().getPersNrinHousehold() + ";";
-		// PersIndex
-		returnstring += act.getPerson().getPersIndex() + ";";
-		// WOTAG
-		returnstring += act.getWeekDay() + ";";
-		// TourIndex
-		returnstring += (act.isHomeActivity() ? tmptourindex : act.getTourIndex()) + ";";
-		// AktIndex
-		returnstring += (act.isHomeActivity() ? tmpaktindex : act.getIndex()) + ";";
-		// starttime
-		returnstring += act.getStartTime() + ";";
-		// starttime_week
-		returnstring += act.getStartTimeWeekContext() + ";"; 
-		// endtime
-		returnstring += act.getEndTime() + ";";		
-		// endtime_week
-		returnstring += act.getEndTimeWeekContext() + ";";  
-		// duration
-		returnstring += act.getDuration() + ";";
-		// purpose
-		returnstring += act.getActivityType().getTypeasChar() + ";";
-		// joint Status
-		returnstring += (Configuration.model_joint_actions ? act.getJointStatus(): "-99") + "";
-		
-		returnstring +="\n";
-		return returnstring;		
-	}
+    @Throws(IOException::class)
+    private fun writeTripData_header() {
+        // Header
+        tripwriter!!.append("HHIndex;PersNr;PersIndex;WOTAG;anzeit;anzeit_woche;abzeit;abzeit_woche;Dauer;zweck_text;jointStatus")
+        tripwriter!!.append('\n')
+        tripwriter!!.flush()
+    }
 
 
-	/**
-	 * 
-	 * create output trip information
-	 * 
-	 * @param trip
-	 * @return
-	 */
-	private String writeTrip(HTrip trip)
-	{
-		assert trip.isScheduled(): "Trip is not scheduled!";
-		String returnstring="";
-		
-		// HHIndex
-		returnstring += trip.getActivity().getPerson().getHousehold().getHouseholdIndex() + ";";		
-		// PersNr
-		returnstring += trip.getActivity().getPerson().getPersNrinHousehold() + ";";
-		// PersIndex
-		returnstring += trip.getActivity().getPerson().getPersIndex() + ";";
-		// Weekday
-		returnstring += trip.getActivity().getWeekDay() + ";";
-		// endtime
-		returnstring += trip.getEndTime() + ";";
-		// endtime_week
-		returnstring += trip.getEndTimeWeekContext() + ";"; 
-		// starttime
-		returnstring += trip.getStartTime() + ";";		
-		// starttime_week
-		returnstring += trip.getStartTimeWeekContext() + ";";  
-		// duration
-		returnstring += trip.getDuration() + ";";
-		// type of trip
-		returnstring += trip.getType().getTypeasChar() + ";";
-		// jointStatus
-		returnstring += (Configuration.model_joint_actions ? trip.getJointStatus(): "-99") + "";
-		
-		returnstring +="\n";
-		return returnstring;		
-	}
-	
+    @Throws(IOException::class)
+    private fun writePersonData_header() {
+        // Header
+        personwriter!!.append("HHIndex;numberofhhmembers;children010;childrenunder18;areatype;numberofcarsinhh;PersNr;PersIndex;Age;Employment;Gender;isAllowedToWork;CommutingdistanceWork;CommutingdistanceEducation")
+        personwriter!!.append('\n')
+        personwriter!!.flush()
+    }
+
+    @Throws(IOException::class)
+    private fun exportsinglePerson(person: ActitoppPerson) {
+        // Export activity data
+        for (act in person.weekPattern!!.allActivities) {
+            if (act.isScheduled) {
+                activitywriter!!.append(writeActivity(act))
+                activitywriter!!.flush()
+            }
+        }
+        // Export trip data
+        for (trip in person.weekPattern!!.allTrips) {
+            if (trip.duration > 0) {
+                tripwriter!!.append(writeTrip(trip))
+                tripwriter!!.flush()
+            }
+        }
+        // Export person information
+        personwriter!!.append(writePersonInformation(person))
+        personwriter!!.flush()
+    }
+
+
+    private fun writePersonInformation(person: ActitoppPerson): String {
+        var returnstring = ""
+
+
+        // HHIndex
+        returnstring += person.household.householdIndex.toString() + ";"
+        // Number of HH members
+        returnstring += person.household.numberofPersonsinHousehold.toString() + ";"
+        // Children 0-10
+        returnstring += person.household.children0_10.toString() + ";"
+        // Children under 18
+        returnstring += person.household.children_u18.toString() + ";"
+        // AreaType
+        returnstring += person.household.areatype.toString() + ";"
+        // Number of cars in HH
+        returnstring += person.household.numberofcarsinhousehold.toString() + ";"
+
+        // PersNr
+        returnstring += person.persNrinHousehold.toString() + ";"
+        // PersIndex
+        returnstring += person.persIndex.toString() + ";"
+        // Age
+        returnstring += person.age.toString() + ";"
+        // Employment
+        returnstring += person.employment.toString() + ";"
+        // Gender
+        returnstring += person.gender.toString() + ";"
+        // isAllowedToWork
+        returnstring += person.isAllowedToWork.toString() + ";"
+        // CommutingDistance Work
+        returnstring += person.commutingdistance_work.toString() + ";"
+        // CommutingDistance Education
+        returnstring += person.commutingdistance_education.toString() + ""
+
+        returnstring += "\n"
+        return returnstring
+    }
+
+
+    /**
+     * create output activity information
+     *
+     * @param act
+     * @return
+     */
+    private fun writeActivity(act: HActivity): String {
+        assert(act.isScheduled) { "Activity is not fully scheduled" }
+        var returnstring = ""
+
+        /*
+         * estimate tourindex and activityindex for home activities
+         * if day is home-day only, return 0/0, otherwise -99/-99
+         */
+        var tmptourindex = 0
+        var tmpaktindex = 0
+        if (act.day.amountOfTours > 0) {
+            tmptourindex = -99
+            tmpaktindex = -99
+        }
+
+        // HHIndex
+        returnstring += act.person.household.householdIndex.toString() + ";"
+        // PersNr
+        returnstring += act.person.persNrinHousehold.toString() + ";"
+        // PersIndex
+        returnstring += act.person.persIndex.toString() + ";"
+        // WOTAG
+        returnstring += act.weekDay.toString() + ";"
+        // TourIndex
+        returnstring += (if (act.isHomeActivity) tmptourindex else act.tourIndex).toString() + ";"
+        // AktIndex
+        returnstring += (if (act.isHomeActivity) tmpaktindex else act.index).toString() + ";"
+        // starttime
+        returnstring += act.startTime.toString() + ";"
+        // starttime_week
+        returnstring += act.startTimeWeekContext.toString() + ";"
+        // endtime
+        returnstring += act.endTime.toString() + ";"
+        // endtime_week
+        returnstring += act.endTimeWeekContext.toString() + ";"
+        // duration
+        returnstring += act.duration.toString() + ";"
+        // purpose
+        returnstring += act.activityType.typeasChar.toString() + ";"
+        // joint Status
+        returnstring += (if (Configuration.model_joint_actions) act.jointStatus else "-99").toString() + ""
+
+        returnstring += "\n"
+        return returnstring
+    }
+
+
+    /**
+     * create output trip information
+     *
+     * @param trip
+     * @return
+     */
+    private fun writeTrip(trip: HTrip): String {
+        assert(trip.isScheduled) { "Trip is not scheduled!" }
+        var returnstring = ""
+
+        // HHIndex
+        returnstring += trip.activity.person.household.householdIndex.toString() + ";"
+        // PersNr
+        returnstring += trip.activity.person.persNrinHousehold.toString() + ";"
+        // PersIndex
+        returnstring += trip.activity.person.persIndex.toString() + ";"
+        // Weekday
+        returnstring += trip.activity.weekDay.toString() + ";"
+        // endtime
+        returnstring += trip.endTime.toString() + ";"
+        // endtime_week
+        returnstring += trip.endTimeWeekContext.toString() + ";"
+        // starttime
+        returnstring += trip.startTime.toString() + ";"
+        // starttime_week
+        returnstring += trip.startTimeWeekContext.toString() + ";"
+        // duration
+        returnstring += trip.duration.toString() + ";"
+        // type of trip
+        returnstring += trip.type.typeasChar.toString() + ";"
+        // jointStatus
+        returnstring += (if (Configuration.model_joint_actions) trip.jointStatus else "-99").toString() + ""
+
+        returnstring += "\n"
+        return returnstring
+    }
 }
 

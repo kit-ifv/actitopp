@@ -1,47 +1,38 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
+
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 /**
- * 
  * @author Tim Hilgert
- *
  */
-public class CSVWRDDistributionLoader
-{
+class CSVWRDDistributionLoader {
+    fun loadDistributionInformation(input: InputStream): WRDModelDistributionInformation {
+        val minfo = WRDModelDistributionInformation()
 
-  public WRDModelDistributionInformation loadDistributionInformation(InputStream input)
-  {
-  	WRDModelDistributionInformation minfo = new WRDModelDistributionInformation();
-  	   
-    try (BufferedReader inRead = new BufferedReader(new InputStreamReader(input)))
-    {
-      boolean header = true;
-      String line = null;
+        try {
+            BufferedReader(InputStreamReader(input)).use { inRead ->
+                var header = true
+                var line: String?
+                while ((inRead.readLine().also { line = it }) != null) {
+                    if (header) {
+                        line = inRead.readLine()
+                        header = false
+                    }
+                    val splitted = line!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
-      while ((line = inRead.readLine()) != null)
-      {
-        if (header)
-        {
-          line = inRead.readLine();
-          header = false;
+                    val slot = splitted[0].toInt()
+                    val amount = splitted[1].toInt()
+
+                    minfo.addDistributionElement(slot, amount)
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
-        String[] splitted = line.split(";");
-        
-        int slot = Integer.parseInt(splitted[0]);
-        int amount = Integer.parseInt(splitted[1]);
-        
-        minfo.addDistributionElement(slot, amount);
-        
-      }      
-    } 
-    catch (IOException e) 
-    {
-			e.printStackTrace();
-		}
-    return minfo;
-  }
+        return minfo
+    }
 }

@@ -1,202 +1,156 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
 
 /**
- * 
  * @author Tim Hilgert
- *
  */
-public class HTrip {
+class HTrip(parent: HActivity, type: TripStatus, tripduration: Int) {
+    /**
+     * @return the activity
+     */
+    // each trip is bound to an activity
+    @JvmField
+    val activity: HActivity
 
-	// each trip is bound to an activity
-	private HActivity activity;
-	
-	// indicator if trip is one before or after an activity
-	private TripStatus status;
+    // indicator if trip is one before or after an activity
+    private val status: TripStatus
 
-	private int tripduration = -1;
-
-
-	public HTrip(HActivity parent, TripStatus type, int tripduration)
-	{
-		assert parent!=null :	"corresponding activity NULL!";
-		assert tripduration>0 :	"duration is less or equal 0!";
-		
-		this.activity = parent;
-		this.status = type;
-		this.tripduration = tripduration;
-	}
-
-	/**
-	 * @return the tripduration
-	 */
-	public int getDuration() {
-		return tripduration;
-	}
+    var duration: Int = -1
 
 
-	/**
-	 * @param tripduration the tripduration to set
-	 */
-	public void setDuration(int tripduration) {
-		this.tripduration = tripduration;
-	}
+    init {
+        assert(tripduration > 0) { "duration is less or equal 0!" }
 
-	/**
-	 * @return the activity
-	 */
-	public HActivity getActivity() {
-		return activity;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isScheduled()
-	{
-		return getDuration()!=-1;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getStartTime()
-	{
-		int starttime=-1;
-		
-		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
-		{
-			starttime = activity.getStartTime() - tripduration;
-		}
-		if (status.equals(TripStatus.TRIP_AFTER_ACT))
-		{
-			starttime = activity.getEndTime();
-		}
-		
-		assert starttime!=-1 : "could not get TripStartTime";		
-		return starttime;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getEndTime()
-	{
-		int endtime=-1;
-		
-		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
-		{
-			endtime = activity.getStartTime();
-		}
-		if (status.equals(TripStatus.TRIP_AFTER_ACT))
-		{
-			endtime = activity.getEndTime() + tripduration;
-		}
-		
-		assert endtime!=-1 : "could not get TripEndTime";		
-		return endtime;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getStartTimeWeekContext()
-	{
-		int starttime=-1;
-		
-		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
-		{
-			starttime = activity.getStartTimeWeekContext() - tripduration;
-		}
-		if (status.equals(TripStatus.TRIP_AFTER_ACT))
-		{
-			starttime = activity.getEndTimeWeekContext();
-		}
-		
-		assert starttime!=-1 : "could not get TripStartTime";		
-		return starttime;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getEndTimeWeekContext()
-	{
-		int endtime=-1;
-		
-		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
-		{
-			endtime = activity.getStartTimeWeekContext();
-		}
-		if (status.equals(TripStatus.TRIP_AFTER_ACT))
-		{
-			endtime = activity.getEndTimeWeekContext() + tripduration;
-		}
-		
-		assert endtime!=-1 : "could not get TripEndTime";		
-		return endtime;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public ActivityType getType()
-	{
-		ActivityType type=ActivityType.UNKNOWN;
-		
-		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
-		{
-			type = activity.getActivityType();
-		}
-		
-		/*
-		 * until now, trip after activities only occur after the last activity in a tour, thus they are always trips to home
-		 */
-		if (status.equals(TripStatus.TRIP_AFTER_ACT))
-		{
-			type = ActivityType.HOME;
-		}
-		
-		assert type!=ActivityType.UNKNOWN : "could not get TripType";		
-		return type;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public JointStatus getJointStatus()
-	{
-		JointStatus jointStatus= JointStatus.UNKNOWN;
-		
-		if (status.equals(TripStatus.TRIP_BEFORE_ACT))
-		{
-			jointStatus = activity.getJointStatus();
-		}
-		
-		/*
-		 * until now, trip after activities are home trips and joint home trips are not yet supported
-		 */
-		if (status.equals(TripStatus.TRIP_AFTER_ACT))
-		{
-			jointStatus = JointStatus.NOJOINTELEMENT;
-		}
-		
-		assert jointStatus!=JointStatus.UNKNOWN : "could not get jointStatus";		
-		return jointStatus;
-	}
-	
-	
-	@Override
-	public String toString()
-	{
-		return "trip: start(week): " + getStartTimeWeekContext() + " / end(week): " + getEndTimeWeekContext() + " / duration: " + getDuration();
-	}
-	
+        this.activity = parent
+        this.status = type
+        this.duration = tripduration
+    }
+
+
+    val isScheduled: Boolean
+        /**
+         * @return
+         */
+        get() = duration != -1
+
+    val startTime: Int
+        /**
+         * @return
+         */
+        get() {
+            var starttime = -1
+
+            if (status == TripStatus.TRIP_BEFORE_ACT) {
+                starttime = activity.startTime - duration
+            }
+            if (status == TripStatus.TRIP_AFTER_ACT) {
+                starttime = activity.endTime
+            }
+
+            assert(starttime != -1) { "could not get TripStartTime" }
+            return starttime
+        }
+
+    val endTime: Int
+        /**
+         * @return
+         */
+        get() {
+            var endtime = -1
+
+            if (status == TripStatus.TRIP_BEFORE_ACT) {
+                endtime = activity.startTime
+            }
+            if (status == TripStatus.TRIP_AFTER_ACT) {
+                endtime = activity.endTime + duration
+            }
+
+            assert(endtime != -1) { "could not get TripEndTime" }
+            return endtime
+        }
+
+    val startTimeWeekContext: Int
+        /**
+         * @return
+         */
+        get() {
+            var starttime = -1
+
+            if (status == TripStatus.TRIP_BEFORE_ACT) {
+                starttime = activity.startTimeWeekContext - duration
+            }
+            if (status == TripStatus.TRIP_AFTER_ACT) {
+                starttime = activity.endTimeWeekContext
+            }
+
+            assert(starttime != -1) { "could not get TripStartTime" }
+            return starttime
+        }
+
+    val endTimeWeekContext: Int
+        /**
+         * @return
+         */
+        get() {
+            var endtime = -1
+
+            if (status == TripStatus.TRIP_BEFORE_ACT) {
+                endtime = activity.startTimeWeekContext
+            }
+            if (status == TripStatus.TRIP_AFTER_ACT) {
+                endtime = activity.endTimeWeekContext + duration
+            }
+
+            assert(endtime != -1) { "could not get TripEndTime" }
+            return endtime
+        }
+
+    val type: ActivityType
+        /**
+         * @return
+         */
+        get() {
+            var type: ActivityType = ActivityType.UNKNOWN
+
+            if (status == TripStatus.TRIP_BEFORE_ACT) {
+                type = activity.activityType
+            }
+
+            /*
+      * until now, trip after activities only occur after the last activity in a tour, thus they are always trips to home
+      */
+            if (status == TripStatus.TRIP_AFTER_ACT) {
+                type = ActivityType.HOME
+            }
+
+            assert(type != ActivityType.UNKNOWN) { "could not get TripType" }
+            return type
+        }
+
+    val jointStatus: JointStatus?
+        /**
+         * @return
+         */
+        get() {
+            var jointStatus: JointStatus? = JointStatus.UNKNOWN
+
+            if (status == TripStatus.TRIP_BEFORE_ACT) {
+                jointStatus = activity.jointStatus
+            }
+
+            /*
+      * until now, trip after activities are home trips and joint home trips are not yet supported
+      */
+            if (status == TripStatus.TRIP_AFTER_ACT) {
+                jointStatus = JointStatus.NOJOINTELEMENT
+            }
+
+            assert(jointStatus != JointStatus.UNKNOWN) { "could not get jointStatus" }
+            return jointStatus
+        }
+
+
+    override fun toString(): String {
+        return "trip: start(week): $startTimeWeekContext / end(week): $endTimeWeekContext / duration: $duration"
+    }
 }

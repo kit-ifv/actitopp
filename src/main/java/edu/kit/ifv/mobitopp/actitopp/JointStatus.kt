@@ -1,59 +1,41 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Collections
+import java.util.EnumSet
 
-public enum JointStatus {
-	
-	JOINTTRIPANDACTIVITY (1),
-	JOINTACTIVITY(2),
-	JOINTTRIP (3),
-	NOJOINTELEMENT(4),
-	UNKNOWN(-1)
-	;
-	
+enum class JointStatus(val typeasInt: Int) {
+    JOINTTRIPANDACTIVITY(1),
+    JOINTACTIVITY(2),
+    JOINTTRIP(3),
+    NOJOINTELEMENT(4),
+    UNKNOWN(-1);
 
-	public static final Set<JointStatus> JOINTELEMENTS;
-	public static final Set<JointStatus> FULLSET;
-	
-	static 
-	{	
-		FULLSET = Collections.unmodifiableSet(EnumSet.of(
-																														JointStatus.JOINTTRIPANDACTIVITY,
-																														JointStatus.JOINTACTIVITY,
-																														JointStatus.JOINTTRIP,
-																														JointStatus.NOJOINTELEMENT
-																										));
-		JOINTELEMENTS = Collections.unmodifiableSet(EnumSet.of(
-																														JointStatus.JOINTTRIPANDACTIVITY,
-																														JointStatus.JOINTACTIVITY,
-																														JointStatus.JOINTTRIP
-																										));
-	}
-	
-	
-	private int intValue;
-	
-	private JointStatus(int intValue) 
-	{
-		this.intValue=intValue;	
-	}
-	
-	public int getTypeasInt() 
-	{ 
-		return this.intValue; 
-	}
 
-	public static JointStatus getTypeFromInt(int intValue) 
-	{
-		for (JointStatus type : EnumSet.allOf(JointStatus.class)) 
-		{
-			if (type.getTypeasInt() ==  intValue) 
-			{
-				return type;
-			}
-		}
-		return null;
-	}
+    companion object {
+        val JOINTELEMENTS: Set<JointStatus> = Collections.unmodifiableSet(
+            EnumSet.of(
+                JOINTTRIPANDACTIVITY,
+                JOINTACTIVITY,
+                JOINTTRIP
+            )
+        )
+        val FULLSET: Set<JointStatus> = Collections.unmodifiableSet(
+            EnumSet.of(
+                JOINTTRIPANDACTIVITY,
+                JOINTACTIVITY,
+                JOINTTRIP,
+                NOJOINTELEMENT
+            )
+        )
+
+
+        fun getTypeFromInt(intValue: Int): JointStatus {
+            for (type in EnumSet.allOf(JointStatus::class.java)) {
+                if (type.typeasInt == intValue) {
+                    return type
+                }
+            }
+            throw NoSuchElementException("No type with value $intValue")
+        }
+    }
 }

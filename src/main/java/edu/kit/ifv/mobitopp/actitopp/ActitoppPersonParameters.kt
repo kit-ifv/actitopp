@@ -1,1410 +1,957 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
+
+import kotlin.math.max
 
 /**
- * 
  * @author Tim Hilgert
- *
  */
-public enum ActitoppPersonParameters {
+enum class ActitoppPersonParameters(val descriptor: String) {
+    /*
+        * Kinder 0-10
+        */
+    haushalthatkinderunter10("haushalthatkinderunter10") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.children0_10 > 0) 1.0 else 0.0)
+        }
+    },
 
-	/*
-	 * Kinder 0-10
-	 */
-	haushalthatkinderunter10("haushalthatkinderunter10") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getChildren0_10() > 0) ? 1.0 : 0.0);
-		}
-	},	
-	
-	
-	/*
-	 * Kinder unter 18
-	 */
-	haushalthatkinderunter18("haushalthatkinderunter18") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getChildren_u18() > 0) ? 1.0 : 0.0);
-		}
-	},	
-	anzahlkinder_u18("anzahlkinder_u18") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getChildren_u18();
-		}
-	},		
-	
-	/*
-	 * BERUF
-	 */
-	beruf_vollzeit("beruf_vollzeit") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getEmployment() == 1) ? 1.0 : 0.0);
-		}
-	},
-	beruf_teilzeit("beruf_teilzeit") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int employmentType = actitoppPerson.getEmployment();
-	    double returnvalue = 0.0;
-	    if (employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue = 1.0;
-	    return returnvalue;
-		}
-	},
-	beruf_ohneerwerb("beruf_ohneerwerb") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int employmentType = actitoppPerson.getEmployment();
-	    double returnvalue = 0.0;
-	    if (employmentType == 3 || employmentType == 6) returnvalue = 1.0;
-	    return returnvalue;
-		}
-	},
-	beruf_schueler("beruf_schueler") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int employmentType = actitoppPerson.getEmployment();
-	    double returnvalue = 0.0;
-	    if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42) returnvalue = 1.0;
-	    return returnvalue;
-		}
-	},
-	beruf_azubi("beruf_azubi") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getEmployment() == 5) ? 1.0 : 0.0);
-		}
-	},
-	beruf_schueler_azubi("beruf_schueler_azubi") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int employmentType = actitoppPerson.getEmployment();
-			double returnvalue = 0.0;
-		  if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42 || employmentType == 5) returnvalue = 1.0;
-		  return returnvalue;
-		}
-	},
-	beruf_erwerbstaetig("beruf_erwerbstaetig") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int employmentType = actitoppPerson.getEmployment();
-	    double returnvalue = 0.0;
-	    if (employmentType == 1 || employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue = 1.0;
-	    return returnvalue;
-		}
-	},
-	beruf_rentner("beruf_rentner") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getEmployment() == 7) ? 1.0 : 0.0);
-		}
-	},
-	
-	/*
-	 *  HHGRO
-	 */
-	persin2pershh("persin2pershh") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getHousehold().getNumberofPersonsinHousehold() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	persin3pershh("persin3pershh") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getHousehold().getNumberofPersonsinHousehold() == 3) ? 1.0 : 0.0);
-		}
-	},
-	rentnerin2pershh("rentnerin2pershh") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getHousehold().getNumberofPersonsinHousehold() == 2 && actitoppPerson.getEmployment() == 7) ? 1.0 : 0.0);
-		}
-	},
-	
-	/*
-	 * ALTER
-	 */
-	alter_10bis17("alter_10bis17") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 10 && actitoppPerson.getAge() <= 17) ? 1.0 : 0.0);
-		}
-	},
-	alter_18bis25("alter_18bis25") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 18 && actitoppPerson.getAge() <= 25) ? 1.0 : 0.0);
-		}
-	},
-	alter_26bis35("alter_26bis35") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 26 && actitoppPerson.getAge() <= 35) ? 1.0 : 0.0);
-		}
-	},
-	alter_36bis50("alter_36bis50") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 36 && actitoppPerson.getAge() <= 50) ? 1.0 : 0.0);
-		}
-	},
-	alter_51bis60("alter_51bis60") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 51 && actitoppPerson.getAge() <= 60) ? 1.0 : 0.0);
-		}
-	},
-	alter_61bis70("alter_61bis70") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 61 && actitoppPerson.getAge() <= 70) ? 1.0 : 0.0);
-		}
-	},
-	alter_ueber70("alter_ueber70") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 71) ? 1.0 : 0.0);
-		}
-	},
-	alter_18bis35("alter_18bis35") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAge() >= 18 && actitoppPerson.getAge() <= 35) ? 1.0 : 0.0);
-		}
-	},
-	
-	/*
-	 * GESCHLECHT
-	 */	
-	male("male") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getGender() == 1) ? 1.0 : 0.0);
-		}
-	},
- 
-	/*
-	 * RAUMTYP
-	 */	
-	Raumtyp_mobitopp_rural("Raumtyp_mobitopp_rural") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAreatype() == 1) ? 1.0 : 0.0);
-		}
-	},	
-	Raumtyp_mobitopp_provincial("Raumtyp_mobitopp_provincial") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAreatype() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	Raumtyp_mobitopp_cityoutskirt("Raumtyp_mobitopp_cityoutskirt") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAreatype() == 3) ? 1.0 : 0.0);
-		}
-	},	
-	Raumtyp_mobitopp_metropolitan("Raumtyp_mobitopp_metropolitan") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAreatype() == 4) ? 1.0 : 0.0);
-		}
-	},	
-	Raumtyp_mobitopp_conurbation("Raumtyp_mobitopp_conurbation") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAreatype() == 5) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * PKWHH
-	 */	
-	PKWHH("PKWHH") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getNumberofcarsinhousehold();
-		}
-	},	
-	
-	/*
-	 * Pendeln 0-5 Kilometer
-	 */	
-	pendeln_0bis5km("pendeln_0bis5km") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
-			return ((commute_distance > 0 && commute_distance <= 5) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Pendeln 5-10 Kilometer
-	 */	
-	pendeln_5bis10km("pendeln_5bis10km") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
-			return ((commute_distance > 5 && commute_distance <= 10) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Pendeln 10-20 Kilometer
-	 */	
-	pendeln_10bis20km("pendeln_10bis20km") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
-			return ((commute_distance > 10 && commute_distance <= 20) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Pendeln 20-50 Kilometer
-	 */	
-	pendeln_20bis50km("pendeln_20bis50km") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
-			return ((commute_distance > 20 && commute_distance <= 50) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Pendeln ueber 50 Kilometer
-	 */	
-	pendeln_ueber50km("pendeln_ueber50km") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			double commute_distance = Math.max(actitoppPerson.getCommutingdistance_work(), actitoppPerson.getCommutingdistance_education());
-			return ((commute_distance > 50) ? 1.0 : 0.0);
-		}
-	},	
-		
-	/*
-	 * Anzahl Arbeitstage (Stufe 1A)
-	 */	
-	anztage_w("anztage_w") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getAttributesMap().get("anztage_w").doubleValue();
-		}
-	},	
-	anzahl_arbeitstage0("anzahl_arbeitstage0") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 0) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage1("anzahl_arbeitstage1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 1) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage2("anzahl_arbeitstage2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage3("anzahl_arbeitstage3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 3) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage4("anzahl_arbeitstage4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 4) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage5("anzahl_arbeitstage5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 5) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage6("anzahl_arbeitstage6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 6) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_arbeitstage7("anzahl_arbeitstage7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_w").doubleValue() == 7) ? 1.0 : 0.0);
-		}
-	},	
 
-	/*
-	 * Anzahl Bildungstage (Stufe 1B)
-	 */	
-	anztage_e("anztage_e") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getAttributesMap().get("anztage_e").doubleValue();
-		}
-	},	
-	anzahl_bildungstage0("anzahl_bildungstage0") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 0) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage1("anzahl_bildungstage1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 1) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage2("anzahl_bildungstage2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage3("anzahl_bildungstage3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 3) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage4("anzahl_bildungstage4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 4) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage5("anzahl_bildungstage5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 5) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage6("anzahl_bildungstage6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 6) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_bildungstage7("anzahl_bildungstage7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_e").doubleValue() == 7) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Anzahl Freizeittage (Stufe 1C)
-	 */	
-	anztage_l("anztage_l") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getAttributesMap().get("anztage_l").doubleValue();
-		}
-	},	
-	anzahl_freizeittage0("anzahl_freizeittage0") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 0) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage1("anzahl_freizeittage1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 1) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage2("anzahl_freizeittage2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage3("anzahl_freizeittage3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 3) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage4("anzahl_freizeittage4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 4) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage5("anzahl_freizeittage5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 5) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage6("anzahl_freizeittage6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 6) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_freizeittage7("anzahl_freizeittage7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_l").doubleValue() == 7) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Anzahl Shoppingtage (Stufe 1D)
-	 */	
-	anztage_s("anztage_s") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getAttributesMap().get("anztage_s").doubleValue();
-		}
-	},	
-	anzahl_shoppingtage0("anzahl_shoppingtage0") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 0) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage1("anzahl_shoppingtage1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 1) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage2("anzahl_shoppingtage2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage3("anzahl_shoppingtage3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 3) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage4("anzahl_shoppingtage4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 4) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage5("anzahl_shoppingtage5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 5) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage6("anzahl_shoppingtage6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 6) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_shoppingtage7("anzahl_shoppingtage7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_s").doubleValue() == 7) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Anzahl Transporttage (Stufe 1E)
-	 */	
-	anztage_t("anztage_t") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getAttributesMap().get("anztage_t").doubleValue();
-		}
-	},	
-	anzahl_transporttage0("anzahl_transporttage0") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 0) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage1("anzahl_transporttage1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 1) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage2("anzahl_transporttage2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 2) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage3("anzahl_transporttage3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 3) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage4("anzahl_transporttage4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 4) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage5("anzahl_transporttage5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 5) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage6("anzahl_transporttage6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 6) ? 1.0 : 0.0);
-		}
-	},	
-	anzahl_transporttage7("anzahl_transporttage7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributesMap().get("anztage_t").doubleValue() == 7) ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Anzahl immobile Tage (Stufe 1F)
-	 */	
-	anztage_immobil("anztage_immobil") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getAttributesMap().get("anztage_immobil").doubleValue();
-		}
-	},	
-	
-	/*
-	 * Properties fuer Anzahl an Aktivitaeten in der Woche
-	 */
-	wakt_prowoche_1bis3("wakt_prowoche_1bis3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.WORK);
-			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
-		}
-	},	
-	wakt_prowoche_7bis10("wakt_prowoche_7bis10") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.WORK);
-			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
-		}
-	},		
-	eakt_prowoche_ueber0("eakt_prowoche_ueber0") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.EDUCATION);
-			return ((amountofactivities > 0) ? 1.0 : 0.0);
-		}
-	},	
-	eakt_prowoche_1bis3("eakt_prowoche_1bis3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.EDUCATION);
-			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
-		}
-	},	
-	lakt_prowoche_1bis3("lakt_prowoche_1bis3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
-			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
-		}
-	},	
-	lakt_prowoche_4bis6("lakt_prowoche_4bis6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
-			return ((amountofactivities >= 4 && amountofactivities <= 6) ? 1.0 : 0.0);
-		}
-	},	
-	lakt_prowoche_7bis10("lakt_prowoche_7bis10") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
-			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
-		}
-	},	
-	sakt_prowoche_1bis3("sakt_prowoche_1bis3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
-			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
-		}
-	},	
-	sakt_prowoche_4bis6("sakt_prowoche_4bis6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
-			return ((amountofactivities >= 4 && amountofactivities <= 6) ? 1.0 : 0.0);
-		}
-	},	
-	sakt_prowoche_7bis10("sakt_prowoche_7bis10") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
-			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
-		}
-	},	
-	takt_prowoche_1bis3("takt_prowoche_1bis3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
-			return ((amountofactivities >= 1 && amountofactivities <= 3) ? 1.0 : 0.0);
-		}
-	},	
-	takt_prowoche_4bis6("takt_prowoche_4bis6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
-			return ((amountofactivities >= 4 && amountofactivities <= 6) ? 1.0 : 0.0);
-		}
-	},	
-	takt_prowoche_7bis10("takt_prowoche_7bis10") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int amountofactivities = actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
-			return ((amountofactivities >= 7 && amountofactivities <= 10) ? 1.0 : 0.0);
-		}
-	},	
-	
-	anzakt_woche_w("anzakt_woche_w") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.WORK);
-		}
-	},	
-	anzakt_woche_e("anzakt_woche_e") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.EDUCATION);
-		}
-	},
-	anzakt_woche_l("anzakt_woche_l") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.LEISURE);
-		}
-	},
-	anzakt_woche_s("anzakt_woche_s") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.SHOPPING);
-		}
-	},
-	anzakt_woche_t("anzakt_woche_t") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countActivitiesPerWeek(ActivityType.TRANSPORT);
-		}
-	},
-	
-	/*
-	 * Anzahl Touren in der Woche
-	 */
-	anztouren_woche_w("anztouren_woche_w") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.WORK);
-		}
-	},	
-	anztouren_woche_e("anztouren_woche_e") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.EDUCATION);
-		}
-	},	
-	anztouren_woche_l("anztouren_woche_l") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.LEISURE);
-		}
-	},	
-	anztouren_woche_s("anztouren_woche_s") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.SHOPPING);
-		}
-	},	
-	anztouren_woche_t("anztouren_woche_t") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return actitoppPerson.getWeekPattern().countToursPerWeek(ActivityType.TRANSPORT);
-		}
-	},	
-	
-	/*
-	 * Anzahl Tage mit spezifischen Aktivitaetentypen
-	 */
-	tagemit_wakt_1("tagemit_wakt_1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 1 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_wakt_2("tagemit_wakt_2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 2 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_wakt_3("tagemit_wakt_3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 3 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_wakt_4("tagemit_wakt_4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 4 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_wakt_5("tagemit_wakt_5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 5 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_wakt_6("tagemit_wakt_6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 6 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_wakt_7("tagemit_wakt_7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.WORK) == 7 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_eakt_1("tagemit_eakt_1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 1 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_eakt_2("tagemit_eakt_2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 2 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_eakt_3("tagemit_eakt_3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 3 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_eakt_4("tagemit_eakt_4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 4 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_eakt_5("tagemit_eakt_5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 5 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_eakt_6("tagemit_eakt_6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 6 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_eakt_7("tagemit_eakt_7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.EDUCATION) == 7 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_lakt_1("tagemit_lakt_1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 1 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_lakt_2("tagemit_lakt_2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 2 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_lakt_3("tagemit_lakt_3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 3 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_lakt_4("tagemit_lakt_4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 4 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_lakt_5("tagemit_lakt_5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 5 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_lakt_6("tagemit_lakt_6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 6 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_lakt_7("tagemit_lakt_7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.LEISURE) == 7 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_sakt_1("tagemit_sakt_1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 1 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_sakt_2("tagemit_sakt_2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 2 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_sakt_3("tagemit_sakt_3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 3 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_sakt_4("tagemit_sakt_4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 4 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_sakt_5("tagemit_sakt_5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 5 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_sakt_6("tagemit_sakt_6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 6 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_sakt_7("tagemit_sakt_7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.SHOPPING) == 7 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_takt_1("tagemit_takt_1") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 1 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_takt_2("tagemit_takt_2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 2 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_takt_3("tagemit_takt_3") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 3 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_takt_4("tagemit_takt_4") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 4 ? 1.0 : 0.0);
-		}
-	},		
-	tagemit_takt_5("tagemit_takt_5") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 5 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_takt_6("tagemit_takt_6") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 6 ? 1.0 : 0.0);
-		}
-	},	
-	tagemit_takt_7("tagemit_takt_7") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return (actitoppPerson.getWeekPattern().countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 7 ? 1.0 : 0.0);
-		}
-	},	
-	
-	/*
-	 * Anzahl Tage mit Touren Vor/Nach-Haupttour
-	 */
-	anztagemit_tourenvorht("anztagemit_tourenvorht") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int counter=0;
-			for (HDay day : actitoppPerson.getWeekPattern().getDays())
-			{
-				if (!day.isHomeDay() && day.getLowestTourIndex()<0) counter++;
-			}
-			return counter;
-		}
-	},
-	anztagemit_tourennachht("anztagemit_tourennachht") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			int counter=0;
-			for (HDay day : actitoppPerson.getWeekPattern().getDays())
-			{
-				if (!day.isHomeDay() && day.getHighestTourIndex()>0) counter++;
-			}
-			return counter;
-		}
-	},
-	
-	/*
-	 * Zeitbudget Work
-	 */
-	zeitbudget_work_ueber_kat2("zeitbudget_work_ueber_kat2") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("Wbudget_category_alternative") > 2) ? 1.0 : 0.0);
-		}
-	},
-	
-	/*
-	 * Default Anzahl Touren am Tag = 1
-	 */
-	mean_1tour("mean_1tour") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 1) ? 1.0 : 0.0);
-		}
-	},
-	/*
-	 * Default Anzahl Touren am Tag = 2
-	 */
-	mean_2touren("mean_2touren") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("anztourentag_mean") == 2) ? 1.0 : 0.0);
-		}
-	},
-	/*
-	 * Default Anzahl Akt am Tag = 1
-	 */
-	mean_1akt("mean_1akt") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 1) ? 1.0 : 0.0);
-		}
-	},
-	/*
-	 * Default Anzahl Akt am Tag = 2
-	 */
-	mean_2akt("mean_2akt") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 2) ? 1.0 : 0.0);
-		}
-	},
-	/*
-	 * Default Anzahl Akt am Tag = 3
-	 */
-	mean_3akt("mean_3akt") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("anzakttag_mean") == 3) ? 1.0 : 0.0);
-		}
-	},
-	/*
-	 * Standard-Startzeitraum fuer T1
-	 */
-	std_start_T1_6_7_Uhr("std_start_T1_6_7_Uhr") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("first_tour_default_start_cat") == 3) ? 1.0 : 0.0);
-		}
-	},
-	std_start_T1_7_8_Uhr("std_start_T1_7_8_Uhr") 
-	{
-		@Override
-		public double getAttribute(ActitoppPerson actitoppPerson) 
-		{
-			return ((actitoppPerson.getAttributefromMap("first_tour_default_start_cat") == 4) ? 1.0 : 0.0);
-		}
-	},
-	
-	;
-		
-	private final String name;
+    /*
+     * Kinder unter 18
+     */
+    haushalthatkinderunter18("haushalthatkinderunter18") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.children_u18 > 0) 1.0 else 0.0)
+        }
+    },
+    anzahlkinder_u18("anzahlkinder_u18") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.children_u18.toDouble()
+        }
+    },
 
-	/**
-	 * private constructor
-	 * 
-	 * @param name
-	 */
-	private ActitoppPersonParameters(String name)
-	{
-		this.name = name;
-	}
-	
-	/**
-	 * 
-	 * get ENUM Value for a given string
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public static ActitoppPersonParameters getEnumValue(String name)
-	{
-		checkUniqueness(name);
-		
-		// search for correct ENUM
-		for (ActitoppPersonParameters parameter : values())
-		{
-			if (parameter.name.equals(name)) return parameter;
-		}
-		throw new IllegalArgumentException(name + " not found");
-	}
-	
+    /*
+     * BERUF
+     */
+    beruf_vollzeit("beruf_vollzeit") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.employment == 1) 1.0 else 0.0)
+        }
+    },
+    beruf_teilzeit("beruf_teilzeit") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val employmentType = actitoppPerson.employment
+            var returnvalue = 0.0
+            if (employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue = 1.0
+            return returnvalue
+        }
+    },
+    beruf_ohneerwerb("beruf_ohneerwerb") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val employmentType = actitoppPerson.employment
+            var returnvalue = 0.0
+            if (employmentType == 3 || employmentType == 6) returnvalue = 1.0
+            return returnvalue
+        }
+    },
+    beruf_schueler("beruf_schueler") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val employmentType = actitoppPerson.employment
+            var returnvalue = 0.0
+            if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42) returnvalue =
+                1.0
+            return returnvalue
+        }
+    },
+    beruf_azubi("beruf_azubi") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.employment == 5) 1.0 else 0.0)
+        }
+    },
+    beruf_schueler_azubi("beruf_schueler_azubi") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val employmentType = actitoppPerson.employment
+            var returnvalue = 0.0
+            if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42 || employmentType == 5) returnvalue =
+                1.0
+            return returnvalue
+        }
+    },
+    beruf_erwerbstaetig("beruf_erwerbstaetig") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val employmentType = actitoppPerson.employment
+            var returnvalue = 0.0
+            if (employmentType == 1 || employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue =
+                1.0
+            return returnvalue
+        }
+    },
+    beruf_rentner("beruf_rentner") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.employment == 7) 1.0 else 0.0)
+        }
+    },
 
-	/**
-	 * 
-	 * method to check uniqueness of ENUM Variable
-	 * 
-	 * @param name
-	 */
-	private static void checkUniqueness(String name)
-	{
-			int counter=0;
-			for (ActitoppPersonParameters parameter : values())
-			{
-				if (parameter.name.equals(name))
-				{
-					counter++;
-					if (counter>1) throw new IllegalArgumentException(name + " identifier is not unique - wrong enum specification");
-				}
-			}
-	}
+    /*
+     *  HHGRO
+     */
+    persin2pershh("persin2pershh") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.household.numberofPersonsinHousehold == 2) 1.0 else 0.0)
+        }
+    },
+    persin3pershh("persin3pershh") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.household.numberofPersonsinHousehold == 3) 1.0 else 0.0)
+        }
+    },
+    rentnerin2pershh("rentnerin2pershh") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.household.numberofPersonsinHousehold == 2 && actitoppPerson.employment == 7) 1.0 else 0.0)
+        }
+    },
 
-	public abstract double getAttribute(ActitoppPerson actitoppPerson);
-	
-	
+    /*
+     * ALTER
+     */
+    alter_10bis17("alter_10bis17") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 10 && actitoppPerson.age <= 17) 1.0 else 0.0)
+        }
+    },
+    alter_18bis25("alter_18bis25") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 18 && actitoppPerson.age <= 25) 1.0 else 0.0)
+        }
+    },
+    alter_26bis35("alter_26bis35") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 26 && actitoppPerson.age <= 35) 1.0 else 0.0)
+        }
+    },
+    alter_36bis50("alter_36bis50") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 36 && actitoppPerson.age <= 50) 1.0 else 0.0)
+        }
+    },
+    alter_51bis60("alter_51bis60") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 51 && actitoppPerson.age <= 60) 1.0 else 0.0)
+        }
+    },
+    alter_61bis70("alter_61bis70") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 61 && actitoppPerson.age <= 70) 1.0 else 0.0)
+        }
+    },
+    alter_ueber70("alter_ueber70") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 71) 1.0 else 0.0)
+        }
+    },
+    alter_18bis35("alter_18bis35") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.age >= 18 && actitoppPerson.age <= 35) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * GESCHLECHT
+     */
+    male("male") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.gender == 1) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * RAUMTYP
+     */
+    Raumtyp_mobitopp_rural("Raumtyp_mobitopp_rural") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.areatype == 1) 1.0 else 0.0)
+        }
+    },
+    Raumtyp_mobitopp_provincial("Raumtyp_mobitopp_provincial") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.areatype == 2) 1.0 else 0.0)
+        }
+    },
+    Raumtyp_mobitopp_cityoutskirt("Raumtyp_mobitopp_cityoutskirt") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.areatype == 3) 1.0 else 0.0)
+        }
+    },
+    Raumtyp_mobitopp_metropolitan("Raumtyp_mobitopp_metropolitan") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.areatype == 4) 1.0 else 0.0)
+        }
+    },
+    Raumtyp_mobitopp_conurbation("Raumtyp_mobitopp_conurbation") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.areatype == 5) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * PKWHH
+     */
+    PKWHH("PKWHH") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.numberofcarsinhousehold.toDouble()
+        }
+    },
+
+    /*
+     * Pendeln 0-5 Kilometer
+     */
+    pendeln_0bis5km("pendeln_0bis5km") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val commute_distance =
+                max(actitoppPerson.commutingdistance_work, actitoppPerson.commutingdistance_education)
+            return (if (commute_distance > 0 && commute_distance <= 5) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Pendeln 5-10 Kilometer
+     */
+    pendeln_5bis10km("pendeln_5bis10km") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val commute_distance =
+                max(actitoppPerson.commutingdistance_work, actitoppPerson.commutingdistance_education)
+            return (if (commute_distance > 5 && commute_distance <= 10) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Pendeln 10-20 Kilometer
+     */
+    pendeln_10bis20km("pendeln_10bis20km") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val commute_distance =
+                max(actitoppPerson.commutingdistance_work, actitoppPerson.commutingdistance_education)
+            return (if (commute_distance > 10 && commute_distance <= 20) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Pendeln 20-50 Kilometer
+     */
+    pendeln_20bis50km("pendeln_20bis50km") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val commute_distance =
+                max(actitoppPerson.commutingdistance_work, actitoppPerson.commutingdistance_education)
+            return (if (commute_distance > 20 && commute_distance <= 50) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Pendeln ueber 50 Kilometer
+     */
+    pendeln_ueber50km("pendeln_ueber50km") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val commute_distance =
+                max(actitoppPerson.commutingdistance_work, actitoppPerson.commutingdistance_education)
+            return (if (commute_distance > 50) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl Arbeitstage (Stufe 1A)
+     */
+    anztage_w("anztage_w") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.attributesMap["anztage_w"]
+        }
+    },
+    anzahl_arbeitstage0("anzahl_arbeitstage0") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 0.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage1("anzahl_arbeitstage1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 1.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage2("anzahl_arbeitstage2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 2.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage3("anzahl_arbeitstage3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 3.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage4("anzahl_arbeitstage4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 4.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage5("anzahl_arbeitstage5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 5.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage6("anzahl_arbeitstage6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 6.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_arbeitstage7("anzahl_arbeitstage7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_w"] == 7.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl Bildungstage (Stufe 1B)
+     */
+    anztage_e("anztage_e") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.attributesMap["anztage_e"]
+        }
+    },
+    anzahl_bildungstage0("anzahl_bildungstage0") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 0.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage1("anzahl_bildungstage1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 1.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage2("anzahl_bildungstage2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 2.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage3("anzahl_bildungstage3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 3.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage4("anzahl_bildungstage4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 4.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage5("anzahl_bildungstage5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 5.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage6("anzahl_bildungstage6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 6.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_bildungstage7("anzahl_bildungstage7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_e"] == 7.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl Freizeittage (Stufe 1C)
+     */
+    anztage_l("anztage_l") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.attributesMap["anztage_l"] ?: 0.0
+        }
+    },
+    anzahl_freizeittage0("anzahl_freizeittage0") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 0.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage1("anzahl_freizeittage1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 1.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage2("anzahl_freizeittage2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 2.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage3("anzahl_freizeittage3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 3.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage4("anzahl_freizeittage4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 4.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage5("anzahl_freizeittage5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 5.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage6("anzahl_freizeittage6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 6.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_freizeittage7("anzahl_freizeittage7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_l"] == 7.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl Shoppingtage (Stufe 1D)
+     */
+    anztage_s("anztage_s") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.attributesMap["anztage_s"]
+        }
+    },
+    anzahl_shoppingtage0("anzahl_shoppingtage0") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 0.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage1("anzahl_shoppingtage1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 1.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage2("anzahl_shoppingtage2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 2.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage3("anzahl_shoppingtage3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 3.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage4("anzahl_shoppingtage4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 4.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage5("anzahl_shoppingtage5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 5.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage6("anzahl_shoppingtage6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 6.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_shoppingtage7("anzahl_shoppingtage7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_s"] == 7.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl Transporttage (Stufe 1E)
+     */
+    anztage_t("anztage_t") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.attributesMap["anztage_t"] ?:0.0
+        }
+    },
+    anzahl_transporttage0("anzahl_transporttage0") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 0.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage1("anzahl_transporttage1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 1.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage2("anzahl_transporttage2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 2.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage3("anzahl_transporttage3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 3.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage4("anzahl_transporttage4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 4.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage5("anzahl_transporttage5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 5.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage6("anzahl_transporttage6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 6.0) 1.0 else 0.0)
+        }
+    },
+    anzahl_transporttage7("anzahl_transporttage7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.attributesMap["anztage_t"] == 7.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl immobile Tage (Stufe 1F)
+     */
+    anztage_immobil("anztage_immobil") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.attributesMap["anztage_immobil"]?: 0.0
+        }
+    },
+
+    /*
+     * Properties fuer Anzahl an Aktivitaeten in der Woche
+     */
+    wakt_prowoche_1bis3("wakt_prowoche_1bis3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.WORK)
+            return (if (amountofactivities >= 1 && amountofactivities <= 3) 1.0 else 0.0)
+        }
+    },
+    wakt_prowoche_7bis10("wakt_prowoche_7bis10") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.WORK)
+            return (if (amountofactivities >= 7 && amountofactivities <= 10) 1.0 else 0.0)
+        }
+    },
+    eakt_prowoche_ueber0("eakt_prowoche_ueber0") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.EDUCATION)
+            return (if (amountofactivities > 0) 1.0 else 0.0)
+        }
+    },
+    eakt_prowoche_1bis3("eakt_prowoche_1bis3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.EDUCATION)
+            return (if (amountofactivities >= 1 && amountofactivities <= 3) 1.0 else 0.0)
+        }
+    },
+    lakt_prowoche_1bis3("lakt_prowoche_1bis3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.LEISURE)
+            return (if (amountofactivities >= 1 && amountofactivities <= 3) 1.0 else 0.0)
+        }
+    },
+    lakt_prowoche_4bis6("lakt_prowoche_4bis6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.LEISURE)
+            return (if (amountofactivities >= 4 && amountofactivities <= 6) 1.0 else 0.0)
+        }
+    },
+    lakt_prowoche_7bis10("lakt_prowoche_7bis10") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.LEISURE)
+            return (if (amountofactivities >= 7 && amountofactivities <= 10) 1.0 else 0.0)
+        }
+    },
+    sakt_prowoche_1bis3("sakt_prowoche_1bis3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.SHOPPING)
+            return (if (amountofactivities >= 1 && amountofactivities <= 3) 1.0 else 0.0)
+        }
+    },
+    sakt_prowoche_4bis6("sakt_prowoche_4bis6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.SHOPPING)
+            return (if (amountofactivities >= 4 && amountofactivities <= 6) 1.0 else 0.0)
+        }
+    },
+    sakt_prowoche_7bis10("sakt_prowoche_7bis10") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.SHOPPING)
+            return (if (amountofactivities >= 7 && amountofactivities <= 10) 1.0 else 0.0)
+        }
+    },
+    takt_prowoche_1bis3("takt_prowoche_1bis3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.TRANSPORT)
+            return (if (amountofactivities >= 1 && amountofactivities <= 3) 1.0 else 0.0)
+        }
+    },
+    takt_prowoche_4bis6("takt_prowoche_4bis6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.TRANSPORT)
+            return (if (amountofactivities >= 4 && amountofactivities <= 6) 1.0 else 0.0)
+        }
+    },
+    takt_prowoche_7bis10("takt_prowoche_7bis10") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            val amountofactivities = actitoppPerson.countActivityTypes(ActivityType.TRANSPORT)
+            return (if (amountofactivities >= 7 && amountofactivities <= 10) 1.0 else 0.0)
+        }
+    },
+
+    anzakt_woche_w("anzakt_woche_w") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countActivityTypes(ActivityType.WORK).toDouble()
+        }
+    },
+    anzakt_woche_e("anzakt_woche_e") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countActivityTypes(ActivityType.EDUCATION).toDouble()
+        }
+    },
+    anzakt_woche_l("anzakt_woche_l") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countActivityTypes(ActivityType.LEISURE).toDouble()
+        }
+    },
+    anzakt_woche_s("anzakt_woche_s") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countActivityTypes(ActivityType.SHOPPING).toDouble()
+        }
+    },
+    anzakt_woche_t("anzakt_woche_t") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countActivityTypes(ActivityType.TRANSPORT).toDouble()
+        }
+    },
+
+    /*
+     * Anzahl Touren in der Woche
+     */
+    anztouren_woche_w("anztouren_woche_w") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countTourTypes(ActivityType.WORK).toDouble()
+        }
+    },
+    anztouren_woche_e("anztouren_woche_e") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countTourTypes(ActivityType.EDUCATION).toDouble()
+        }
+    },
+    anztouren_woche_l("anztouren_woche_l") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countTourTypes(ActivityType.LEISURE).toDouble()
+        }
+    },
+    anztouren_woche_s("anztouren_woche_s") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countTourTypes(ActivityType.SHOPPING).toDouble()
+        }
+    },
+    anztouren_woche_t("anztouren_woche_t") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return actitoppPerson.countTourTypes(ActivityType.TRANSPORT).toDouble()
+        }
+    },
+
+    /*
+     * Anzahl Tage mit spezifischen Aktivitaetentypen
+     */
+    tagemit_wakt_1("tagemit_wakt_1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 1) 1.0 else 0.0)
+        }
+    },
+    tagemit_wakt_2("tagemit_wakt_2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 2) 1.0 else 0.0)
+        }
+    },
+    tagemit_wakt_3("tagemit_wakt_3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 3) 1.0 else 0.0)
+        }
+    },
+    tagemit_wakt_4("tagemit_wakt_4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 4) 1.0 else 0.0)
+        }
+    },
+    tagemit_wakt_5("tagemit_wakt_5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 5) 1.0 else 0.0)
+        }
+    },
+    tagemit_wakt_6("tagemit_wakt_6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 6) 1.0 else 0.0)
+        }
+    },
+    tagemit_wakt_7("tagemit_wakt_7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.WORK) == 7) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_1("tagemit_eakt_1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 1) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_2("tagemit_eakt_2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 2) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_3("tagemit_eakt_3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 3) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_4("tagemit_eakt_4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 4) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_5("tagemit_eakt_5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 5) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_6("tagemit_eakt_6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 6) 1.0 else 0.0)
+        }
+    },
+    tagemit_eakt_7("tagemit_eakt_7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.EDUCATION) == 7) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_1("tagemit_lakt_1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 1) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_2("tagemit_lakt_2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 2) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_3("tagemit_lakt_3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 3) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_4("tagemit_lakt_4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 4) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_5("tagemit_lakt_5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 5) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_6("tagemit_lakt_6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 6) 1.0 else 0.0)
+        }
+    },
+    tagemit_lakt_7("tagemit_lakt_7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.LEISURE) == 7) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_1("tagemit_sakt_1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 1) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_2("tagemit_sakt_2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 2) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_3("tagemit_sakt_3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 3) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_4("tagemit_sakt_4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 4) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_5("tagemit_sakt_5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 5) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_6("tagemit_sakt_6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 6) 1.0 else 0.0)
+        }
+    },
+    tagemit_sakt_7("tagemit_sakt_7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.SHOPPING) == 7) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_1("tagemit_takt_1") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 1) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_2("tagemit_takt_2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 2) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_3("tagemit_takt_3") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 3) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_4("tagemit_takt_4") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 4) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_5("tagemit_takt_5") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 5) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_6("tagemit_takt_6") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 6) 1.0 else 0.0)
+        }
+    },
+    tagemit_takt_7("tagemit_takt_7") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.countDaysWithSpecificActivity(ActivityType.TRANSPORT) == 7) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Anzahl Tage mit Touren Vor/Nach-Haupttour
+     */
+    anztagemit_tourenvorht("anztagemit_tourenvorht") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            var counter = 0
+            for (day in actitoppPerson.days()) {
+                if (!day.isHomeDay && day.lowestTourIndex < 0) counter++
+            }
+            return counter.toDouble()
+        }
+    },
+    anztagemit_tourennachht("anztagemit_tourennachht") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            var counter = 0
+            for (day in actitoppPerson.days()) {
+                if (!day.isHomeDay && day.highestTourIndex > 0) counter++
+            }
+            return counter.toDouble()
+        }
+    },
+
+    /*
+     * Zeitbudget Work
+     */
+    zeitbudget_work_ueber_kat2("zeitbudget_work_ueber_kat2") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("Wbudget_category_alternative") > 2) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Default Anzahl Touren am Tag = 1
+     */
+    mean_1tour("mean_1tour") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("anztourentag_mean") == 1.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Default Anzahl Touren am Tag = 2
+     */
+    mean_2touren("mean_2touren") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("anztourentag_mean") == 2.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Default Anzahl Akt am Tag = 1
+     */
+    mean_1akt("mean_1akt") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("anzakttag_mean") == 1.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Default Anzahl Akt am Tag = 2
+     */
+    mean_2akt("mean_2akt") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("anzakttag_mean") == 2.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Default Anzahl Akt am Tag = 3
+     */
+    mean_3akt("mean_3akt") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("anzakttag_mean") == 3.0) 1.0 else 0.0)
+        }
+    },
+
+    /*
+     * Standard-Startzeitraum fuer T1
+     */
+    std_start_T1_6_7_Uhr("std_start_T1_6_7_Uhr") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("first_tour_default_start_cat") == 3.0) 1.0 else 0.0)
+        }
+    },
+    std_start_T1_7_8_Uhr("std_start_T1_7_8_Uhr") {
+        override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
+            return (if (actitoppPerson.getAttributefromMap("first_tour_default_start_cat") == 4.0) 1.0 else 0.0)
+        }
+    },
+    ;
+
+    abstract fun getAttribute(actitoppPerson: ActitoppPerson): Double
+
+
+    companion object {
+        /**
+         * get ENUM Value for a given string
+         *
+         * @param name
+         * @return
+         */
+        fun getEnumValue(name: String): ActitoppPersonParameters {
+            checkUniqueness(name)
+
+            // search for correct ENUM
+            for (parameter in entries) {
+                if (parameter.descriptor == name) return parameter
+            }
+            throw IllegalArgumentException("$name not found")
+        }
+
+
+        /**
+         * method to check uniqueness of ENUM Variable
+         *
+         * @param name
+         */
+        private fun checkUniqueness(name: String) {
+            var counter = 0
+            for (parameter in entries) {
+                if (parameter.descriptor == name) {
+                    counter++
+                    require(counter <= 1) { "$name identifier is not unique - wrong enum specification" }
+                }
+            }
+        }
+    }
 }

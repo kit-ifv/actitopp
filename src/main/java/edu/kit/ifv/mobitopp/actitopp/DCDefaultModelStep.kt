@@ -1,283 +1,229 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.text.NumberFormat
 
 
 /**
- * 
  * @author Tim Hilgert
+ *
  *
  * object for a discrete choice model step
  */
-public class DCDefaultModelStep extends AbsHModelStep
-{
-	
-	private RNGHelper randomgenerator;
-	private AttributeLookup attributeLookup;
+class DCDefaultModelStep(
+    id: String,
+    modelFileBase: ModelFileBase,
+    private val attributeLookup: AttributeLookup,
+    private val randomgenerator: RNGHelper
+) :
+    AbsHModelStep(id) {
+    var decision: Int = -1
+        private set
+    lateinit var alternativeChosen: String
+        private set
+    private val choiceFunction: ChoiceFunction = LogitFunction()
 
-  private int decision = -1;
-  private String alternativeChosen;
-  private ChoiceFunction choiceFunction;
-  
-  
-  private DCModelSteplnformation modelinfo;
-  private ArrayList<DCAlternative> alternatives;  
-  
-  //restrict alternatives to a specific range
-  private int fromRangeLimiter = 0;
-  private int toRangeLimiter = -1;
-  
-     
-  /**
-   * 
-   * @param id
-   * @param modelFileBase
-   * @param attributeLookup
-   */
-  public DCDefaultModelStep(String id, ModelFileBase modelFileBase, AttributeLookup attributeLookup, RNGHelper randomgenerator)
-  {
-    super(id);
-    
-    this.randomgenerator = randomgenerator;
-    this.attributeLookup = attributeLookup;
-    this.alternatives = new ArrayList<DCAlternative>();  
-    this.choiceFunction = new LogitFunction();   
-    
-    /*
-     * load model information from file base
-     */
-    modelinfo = modelFileBase.getModelInformationforDCStep(id);
-    assert modelinfo != null : "ModelInformationDC Object is null";
-    
-		/*
-		 *  create an object for each step alternative
-		 */
-    for (String s : modelinfo.getAlternativesList())
-    {
-    	alternatives.add(new DCAlternative(s));
-    }
-  }
-   
-  
-  /**
-   * 
-   * method to do a dc model step
-   * 
-   */
-  @Override
-  public int doStep()
-  {
-      	
-    /*
-     * set rangeLimiter (UpperBound) if not yet determinded
-     */
-    toRangeLimiter = (toRangeLimiter >= 0) ? toRangeLimiter : alternatives.size();
-    
-    assert toRangeLimiter>=fromRangeLimiter : "fromRangeLimiter > toRangeLimiter!";
 
     /*
-     * disable alternatives out of Lower-UpperBound range!
-     */
-    for (int i=0; i<alternatives.size(); i++)
-    {
-    	if (i<fromRangeLimiter || i>toRangeLimiter) alternatives.get(i).setEnabled(false);
-    }
-    
-    /*
-     * check that there is at least one alternative still enabled
-     */
-    boolean alternativeavailable=false;
-    for (DCAlternative mAlt : alternatives)
-    {
-    	if (mAlt.isEnabled()) alternativeavailable=true;
-    }
-    assert alternativeavailable==true : "no alternative available!";
-    
-	  /*
-	   * initialize utility function for each alternative
-	   */
-    for (DCAlternative mAlt : alternatives)
-	  {  
-			if (mAlt.isEnabled())
-			{
-				UtilityFunction uf = mAlt.getUtilityFunction();
-				
-				// Loop through all parameters of this alternative
-				for (Entry<String, Double> mapentry : modelinfo.getParameterValuesforAlternative(mAlt.getName()).entrySet())
-				{
-					String parameterName = mapentry.getKey();
-					Double parameterValue = mapentry.getValue();
-					
-					if(parameterName.equals("Grundnutzen") || parameterName.equals("Intercept"))
-					{ 
-						uf.setBaseWeight(parameterValue);
-					}
-					else
-					{
-						String parameterContext = modelinfo.getContextforParameter(parameterName);
-						double attributeValue = attributeLookup.getAttributeValue(parameterContext, parameterName);
-						uf.addParameterAttributeCombination(new UtilityParameterAttributeCombination(parameterName, parameterValue, attributeValue));
-					}
-				}
-			}
-	  }
-    
-    /*
-     * determine probabilities of enabled alternatives
-     */
-    choiceFunction.calculateProbabilities(alternatives);
-    
-    /*
-     * decide for one alternative
-     */
-    double randomvalue = randomgenerator.getRandomValue();
-    decision = choiceFunction.chooseAlternative(alternatives, randomvalue);
-    alternativeChosen = alternatives.get(decision).getName();
-    
-    // DEBUG USE ONLY
-    if (Configuration.debugenabled)
-    {
-    	printDecisionProcess();
+* load model information from file base
+*/
+    private val modelinfo: DCModelSteplnformation = modelFileBase.getModelInformationforDCStep(id)
+
+    private val alternatives = ArrayList<DCAlternative>()
+
+    //restrict alternatives to a specific range
+    var lowerBound: Int = 0
+        private set
+    var upperBound: Int = -1
+        private set
+
+
+    init {
+        /*
+         *  create an object for each step alternative
+         */
+        for (s in modelinfo.alternativesList) {
+            alternatives.add(DCAlternative(s))
+        }
     }
 
-    assert decision!=-1 : "could not make a decision!";
-    return decision;  
-  }
 
-	/**
-   * Limits the DC-process to a certain alternative range. this method must be called before doStep() if necessary
-   * @param from
-   * @param to
-   */
-  public void limitUpperandLowerBound(int from, int to)
-  {
-    fromRangeLimiter = from;
-    toRangeLimiter = to;
-  }
-  
-	/**
-   * Limits the DC-process to a certain alternative upperBound. this method must be called before doStep() if necessary
-   * @param to
-   */
-  public void limitUpperBoundOnly(int to)
-  {
-  	toRangeLimiter = to;
-  }
-  
-	/**
-   * Limits the DC-process to a certain alternative lowerBound. this method must be called before doStep() if necessary
-   * @param from
-   */
-  public void limitLowerBoundOnly(int from)
-  {
-  	fromRangeLimiter = from;
-  }
-  
-  /**
-   * methode disables an alternative of the set of alternatives.
-   * this alternative will not be considered when choosing an alternative.
-   * 
-   * @param name
-   */
-  public void disableAlternative(String name)
-  {
-  	for (DCAlternative ma : alternatives)
-  	{
-  		if (ma.getName().equals(name)) ma.setEnabled(false);
-  	}
-  }
-  
-  /**
-   * changes the utilityfactor of an alternative based on an alternativename.
-   * utilityfactir is used to influence the utility/significance of alternatives
-   * 
-   * @param alternativename
-   * @param utilityfactor
-   */
-  public void adaptUtilityFactor(String alternativename, double utilityfactor)
-  {
-  	for (DCAlternative ma : alternatives)
-  	{
-  		if (ma.getName().equals(alternativename)) ma.setUtilityfactor(utilityfactor);
-  	}
-  }
+    /**
+     * method to do a dc model step
+     */
+    public override fun doStep(): Int {
+        /*
+                 * set rangeLimiter (UpperBound) if not yet determinded
+                 */
 
-  
-  /**
-   * changes the utilityfactor of an alternative based on an alternativeindex.
-   * utilityfactir is used to influence the utility/significance of alternatives
-   * 
-   * @param alternativeindex
-   * @param utilityfactor
-   */
-  public void adaptUtilityFactor(int alternativeindex, double utilityfactor)
-  {
-  	alternatives.get(alternativeindex).setUtilityfactor(utilityfactor);
-  }
+        upperBound = if (upperBound >= 0) upperBound else alternatives.size
 
-	/**
-	 * prints the decision process for debug reasons
-	 */
-	public void printDecisionProcess()
-	{
-	    System.out.println("-------- DECISIONS FOR STEP " + this.id +" ---------------");
-	           
-	    for(DCAlternative mAlt : alternatives)
-	    {
-	    	if(mAlt.isEnabled())
-	    	{
-	    		System.out.println("alternative: "+mAlt.getName() +" prob: "+ NumberFormat.getPercentInstance().format(mAlt.getProbability()) +" - utility: " + mAlt.getUtility());
-	    	}
-	    }
-	
-	    System.out.println("Chosen alternative: " + alternativeChosen);
-	    System.out.println("Random Value: " + randomgenerator.getLastRandomValue());
-	    System.out.println("SAVED for: " + attributeLookup);
-	    System.out.println();
-	}
+        assert(upperBound >= lowerBound) { "fromRangeLimiter > toRangeLimiter!" }
 
-  /**
-	 * check if alternative is enabled or not
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public boolean alternativeisEnabled(String name)
-	{
-		boolean result=false;
-		for (Iterator<DCAlternative> it = alternatives.iterator(); it.hasNext();)
-		{
-			DCAlternative ma = it.next();
-			if (ma.getName().equals(name) && ma.isEnabled()) result=true;
-		}
-		return result;
-	}
+        /*
+         * disable alternatives out of Lower-UpperBound range!
+         */
+        for (i in alternatives.indices) {
+            if (i < lowerBound || i > upperBound) alternatives[i].isEnabled = false
+        }
+
+        /*
+         * check that there is at least one alternative still enabled
+         */
+        var alternativeavailable = false
+        for (mAlt in alternatives) {
+            if (mAlt.isEnabled) alternativeavailable = true
+        }
+        assert(alternativeavailable) { "no alternative available!" }
+
+        /*
+         * initialize utility function for each alternative
+         */
+        for (mAlt in alternatives) {
+            if (mAlt.isEnabled) {
+                val uf = mAlt.utilityFunction
+
+                // Loop through all parameters of this alternative
+                modelinfo.getParameterValuesforAlternativeDepre(mAlt.name).entries.forEach { (parameterName, parameterValue) ->
+                    if (parameterName == "Grundnutzen" || parameterName == "Intercept") {
+                        uf.setBaseWeight(parameterValue)
+                    } else {
+                        val parameterContext = modelinfo.getContextforParameterDepre(parameterName)
+                        val attributeValue = attributeLookup.getAttributeValue(
+                            parameterContext!!,
+                            parameterName
+                        )
+                        uf.addParameterAttributeCombination(
+                            UtilityParameterAttributeCombination(
+                                parameterName,
+                                parameterValue, attributeValue
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        /*
+         * determine probabilities of enabled alternatives
+         */
+        choiceFunction.calculateProbabilities(alternatives)
+
+        /*
+         * decide for one alternative
+         */
+        val randomvalue = randomgenerator.randomValue
+        decision = choiceFunction.chooseAlternative(alternatives, randomvalue)
+        alternativeChosen = alternatives[decision].name
+
+        // DEBUG USE ONLY
+        if (Configuration.debugenabled) {
+            printDecisionProcess()
+        }
+
+        assert(decision != -1) { "could not make a decision!" }
+        return decision
+    }
+
+    /**
+     * Limits the DC-process to a certain alternative range. this method must be called before doStep() if necessary
+     *
+     * @param from
+     * @param to
+     */
+    fun limitUpperandLowerBound(from: Int, to: Int) {
+        lowerBound = from
+        upperBound = to
+    }
+
+    /**
+     * Limits the DC-process to a certain alternative upperBound. this method must be called before doStep() if necessary
+     *
+     * @param to
+     */
+    fun limitUpperBoundOnly(to: Int) {
+        upperBound = to
+    }
+
+    /**
+     * Limits the DC-process to a certain alternative lowerBound. this method must be called before doStep() if necessary
+     *
+     * @param from
+     */
+    fun limitLowerBoundOnly(from: Int) {
+        lowerBound = from
+    }
+
+    /**
+     * methode disables an alternative of the set of alternatives.
+     * this alternative will not be considered when choosing an alternative.
+     *
+     * @param name
+     */
+    fun disableAlternative(name: String) {
+        for (ma in alternatives) {
+            if (ma.name == name) ma.isEnabled = false
+        }
+    }
+
+    /**
+     * changes the utilityfactor of an alternative based on an alternativename.
+     * utilityfactir is used to influence the utility/significance of alternatives
+     *
+     * @param alternativename
+     * @param utilityfactor
+     */
+    fun adaptUtilityFactor(alternativename: String, utilityfactor: Double) {
+        for (ma in alternatives) {
+            if (ma.name == alternativename) ma.setUtilityfactor(utilityfactor)
+        }
+    }
 
 
-	public int getLowerBound()
-	{
-		return fromRangeLimiter;
-	}
+    /**
+     * changes the utilityfactor of an alternative based on an alternativeindex.
+     * utilityfactir is used to influence the utility/significance of alternatives
+     *
+     * @param alternativeindex
+     * @param utilityfactor
+     */
+    fun adaptUtilityFactor(alternativeindex: Int, utilityfactor: Double) {
+        alternatives[alternativeindex].setUtilityfactor(utilityfactor)
+    }
 
+    /**
+     * prints the decision process for debug reasons
+     */
+    fun printDecisionProcess() {
+        println("-------- DECISIONS FOR STEP " + this.id + " ---------------")
 
-	public int getUpperBound()
-	{
-		return toRangeLimiter;
-	}
+        for (mAlt in alternatives) {
+            if (mAlt.isEnabled) {
+                println(
+                    "alternative: " + mAlt.name + " prob: " + NumberFormat.getPercentInstance()
+                        .format(mAlt.probability) + " - utility: " + mAlt.utility
+                )
+            }
+        }
 
+        println("Chosen alternative: $alternativeChosen")
+        println("Random Value: " + randomgenerator.lastRandomValue)
+        println("SAVED for: $attributeLookup")
+        println()
+    }
 
-	public int getDecision()
-	{
-	    return decision;
-	}
-
-	public String getAlternativeChosen()
-	{
-	    return alternativeChosen;
-	}
-
+    /**
+     * check if alternative is enabled or not
+     *
+     * @param name
+     * @return
+     */
+    fun alternativeisEnabled(name: String): Boolean {
+        var result = false
+        val it: Iterator<DCAlternative> = alternatives.iterator()
+        while (it.hasNext()) {
+            val ma = it.next()
+            if (ma.name == name && ma.isEnabled) result = true
+        }
+        return result
+    }
 }

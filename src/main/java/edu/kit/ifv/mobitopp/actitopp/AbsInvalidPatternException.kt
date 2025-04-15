@@ -1,24 +1,16 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
 
-public abstract class AbsInvalidPatternException extends Exception{
-	
-	private static final long serialVersionUID = -3495343767758041143L;
+abstract class AbsInvalidPatternException : Exception() {
+    abstract var reason: String?
 
-	
-	public abstract String getReason();
+    abstract var errorType: String?
 
-  public abstract void setReason(String reason);
-  
-	public abstract String getErrorType();
+    abstract var faultyPattern: HWeekPattern?
 
-  public abstract void setErrorType(String reason);
+    abstract var involvedActivities: Array<HActivity?>?
 
-  public abstract HWeekPattern getFaultyPattern();
-
-  public abstract void setFaultyPattern(HWeekPattern faultyPattern);
-
-	public abstract HActivity[] getInvolvedActivities();
-
-	public abstract void setInvolvedActivities(HActivity[] involvedActivities);
+    companion object {
+        private const val serialVersionUID = -3495343767758041143L
+    }
 }

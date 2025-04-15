@@ -1,21 +1,19 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.List;
-
-public interface ChoiceFunction
-{
-
+interface ChoiceFunction {
     /**
      * Calculates the probabilitites for the alternatives
+     *
      * @param alternatives
      */
-    public void calculateProbabilities(List<DCAlternative> alternatives);
-    
+    fun calculateProbabilities(alternatives: List<DCAlternative>)
+
     /**
      * Returns the index of the choice alternative that has been chosen
+     *
      * @param alternatives
      * @param random
      * @return
      */
-    public int chooseAlternative(List<DCAlternative> alternatives, double random);
+    fun chooseAlternative(alternatives: List<DCAlternative>, random: Double): Int
 }

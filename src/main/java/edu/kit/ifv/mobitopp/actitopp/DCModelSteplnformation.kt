@@ -1,94 +1,76 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
- * 
  * @author Tim Hilgert
+ *
  *
  * object to handle the model flow information of each model step
  * contains relevant parameters with their context of the step and alternatives
  */
-public class DCModelSteplnformation
-{
-	// contains all parameters for the specific model step
-  private HashMap<String, String> parameterNamesContexts;
-  // contains all alternative for the specific model step
-  private ArrayList<String> alternativesList;
-  // contains all possible alternatives including parameter values
-  private Map<String, DCModelAlternativeParameterValues> alternativesParameters;
-  
-  
+class DCModelSteplnformation {
+    // contains all parameters for the specific model step
+    private lateinit var parameterNamesContexts: HashMap<String, String>
 
-  public DCModelSteplnformation()
-  {}
+    // contains all alternative for the specific model step
+    lateinit var alternativesList: ArrayList<String>
+
+    // contains all possible alternatives including parameter values
+    lateinit var alternativesParameters: Map<String, DCModelAlternativeParameterValues>
 
 
-	/**
-	 * @return the alternativesList
-	 */
-  public List<String> getAlternativesList()
-  {
-  	assert alternativesList!=null : "alternativesList is null";
-    return alternativesList;
-  }
+    /**
+     * @return the alternativesList
+     */
+    fun getAlternativesListDeprecated(): List<String> {
+        return alternativesList
+    }
 
-	/**
-	 * @return the parameterNamesContexts
-	 */
-	public Map<String, String> getParameterNamesContexts()
-	{
-		assert parameterNamesContexts!=null : "parameterNamesContexts is null";
-		return parameterNamesContexts;
-	}
-	
-	public HashMap<String,Double> getParameterValuesforAlternative(String alternativeName)
-	{
-		return alternativesParameters.get(alternativeName).getAllParameterValues();
-	}
+    /**
+     * @return the parameterNamesContexts
+     */
+    fun getParameterNamesContexts(): Map<String, String> {
 
-	public String getContextforParameter(String parameterName)
-	{
-		return parameterNamesContexts.get(parameterName);
-	}
+        return parameterNamesContexts
+    }
 
-	/**
-	 * @return the alternativesParameters
-	 */
-	public Map<String, DCModelAlternativeParameterValues> getAlternativesParameters() 
-	{
-		assert alternativesParameters!=null : "alternativesParameters is null";
-		return alternativesParameters;
-	}
+    fun getParameterValuesforAlternativeDepre(alternativeName: String): HashMap<String, Double> {
+        return alternativesParameters[alternativeName]?.allParameterValues ?: HashMap()
+    }
+
+    fun getContextforParameterDepre(parameterName: String): String? {
+        return parameterNamesContexts[parameterName]
+    }
+
+    /**
+     * @return the alternativesParameters
+     */
+    fun getAlternativesParametersDepre(): Map<String, DCModelAlternativeParameterValues> {
+
+        return alternativesParameters
+    }
 
 
-	/**
-	 * @param alternativesParameters the alternativesParameters to set
-	 */
-	public void setAlternativesParameters(Map<String, DCModelAlternativeParameterValues> alternativesParameters) {
-		this.alternativesParameters = alternativesParameters;
-	}
+    /**
+     * @param alternativesParameters the alternativesParameters to set
+     */
+    fun setAlternativesParametersDepre(alternativesParameters: Map<String, DCModelAlternativeParameterValues>) {
+        this.alternativesParameters = alternativesParameters
+    }
 
 
-	/**
-	 * @param parameterNamesContexts the parameterNamesContexts to set
-	 */
-	public void setParameterNamesContexts(HashMap<String, String> parameterNamesContexts) {
-		this.parameterNamesContexts = parameterNamesContexts;
-	}
+    /**
+     * @param parameterNamesContexts the parameterNamesContexts to set
+     */
+    fun setParameterNamesContextsDepre(parameterNamesContexts: HashMap<String, String>) {
+        this.parameterNamesContexts = parameterNamesContexts
+    }
 
 
-	/**
-	 * @param alternativesList the alternativesList to set
-	 */
-	public void setAlternativesList(ArrayList<String> alternativesList) {
-		this.alternativesList = alternativesList;
-	}
-	
-
-
+    /**
+     * @param alternativesList the alternativesList to set
+     */
+    fun setAlternativesListDepre(alternativesList: ArrayList<String>) {
+        this.alternativesList = alternativesList
+    }
 }

@@ -1,31 +1,21 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.HashMap;
+class DCModelAlternativeParameterValues {
+    private val parameterValues = HashMap<String, Double>()
 
-public class DCModelAlternativeParameterValues {
-	
-	private HashMap<String, Double> parameterValues;
-	
-	public DCModelAlternativeParameterValues()
-	{
-		parameterValues = new HashMap<String, Double>();
-	}
-		
-	public Double getParameterValue (String parameterName)
-	{
-		Double parameterValue = parameterValues.get(parameterName);
-		assert parameterValue!=null : "could not read parameterValue for ParameterName " + parameterName;
-		return parameterValue;
-	}
-	
-	public HashMap<String, Double> getAllParameterValues()
-	{
-		assert parameterValues!=null : "parameterValues are null";
-		return parameterValues;
-	}
-	
-	public void addParameterValue(String parameterName, Double parameterValue)
-	{
-		parameterValues.put(parameterName, parameterValue);
-	}
+    fun getParameterValue(parameterName: String): Double {
+        val parameterValue =
+            checkNotNull(parameterValues[parameterName]) { "could not read parameterValue for ParameterName $parameterName" }
+        return parameterValue
+    }
+
+    val allParameterValues: HashMap<String, Double>
+        get() {
+            checkNotNull(parameterValues) { "parameterValues are null" }
+            return parameterValues
+        }
+
+    fun addParameterValue(parameterName: String, parameterValue: Double) {
+        parameterValues[parameterName] = parameterValue
+    }
 }

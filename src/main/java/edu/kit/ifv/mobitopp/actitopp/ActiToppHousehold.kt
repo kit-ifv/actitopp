@@ -1,347 +1,291 @@
-package edu.kit.ifv.mobitopp.actitopp;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package edu.kit.ifv.mobitopp.actitopp
 
 /**
- * 
  * @author Tim Hilgert
- *
  */
-public class ActiToppHousehold {
-	
-	private int householdIndex;
-	
-	private Map<Integer, ActitoppPerson> householdmembers;
-	
-	// household properties
-	private int children0_10;
-	private int children_u18;
-	private int areatype;
-	private int numberofcarsinhousehold;	
-	
-	/**
-	 * 
-	 * constructor with number of cars in household
-	 *
-	 * @param householdIndex
-	 * @param children0_10
-	 * @param children_u18
-	 * @param areatype
-	 * @param numberofcarsinhousehold
-	 */
-	public ActiToppHousehold(int householdIndex, int children0_10, int children_u18, int areatype, int numberofcarsinhousehold) {
-		
-		super();
-		this.householdIndex = householdIndex;
+class ActiToppHousehold {
+    /**
+     * @return the householdIndex
+     */
 
-		this.children0_10 = children0_10;
-		this.children_u18 = children_u18;
-		this.areatype = areatype;
-		this.numberofcarsinhousehold = numberofcarsinhousehold;
+    val householdIndex: Int
 
-		this.householdmembers = new HashMap<Integer, ActitoppPerson>();
-	}
-	
-	/**
-	 * 
-	 * constructor without number of cars in household
-	 *
-	 * @param householdIndex
-	 * @param children0_10
-	 * @param children_u18
-	 * @param areatype
-	 */
-	public ActiToppHousehold(int householdIndex, int children0_10, int children_u18, int areatype) {
-		
-		super();
-		this.householdIndex = householdIndex;
+    val householdmembers: MutableMap<Int, ActitoppPerson>
 
-		this.children0_10 = children0_10;
-		this.children_u18 = children_u18;
-		this.areatype = areatype;
+    /**
+     * @return the children0_10
+     */
+    /**
+     * @param children0_10 the children0_10 to set
+     */
+    // household properties
+    
+    var children0_10: Int
+    /**
+     * @return the children_u18
+     */
+    /**
+     * @param children_u18 the children_u18 to set
+     */
+    
+    var children_u18: Int
+    /**
+     * @return the areatype
+     */
+    /**
+     * @param areatype the areatype to set
+     */
+    
+    var areatype: Int
+    /**
+     * @return the numberofcarsinhousehold
+     */
+    /**
+     * @param numberofcarsinhousehold the numberofcarsinhousehold to set
+     */
+    
+    var numberofcarsinhousehold: Int = 0
 
-		this.householdmembers = new HashMap<Integer, ActitoppPerson>();
-	}
-	
-	/**
-	 * 
-	 * constructor used to "clone" household including all persons in the household
-	 *
-	 * @param tmphh
-	 */
-	public ActiToppHousehold(ActiToppHousehold tmphh)
-	{
+    /**
+     * constructor with number of cars in household
+     *
+     * @param householdIndex
+     * @param children0_10
+     * @param children_u18
+     * @param areatype
+     * @param numberofcarsinhousehold
+     */
+    constructor(
+        householdIndex: Int,
+        children0_10: Int,
+        children_u18: Int,
+        areatype: Int,
+        numberofcarsinhousehold: Int
+    ) : super() {
+        this.householdIndex = householdIndex
 
-		this (tmphh.getHouseholdIndex(),
-					tmphh.getChildren0_10(),
-					tmphh.getChildren_u18(),
-					tmphh.getAreatype(),
-					tmphh.getNumberofcarsinhousehold());
-		
-		// "clone" all householdmembers
-		for (ActitoppPerson tmppers : tmphh.getHouseholdmembersasList())
-		{
-			new ActitoppPerson(tmppers, this);		
-		}
-		
-	}
+        this.children0_10 = children0_10
+        this.children_u18 = children_u18
+        this.areatype = areatype
+        this.numberofcarsinhousehold = numberofcarsinhousehold
 
-	/**
-	 * @return the householdIndex
-	 */
-	public int getHouseholdIndex() {
-		return householdIndex;
-	}
+        this.householdmembers = HashMap()
+    }
 
-	/**
-	 * @return the householdmembers
-	 */
-	public Map<Integer, ActitoppPerson> getHouseholdmembers() {
-		return householdmembers;
-	}
+    /**
+     * constructor without number of cars in household
+     *
+     * @param householdIndex
+     * @param children0_10
+     * @param children_u18
+     * @param areatype
+     */
+    constructor(householdIndex: Int, children0_10: Int, children_u18: Int, areatype: Int) : super() {
+        this.householdIndex = householdIndex
 
-	/**
-	 * @return the householdmembers
-	 */
-	public List<ActitoppPerson> getHouseholdmembersasList() {
-		List<ActitoppPerson> tmpliste = new ArrayList<ActitoppPerson>();
-		
-		for (Map.Entry<Integer, ActitoppPerson> tmpmapentry: getHouseholdmembers().entrySet()) {
-			tmpliste.add(tmpmapentry.getValue());
-		}
-		
-		return tmpliste;
-	}
-	
-	/**
-	 * 
-	 * @param persnrinhousehold
-	 * @return the person in the household
-	 */
-	public ActitoppPerson getHouseholdMember(int persnrinhousehold) {
-		ActitoppPerson tmpperson = this.getHouseholdmembers().get(persnrinhousehold);
-		assert tmpperson!=null : "Person does not exist in this household!";
-		return tmpperson;
-	}
-	
-	/**
-	 * 
-	 * @param member
-	 * @param persnr
-	 */
-	public void addHouseholdmember(ActitoppPerson member, int persnr) {
-		assert member!=null : "Householdmember is null";
-		assert this.householdmembers.get(persnr)==null : "Householdmember using this identifier already exists - persnr " + persnr;
-		this.householdmembers.put(persnr, member);
-	}
+        this.children0_10 = children0_10
+        this.children_u18 = children_u18
+        this.areatype = areatype
+
+        this.householdmembers = HashMap()
+    }
+
+    /**
+     * constructor used to "clone" household including all persons in the household
+     *
+     * @param tmphh
+     */
+    constructor(tmphh: ActiToppHousehold) : this(
+        tmphh.householdIndex,
+        tmphh.children0_10,
+        tmphh.children_u18,
+        tmphh.areatype,
+        tmphh.numberofcarsinhousehold
+    ) {
+        // "clone" all householdmembers
+        for (tmppers in tmphh.householdmembersasList) {
+            ActitoppPerson(tmppers, this)
+        }
+    }
+
+    /**
+     * @return the householdmembers
+     */
+    fun getHouseholdmembersDeprecated(): Map<Int, ActitoppPerson> {
+        return householdmembers
+    }
+
+    val householdmembersasList: List<ActitoppPerson>
+        /**
+         * @return the householdmembers
+         */
+        get() {
+            val tmpliste: MutableList<ActitoppPerson> = ArrayList()
+
+            for ((_, value) in getHouseholdmembersDeprecated()) {
+                tmpliste.add(value)
+            }
+
+            return tmpliste
+        }
+
+    /**
+     * @param persnrinhousehold
+     * @return the person in the household
+     */
+    fun getHouseholdMember(persnrinhousehold: Int): ActitoppPerson {
+        val tmpperson =
+            checkNotNull(getHouseholdmembersDeprecated()[persnrinhousehold]) { "Person does not exist in this household!" }
+        return tmpperson
+    }
+
+    /**
+     * @param member
+     * @param persnr
+     */
+    fun addHouseholdmember(member: ActitoppPerson, persnr: Int) {
+        checkNotNull(member) { "Householdmember is null" }
+        assert(householdmembers[persnr] == null) { "Householdmember using this identifier already exists - persnr $persnr" }
+        householdmembers[persnr] = member
+    }
 
 
-	/**
-	 * @return the children0_10
-	 */
-	public int getChildren0_10() {
-		return children0_10;
-	}
+    val numberofPersonsinHousehold: Int
+        /**
+         * @return the numberofpersonsinhousehold
+         */
+        get() = householdmembers.size
 
-	/**
-	 * @param children0_10 the children0_10 to set
-	 */
-	public void setChildren0_10(int children0_10) {
-		this.children0_10 = children0_10;
-	}
+    /**
+     * resets all modeling results for this household
+     */
+    fun resetHouseholdModelingResults() {
+        for (actperson in householdmembersasList) {
+            actperson.clearAttributesMap()
+            actperson.clearWeekPattern()
+            actperson.clearJointActivitiesforConsideration()
+        }
+    }
 
-	/**
-	 * @return the children_u18
-	 */
-	public int getChildren_u18() {
-		return children_u18;
-	}
 
-	/**
-	 * @param children_u18 the children_u18 to set
-	 */
-	public void setChildren_u18(int children_u18) {
-		this.children_u18 = children_u18;
-	}
+    override fun toString(): String {
+        val message = StringBuffer()
 
-	/**
-	 * @return the areatype
-	 */
-	public int getAreatype() {
-		return areatype;
-	}
+        message.append("\n household information")
 
-	/**
-	 * @param areatype the areatype to set
-	 */
-	public void setAreatype(int areatype) {
-		this.areatype = areatype;
-	}
+        message.append("\n - HH-index : ")
+        message.append(householdIndex)
 
-	/**
-	 * @return the numberofcarsinhousehold
-	 */
-	public int getNumberofcarsinhousehold() {
-		return numberofcarsinhousehold;
-	}
+        message.append("\n - #HH-members : ")
+        message.append(numberofPersonsinHousehold)
 
-	/**
-	 * @param numberofcarsinhousehold the numberofcarsinhousehold to set
-	 */
-	public void setNumberofcarsinhousehold(int numberofcarsinhousehold) {
-		this.numberofcarsinhousehold = numberofcarsinhousehold;
-	}
-	
-	/**
-	 * 
-	 * @return the numberofpersonsinhousehold
-	 */
-	public int getNumberofPersonsinHousehold() {
-		return this.householdmembers.size();
-	}
-	
-	/**
-	 * resets all modeling results for this household
-	 */
-	public void resetHouseholdModelingResults()
-	{
-		for (ActitoppPerson actperson : getHouseholdmembersasList())
-		{
-			actperson.clearAttributesMap();
-			actperson.clearWeekPattern();
-			actperson.clearJointActivitiesforConsideration();
-		}
-	}
-	
+        message.append("\n - #children 0-10 : ")
+        message.append(children0_10)
 
-	
-	@Override
-	public String toString()	{
-  	StringBuffer message = new StringBuffer();
+        message.append("\n - #children <18 : ")
+        message.append(children_u18)
 
-  	message.append("\n household information");
-  	
-		message.append("\n - HH-index : ");
-		message.append(getHouseholdIndex());
-		
-		message.append("\n - #HH-members : ");
-		message.append(getNumberofPersonsinHousehold());		
-		
-		message.append("\n - #children 0-10 : ");
-		message.append(getChildren0_10());
-		
-		message.append("\n - #children <18 : ");
-		message.append(getChildren_u18());
-		
-		message.append("\n - area type : ");
-		message.append(getAreatype());
-		
-		message.append("\n - #car in HH : ");
-		message.append(getNumberofcarsinhousehold());		
-		
-		return message.toString();
-	}
-	
-	/**
-	 * generates activity schedules for the household (i.e. for each hh member)
-	 * 
-	 * @param fileBase
-	 * @param randomgenerator
-	 * @throws InvalidPatternException
-	 */
-	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator) throws InvalidPatternException
-	{
-		List<ActitoppPerson> hhmembers = getHouseholdmembersasList();
-		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmembers, fileBase);
-		
-		for (int i=0; i<hhmembers.size(); i++)
-		{
-			ActitoppPerson actperson = hhmembers.get(i);
+        message.append("\n - area type : ")
+        message.append(areatype)
 
-			boolean personscheduleOK = false;
-	    while (!personscheduleOK)
-	    {
-	      try
-	      {
-					// stores the modeling order of persons within the household
-					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
-					
-	    		// generates week schedule
-	      	actperson.generateSchedule(fileBase, randomgenerator);
-	    			      	
-	        personscheduleOK = true;                
-	      }
-	      catch (InvalidPatternException e)
-	      {
-	        //System.err.println(e.getReason());
-	         
-	        /*
-	         * When modeling joint actions, errors on person level are passed to household level (here). As household members
-	         * are connected through joint actions, we need to remodel the whole household.
-	         * 
-	         * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
-	         * person only.
-	         */
-	        if (Configuration.model_joint_actions)
-	        {
-	        	throw new InvalidPatternException("Household",actperson.getWeekPattern(),"Remodel Household");
-	        }
-	      }
-	    }	    			        	
-		}
-	}
+        message.append("\n - #car in HH : ")
+        message.append(numberofcarsinhousehold)
 
-	/**
-	 * generates activity schedules for the household (i.e. for each hh member) using debug loggers to log results
-	 * 
-	 * @param fileBase
-	 * @param randomgenerator
-	 * @param debugloggers
-	 * @throws InvalidPatternException
-	 */
-	public void generateSchedules(ModelFileBase fileBase, RNGHelper randomgenerator, DebugLoggers debugloggers)	throws InvalidPatternException
-	{
-		List<ActitoppPerson> hhmembers = getHouseholdmembersasList();
-		if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(hhmembers, fileBase);
-		
-		for (int i=0; i<hhmembers.size(); i++)
-		{
-			ActitoppPerson actperson = hhmembers.get(i);
-	
-			boolean personscheduleOK = false;
-	    while (!personscheduleOK)
-	    {
-	      try
-	      {
-					// stores the modeling ordner of persons within the household
-					actperson.addAttributetoMap("numbermodeledinhh", (double) (i+1));
-					
-	    		// generates week schedule
-	      	actperson.generateSchedule(fileBase, randomgenerator, debugloggers);
-	    			      	
-	        personscheduleOK = true;                
-	      }
-	      catch (InvalidPatternException e)
-	      {
-	        //System.err.println(e.getReason());
-	        debugloggers.deleteInformationforPerson(actperson);
-	        
-	        /*
-	         * When modeling joint actions, errors on person level are passed to household level (here). As household members
-	         * are connected through joint actions, we need to remodel the whole household.
-	         * 
-	         * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
-	         * person only.
-	         */
-	        if (Configuration.model_joint_actions)
-	        {
-	        	throw new InvalidPatternException("Household",actperson.getWeekPattern(),"Remodel Household");
-	        }
-	      }
-	    }	    			        	
-		}
-	}
+        return message.toString()
+    }
+
+    /**
+     * generates activity schedules for the household (i.e. for each hh member)
+     *
+     * @param fileBase
+     * @param randomgenerator
+     * @throws InvalidPatternException
+     */
+
+    fun generateSchedules(fileBase: ModelFileBase, randomgenerator: RNGHelper) {
+        val hhmembers = householdmembersasList
+        if (Configuration.model_joint_actions) ActitoppPerson.Companion.sortPersonListOnProbabilityofJointActions_DESC(
+            hhmembers,
+            fileBase
+        )
+
+        for (i in hhmembers.indices) {
+            val actperson = hhmembers[i]
+
+            var personscheduleOK = false
+            while (!personscheduleOK) {
+                try {
+                    // stores the modeling order of persons within the household
+                    actperson.addAttributetoMap("numbermodeledinhh", (i + 1).toDouble())
+
+                    // generates week schedule
+                    actperson.generateSchedule(fileBase, randomgenerator)
+
+                    personscheduleOK = true
+                } catch (e: InvalidPatternException) {
+                    //System.err.println(e.getReason());
+
+                    /*
+                     * When modeling joint actions, errors on person level are passed to household level (here). As household members
+                     * are connected through joint actions, we need to remodel the whole household.
+                     *
+                     * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
+                     * person only.
+                     */
+
+                    if (Configuration.model_joint_actions) {
+                        throw InvalidPatternException("Household", actperson.weekPattern, "Remodel Household")
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * generates activity schedules for the household (i.e. for each hh member) using debug loggers to log results
+     *
+     * @param fileBase
+     * @param randomgenerator
+     * @param debugloggers
+     * @throws InvalidPatternException
+     */
+
+    fun generateSchedules(fileBase: ModelFileBase, randomgenerator: RNGHelper, debugloggers: DebugLoggers) {
+        val hhmembers = householdmembersasList
+        if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(
+            hhmembers,
+            fileBase
+        )
+
+        for (i in hhmembers.indices) {
+            val actperson = hhmembers[i]
+
+            var personscheduleOK = false
+            while (!personscheduleOK) {
+                try {
+                    // stores the modeling ordner of persons within the household
+                    actperson.addAttributetoMap("numbermodeledinhh", (i + 1).toDouble())
+
+                    // generates week schedule
+                    actperson.generateSchedule(fileBase, randomgenerator, debugloggers)
+
+                    personscheduleOK = true
+                } catch (e: InvalidPatternException) {
+                    //System.err.println(e.getReason());
+                    debugloggers.deleteInformationforPerson(actperson)
+
+                    /*
+                     * When modeling joint actions, errors on person level are passed to household level (here). As household members
+                     * are connected through joint actions, we need to remodel the whole household.
+                     *
+                     * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
+                     * person only.
+                     */
+                    if (Configuration.model_joint_actions) {
+                        throw InvalidPatternException("Household", actperson.weekPattern, "Remodel Household")
+                    }
+                }
+            }
+        }
+    }
 }

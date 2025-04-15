@@ -1,72 +1,58 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Locale;
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.text.NumberFormat
+import java.text.ParseException
+import java.util.Locale
+
 /**
- * 
- * @author Tim Hilgert
- *
+ * @author Tim Hilbert
  */
-public class CSVLinRegEstimatesLoader
-{
+class CSVLinRegEstimatesLoader {
+    /**
+     * read estimate values from file system and store them in a hash map
+     *
+     * @param input
+     * @return
+     */
+    fun getEstimates(input: InputStream): HashMap<String, LinRegEstimate> {
+        val estimatesMap = HashMap<String, LinRegEstimate>()
 
-	/**
-	 * 
-	 * read estimate values from file system and store them in a hash map
-	 * 
-	 * @param input
-	 * @return
-	 */
-  public HashMap<String, LinRegEstimate> getEstimates(InputStream input)
-  {
 
-    HashMap<String, LinRegEstimate> estimatesMap = new HashMap<String, LinRegEstimate>();
+        try {
+            BufferedReader(InputStreamReader(input)).use { inRead ->
+                var header = true
+                var line: String?
+                while ((inRead.readLine().also { line = it }) != null) {
+                    if (header) {
+                        line = inRead.readLine()
+                        header = false
+                    }
 
-      
-		try(BufferedReader inRead = new BufferedReader(new InputStreamReader(input)))
-		{
-	    boolean header = true;
-	    String line = null;
+                    val splitted = line!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    val variable = splitted[0]
+                    val contextIdentifier = splitted[2]
 
-	    while((line  = inRead.readLine())!= null)
-	    {
-        if(header)
-        {
-          line = inRead.readLine();
-          header = false;
+                    var estimatevalue = 0.0
+                    val nf = NumberFormat.getInstance(Locale.ENGLISH)
+
+                    try {
+                        estimatevalue = nf.parse(splitted[1]).toDouble()
+                    } catch (e: ParseException) {
+                        e.printStackTrace()
+                    }
+
+                    assert(contextIdentifier == "default" || contextIdentifier == "person" || contextIdentifier == "day" || contextIdentifier == "tour" || contextIdentifier == "activity") { "wrong Reference Value for InputParamMap - $variable - $contextIdentifier - SourceLocation: $input" }
+                    estimatesMap[variable] = LinRegEstimate(variable, estimatevalue, contextIdentifier)
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
-        
-        String[] splitted = line.split(";");
-        String variable = splitted[0];
-        String contextIdentifier = splitted[2];
- 
-        double estimatevalue = 0f;
-        NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 
-        try
-        {
-        	estimatevalue = nf.parse(splitted[1]).doubleValue();
-        }
-        catch (ParseException e)
-        {
-          e.printStackTrace();
-        }
-        
-        assert (contextIdentifier.equals("default") || contextIdentifier.equals("person") || contextIdentifier.equals("day") || contextIdentifier.equals("tour") || contextIdentifier.equals("activity")) : "wrong Reference Value for InputParamMap - " + variable + " - " + contextIdentifier + " - SourceLocation: " + input;
-        estimatesMap.put(variable, new LinRegEstimate(variable, estimatevalue, contextIdentifier));          
-      }
+        return estimatesMap
     }
-    catch (IOException e)
-    {
-        e.printStackTrace();
-    }
-
-    return estimatesMap;
-  }
 }

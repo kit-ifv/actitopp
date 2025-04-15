@@ -1,53 +1,42 @@
-package edu.kit.ifv.mobitopp.actitopp;
-
-import java.util.ArrayList;
+package edu.kit.ifv.mobitopp.actitopp
 
 /**
- * 
  * @author Tim Hilgert
- *
  */
-public class UtilityFunction
-{
+class UtilityFunction {
+    private var baseWeight = 0.0
+    private val parameterattributeCombinations =
+        ArrayList<UtilityParameterAttributeCombination>()
 
-  private double baseWeight;
-  private ArrayList<UtilityParameterAttributeCombination> parameterattributeCombinations;
-  
-  
-  public UtilityFunction()
-  {
-  	this.parameterattributeCombinations = new ArrayList<UtilityParameterAttributeCombination>();
-  }
-  
-  public void setBaseWeight(double baseWeight)
-  {
-    this.baseWeight = baseWeight;
-  }
-  
-  public void addParameterAttributeCombination (UtilityParameterAttributeCombination combination)
-  {
-  	parameterattributeCombinations.add(combination);
-  }
+    fun setBaseWeight(baseWeight: Double) {
+        this.baseWeight = baseWeight
+    }
 
-  public double getUtility()
-  {   
-    double utility = 0.0 + baseWeight;
-    for(UtilityParameterAttributeCombination pair : parameterattributeCombinations)
-    {
-      utility += (pair.getattributeValue() * pair.getparameterValue());
+    fun addParameterAttributeCombination(combination: UtilityParameterAttributeCombination) {
+        parameterattributeCombinations.add(combination)
     }
-    
-    return utility;
-  }
-  
-	public void printUtilityDetails()
-  {
-    System.out.print("Base utility: "+ baseWeight);
-    for(UtilityParameterAttributeCombination pair : parameterattributeCombinations)
-    {
-      System.out.print(pair.getName() + ":" + pair.getattributeValue() + "*" + pair.getparameterValue());
-      System.out.print(" __ ");
+
+    val utility: Double
+        get() {
+            var utility = 0.0 + baseWeight
+            for (pair in parameterattributeCombinations) {
+                utility += (pair.getattributeValue() * pair.getparameterValue())
+            }
+
+            return utility
+        }
+
+    fun printUtilityDetails() {
+        print("Base utility: $baseWeight")
+        for (pair in parameterattributeCombinations) {
+            print(pair.name + ":" + pair.getattributeValue() + "*" + pair.getparameterValue())
+            print(" __ ")
+        }
+        println(
+            """
+                
+                TOTAL UTILITY: ${utility}
+                """.trimIndent()
+        )
     }
-    System.out.println("\nTOTAL UTILITY: " + getUtility());
-  }
 }

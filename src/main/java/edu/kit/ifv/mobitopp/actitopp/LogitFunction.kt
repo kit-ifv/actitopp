@@ -1,57 +1,44 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.List;
+import kotlin.math.exp
 
-public class LogitFunction implements ChoiceFunction
-{
+class LogitFunction : ChoiceFunction {
+    override fun calculateProbabilities(alternatives: List<DCAlternative>) {
+        var utilitySum = 0.0
+        var probabilitySum = 0.0
 
-
-  public void calculateProbabilities(List<DCAlternative> alternatives)
-  {
-  	double utilitySum = 0.0d;
-  	double probabilitySum = 0.0d;
-  	
-  	// Calculate utilitysum of all alternatives
-    for (DCAlternative ma : alternatives)
-    {
-      if (ma.isEnabled()) utilitySum += Math.exp(ma.getUtility());
-    }
-    
-    // Calculate probability of each alternative based on utilitySum
-    for (DCAlternative ma : alternatives)
-    {
-    	if (ma.isEnabled()) 
-    	{
-    		double probability = Math.exp(ma.getUtility()) / utilitySum;
-    		ma.setProbability(probability);
-    		probabilitySum += probability;
-    	}
-    }
-    assert Math.round(probabilitySum*100)/100 == 1.0d:"wrong probability sum! (!=1.0d)";
-  }
-  
-  
-  @Override
-  public int chooseAlternative(List<DCAlternative> alternatives, double random)
-  {
-  	int choiceindex=-1;
-    double movingSum = 0;
-    for (int i=0; i<alternatives.size();i++)
-    {
-    	DCAlternative ma = alternatives.get(i);
-    	if (ma.isEnabled())
-    	{
-    		double movingsumnew = movingSum + ma.getProbability();
-        if (random>= movingSum && random <= movingsumnew)
-        {
-        	choiceindex=i;
-        	break;
+        // Calculate utilitysum of all alternatives
+        for (ma in alternatives) {
+            if (ma.isEnabled) utilitySum += exp(ma.utility)
         }
-        movingSum = movingsumnew;
-    	}
-    }
-    assert choiceindex!=-1 : "could not make a choice!";
-    return choiceindex;
-  }
 
+        // Calculate probability of each alternative based on utilitySum
+        for (ma in alternatives) {
+            if (ma.isEnabled) {
+                val probability = exp(ma.utility) / utilitySum
+                ma.probability = probability
+                probabilitySum += probability
+            }
+        }
+        assert((Math.round(probabilitySum * 100) / 100).toDouble() == 1.0) { "wrong probability sum! (!=1.0d)" }
+    }
+
+
+    override fun chooseAlternative(alternatives: List<DCAlternative>, random: Double): Int {
+        var choiceindex = -1
+        var movingSum = 0.0
+        for (i in alternatives.indices) {
+            val ma = alternatives[i]
+            if (ma.isEnabled) {
+                val movingsumnew = movingSum + ma.probability
+                if (random in movingSum..movingsumnew) {
+                    choiceindex = i
+                    break
+                }
+                movingSum = movingsumnew
+            }
+        }
+        assert(choiceindex != -1) { "could not make a choice!" }
+        return choiceindex
+    }
 }

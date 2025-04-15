@@ -1,919 +1,717 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
+
+import java.util.Collections
+import kotlin.math.max
+import kotlin.math.min
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 /**
- * 
  * @author Tim Hilgert
- *
  */
-public class HActivity
-{
-	
-	//stores all attributes that are not directly accessible by variables	
-	private Map<String, Double> attributes;
-		
-	private HDay day;	
-	private HTour tour;
-	
-	private ActivityType acttype = ActivityType.UNKNOWN;
-	
-  private int index								= -99;
-  private int duration 						= -1;
-  private int starttime 					= -1;
-  
-  
-  private HTrip tripbeforeactivity;
-  private HTrip tripafteractivity;
-  
-  private JointStatus jointStatus = JointStatus.UNKNOWN;
-  
-  private List<ActitoppPerson> jointParticipants  = new ArrayList<ActitoppPerson>();
- 
-	/**
-   * 
-   * constructor
-   * 
-   * @param parent
-   * @param index
-   */
-	public HActivity(HTour parent, int index)
-	{
-		assert parent!=null : "tour is not initialized";
-    this.tour = parent;
-    
-    this.day = parent.getDay();
-    setIndex(index);
-    
-    this.attributes = new HashMap<String, Double>();
-    setCreatorPersonIndex(day.getPerson().getPersIndex());
-	}  
-	
-	/**
-	 * 
-	 * constructor
-	 * 
-	 * @param parent
-	 * @param index
-	 * @param type
-	 */
-	public HActivity(HTour parent, int index, ActivityType type)
-	{
-	    this(parent, index);
-	    assert type!=ActivityType.UNKNOWN : "unknown activity type!";
-	    setActivityType(type);
-	}  	
+class HActivity {
+    //stores all attributes that are not directly accessible by variables
+    private lateinit var attributes: MutableMap<String, Double>
 
-	/**
-	 * 
-	 * constructor for home activities
-	 * 
-	 * @param parent
-	 * @param type
-	 * @param duration
-	 * @param starttime
-	 */
-	public HActivity(HDay parent, ActivityType type, int duration, int starttime)
-	{
-		assert parent!=null : "day is not initialized";
-		this.day = parent;
-	  setActivityType(type);
-		setDuration(duration);
-		setStartTime(starttime);
-		setJointStatus(JointStatus.NOJOINTELEMENT);
-	}
+    val day: HDay
+    lateinit var tour: HTour
+        private set
 
+    private var acttype = ActivityType.UNKNOWN
 
-
-	public HTour getTour() 
-	{
-		return tour;
-	}
-	
-	public HDay getDay() 
-	{
-		assert day != null : "day is not initialized";
-		return day;
-	}
-	
-	public HWeekPattern getWeekPattern()
-	{
-		return day.getPattern();
-	}
-	
-	public ActitoppPerson getPerson()
-	{
-		return day.getPerson();
-	}
-
-	public int getIndex()
-	{
-		assert index != -99 : "index is not set";
-	    return index;
-	}
-
-	public void setIndex(int index)
-	{
-	    this.index = index;
-	}
-	
-	public ActivityType getActivityType()
-	{
-		assert ActivityType.FULLSET.contains(acttype) : "unknown activity type:" + acttype;
-		if (!getPerson().isAllowedToWork()) assert acttype!=ActivityType.WORK : "person is not allowed to work!";
-		return acttype;
-	}
-
-	public void setActivityType(ActivityType acttype)
-	{
-		assert ActivityType.FULLSET.contains(acttype) : "unknown activity type:" + acttype;
-		if (!getPerson().isAllowedToWork()) assert acttype!=ActivityType.WORK : "person is not allowed to work!";
-		this.acttype = acttype;
-	}
-
-	public int getDuration() 
-	{
-		assert duration != -1 : "duration is not set";
-		return duration;
-	}
-
-	public void setDuration(int duration) 
-	{
-		assert duration>0 : "duration is not >0: " + duration;
-		this.duration = duration;
-	}
-
-	public int getStartTime() 
-	{
-		assert starttime != -1 : "starttime is not set";
-		return starttime;
-	}
-
-	public void setStartTime(int starttime) 
-	{
-		assert starttime>=0 : "starttime is not >0: "  + starttime;
-		this.starttime = starttime;
-	}
-
-	public JointStatus getJointStatus() {
-		assert jointStatus!=JointStatus.UNKNOWN : "jointStatus not set";
-		return jointStatus;
-	}
-
-	public void setJointStatus(JointStatus jointStatus) {
-		assert JointStatus.FULLSET.contains(jointStatus) : "invalid value for jointStatus - actual value: " + jointStatus;
-		this.jointStatus = jointStatus;
-	}
-
-	/**
-	 * 
-	 * @return the estimatedTripTimeBeforeActivity
-	 */
-	public int getEstimatedTripTimeBeforeActivity() 
-	{
-		assert tripBeforeActivityisScheduled() : "trip before activity in not intialized";
-		int tmptriptimebefore = tripbeforeactivity.getDuration();
-		return tmptriptimebefore;
-	}
-
-	/**
-	 * @return the estimatedTripTimeAfterActivity
-	 */
-	public int getEstimatedTripTimeAfterActivity() 
-	{
-		assert tripAfterActivityisScheduled() : "trip after activity in not intialized";
-		int tmptriptimeafter = tripafteractivity.getDuration();
-		return tmptriptimeafter;
-	}
-	
-	/**
-	 * sorts list of activities ascending by week-order start time
-   * 
-   * @param actList
-   */
-  public static void sortActivityListbyWeekStartTimes(List<HActivity> actList)
-  {
-  	assert actList != null : "empty list";
-  	
-  Collections.sort(actList, new Comparator<HActivity>()
-  {
-	    @Override
-	    public int compare(HActivity act1, HActivity act2)
-	    {
-	      if(act1.getStartTimeWeekContext()< act2.getStartTimeWeekContext())
-	      {
-	          return -1;
-	      }
-	      else if(act1.getStartTimeWeekContext() == act2.getStartTimeWeekContext())
-	      {
-	          return 0;
-	      }
-	      else
-	      {
-	          return 1;
-	      }
-	    }
-	  });
-  }
-    
-  /**
-   * 
-   * sorts list of activities ascending by week-order indices
-   * 
-   * @param list
-   */
-  public static void sortActivityListbyIndices(List<HActivity> list)
-  {
-  	assert list != null : "list is empty";
-  		
-      Collections.sort(list, new Comparator<HActivity>()
-      {
-        @Override
-        public int compare(HActivity o1, HActivity o2)
-        {
-        	int result = 99;
-        	if			(o1.getDayIndex() <  o2.getDayIndex()) result = -1;
-        	else if	(o1.getDayIndex() >  o2.getDayIndex()) result = +1;
-        	else
-        	{
-          	if			(o1.getTour().getIndex() <   o2.getTour().getIndex()) result = -1;
-          	else if	(o1.getTour().getIndex() >   o2.getTour().getIndex()) result = +1;
-          	else
-          	{
-              if			(o1.getIndex() < o2.getIndex()) result = -1;
-              else if	(o1.getIndex() > o2.getIndex()) result = +1;
-              else 																		result = 0;
-          	}
-        	}
-        	
-        	assert result!=99 : "Could not compare these two activities! - Act1: " + o1 + " - Act2: " + o2;
-        	return result;      		
+    var index: Int = -99
+        get() {
+            assert(field != -99) { "index is not set" }
+            return field
         }
-        
-      });
-  }
-  
-  /**
-   * calculates duration between end of first activity (including trip after activity if there is one)
-   * and the beginning of a second activity (including trip before activity if there is one)
-   * 
-   * @param firstact
-   * @param secondact
-   * @return
-   */
-  public static int getTimebetweenTwoActivities(HActivity firstact, HActivity secondact)
-  {
-  	int result=-999999;
-  	
-  	int endezeitersteakt;
-  	int anfangszeitzweiteakt;
-  	
-  	// end of first activity
-  	endezeitersteakt = firstact.getEndTimeWeekContext();
-  	if (firstact.isActivityLastinTour())
-  	{
-  		endezeitersteakt += firstact.getEstimatedTripTimeAfterActivity();
-  	}
-
-  	// beginning second activity
-  	anfangszeitzweiteakt = secondact.getTripStartTimeBeforeActivityWeekContext();
-  	
-
-  	result = anfangszeitzweiteakt - endezeitersteakt; 	
-  	assert result!=-999999 : "Could not determine time between these two activities";
-  	return result;
-  }
-  
-  
-  
-  /**
-   * check if two activities are overlapping
-   * false = no overlapping
-   * true = overlapping
-   * 
-   * @param act1
-   * @param act2
-   * @return
-   */
-	public static boolean checkActivityOverlapping(HActivity act1, HActivity act2)
-	{
-		boolean result = false;
-		
-		// check time occupation of first activity
-		int starttime_first = act1.getStartTimeWeekContext() - (act1.tripBeforeActivityisScheduled() ? act1.getEstimatedTripTimeBeforeActivity() : 0);
-		int endtime_first = (act1.durationisScheduled() ? act1.getEndTimeWeekContext() : act1.getStartTimeWeekContext()) + (act1.tripAfterActivityisScheduled() ? act1.getEstimatedTripTimeAfterActivity() : 0);
-	
-		// check time occupation of second activity
-		int starttime_second = act2.getStartTimeWeekContext() - (act2.tripBeforeActivityisScheduled() ? act2.getEstimatedTripTimeBeforeActivity() : 0);
-		int endtime_second = (act2.durationisScheduled() ? act2.getEndTimeWeekContext() : act2.getStartTimeWeekContext()) + (act2.tripAfterActivityisScheduled() ? act2.getEstimatedTripTimeAfterActivity() : 0);
-		
-		if (
-					// start or end of second activity is within time occupation of the first
-					(starttime_second > starttime_first && starttime_second < endtime_first) ||
-					(endtime_second 	> starttime_first && endtime_second 	< endtime_first)
-					||
-					// start or end of first activity is within time occupation of the second
-					(starttime_first > starttime_second && starttime_first < endtime_second) ||
-					(endtime_first 	 > starttime_second && endtime_first 	 < endtime_second)
-			 )
-		{
-			result=true;
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * create start times for activities in list when they can be determined
-	 * 
-	 * @param actliste
-	 */
-  public static void createPossibleStarttimes(List<HActivity> actliste)
-  {
-  	for (HActivity act : actliste)
-    {
-    	if (!act.startTimeisScheduled())
-    	{
-        /*
-         * if the previous activity in the tour has a determined startime time and duration,
-         * also the actual activity can be determined concerning start time.
-         */
-        if (!act.isActivityFirstinTour() 
-        				&& act.getPreviousActivityinTour().startTimeisScheduled() 
-        				&& act.getPreviousActivityinTour().durationisScheduled())
-    		{
-        	act.setStartTime(act.getPreviousActivityinTour().getEndTime() + act.getEstimatedTripTimeBeforeActivity());
-    		}	
-        	
-        /*
-         * if the following activity in the tour has a determined startime time and duration,
-         * also the actual activity can be determined concerning start time.
-         */
-        if (!act.isActivityLastinTour() 
-        		&& act.durationisScheduled()
-        		&& act.getNextActivityinTour().startTimeisScheduled())
-        {
-        	act.setStartTime(act.getNextActivityinTour().getTripStartTimeBeforeActivity() - act.getDuration());
+        set(value) {
+            field = value
         }
-    	}
+    var duration = -1
+    private var starttime = -1
+
+
+    /**
+     * @return the tripbeforeactivity
+     */
+    /**
+     * @param tripbeforeactivity the tripbeforeactivity to set
+     */
+    var tripbeforeactivity: HTrip? = null
+    /**
+     * @return the tripafteractivity
+     */
+    /**
+     * @param tripafteractivity the tripafteractivity to set
+     */
+    var tripafteractivity: HTrip? = null
+
+    var jointStatus = JointStatus.UNKNOWN
+
+    private var jointParticipants: MutableList<ActitoppPerson> = ArrayList()
+
+    /**
+     * constructor
+     *
+     * @param parent
+     * @param index
+     */
+    constructor(parent: HTour, index: Int) {
+        checkNotNull(parent) { "tour is not initialized" }
+        this.tour = parent
+
+        this.day = parent.day
+        this.index = index
+
+        this.attributes = HashMap()
+        creatorPersonIndex = day.person.persIndex
     }
-  }
 
-	/**
-   * compare two activities concerning indices
-   * 
-   * 0  - same activity
-   * 1  - acttocompare is AFTER the other activity (higher day, tour or activity index)
-   * -1 - acttocompare is BEFORE the other activity
-   * 
-   * @param acttocompare
-   * @return
-   */
-  public int compareTo(HActivity acttocompare) 
-  {
-    int result=99;
-    if (acttocompare.getWeekDay() >  this.getWeekDay()) result = 1;
-    if (acttocompare.getWeekDay() <  this.getWeekDay()) result = -1;
-    if (acttocompare.getWeekDay() == this.getWeekDay())
-    {
-      if (acttocompare.getTour().getIndex() >  this.getTour().getIndex()) result = 1;
-      if (acttocompare.getTour().getIndex() <  this.getTour().getIndex()) result = -1;    	
-      if (acttocompare.getTour().getIndex() == this.getTour().getIndex())
-      {
-        if (acttocompare.getIndex() >  this.getIndex()) result = 1;
-        if (acttocompare.getIndex() <  this.getIndex()) result = -1;
-        if (acttocompare.getIndex() == this.getIndex()) result = 0;
-      } 
+    /**
+     * constructor
+     *
+     * @param parent
+     * @param index
+     * @param type
+     */
+    constructor(parent: HTour, index: Int, type: ActivityType) : this(parent, index) {
+        assert(type != ActivityType.UNKNOWN) { "unknown activity type!" }
+        activityType = type
     }
-    assert result!=99 : "Could not compare these two activities! - Act1: " + this + " - Act2: " + acttocompare;
-    return result;
-  }
- 
 
-  @Override
-	public String toString()
-	{
-  	String result="";
-  	
-  	if (isHomeActivity())
-  	{
-  		result= getDayIndex() + 	
-  				" start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
-  				" end " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
-  				" duration: " + (durationisScheduled() ? this.duration : "n.a.") + 
-  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + 
-  				" jointStatus: " + this.jointStatus
-  				;  		
-  	}
-  	else
-  	{
-  		result= getDayIndex() + "/" + getTour().getIndex() + "/" + getIndex() + 	
-		  				" start " + (startTimeisScheduled() ? getStartTimeWeekContext() : "n.a.") + 
-		  				" end " + (startTimeisScheduled() && durationisScheduled() ? getEndTimeWeekContext() : "n.a.") + 
-		  				" duration: " + (durationisScheduled() ? this.duration : "n.a.") + 
-		  				" type: " + (activitytypeisScheduled() ? this.acttype.getTypeasChar() : "n.a.") + 
-		  				" jointStatus: " + this.jointStatus +
-		  				" trip before: " + (tripBeforeActivityisScheduled() ? getEstimatedTripTimeBeforeActivity() : "n.a.") + 
-		  				" trip after: " + (tripAfterActivityisScheduled() ? getEstimatedTripTimeAfterActivity() : "n.a.")
-		  				;
-  	}
-		return result;
-	}
-
-
-	public boolean isActivityFirstinTour()
-	{
-		return getTour().getLowestActivityIndex()==getIndex();
-	}
-	
-	public boolean isActivityLastinTour()
-	{
-		return getTour().getHighestActivityIndex()==getIndex();
-	}
-	
-	
-	/**
-	 * commuting trips BEFORE are trips
-	 * - that start at home
-	 * - that end at work (activity type is work)
-	 *
-	 * @return
-	 */
-	public boolean hasWorkCommutingTripbeforeActivity()
-	{
-		return ((isActivityFirstinTour() && getActivityType()==ActivityType.WORK && (getPerson().getCommutingdistance_work() != 0.0)) ? true : false); 
-	}
-	
-	/**
-	 * commuting trips AFTER are trips
-	 * - that end at home
-	 * - that start at work (activity type is home)
-	 *
-	 * @return
-	 */
-	public boolean hasWorkCommutingTripafterActivity()
-	{
-		return ((isActivityLastinTour() && getActivityType()==ActivityType.WORK && (getPerson().getCommutingdistance_work() != 0.0)) ? true : false); 
-	}
-	
-	/**
-	 * commuting trips BEFORE are trips
-	 * - that start at home
-	 * - that end at school/university (activity type is education)
-	 *
-	 * @return
-	 */
-	public boolean hasEducationCommutingTripbeforeActivity()
-	{
-		return ((isActivityFirstinTour() && getActivityType()==ActivityType.EDUCATION && (getPerson().getCommutingdistance_education() != 0.0)) ? true : false); 
-	}
-	
-	/**
-	 * commuting trips AFTER are trips
-	 * - that end at home
-	 * - that start at school/university (activity type is home)
-	 *
-	 * @return
-	 */
-	public boolean hasEducationCommutingTripafterActivity()
-	{
-		return ((isActivityLastinTour() && getActivityType()==ActivityType.EDUCATION && (getPerson().getCommutingdistance_education() != 0.0)) ? true : false); 
-	}
-	
-	/**
-	 * @return
-	 */
-	public boolean isHomeActivity()
-	{
-		return (activitytypeisScheduled() && getActivityType()==ActivityType.HOME);
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isMainActivityoftheTour()
-	{
-		return this.getIndex()==0;
-	}
-	
-	/**
-	 * @return
-	 */
-	public boolean isMainActivityoftheDay()
-	{
-		return isMainActivityoftheTour() && getTour().isMainTouroftheDay();
-	}
-	
-	/**
-	 * @return
-	 */
-	public HActivity getPreviousActivityinTour()
-	{
-		HActivity previousActivity;
-		
-    if (!isActivityFirstinTour())
-    {
-    	previousActivity = getTour().getActivity(getIndex()-1);
+    /**
+     * constructor for home activities
+     *
+     * @param parent
+     * @param type
+     * @param duration
+     * @param starttime
+     */
+    constructor(parent: HDay, type: ActivityType, duration: Int, starttime: Int) {
+        checkNotNull(parent) { "day is not initialized" }
+        this.day = parent
+        activityType = type
+        this.duration = duration
+        startTime = starttime
+        jointStatus = JointStatus.NOJOINTELEMENT
     }
-    else
-    {
-    	previousActivity = null;
+    
+    val weekPattern: HWeekPattern
+        get() = day.pattern
+
+    val person: ActitoppPerson
+        get() = day.person
+
+    var activityType: ActivityType
+        get() {
+            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
+            if (!person!!.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
+            return acttype
+        }
+        set(acttype) {
+            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
+            if (!person!!.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
+            this.acttype = acttype
+        }
+
+    
+    var startTime: Int
+        get() {
+            assert(starttime != -1) { "starttime is not set" }
+            return starttime
+        }
+        set(starttime) {
+            assert(starttime >= 0) { "starttime is not >0: $starttime" }
+            this.starttime = starttime
+        }
+    
+
+    val estimatedTripTimeBeforeActivity: Int
+        /**
+         * @return the estimatedTripTimeBeforeActivity
+         */
+        get() {
+            assert(tripBeforeActivityisScheduled()) { "trip before activity in not intialized" }
+            val tmptriptimebefore = tripbeforeactivity!!.duration
+            return tmptriptimebefore
+        }
+
+    val estimatedTripTimeAfterActivity: Int
+        /**
+         * @return the estimatedTripTimeAfterActivity
+         */
+        get() {
+            assert(tripAfterActivityisScheduled()) { "trip after activity in not intialized" }
+            val tmptriptimeafter = tripafteractivity!!.duration
+            return tmptriptimeafter
+        }
+
+    /**
+     * compare two activities concerning indices
+     *
+     *
+     * 0  - same activity
+     * 1  - acttocompare is AFTER the other activity (higher day, tour or activity index)
+     * -1 - acttocompare is BEFORE the other activity
+     *
+     * @param acttocompare
+     * @return
+     */
+    fun compareTo(acttocompare: HActivity): Int {
+        var result = 99
+        if (acttocompare.weekDay > this.weekDay) result = 1
+        if (acttocompare.weekDay < this.weekDay) result = -1
+        if (acttocompare.weekDay == this.weekDay) {
+            if (acttocompare.tour!!.index > tour!!.index) result = 1
+            if (acttocompare.tour!!.index < tour!!.index) result = -1
+            if (acttocompare.tour!!.index == tour!!.index) {
+                if (acttocompare.index > this.index) result = 1
+                if (acttocompare.index < this.index) result = -1
+                if (acttocompare.index == this.index) result = 0
+            }
+        }
+        assert(result != 99) { "Could not compare these two activities! - Act1: $this - Act2: $acttocompare" }
+        return result
     }
-    return previousActivity;
-	}
-	
-	/**
-	 * @return
-	 */
-	public HActivity getNextActivityinTour()
-	{
-		HActivity nextActivity;
-		
-	  if (!isActivityLastinTour())
-    {
-    	nextActivity = getTour().getActivity(getIndex()+1);
+
+
+    override fun toString(): String {
+        var result = ""
+
+        result = if (isHomeActivity) {
+            dayIndex.toString() +
+                    " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
+                    " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
+                    " duration: " + (if (durationisScheduled()) duration else "n.a.") +
+                    " type: " + (if (activitytypeisScheduled()) acttype.typeasChar else "n.a.") +
+                    " jointStatus: " + this.jointStatus
+        } else {
+            dayIndex.toString() + "/" + tour!!.index + "/" + index +
+                    " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
+                    " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
+                    " duration: " + (if (durationisScheduled()) duration else "n.a.") +
+                    " type: " + (if (activitytypeisScheduled()) acttype.typeasChar else "n.a.") +
+                    " jointStatus: " + this.jointStatus +
+                    " trip before: " + (if (tripBeforeActivityisScheduled()) estimatedTripTimeBeforeActivity else "n.a.") +
+                    " trip after: " + (if (tripAfterActivityisScheduled()) estimatedTripTimeAfterActivity else "n.a.")
+        }
+        return result
     }
-    else
-    {
-    	nextActivity = null;
+
+
+    val isActivityFirstinTour: Boolean
+        get() = tour.lowestActivityIndex == index
+
+    val isActivityLastinTour: Boolean
+        get() = tour.highestActivityIndex == index
+
+
+    /**
+     * commuting trips BEFORE are trips
+     * - that start at home
+     * - that end at work (activity type is work)
+     *
+     * @return
+     */
+    fun hasWorkCommutingTripbeforeActivity(): Boolean {
+        return (if (isActivityFirstinTour && activityType == ActivityType.WORK && (person!!.commutingdistance_work != 0.0)) true else false)
     }
-    return nextActivity;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public HActivity getPreviousOutOfHomeActivityinPattern()
-	{
-		HActivity previousact=null;
-		
-		// if this is the first actitvity, get the last one from previous tour
-		if (isActivityFirstinTour())
-		{
-			HTour previousTour = getTour().getPreviousTourinPattern();
-			if (previousTour!=null) previousact = previousTour.getLastActivityInTour();
-		}
-		else
-		{
-			previousact = getPreviousActivityinTour();
-		}
-		return previousact;
-	}
 
-	/**
-	 * @return
-	 */
-	public HActivity getNextOutOfHomeActivityinPattern()
-	{
-		HActivity nextact=null;
-		
-		// if this is the last actitvity, get the first one from next tour
-		if (isActivityLastinTour())
-		{
-			HTour nexttour = getTour().getNextTourinPattern();
-			if (nexttour!=null) nextact = nexttour.getFirstActivityInTour();
-		}
-		else
-		{
-			nextact = getNextActivityinTour();
-		}
-		return nextact;
-	}
+    /**
+     * commuting trips AFTER are trips
+     * - that end at home
+     * - that start at work (activity type is home)
+     *
+     * @return
+     */
+    fun hasWorkCommutingTripafterActivity(): Boolean {
+        return (if (isActivityLastinTour && activityType == ActivityType.WORK && (person!!.commutingdistance_work != 0.0)) true else false)
+    }
 
-	
-	
-	/**
-	 * starttime + duration
-	 * 
-	 * @return
-	 */
-	public int getEndTime()
-	{
-		return getStartTime() + getDuration(); 
-	}
+    /**
+     * commuting trips BEFORE are trips
+     * - that start at home
+     * - that end at school/university (activity type is education)
+     *
+     * @return
+     */
+    fun hasEducationCommutingTripbeforeActivity(): Boolean {
+        return (if (isActivityFirstinTour && activityType == ActivityType.EDUCATION && (person!!.commutingdistance_education != 0.0)) true else false)
+    }
 
-	public int getWeekDay()
-	{
-		return getDay().getWeekday();
-	}
+    /**
+     * commuting trips AFTER are trips
+     * - that end at home
+     * - that start at school/university (activity type is home)
+     *
+     * @return
+     */
+    fun hasEducationCommutingTripafterActivity(): Boolean {
+        return (if (isActivityLastinTour && activityType == ActivityType.EDUCATION && (person!!.commutingdistance_education != 0.0)) true else false)
+    }
 
-	public int getDayIndex()
-	{
-		return getDay().getIndex();
-	}
-	
-	public int getTourIndex()
-	{
-		return getTour().getIndex();
-	}
-	
-	public int getStartTimeWeekContext()
-	{
-		return 1440*getDayIndex() + getStartTime();
-	}
+    val isHomeActivity: Boolean
+        /**
+         * @return
+         */
+        get() = (activitytypeisScheduled() && activityType == ActivityType.HOME)
 
-	public int getEndTimeWeekContext()
-	{
-		return getStartTimeWeekContext() + getDuration();
-	}
-	
-	public int getTripStartTimeBeforeActivity()
-	{
-		return getTripbeforeactivity().getStartTime();
-	}
+    val isMainActivityoftheTour: Boolean
+        /**
+         * @return
+         */
+        get() = this.index == 0
 
-	public int getTripStartTimeBeforeActivityWeekContext()
-	{
-		return getTripbeforeactivity().getStartTimeWeekContext();
-	}
-	
-	public int getTripStartTimeAfterActivity()
-	{
-		return getTripafteractivity().getStartTime();
-	}
-	
-	public int getTripStartTimeAfterActivityWeekContext()
-	{
-		return getTripafteractivity().getStartTimeWeekContext();
-	}
-	
-	/**
-	 * @return the tripbeforeactivity
-	 */
-	public HTrip getTripbeforeactivity() {
-		return tripbeforeactivity;
-	}
+    val isMainActivityoftheDay: Boolean
+        /**
+         * @return
+         */
+        get() = isMainActivityoftheTour && tour.isMainTouroftheDay
 
-	/**
-	 * @param tripbeforeactivity the tripbeforeactivity to set
-	 */
-	public void setTripbeforeactivity(HTrip tripbeforeactivity) {
-		this.tripbeforeactivity = tripbeforeactivity;
-	}
+    val previousActivityinTour: HActivity?
+        /**
+         * @return
+         */
+        get() {
+            val previousActivity = if (!isActivityFirstinTour) {
+                tour.getActivity(index - 1)
+            } else {
+                null
+            }
+            return previousActivity
+        }
 
-	/**
-	 * @return the tripafteractivity
-	 */
-	public HTrip getTripafteractivity() {
-		return tripafteractivity;
-	}
-
-	/**
-	 * @param tripafteractivity the tripafteractivity to set
-	 */
-	public void setTripafteractivity(HTrip tripafteractivity) {
-		this.tripafteractivity = tripafteractivity;
-	}
-
-	/**
-	 * 
-	 * mean time calculation
-	 * 
-	 * @return
-	 */
-	public int calculateMeanTime()
-	{
-		double timebudget = getPerson().getAttributefromMap(getActivityType() + "budget_exact");
-		double daysWithAct = getWeekPattern().countDaysWithSpecificActivity(getActivityType());
-		double specificActivitiesForCurrentDay = getDay().getTotalNumberOfActivitites(getActivityType());
-		
-		// calculation (between 0 and 1440)
-		double meantime;
-		meantime = (int) Math.max((timebudget / daysWithAct) * (1 / specificActivitiesForCurrentDay),1.0);
-		meantime = Math.min(meantime, 1440.0);
-		
-		return (int) meantime;
-	}
-	
-	/**
-	 * 
-	 * mean time calculation (category)
-	 * 
-	 * @return
-	 */
-	public int calculateMeanTimeCategory()
-	{
-		int meantime = calculateMeanTime();
-		int meantimecategory = -99;
-		for (int i=0; i<Configuration.NUMBER_OF_ACT_DURATION_CLASSES; i++)
-		{
-			if (meantime >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && meantime <= Configuration.ACT_TIME_TIMECLASSES_UB[i]) meantimecategory = i;
-		}
-		assert meantimecategory!=-99 : "could not determine category!";
-		return meantimecategory;
-	}
-	
-	/**
-	 * calculates trip times (default or based on commuting distances)
-	 */
-	public void createTripsforActivity()
-	{
-
-		/*
-		 * trip BEFORE activity
-		 */
-		
-		// default
-    int actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
-    // better than default if we have commuting information
-    if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_work();
-    if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = getPerson().getCommutingDuration_education();
-		if (tripbeforeactivity==null)
-		{   
-			tripbeforeactivity = new HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime_beforeTrip);
-		}
-		else
-		{
-			tripbeforeactivity.setDuration(actualTripTime_beforeTrip);
-		}
-
-		/*
-		 * trip AFTER activity
-		 */	
-		
-		if (isActivityLastinTour())
-		{
-			// default
-	    int actualTripTime_afterTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR;
-	    // better than default if we have commuting information
-	    if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_work();
-	    if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip = getPerson().getCommutingDuration_education();
-	    if (tripafteractivity==null)
-	    {
-	    	tripafteractivity = new HTrip(this, TripStatus.TRIP_AFTER_ACT, actualTripTime_afterTrip);
-	    }
-	    else
-	    {
-	    	tripafteractivity.setDuration(actualTripTime_afterTrip);
-	    }
-	    
-		}
-	}
-	
-	public boolean isScheduled()
-	{
-		return durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (Configuration.model_joint_actions ? this.jointStatus!=JointStatus.UNKNOWN : true);
-	}
-	
-	public boolean activitytypeisScheduled()
-	{
-		return this.acttype!=ActivityType.UNKNOWN;
-	}
-	
-	public boolean tripBeforeActivityisScheduled()
-	{
-		return tripbeforeactivity!=null && tripbeforeactivity.isScheduled();
-	}
-	
-	public boolean tripAfterActivityisScheduled()
-	{
-		return tripafteractivity!=null && tripafteractivity.isScheduled();
-	}
-	
-	public boolean durationisScheduled()
-	{
-		return duration!=-1;
-	}
-	
-	public boolean startTimeisScheduled()
-	{
-		return starttime!=-1;
-	}
-	
-	/**
-	 * @param name 
-	 * @param value
-	 */
-	public void addAttributetoMap(String name, Double value) {
-		assert !attributes.containsKey(name) : "attribute is already in map";
-		this.attributes.put(name, value);
-	}
-	
-	/**
-	 * @param name
-	 * @return
-	 */
-	public Double getAttributefromMap(String name) {
-		return this.attributes.get(name);
-	}
+    val nextActivityinTour: HActivity?
+        /**
+         * @return
+         */
+        get() {
+            val nextActivity = if (!isActivityLastinTour) {
+                tour.getActivity(index + 1)
+            } else {
+                null
+            }
+            return nextActivity
+        }
 
 
-	/**
-	 * @return the attributes
-	 */
-	public Map<String, Double> getAttributesMap() {
-		return attributes;
-	}
-	
-	/**
-	 * returns personindex of person that first created this activity.
-	 * if modeling joint actions this may be another person of the household that was modeled previous
-	 * in modeling order and that first created this joint activity.
-	 * 
-	 * @return
-	 */
-	public int getCreatorPersonIndex()
-	{
-		int result = -1;
-		if (attributes.containsKey("CreatorPersonIndex"))
-		{
-			result = getAttributefromMap("CreatorPersonIndex").intValue();
-		}
-		else
-		{
-			result = getPerson().getPersIndex();
-		}
-		assert result!=-1 : "could not determine CreatorPersonIndex!";
-		return result;
-	}
-	
-	/**
-	 * sets the personindex of person that first created this activity.
-	 * 
-	 * @param persindex
-	 */
-	public void setCreatorPersonIndex(int persindex)
-	{
-		if (attributes.containsKey("CreatorPersonIndex"))
-		{
-			attributes.remove("CreatorPersonIndex");
-		}
-		attributes.put("CreatorPersonIndex", (double) persindex);
-	}
+    val previousOutOfHomeActivityinPattern: HActivity?
+        /**
+         * @return
+         */
+        get() {
+            var previousact: HActivity? = null
 
-	/**
-	 * @return the JointParticipants
-	 */
-	public List<ActitoppPerson> getJointParticipants() {
-		return jointParticipants;
-	}
+            // if this is the first actitvity, get the last one from previous tour
+            if (isActivityFirstinTour) {
+                val previousTour = tour.previousTourinPattern
+                if (previousTour != null) previousact = previousTour.lastActivityInTour
+            } else {
+                previousact = previousActivityinTour
+            }
+            return previousact
+        }
 
-	/**
-	 * @param gemJointParticipants the JointParticipants to set
-	 */
-	public void setJointParticipants(List<ActitoppPerson> gemJointParticipants) {
-		this.jointParticipants = gemJointParticipants;
-	}
-	
-	/**
-	 * @param person
-	 */
-	public void addJointParticipant (ActitoppPerson person)
-	{
-		jointParticipants.add(person);
-	}
-	
-	
-	/**
-	 * @param person
-	 */
-	public void removeJointParticipant (ActitoppPerson person)
-	{
-		jointParticipants.remove(person);
-		
-		// if there is no other jointParticipant left, remove jointStatus of the activity
-		if (jointParticipants.size()==0) setJointStatus(JointStatus.NOJOINTELEMENT);
-	}
-	
-	/**
-	 * determines a default activity time based on activity type and the amount of activities for this type on the specific day
-	 * 
-	 * empirical values are based on MEDIAN-values of duration per day [min] based on German Mobility Panel data
-	 * default activity time: defaulttime = empirical value / numberofactivites(type, day)
-	 * 
-	 * @return
-	 */
-	public int getDefaultActivityTime()
-	{
-		int defaulttime=-1;
-		switch(getActivityType()){
-    case WORK:
-    	defaulttime = 472 / getDay().getTotalNumberOfActivitites(ActivityType.WORK);
-      break;
-    case EDUCATION:
-    	defaulttime = 340 / getDay().getTotalNumberOfActivitites(ActivityType.EDUCATION);
-      break;
-    case LEISURE:
-    	defaulttime = 130 / getDay().getTotalNumberOfActivitites(ActivityType.LEISURE);
-      break;
-    case SHOPPING:
-    	defaulttime = 41 / getDay().getTotalNumberOfActivitites(ActivityType.SHOPPING);
-      break; 
-    case TRANSPORT:
-    	defaulttime = 15 / getDay().getTotalNumberOfActivitites(ActivityType.TRANSPORT);
-      break; 
-    default:
-    	defaulttime = 278 / getDay().getTotalAmountOfActivitites();
-      break; 
-		}
-		assert defaulttime!=-1 : "could not determine defaultTime!";
-		return defaulttime;
-	}
-	
+    val nextOutOfHomeActivityinPattern: HActivity?
+        /**
+         * @return
+         */
+        get() {
+            var nextact: HActivity? = null
+
+            // if this is the last actitvity, get the first one from next tour
+            if (isActivityLastinTour) {
+                val nexttour = tour.nextTourinPattern
+                if (nexttour != null) nextact = nexttour.firstActivityInTour
+            } else {
+                nextact = nextActivityinTour
+            }
+            return nextact
+        }
+
+
+    val endTime: Int
+        /**
+         * starttime + duration
+         *
+         * @return
+         */
+        get() = startTime + duration
+
+    val weekDay: Int
+        get() = day.weekday
+
+    val dayIndex: Int
+        get() = day.index
+
+    val tourIndex: Int
+        get() = tour!!.index
+
+    val startTimeWeekContext: Int
+        get() = 1440 * dayIndex + startTime
+
+    val endTimeWeekContext: Int
+        get() = startTimeWeekContext + duration
+
+    val tripStartTimeBeforeActivity: Int
+        get() = tripbeforeactivity!!.startTime
+
+    val tripStartTimeBeforeActivityWeekContext: Int
+        get() = tripbeforeactivity!!.startTimeWeekContext
+
+    val tripStartTimeAfterActivity: Int
+        get() = tripafteractivity!!.startTime
+
+    val tripStartTimeAfterActivityWeekContext: Int
+        get() = tripafteractivity!!.startTimeWeekContext
+
+    /**
+     * mean time calculation
+     *
+     * @return
+     */
+    fun calculateMeanTime(): Int {
+        val timebudget = person!!.getAttributefromMap(activityType.toString() + "budget_exact")
+        val daysWithAct = weekPattern.countDaysWithSpecificActivity(activityType).toDouble()
+        val specificActivitiesForCurrentDay = day.getTotalNumberOfActivitites(activityType).toDouble()
+
+        // calculation (between 0 and 1440)
+        var meantime =
+            max((timebudget / daysWithAct) * (1 / specificActivitiesForCurrentDay), 1.0).toInt().toDouble()
+        meantime = min(meantime, 1440.0)
+
+        return meantime.toInt()
+    }
+
+    /**
+     * mean time calculation (category)
+     *
+     * @return
+     */
+    fun calculateMeanTimeCategory(): Int {
+        val meantime = calculateMeanTime()
+        var meantimecategory = -99
+        for (i in 0..<Configuration.NUMBER_OF_ACT_DURATION_CLASSES) {
+            if (meantime >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && meantime <= Configuration.ACT_TIME_TIMECLASSES_UB[i]) meantimecategory =
+                i
+        }
+        assert(meantimecategory != -99) { "could not determine category!" }
+        return meantimecategory
+    }
+
+    /**
+     * calculates trip times (default or based on commuting distances)
+     */
+    fun createTripsforActivity() {
+        /*
+                 * trip BEFORE activity
+                 */
+
+        // default
+
+        var actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR
+        // better than default if we have commuting information
+        if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person!!.commutingDuration_work
+        if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person!!.commutingDuration_education
+        if (tripbeforeactivity == null) {
+            tripbeforeactivity = HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime_beforeTrip)
+        } else {
+            tripbeforeactivity!!.duration = (actualTripTime_beforeTrip)
+        }
+
+        /*
+         * trip AFTER activity
+         */
+        if (isActivityLastinTour) {
+            // default
+            var actualTripTime_afterTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR
+            // better than default if we have commuting information
+            if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = person!!.commutingDuration_work
+            if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip =
+                person!!.commutingDuration_education
+            if (tripafteractivity == null) {
+                tripafteractivity = HTrip(this, TripStatus.TRIP_AFTER_ACT, actualTripTime_afterTrip)
+            } else {
+                tripafteractivity!!.duration = (actualTripTime_afterTrip)
+            }
+        }
+    }
+
+    val isScheduled: Boolean
+        get() = durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (if (Configuration.model_joint_actions) jointStatus != JointStatus.UNKNOWN else true)
+
+    fun activitytypeisScheduled(): Boolean {
+        return this.acttype != ActivityType.UNKNOWN
+    }
+
+    fun tripBeforeActivityisScheduled(): Boolean {
+        return tripbeforeactivity?.isScheduled ?: false
+    }
+
+    fun tripAfterActivityisScheduled(): Boolean {
+        return tripafteractivity?.isScheduled?:false
+    }
+
+    fun durationisScheduled(): Boolean {
+        return duration != -1
+    }
+
+    fun startTimeisScheduled(): Boolean {
+        return starttime != -1
+    }
+
+    /**
+     * @param name
+     * @param value
+     */
+    fun addAttributetoMap(name: String, value: Double) {
+        assert(!attributes!!.containsKey(name)) { "attribute is already in map" }
+        attributes!![name] = value
+    }
+
+    /**
+     * @param name
+     * @return
+     */
+    fun getAttributefromMap(name: String): Double? {
+        return attributes!![name]
+    }
+
+
+    val attributesMap: DefaultDoubleMap<String>
+        /**
+         * @return the attributes
+         */
+        get() = DefaultDoubleMap(attributes)
+
+    var creatorPersonIndex: Int
+        /**
+         * returns personindex of person that first created this activity.
+         * if modeling joint actions this may be another person of the household that was modeled previous
+         * in modeling order and that first created this joint activity.
+         *
+         * @return
+         */
+        get() {
+            val result: Int = if (attributes!!.containsKey("CreatorPersonIndex")) {
+                getAttributefromMap("CreatorPersonIndex")!!.toInt()
+            } else {
+                person.persIndex
+            }
+            assert(result != -1) { "could not determine CreatorPersonIndex!" }
+            return result
+        }
+        /**
+         * sets the personindex of person that first created this activity.
+         *
+         * @param persindex
+         */
+        set(persindex) {
+            if (attributes!!.containsKey("CreatorPersonIndex")) {
+                attributes!!.remove("CreatorPersonIndex")
+            }
+            attributes!!["CreatorPersonIndex"] = persindex.toDouble()
+        }
+
+    /**
+     * @return the JointParticipants
+     */
+    fun getJointParticipants(): List<ActitoppPerson> {
+        return jointParticipants
+    }
+
+    /**
+     * @param gemJointParticipants the JointParticipants to set
+     */
+    fun setJointParticipants(gemJointParticipants: MutableList<ActitoppPerson>) {
+        this.jointParticipants = gemJointParticipants
+    }
+
+    /**
+     * @param person
+     */
+    fun addJointParticipant(person: ActitoppPerson) {
+        jointParticipants.add(person)
+    }
+
+
+    /**
+     * @param person
+     */
+    fun removeJointParticipant(person: ActitoppPerson) {
+        jointParticipants.remove(person)
+
+        // if there is no other jointParticipant left, remove jointStatus of the activity
+        if (jointParticipants.size == 0) {jointStatus = (JointStatus.NOJOINTELEMENT) }
+    }
+
+    val defaultActivityTime: Int
+        /**
+         * determines a default activity time based on activity type and the amount of activities for this type on the specific day
+         *
+         *
+         * empirical values are based on MEDIAN-values of duration per day [min] based on German Mobility Panel data
+         * default activity time: defaulttime = empirical value / numberofactivites(type, day)
+         *
+         * @return
+         */
+        get() {
+            var defaulttime = -1
+            defaulttime = when (activityType) {
+                ActivityType.WORK -> 472 / day.getTotalNumberOfActivitites(ActivityType.WORK)
+                ActivityType.EDUCATION -> 340 / day.getTotalNumberOfActivitites(ActivityType.EDUCATION)
+
+                ActivityType.LEISURE -> 130 / day.getTotalNumberOfActivitites(ActivityType.LEISURE)
+                ActivityType.SHOPPING -> 41 / day.getTotalNumberOfActivitites(ActivityType.SHOPPING)
+                ActivityType.TRANSPORT -> 15 / day.getTotalNumberOfActivitites(ActivityType.TRANSPORT)
+
+                else -> 278 / day.totalAmountOfActivitites
+            }
+            assert(defaulttime != -1) { "could not determine defaultTime!" }
+            return defaulttime
+        }
+
+    companion object {
+        /**
+         * sorts list of activities ascending by week-order start time
+         *
+         * @param actList
+         */
+        fun sortActivityListbyWeekStartTimes(actList: List<HActivity>) {
+            checkNotNull(actList) { "empty list" }
+
+            Collections.sort(
+                actList
+            ) { act1, act2 ->
+                if (act1.startTimeWeekContext < act2.startTimeWeekContext) {
+                    -1
+                } else if (act1.startTimeWeekContext == act2.startTimeWeekContext) {
+                    0
+                } else {
+                    1
+                }
+            }
+        }
+
+        /**
+         * sorts list of activities ascending by week-order indices
+         *
+         * @param list
+         */
+        fun sortActivityListbyIndices(list: List<HActivity>) {
+            checkNotNull(list) { "list is empty" }
+
+            Collections.sort(list) { o1, o2 ->
+                var result = 99
+                result = if (o1.dayIndex < o2.dayIndex) -1
+                else if (o1.dayIndex > o2.dayIndex) +1
+                else {
+                    if (o1.tour!!.index < o2.tour!!.index) -1
+                    else if (o1.tour!!.index > o2.tour!!.index) +1
+                    else {
+                        if (o1.index < o2.index) -1
+                        else if (o1.index > o2.index) +1
+                        else 0
+                    }
+                }
+
+                assert(result != 99) { "Could not compare these two activities! - Act1: $o1 - Act2: $o2" }
+                result
+            }
+        }
+
+        /**
+         * calculates duration between end of first activity (including trip after activity if there is one)
+         * and the beginning of a second activity (including trip before activity if there is one)
+         *
+         * @param firstact
+         * @param secondact
+         * @return
+         */
+        fun getTimebetweenTwoActivities(firstact: HActivity, secondact: HActivity): Int {
+            var result = -999999
+
+            // end of first activity
+            var endezeitersteakt = firstact.endTimeWeekContext
+            if (firstact.isActivityLastinTour) {
+                endezeitersteakt += firstact.estimatedTripTimeAfterActivity
+            }
+
+            // beginning second activity
+            val anfangszeitzweiteakt = secondact.tripStartTimeBeforeActivityWeekContext
+
+
+            result = anfangszeitzweiteakt - endezeitersteakt
+            assert(result != -999999) { "Could not determine time between these two activities" }
+            return result
+        }
+
+
+        /**
+         * check if two activities are overlapping
+         * false = no overlapping
+         * true = overlapping
+         *
+         * @param act1
+         * @param act2
+         * @return
+         */
+        fun checkActivityOverlapping(act1: HActivity, act2: HActivity): Boolean {
+            var result = false
+
+            // check time occupation of first activity
+            val starttime_first =
+                act1.startTimeWeekContext - (if (act1.tripBeforeActivityisScheduled()) act1.estimatedTripTimeBeforeActivity else 0)
+            val endtime_first =
+                (if (act1.durationisScheduled()) act1.endTimeWeekContext else act1.startTimeWeekContext) + (if (act1.tripAfterActivityisScheduled()) act1.estimatedTripTimeAfterActivity else 0)
+
+            // check time occupation of second activity
+            val starttime_second =
+                act2.startTimeWeekContext - (if (act2.tripBeforeActivityisScheduled()) act2.estimatedTripTimeBeforeActivity else 0)
+            val endtime_second =
+                (if (act2.durationisScheduled()) act2.endTimeWeekContext else act2.startTimeWeekContext) + (if (act2.tripAfterActivityisScheduled()) act2.estimatedTripTimeAfterActivity else 0)
+
+            if ( // start or end of second activity is within time occupation of the first
+                (starttime_second > starttime_first && starttime_second < endtime_first) ||
+                (endtime_second > starttime_first && endtime_second < endtime_first)
+                ||  // start or end of first activity is within time occupation of the second
+                (starttime_first > starttime_second && starttime_first < endtime_second) ||
+                (endtime_first > starttime_second && endtime_first < endtime_second)
+            ) {
+                result = true
+            }
+
+            return result
+        }
+
+        /**
+         * create start times for activities in list when they can be determined
+         *
+         * @param actliste
+         */
+        fun createPossibleStarttimes(actliste: List<HActivity>) {
+            for (act in actliste) {
+                if (!act.startTimeisScheduled()) {
+                    /*
+                 * if the previous activity in the tour has a determined startime time and duration,
+                 * also the actual activity can be determined concerning start time.
+                 */
+                    if (!act.isActivityFirstinTour && act.previousActivityinTour!!.startTimeisScheduled()
+                        && act.previousActivityinTour!!.durationisScheduled()
+                    ) {
+                        act.startTime = act.previousActivityinTour!!.endTime + act.estimatedTripTimeBeforeActivity
+                    }
+
+                    /*
+                 * if the following activity in the tour has a determined startime time and duration,
+                 * also the actual activity can be determined concerning start time.
+                 */
+                    if (!act.isActivityLastinTour && act.durationisScheduled()
+                        && act.nextActivityinTour!!.startTimeisScheduled()
+                    ) {
+                        act.startTime = act.nextActivityinTour!!.tripStartTimeBeforeActivity - act.duration
+                    }
+                }
+            }
+        }
+    }
 }

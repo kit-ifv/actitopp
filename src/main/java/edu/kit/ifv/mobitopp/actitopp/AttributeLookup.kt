@@ -1,120 +1,100 @@
-package edu.kit.ifv.mobitopp.actitopp;
+package edu.kit.ifv.mobitopp.actitopp
 
 /**
  * @author Tim Hilgert
- *
  */
-public class AttributeLookup {
+class AttributeLookup(var currentPerson: ActitoppPerson) {
+    lateinit var currentDay: HDay
+    lateinit var currentTour: HTour
+    lateinit var currentActivity: HActivity
 
-	ActitoppPerson currentPerson;
-	HDay currentDay;
-	HTour currentTour;
-	HActivity currentActivity;
-	
-	/**
-	 * 
-	 * constructor
-	 * 
-	 * @param currentPerson
-	 */
-	public AttributeLookup (ActitoppPerson currentPerson)
-	{
-		this.currentPerson = currentPerson;
-	}
-	
-	/**
-	 * 
-	 * constructor
-	 * 
-	 * @param currentPerson
-	 * @param currentDay
-	 */
-	public AttributeLookup (ActitoppPerson currentPerson, HDay currentDay)
-	{
-		this(currentPerson);
-		this.currentDay = currentDay;
-	}
+    /**
+     * constructor
+     *
+     * @param currentPerson
+     * @param currentDay
+     */
+    constructor(currentPerson: ActitoppPerson, currentDay: HDay) : this(currentPerson) {
+        this.currentDay = currentDay
+    }
 
-	/**
-	 * 
-	 * constructor
-	 * 
-	 * @param currentPerson
-	 * @param currentDay
-	 * @param currentTour
-	 */
-	public AttributeLookup (ActitoppPerson currentPerson, HDay currentDay, HTour currentTour)
-	{
-		this(currentPerson, currentDay);
-		this.currentTour = currentTour;
-	}
-	
-	/**
-	 * 
-	 * constructor
-	 * 
-	 * @param currentPerson
-	 * @param currentDay
-	 * @param currentTour
-	 * @param currentActivity
-	 */
-	public AttributeLookup (ActitoppPerson currentPerson, HDay currentDay, HTour currentTour, HActivity currentActivity)
-	{
-		this(currentPerson, currentDay, currentTour);
-		this.currentActivity = currentActivity;
-	}
-	
-	/**
-	 * 
-	 * Get AttributeValue for specific reference
-	 * 
-	 * @param reference
-	 * @param attributeName
-	 * @return
-	 */
-  public double getAttributeValue (String reference, String attributeName)
-  {
-  	double attributeValue = 999999;
-  	assert (reference.equals("default") || reference.equals("person") || reference.equals("day") || reference.equals("tour") || reference.equals("activity")) : "Unknown reference Value - " + reference;
- 	
-  	switch(reference)
-  	{
-  		case "default":
-	  	case "person":
-	  		assert currentPerson!=null : "no person!";
-	  		attributeValue = ActitoppPersonParameters.getEnumValue(attributeName).getAttribute(currentPerson);
-	  		break;
-	  	case "day":
-	  		assert currentDay!=null : "no day!";
-	  		attributeValue = HDayParameters.getEnumValue(attributeName).getAttribute(currentDay);
-	  		break;
-	  	case "tour":
-	  		assert currentTour!=null : "no tour!";
-	  		attributeValue = HTourParameters.getEnumValue(attributeName).getAttribute(currentTour);
-	  		break;
-	  	case "activity":
-	  		assert currentActivity!=null : "no activity!";
-	  		attributeValue = HActivityParameters.getEnumValue(attributeName).getAttribute(currentActivity);
-	  		break;		
-  	}
+    /**
+     * constructor
+     *
+     * @param currentPerson
+     * @param currentDay
+     * @param currentTour
+     */
+    constructor(currentPerson: ActitoppPerson, currentDay: HDay, currentTour: HTour) : this(
+        currentPerson,
+        currentDay
+    ) {
+        this.currentTour = currentTour
+    }
 
-  	assert attributeValue != 999999 : "AttributeValue couldn't be read! - Reference: " + reference + " - Attribute: " + attributeName;
-  	return attributeValue;
-  }
+    /**
+     * constructor
+     *
+     * @param currentPerson
+     * @param currentDay
+     * @param currentTour
+     * @param currentActivity
+     */
+    constructor(
+        currentPerson: ActitoppPerson,
+        currentDay: HDay,
+        currentTour: HTour,
+        currentActivity: HActivity
+    ) : this(currentPerson, currentDay, currentTour) {
+        this.currentActivity = currentActivity
+    }
 
-  public String toString()
-  {
-  	String personindex = "n.a.";
-  	String daynumber = "n.a.";
-  	String tournr = "n.a.";
-  	String aktnr = "n.a.";
-  	
-  	if (currentPerson!=null) personindex = "" + currentPerson.getPersIndex();
-  	if (currentDay!=null) daynumber = "" + currentDay.getWeekday();
-  	if (currentTour!=null) tournr = "" + currentTour.getIndex();
-  	if (currentActivity!=null) aktnr = "" + currentActivity.getIndex();
-  	
-  	return " Personindex: " + personindex + " // Weekday: " + daynumber + " // Tourindex: " + tournr + " // Actindex: "+ aktnr;
-  }
-	
+    /**
+     * Get AttributeValue for specific reference
+     *
+     * @param reference
+     * @param attributeName
+     * @return
+     */
+    fun getAttributeValue(reference: String, attributeName: String): Double {
+        var attributeValue = 999999.0
+        assert(reference == "default" || reference == "person" || reference == "day" || reference == "tour" || reference == "activity") { "Unknown reference Value - $reference" }
+
+        when (reference) {
+            "default", "person" -> {
+                attributeValue = ActitoppPersonParameters.getEnumValue(attributeName).getAttribute(
+                    currentPerson
+                )
+            }
+
+            "day" -> {
+                attributeValue = HDayParameters.getEnumValue(attributeName).getAttribute(currentDay)
+            }
+
+            "tour" -> {
+                attributeValue = HTourParameters.getEnumValue(attributeName).getAttribute(currentTour)
+            }
+
+            "activity" -> {
+                attributeValue = HActivityParameters.getEnumValue(attributeName).getAttribute(currentActivity)
+            }
+        }
+
+        assert(attributeValue != 999999.0) { "AttributeValue couldn't be read! - Reference: $reference - Attribute: $attributeName" }
+        return attributeValue
+    }
+
+    override fun toString(): String {
+        var personindex = "n.a."
+        var daynumber = "n.a."
+        var tournr = "n.a."
+        var aktnr = "n.a."
+
+        personindex = "" + currentPerson.persIndex
+        daynumber = "" + currentDay.weekday
+        tournr = "" + currentTour.index
+        aktnr = "" + currentActivity.index
+
+        return " Personindex: $personindex // Weekday: $daynumber // Tourindex: $tournr // Actindex: $aktnr"
+    }
 }
