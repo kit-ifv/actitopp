@@ -8,15 +8,17 @@ package edu.kit.ifv.mobitopp.actitopp
  */
 class WRDDefaultModelStep(
     id: String, // category to get a random draw
-    private val category: String, activityType: ActivityType, // surrounding modelCoordinator for this step
+    private val category: String, // activitytype for personal, activity type specific distributions
+    private val activityType: ActivityType, // surrounding modelCoordinator for this step
     private val modelCoordinator: Coordinator
 ) :
     AbsHModelStep(id) {
-    // activitytype for personal, activity type specific distributions
-    private val activityType: ActivityType
 
     // Distribution element that is used to pick a random number
-    private var wrddist: WRDDiscreteDistribution?
+
+    // check if a personalized distribution for this id, category and activity type already exists. If not, create one.
+    private val weightedDistribution: WRDDiscreteDistribution =
+        modelCoordinator.getOrCreateWeightedDistribution(id, category, activityType)
 
     // decision if the distribution should be adapted after drawing
     private var modifydistribution = false
@@ -27,26 +29,6 @@ class WRDDefaultModelStep(
     //limits the range in which a number should be picked randomly.
     private var lowerBoundLimiter = -1
     private var upperBoundLimiter = -1
-
-    /**
-     * @param id
-     * @param category
-     * @param activityType
-     * @param modelCoordinator
-     */
-    init {
-        this.activityType = activityType
-
-        // check if a personalized distribution for this id, category and activity type already exists. If not, create one.
-        this.wrddist = modelCoordinator.getpersonalWRDdistribution(id, category, activityType)
-        if (wrddist == null) {
-            val modelstep = modelCoordinator.fileBase.getModelInformationforWRDStep(id)
-            val distributioninformation = modelstep!!.getWRDDistribution(category)
-            wrddist = WRDDiscreteDistribution(distributioninformation!!)
-
-            modelCoordinator.addpersonalWRDdistribution(id, category, activityType, wrddist!!)
-        }
-    }
 
     /**
      * creates wrd model step element without a given activity type
@@ -67,13 +49,13 @@ class WRDDefaultModelStep(
     public override fun doStep(): Int {
         // pick a random number within the given boundaries
 
-        chosenDistributionElement = wrddist!!.getRandomPickFromDistribution(
+        chosenDistributionElement = weightedDistribution.getRandomPickFromDistribution(
             this.lowerBoundLimiter,
             this.upperBoundLimiter, modelCoordinator.randomGenerator
         )
 
         if (modifydistribution) {
-            wrddist!!.modifydistributionelement(chosenDistributionElement)
+            weightedDistribution.modifydistributionelement(chosenDistributionElement)
         }
 
         return getchosenDistributionElement()

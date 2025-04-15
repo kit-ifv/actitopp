@@ -2233,13 +2233,23 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
         }
     }
 
-
-    fun getpersonalWRDdistribution(
+    /**
+     * Robin: This function appears to generate a [WRDDiscreteDistribution]. This seems to be only used in the WRD Model
+     * step. The nullable return can be removed, since wrd starts a callback to this object to please generate a default
+     * value if none exists.
+     */
+    fun getOrCreateWeightedDistribution(
         id: String,
         categoryName: String,
         activityType: ActivityType
-    ): WRDDiscreteDistribution? {
-        return personalWRDDistributions[id + categoryName + activityType]
+    ): WRDDiscreteDistribution {
+        return personalWRDDistributions[id + categoryName + activityType] ?: run {
+            val modelStep = fileBase.getModelInformationforWRDStep(id)
+            val distribution = modelStep.getWRDDistribution(categoryName)!!
+            WRDDiscreteDistribution(distribution).also {
+                addpersonalWRDdistribution(id, categoryName, activityType, it)
+            }
+        }
     }
 
     fun addpersonalWRDdistribution(
