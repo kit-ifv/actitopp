@@ -4,50 +4,32 @@ package edu.kit.ifv.mobitopp.actitopp
  * @author Tim Hilgert
  */
 class HWeekPattern(
-    /**
-     * @return the person
-     */
-    @JvmField val person: ActitoppPerson
+    val person: ActitoppPerson,
 ) {
     val days: MutableList<HDay> = ArrayList()
 
     private val homeactivitities: MutableList<HActivity> = ArrayList()
 
-    /**
-     * Constructor
-     */
+
     init {
         for (i in 0..6) {
             days.add(HDay(this, i + 1))
         }
     }
-    
-    /**
-     * @param index
-     * @return
-     */
+
     fun getDay(index: Int): HDay {
         return days[index]
     }
 
+    /**
+     * returns activities of the week (only out of home, no home activities) in a list.
+     * Robin: It appears that in the modelling process everything that is part of a tour is an activity that takes place
+     * out of home. In the original code there was no filter at all, just a concatenation of all activities
+     *
+     * @return
+     */
+    val allOutofHomeActivities: List<HActivity> get() = days.flatMap { it.tours.flatMap { it.activities } }
 
-    val allOutofHomeActivities: List<HActivity>
-        /**
-         * returns activities of the week (only out of home, no home activities) in a list
-         *
-         * @return
-         */
-        get() {
-            val actList: MutableList<HActivity> = ArrayList()
-            for (day in this.days) {
-                for (tour in day.tours) {
-                    for (act in tour.activities) {
-                        actList.add(act)
-                    }
-                }
-            }
-            return actList
-        }
 
     val allJointActivities: List<HActivity>
         /**
@@ -63,36 +45,32 @@ class HWeekPattern(
             return tmpliste
         }
 
-    val allHomeActivities: List<HActivity>
-        /**
-         * returns activities of the week (only home activities) in a list
-         *
-         * @return
-         */
-        get() = homeactivitities
+    /**
+     * returns activities of the week (only home activities) in a list
+     * Robin: Somehow this only maps to the private list homeactivities, weird, why do we need that field?
+     *
+     */
+    private val allHomeActivities: List<HActivity> get() = homeactivitities
 
 
+    /**
+     * returns all activities of the week (out of home + home activities) in a list
+     * Robin: Why is the sortFunction defined in HActivity. this needs to be fixed.
+     *
+     * @return
+     */
     val allActivities: List<HActivity>
-        /**
-         * returns all activities of the week (out of home + home activities) in a list
-         *
-         * @return
-         */
         get() {
-            val tmpliste: MutableList<HActivity> = ArrayList()
-            tmpliste.addAll(allOutofHomeActivities)
-            tmpliste.addAll(allHomeActivities)
-            HActivity.Companion.sortActivityListbyWeekStartTimes(tmpliste)
-            return tmpliste
+            val actList = allOutofHomeActivities + allHomeActivities
+            return actList.sortedBy { it.startTimeWeekContext }
         }
 
-
+    /**
+     * returns all trips of the week in a list
+     *
+     * @return
+     */
     val allTrips: List<HTrip>
-        /**
-         * returns all trips of the week in a list
-         *
-         * @return
-         */
         get() {
             val tmpliste: MutableList<HTrip> = ArrayList()
             for (tmpact in allActivities) {
@@ -103,38 +81,10 @@ class HWeekPattern(
         }
 
 
-    val allTours: List<HTour?>
-        /**
-         * returns all tours of the week in a list
-         *
-         * @return
-         */
-        get() {
-            val tourList: MutableList<HTour?> = ArrayList()
-            for (day in this.days) {
-                for (tour in day.tours) {
-                    tourList.add(tour)
-                }
-            }
-            return tourList
-        }
+    val allTours: List<HTour> get() = days.flatMap { it.tours }
 
 
-    val totalAmountOfOutofHomeActivities: Int
-        /**
-         * returns number of activities in the week (only out of home, no home activities)
-         *
-         * @return
-         */
-        get() {
-            var activities = 0
-            for (d in this.days) {
-                activities += d.totalAmountOfActivitites
-            }
-
-            return activities
-        }
-
+    val totalAmountOfOutofHomeActivities: Int get() = days.sumOf { it.totalAmountOfActivitites }
 
     /**
      * returns number of activities in the week (only out of home, no home activities) for a specific activity type
@@ -142,7 +92,10 @@ class HWeekPattern(
      * @param activityType
      * @return
      */
-    fun countActivitiesPerWeek(activityType: ActivityType?): Int {
+    fun countActivitiesPerWeek(activityType: ActivityType): Int = allOutofHomeActivities.count {it.activityType == activityType}
+/* Old Implementation
+  {
+
         var ctr = 0
         for (day in this.days) {
             for (tour in day.tours) {
@@ -153,14 +106,15 @@ class HWeekPattern(
         }
         return ctr
     }
-
+*/
     /**
      * returns number of tours in the week for a specific activity type
      *
      * @param activityType
      * @return
      */
-    fun countToursPerWeek(activityType: ActivityType): Int {
+    fun countToursPerWeek(activityType: ActivityType): Int = days.sumOf { it.tours.count { t -> t.getActivity(0).activityType == activityType } }
+/*    {
         var ctr = 0
         for (day in this.days) {
             for (tour in day.tours) {
@@ -168,7 +122,7 @@ class HWeekPattern(
             }
         }
         return ctr
-    }
+    }*/
 
     /**
      * returns number of days in the week where an activity of a specific activity type exists
@@ -194,8 +148,8 @@ class HWeekPattern(
     }
 
 
-    private fun printActivities(listtoprint: List<HActivity>) {
-        HActivity.Companion.sortActivityListbyWeekStartTimes(listtoprint)
+    private fun printActivities(listtoprinte: List<HActivity>) {
+        val listtoprint = listtoprinte.sortedBy { it.startTimeWeekContext }
 
         println("")
         println(" -------------- activity list --------------")
@@ -217,8 +171,7 @@ class HWeekPattern(
 
 
     fun printJointActivitiesList() {
-        val listtoprint = allJointActivities
-        HActivity.Companion.sortActivityListbyWeekStartTimes(listtoprint)
+        val listtoprint = allJointActivities.sortedBy { it.startTimeWeekContext }
 
         println("")
         println(" -------------- list of joint activities --------------")
@@ -246,8 +199,8 @@ class HWeekPattern(
     fun weekPatternisFreeofOverlaps(): Boolean {
         val freeofOverlaps = true
 
-        val allActivities = this.allActivities
-        HActivity.Companion.sortActivityListbyWeekStartTimes(allActivities)
+        val allActivities = this.allActivities.sortedBy { it.startTimeWeekContext }
+
 
         for (i in 0..<allActivities.size - 1) {
             val aktuelleakt = allActivities[i]

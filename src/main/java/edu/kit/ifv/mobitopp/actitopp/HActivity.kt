@@ -576,20 +576,9 @@ class HActivity {
          *
          * @param actList
          */
-        fun sortActivityListbyWeekStartTimes(actList: List<HActivity>) {
-            checkNotNull(actList) { "empty list" }
+        fun sortActivityListbyWeekStartTimes(actList: MutableList<HActivity>) {
+            actList.sortBy { it.startTimeWeekContext }
 
-            Collections.sort(
-                actList
-            ) { act1, act2 ->
-                if (act1.startTimeWeekContext < act2.startTimeWeekContext) {
-                    -1
-                } else if (act1.startTimeWeekContext == act2.startTimeWeekContext) {
-                    0
-                } else {
-                    1
-                }
-            }
         }
 
         /**

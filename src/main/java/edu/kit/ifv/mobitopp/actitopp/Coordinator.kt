@@ -12,10 +12,10 @@ import kotlin.math.min
  * class to coordinate the modeling of week activity schedules
  * will be called from [ActitoppPerson] to generate schedules
  */
-class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerator: RNGHelper) {
-    /**///////////// */ //	declaration of variables
+class Coordinator(
     /** ///////////// */
-    private val person: ActitoppPerson
+    private val person: ActitoppPerson, fileBase: ModelFileBase, randomgenerator: RNGHelper) {
+    /**///////////// */ //	declaration of variables
     private val pattern: HWeekPattern?
 
     @JvmField
@@ -47,11 +47,6 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
      * @param randomgenerator
      */
     init {
-        checkNotNull(person) { "Person nicht initialisiert" }
-        checkNotNull(fileBase) { "FileBase nicht initialisiert" }
-        checkNotNull(randomgenerator) { "Zufallszahlengenerator nicht initialisiert" }
-
-        this.person = person
         this.pattern = person.weekPattern
         this.fileBase = fileBase
         this.randomGenerator = randomgenerator
