@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -111,7 +112,7 @@ class ModelFileBase private constructor(
      * call chain where afterwards .getDistribution() is called upon.
      */
 
-    fun getDistributionFor(stepID: String, category: String): WRDModelDistributionInformation {
+    fun getDistributionFor(stepID: String, category: Category): WRDModelDistributionInformation {
         return modelInformationWRDsteps[stepID, category]
     }
 
@@ -178,7 +179,7 @@ class ModelFileBase private constructor(
     private fun initWRDSteps(wrdsteps: HashMap<String, Int>) {
         wrdsteps.forEach { (stepID, maxIndex) ->
             (0..maxIndex).forEach {
-                modelInformationWRDsteps[stepID, it.toString()] = loadDistributionInformationFromFile("$RESOURCE_PATH${Configuration.parameterset}/${stepID}_KAT_$it.csv")
+                modelInformationWRDsteps[stepID, Category(it)] = loadDistributionInformationFromFile("$RESOURCE_PATH${Configuration.parameterset}/${stepID}_KAT_$it.csv")
             }
         }
     }

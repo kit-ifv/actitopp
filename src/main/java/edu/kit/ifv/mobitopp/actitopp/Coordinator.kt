@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.ActivityType.Companion.getTypeFromChar
+import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import kotlin.math.max
 import kotlin.math.min
 
@@ -908,8 +909,8 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
         if (pattern!!.countActivitiesPerWeek(activitytype) > 0) {
             // get decision from step 7 DC
             val chosenIndex = person.getAttributefromMap(activitytype.toString() + "budget_category_index")
-
-            val step = WRDDefaultModelStep(id, chosenIndex.toInt().toString(), activitytype, this)
+            //TODO why is get Attribute returning a double, which is then cast to an int. Skip the intermediate step
+            val step = WRDDefaultModelStep(id, Category(chosenIndex.toInt()), activitytype, this)
             step.doStep()
 
             val chosenTime = step.getchosenDistributionElement()
@@ -1065,7 +1066,7 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
                         // initialize object based on chosen time category
                         val chosenTimeCategory = currentActivity.attributesMap["actdurcat_index"]!!
                         val step_wrd = WRDDefaultModelStep(
-                            id_wrd, chosenTimeCategory.toInt().toString(), currentActivity.activityType,
+                            id_wrd, Category(chosenTimeCategory.toInt()), currentActivity.activityType,
                             this
                         )
 
@@ -1164,7 +1165,7 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
                         // initialize object based on chosen time category
                         val chosenTimeCategory = currentActivity.attributesMap["actdurcat_index"]!!
                         val step_wrd = WRDDefaultModelStep(
-                            id_wrd, chosenTimeCategory.toInt().toString(), currentActivity.activityType,
+                            id_wrd, Category(chosenTimeCategory.toInt()), currentActivity.activityType,
                             this
                         )
 
@@ -1365,7 +1366,7 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
                  */
                 val chosenStartCategory = currentTour.attributesMap["tourStartCat_index"] as Double
                 val step_wrd = WRDDefaultModelStep(
-                    id_wrd, chosenStartCategory.toInt().toString(), currentTour.getActivity(0).activityType,
+                    id_wrd, Category(chosenStartCategory.toInt()), currentTour.getActivity(0).activityType,
                     this
                 )
 
@@ -1435,7 +1436,7 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
 
                     // 10T
                     val step_wrd = WRDDefaultModelStep(
-                        "10T", chosenHomeTimeCategory.toString(), currentTour.getActivity(0).activityType,
+                        "10T", Category(chosenHomeTimeCategory), currentTour.getActivity(0).activityType,
                         this
                     )
                     val wrdbounds = calculateBoundsForHomeTime(currentTour, false)
@@ -2240,23 +2241,23 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
      */
     fun getOrCreateWeightedDistribution(
         id: String,
-        categoryName: String,
+        category: Category,
         activityType: ActivityType
     ): WRDDiscreteDistribution {
-        return personalWRDDistributions[id + categoryName + activityType] ?: run {
-            val distribution = fileBase.getDistributionFor(id, categoryName)
+        return personalWRDDistributions[id + category + activityType] ?: run {
+            val distribution = fileBase.getDistributionFor(id, category)
             WRDDiscreteDistribution(distribution).also {
-                addpersonalWRDdistribution(id, categoryName, activityType, it)
+                addpersonalWRDdistribution(id, category, activityType, it)
             }
         }
     }
 
     fun addpersonalWRDdistribution(
         id: String,
-        categoryName: String,
+        category: Category,
         activityType: ActivityType,
         wrddist: WRDDiscreteDistribution
     ) {
-        personalWRDDistributions[id + categoryName + activityType] = wrddist
+        personalWRDDistributions[id + category + activityType] = wrddist
     }
 }

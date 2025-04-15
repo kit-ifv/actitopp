@@ -1,5 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.changes.Category
+
 /**
  * @author Tim Hilgert
  *
@@ -8,7 +10,7 @@ package edu.kit.ifv.mobitopp.actitopp
  */
 class WRDDefaultModelStep(
     id: String, // category to get a random draw
-    private val category: String, // activitytype for personal, activity type specific distributions
+    private val category: Category, // activitytype for personal, activity type specific distributions
     private val activityType: ActivityType, // surrounding modelCoordinator for this step
     private val modelCoordinator: Coordinator
 ) :
@@ -38,7 +40,7 @@ class WRDDefaultModelStep(
      * @param category
      * @param modelCoordinator
      */
-    constructor(id: String, category: String, modelCoordinator: Coordinator) : this(
+    constructor(id: String, category: Category, modelCoordinator: Coordinator) : this(
         id,
         category,
         ActivityType.UNKNOWN,
