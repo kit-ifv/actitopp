@@ -7,6 +7,7 @@ package edu.kit.ifv.mobitopp.actitopp
  * object stores all distribution information of different categories (e.g. time classes) for a specific model step
  * needed to make a weighted random draw (wrd) decision
  */
+@Deprecated("Kill this")
 class WRDModelSteplnformation {
     // contains all distribution information for different categories of the step
     // Robin: This does not need to be an explicit hashmap

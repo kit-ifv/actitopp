@@ -570,6 +570,25 @@ class HActivity {
             return defaulttime
         }
 
+    /* TODO these temporary fields should get removed when the other shenanigans with tripBeforeaActivity are cleaned up
+         and the weekContext Field is killed by using Duration
+
+     */
+    private val startTimeNew: Int get() {
+        return startTimeWeekContext - if (tripBeforeActivityisScheduled()) estimatedTripTimeBeforeActivity else 0
+    }
+    private val endTimeNew: Int get() {
+        return (if (this.durationisScheduled()) this.endTimeWeekContext else this.startTimeWeekContext) +
+        if (this.tripAfterActivityisScheduled()) this.estimatedTripTimeAfterActivity else 0
+
+    }
+
+    /**
+     * overlap checks do not belong in the companion object, since you already have a comparison object.....
+     */
+    fun overlaps(other: HActivity) : Boolean {
+        return startTimeNew < other.endTimeNew && endTimeNew > other.startTimeNew
+    }
     companion object {
         /**
          * sorts list of activities ascending by week-order start time
@@ -644,6 +663,7 @@ class HActivity {
          * @param act2
          * @return
          */
+        @Deprecated("This should never be used. Use act.overlaps(act2) instead")
         fun checkActivityOverlapping(act1: HActivity, act2: HActivity): Boolean {
             var result = false
 

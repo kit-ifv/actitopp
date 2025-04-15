@@ -613,7 +613,7 @@ class ActitoppPerson {
         // check if there is already an activity at the same time
         var activityconflict = false
         for (tmpact in jointActivitiesforConsideration) {
-            if (HActivity.checkActivityOverlapping(act, tmpact)) {
+            if (act.overlaps(tmpact)) {
                 activityconflict = true
                 if (Configuration.debugenabled) {
                     System.err.println("HH" + household.householdIndex + "/P" + persIndex + ": activity was not added as joint acticity due to conflict with existing activity!")

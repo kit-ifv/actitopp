@@ -153,8 +153,7 @@ class Coordinator(
         // finalizing activity schedules
 
         // 1) create and sort a list including all modeled activities of the whole week
-        val allModeledActivities = pattern!!.allOutofHomeActivities
-        HActivity.sortActivityListbyWeekStartTimes(allModeledActivities)
+        val allModeledActivities = pattern!!.allOutofHomeActivities.sortedBy { it.startTimeWeekContext }
 
         // 2) create home activities to be performed between tours
         createHomeActivities(allModeledActivities)
@@ -165,7 +164,11 @@ class Coordinator(
         }
 
         // first sanity checks: check for overlapping activities. if found, throw exception and redo activityweek
-        pattern.weekPatternisFreeofOverlaps()
+        // Robin: TODO i reaaaaly dislike the idea of communicating via errors or exceptions but apparently that is the desired behaviour
+        if(!pattern.weekPatternisFreeofOverlaps()) {
+            throw AssertionError("Some elements overlap in the pattern")
+        }
+
     }
 
     /**
@@ -597,8 +600,7 @@ class Coordinator(
      */
     @Throws(InvalidPatternException::class)
     private fun placeJointActivitiesIntoPattern() {
-        val listjointact = person.allJointActivitiesforConsideration
-        HActivity.sortActivityListbyWeekStartTimes(listjointact)
+        val listjointact = person.allJointActivitiesforConsideration.sortedBy { it.startTimeWeekContext }
 
         /*
          * loop the list in week order and look for an existing activity to be replaced by activity actually processed
@@ -842,7 +844,7 @@ class Coordinator(
             // step 12: check again for temporal overlaps
             for (act in pattern!!.getDay(jointact_dayindey).allActivitiesoftheDay) {
                 if ((act.startTimeisScheduled()
-                            && HActivity.checkActivityOverlapping(act, actforreplacement))
+                            && act.overlaps(actforreplacement))
                     ||
                     (act.isScheduled && act.isActivityLastinTour && actforreplacement.isActivityFirstinTour && act.tourIndex != actforreplacement.tourIndex && HActivity.getTimebetweenTwoActivities(
                         act,

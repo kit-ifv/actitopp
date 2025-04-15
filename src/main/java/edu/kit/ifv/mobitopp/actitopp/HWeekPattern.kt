@@ -161,7 +161,7 @@ class HWeekPattern(
      * @param act
      */
     fun addHomeActivity(act: HActivity) {
-        assert(act.activityType == ActivityType.HOME) { "no home activity" }
+        require(act.activityType == ActivityType.HOME) { "no home activity" }
         homeactivitities.add(act)
     }
 
@@ -171,22 +171,9 @@ class HWeekPattern(
      * @return
      */
     fun weekPatternisFreeofOverlaps(): Boolean {
-        val freeofOverlaps = true
 
         val allActivities = this.allActivities.sortedBy { it.startTimeWeekContext }
+        return allActivities.zipWithNext().none { (first, second) -> first.overlaps(second) }
 
-
-        for (i in 0..<allActivities.size - 1) {
-            val aktuelleakt = allActivities[i]
-            val naechsteakt = allActivities[i + 1]
-
-            assert(
-                !HActivity.Companion.checkActivityOverlapping(
-                    aktuelleakt,
-                    naechsteakt
-                )
-            ) { "activities are overlapping $aktuelleakt vs $naechsteakt" }
-        }
-        return freeofOverlaps
     }
 }
