@@ -93,20 +93,7 @@ class HWeekPattern(
      * @return
      */
     fun countActivitiesPerWeek(activityType: ActivityType): Int = allOutofHomeActivities.count {it.activityType == activityType}
-/* Old Implementation
-  {
 
-        var ctr = 0
-        for (day in this.days) {
-            for (tour in day.tours) {
-                for (act in tour.activities) {
-                    if (act.activityType == activityType) ctr++
-                }
-            }
-        }
-        return ctr
-    }
-*/
     /**
      * returns number of tours in the week for a specific activity type
      *
@@ -114,15 +101,7 @@ class HWeekPattern(
      * @return
      */
     fun countToursPerWeek(activityType: ActivityType): Int = days.sumOf { it.tours.count { t -> t.getActivity(0).activityType == activityType } }
-/*    {
-        var ctr = 0
-        for (day in this.days) {
-            for (tour in day.tours) {
-                if (tour.getActivity(0).activityType == activityType) ctr++
-            }
-        }
-        return ctr
-    }*/
+
 
     /**
      * returns number of days in the week where an activity of a specific activity type exists
@@ -130,13 +109,8 @@ class HWeekPattern(
      * @param activityType
      * @return
      */
-    fun countDaysWithSpecificActivity(activityType: ActivityType?): Int {
-        var ctr = 0
-        for (currentDay in days) {
-            if (currentDay.getTotalNumberOfActivitites(activityType) > 0) ctr++
-        }
-        return ctr
-    }
+    fun countDaysWithSpecificActivity(activityType: ActivityType?): Int = days.count {it.totalAmountOfActivitites > 0}
+
 
 
     fun printOutofHomeActivitiesList() {
