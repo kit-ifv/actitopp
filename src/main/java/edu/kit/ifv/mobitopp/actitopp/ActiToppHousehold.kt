@@ -281,6 +281,7 @@ class ActiToppHousehold {
                      * When ignoring modeling joint actions, errors on person level are handled there and we need to remodel the error
                      * person only.
                      */
+                    // TODO fix this insanity.
                     if (Configuration.model_joint_actions) {
                         throw InvalidPatternException("Household", actperson.weekPattern, "Remodel Household")
                     }

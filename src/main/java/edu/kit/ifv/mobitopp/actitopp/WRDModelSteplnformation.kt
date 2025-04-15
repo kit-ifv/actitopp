@@ -9,8 +9,8 @@ package edu.kit.ifv.mobitopp.actitopp
  */
 class WRDModelSteplnformation {
     // contains all distribution information for different categories of the step
-    private val distributionInformation =
-        HashMap<String, WRDModelDistributionInformation>()
+    // Robin: This does not need to be an explicit hashmap
+    private val distributionInformation = mutableMapOf<String, WRDModelDistributionInformation>()
 
     /**
      * method to add distribution information for a step loaded from the file system
@@ -23,12 +23,20 @@ class WRDModelSteplnformation {
     }
 
     /**
-     * method to get distribution information of a specified category
-     *
-     * @param category
-     * @return
+     * Reduce visual clutter via operators: TODO kill the original function once behaviour tested
      */
-    fun getWRDDistribution(category: String): WRDModelDistributionInformation? {
-        return distributionInformation[category]
+    operator fun set(category: String, distribution: WRDModelDistributionInformation) = addDistributionInformation(category, distribution)
+    /**
+     * Robin: This method is only used in one place, and if the return value would be null the program would
+     * run into a null pointer exception. In that case we can throw an exception, which actually provides meaningful
+     * input to find the error instead of running into nullability issues.
+     */
+    fun getWRDDistribution(category: String): WRDModelDistributionInformation {
+        return distributionInformation[category] ?: throw NoSuchElementException("No distribution information for category $category")
     }
+
+    /**
+     * Reduce visual clutter via operators: TODO kill the original function once behaviour tested
+     */
+    operator fun get(category: String) = getWRDDistribution(category)
 }

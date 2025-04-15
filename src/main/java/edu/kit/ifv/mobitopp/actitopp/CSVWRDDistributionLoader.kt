@@ -1,38 +1,26 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.useLines
 
 
-/**
- * @author Tim Hilgert
- */
-class CSVWRDDistributionLoader {
-    fun loadDistributionInformation(input: InputStream): WRDModelDistributionInformation {
-        val minfo = WRDModelDistributionInformation()
-
-        try {
-            BufferedReader(InputStreamReader(input)).use { inRead ->
-                var header = true
-                var line: String?
-                while ((inRead.readLine().also { line = it }) != null) {
-                    if (header) {
-                        line = inRead.readLine()
-                        header = false
-                    }
-                    val splitted = line!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-
-                    val slot = splitted[0].toInt()
-                    val amount = splitted[1].toInt()
-
-                    minfo.addDistributionElement(slot, amount)
-                }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return minfo
+fun loadDistributionInformationFromFile(string: String) =loadDistributionInformationFromFile(Path(string))
+fun loadDistributionInformationFromFile(path: Path): WRDModelDistributionInformation {
+    require(path.exists()) {
+        "The path $path does not exist."
     }
+    val distributionInformation = WRDModelDistributionInformation()
+    path.useLines { lines ->
+        lines.drop(1).forEach { line ->
+            val split = line.split(";")
+            val slot = split[0].toInt()
+            val amount = split[1].toInt()
+            distributionInformation.addDistributionElement(slot, amount)
+        }
+
+    }
+
+    return distributionInformation
 }

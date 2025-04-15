@@ -22,7 +22,9 @@ class InvalidPatternException
     override var involvedActivities: Array<HActivity?>? = arrayOf()
 ) :
     AbsInvalidPatternException() {
-
+    init {
+        println("Creating")
+    }
     companion object {
         private const val serialVersionUID = -3030772908826568766L
     }

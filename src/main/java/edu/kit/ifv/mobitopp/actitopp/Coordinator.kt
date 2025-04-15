@@ -2244,8 +2244,7 @@ class Coordinator(person: ActitoppPerson, fileBase: ModelFileBase, randomgenerat
         activityType: ActivityType
     ): WRDDiscreteDistribution {
         return personalWRDDistributions[id + categoryName + activityType] ?: run {
-            val modelStep = fileBase.getModelInformationforWRDStep(id)
-            val distribution = modelStep.getWRDDistribution(categoryName)!!
+            val distribution = fileBase.getDistributionFor(id, categoryName)
             WRDDiscreteDistribution(distribution).also {
                 addpersonalWRDdistribution(id, categoryName, activityType, it)
             }

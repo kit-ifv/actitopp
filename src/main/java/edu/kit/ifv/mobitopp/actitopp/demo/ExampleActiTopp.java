@@ -287,7 +287,7 @@ public class ExampleActiTopp {
 
         try {
             // Output information as csv files
-            CSVExportLogger logger = new CSVExportLogger(new File("D:"));
+            CSVExportLogger logger = new CSVExportLogger(new File("output"));
             logger.writeLogging(householdmap);
         } catch (IOException e) {
             e.printStackTrace();

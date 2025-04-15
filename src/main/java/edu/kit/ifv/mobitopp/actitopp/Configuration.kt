@@ -15,7 +15,7 @@ object Configuration {
      * mopv14					= use parameter estimation of MOP 2004-2013 (actiTopp version 1.4+ incl. joint activities)
      * stuttgart			=	use parameter estimation of MOP 2004-2013 calibrated for stuttgart area (only actitopp version 1.0)
      */
-    
+
     var parameterset: String = "mopv14_withpkwhh"
     fun setParameters(text: String) {
         parameterset = text
@@ -35,6 +35,7 @@ object Configuration {
      */
     
     var model_joint_actions: Boolean = true
+
 
 
     /*

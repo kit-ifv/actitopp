@@ -5,7 +5,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
-
+private const val RESOURCE_PATH = "src/main/resources/edu/kit/ifv/mobitopp/actitopp/"
 /**
  * @author Tim Hilgert
  *
@@ -40,7 +40,7 @@ class ModelFileBase private constructor(
     }
 
     private val modelInformationDCsteps = HashMap<String, DCModelSteplnformation>()
-    private val modelInformationWRDsteps = HashMap<String, WRDModelSteplnformation>()
+    private val modelInformationWRDsteps = WeightedDistributionRegistry()
     private val linearregressionestimatesmap = HashMap<String, HashMap<String, LinRegEstimate>>()
 
 
@@ -107,14 +107,14 @@ class ModelFileBase private constructor(
 
 
     /**
-     * returns [WRDModelSteplnformation] object for specific id
-     *
-     * @param modelstepid
-     * @return
+     * Robin: We can replace the original getModelInformationforWRDStep() because it was only an intermediate
+     * call chain where afterwards .getDistribution() is called upon.
      */
-    fun getModelInformationforWRDStep(modelstepid: String): WRDModelSteplnformation {
-        return modelInformationWRDsteps.getValue(modelstepid)
+
+    fun getDistributionFor(stepID: String, category: String): WRDModelDistributionInformation {
+        return modelInformationWRDsteps[stepID, category]
     }
+
 
 
     /**
@@ -175,19 +175,10 @@ class ModelFileBase private constructor(
      * @throws FileNotFoundException
      * @throws IOException
      */
-    @Throws(FileNotFoundException::class, IOException::class)
     private fun initWRDSteps(wrdsteps: HashMap<String, Int>) {
-        // initialize all steps and all categories for each step
-        for ((stepid, maxinidex) in wrdsteps) {
-            val modelstep = WRDModelSteplnformation()
-            modelInformationWRDsteps[stepid] = modelstep
-
-            for (index in 0..maxinidex) {
-                newInputStream(stepid + "_KAT_" + index).use { input ->
-                    val loader = CSVWRDDistributionLoader()
-                    val wrddist = loader.loadDistributionInformation(input!!)
-                    modelstep.addDistributionInformation(index.toString(), wrddist)
-                }
+        wrdsteps.forEach { (stepID, maxIndex) ->
+            (0..maxIndex).forEach {
+                modelInformationWRDsteps[stepID, it.toString()] = loadDistributionInformationFromFile("$RESOURCE_PATH${Configuration.parameterset}/${stepID}_KAT_$it.csv")
             }
         }
     }
@@ -219,3 +210,4 @@ class ModelFileBase private constructor(
         return inputType.newInputStream("$name.csv")
     }
 }
+
