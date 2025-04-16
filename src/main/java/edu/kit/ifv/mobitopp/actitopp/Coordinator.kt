@@ -1554,14 +1554,14 @@ class Coordinator(
         for (tmpact in dayofact.allActivitiesoftheDay) {
             // Search for earlier activity with determined starting time
 
-            if (act.compareTo(tmpact) == -1) {
+            if (act < tmpact) {
                 //System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
                 if (tmpact.startTimeisScheduled() && (last_act_scheduled == null || tmpact.startTime > last_act_scheduled.startTime)) last_act_scheduled =
                     tmpact
             }
 
             // Search for later activity with determined starting time
-            if (act.compareTo(tmpact) == +1) {
+            if (act > tmpact) {
                 //System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
                 if (tmpact.startTimeisScheduled() && (next_act_scheduled == null || tmpact.startTime < next_act_scheduled.startTime)) next_act_scheduled =
                     tmpact

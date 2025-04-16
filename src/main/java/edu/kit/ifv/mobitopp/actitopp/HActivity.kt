@@ -11,7 +11,7 @@ import kotlin.math.min
 /**
  * @author Tim Hilgert
  */
-class HActivity {
+class HActivity: Comparable<HActivity> {
     //stores all attributes that are not directly accessible by variables
     private lateinit var attributes: MutableMap<String, Double>
 
@@ -159,25 +159,14 @@ class HActivity {
      * 0  - same activity
      * 1  - acttocompare is AFTER the other activity (higher day, tour or activity index)
      * -1 - acttocompare is BEFORE the other activity
-     *
+     * TODO figure out if there is ever a scenario where an activity has no known start / end time and this weird
+     *   index comparison shenanigans is actually necessary - The code suggests that this "could" happen, but inspections
+     *   show no such occurrence.
      * @param acttocompare
      * @return
      */
-    fun compareTo(acttocompare: HActivity): Int {
-        var result = 99
-        if (acttocompare.weekDay > this.weekDay) result = 1
-        if (acttocompare.weekDay < this.weekDay) result = -1
-        if (acttocompare.weekDay == this.weekDay) {
-            if (acttocompare.tour!!.index > tour!!.index) result = 1
-            if (acttocompare.tour!!.index < tour!!.index) result = -1
-            if (acttocompare.tour!!.index == tour!!.index) {
-                if (acttocompare.index > this.index) result = 1
-                if (acttocompare.index < this.index) result = -1
-                if (acttocompare.index == this.index) result = 0
-            }
-        }
-        assert(result != 99) { "Could not compare these two activities! - Act1: $this - Act2: $acttocompare" }
-        return result
+    override fun compareTo(acttocompare: HActivity): Int {
+        return compareValuesBy(this, acttocompare, {it.weekDay }, {it.tour.index}, {it.index})
     }
 
 
@@ -351,7 +340,7 @@ class HActivity {
         get() = day.index
 
     val tourIndex: Int
-        get() = tour!!.index
+        get() = tour.index
 
     val startTimeWeekContext: Int
         get() = 1440 * dayIndex + startTime
