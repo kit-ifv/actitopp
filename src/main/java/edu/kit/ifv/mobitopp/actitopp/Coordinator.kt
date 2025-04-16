@@ -1599,8 +1599,9 @@ class Coordinator(
         if (next_act_scheduled != null) {
             startingpointupperbound = next_act_scheduled.startTime
         } else {
-            startingpointupperbound = 1620
-
+            //TODO WHY IS THIS 1620 ?
+//            startingpointupperbound = 1620
+            startingpointupperbound = 1440
             val nextday = dayofact.nextDay
             if (nextday != null && !nextday.isHomeDay) {
                 val firstactnextday = nextday.firstTourOfDay.firstActivityInTour

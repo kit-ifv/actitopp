@@ -326,15 +326,18 @@ public class ExampleActiTopp {
             DebugLoggers hhlogger = new DebugLoggers(debugloggers);
 
             //create activity schedules for the whole household
-            var why = true;
-            while(why) {
-                try {
+            boolean failFlag = true;
+            while (failFlag) {
+                try{
                     acthousehold.generateSchedules(fileBase, randomgenerator, hhlogger);
-                    randomgenerator.getRandomValue();
+                    failFlag = false;
                 } catch (Exception e) {
-
+                    System.out.println("Actitopp failed, why shouldn't it");
                 }
             }
+
+
+
 
 
 

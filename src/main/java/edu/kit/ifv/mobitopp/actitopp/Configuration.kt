@@ -33,8 +33,8 @@ object Configuration {
     /*
      * modeling joint actions within household
      */
-    
-    var model_joint_actions: Boolean = true
+    //TODO try to get joint actions back to work
+    var model_joint_actions: Boolean = false
 
 
 
