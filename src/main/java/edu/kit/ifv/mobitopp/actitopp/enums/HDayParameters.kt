@@ -10,41 +10,41 @@ enum class HDayParameters
  * privater Konstruktor
  *
  * @param description
- */(val description: String) {
+ */{
     /*
         * Wochentag
         */
-    tag_mo("tag_mo") {
+    tag_mo{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 1) 1.0 else 0.0)
         }
     },
-    tag_di("tag_di") {
+    tag_di{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 2) 1.0 else 0.0)
         }
     },
-    tag_mi("tag_mi") {
+    tag_mi{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 3) 1.0 else 0.0)
         }
     },
-    tag_do("tag_do") {
+    tag_do{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 4) 1.0 else 0.0)
         }
     },
-    tag_fr("tag_fr") {
+    tag_fr{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 5) 1.0 else 0.0)
         }
     },
-    tag_sa("tag_sa") {
+    tag_sa{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 6) 1.0 else 0.0)
         }
     },
-    tag_so("tag_so") {
+    tag_so{
         override fun getAttribute(day: HDay): Double {
             return (if (day.weekday == 7) 1.0 else 0.0)
         }
@@ -53,17 +53,17 @@ enum class HDayParameters
     /*
      * Tag hat X Touren
      */
-    taghat1tour("taghat1tour") {
+    taghat1tour{
         override fun getAttribute(day: HDay): Double {
             return (if (day.amountOfTours == 1) 1.0 else 0.0)
         }
     },
-    taghat2touren("taghat2touren") {
+    taghat2touren{
         override fun getAttribute(day: HDay): Double {
             return (if (day.amountOfTours == 2) 1.0 else 0.0)
         }
     },
-    taghat3touren("taghat3touren") {
+    taghat3touren{
         override fun getAttribute(day: HDay): Double {
             return (if (day.amountOfTours == 3) 1.0 else 0.0)
         }
@@ -73,32 +73,32 @@ enum class HDayParameters
     /*
      * Tag hat X Aktivitaeten
      */
-    taghat1akt("taghat1akt") {
+    taghat1akt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivitites == 1) 1.0 else 0.0)
         }
     },
-    taghat2akt("taghat2akt") {
+    taghat2akt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivitites == 2) 1.0 else 0.0)
         }
     },
-    taghat3akt("taghat3akt") {
+    taghat3akt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivitites == 3) 1.0 else 0.0)
         }
     },
-    taghat4akt("taghat4akt") {
+    taghat4akt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivitites == 4) 1.0 else 0.0)
         }
     },
-    taghat5akt("taghat5akt") {
+    taghat5akt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivitites == 5) 1.0 else 0.0)
         }
     },
-    taghat6akt("taghat6akt") {
+    taghat6akt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivitites == 6) 1.0 else 0.0)
         }
@@ -107,7 +107,7 @@ enum class HDayParameters
     /*
      * Tag hat Aktivitaeten eines Typs
      */
-    taghattakt("taghattakt") {
+    taghattakt{
         override fun getAttribute(day: HDay): Double {
             return (if (day.getTotalNumberOfActivitites(ActivityType.TRANSPORT) > 0) 1.0 else 0.0)
         }
@@ -117,27 +117,27 @@ enum class HDayParameters
     /*
      * Haupttour des Tages
      */
-    haupttour_work("haupttour_work") {
+    haupttour_work{
         override fun getAttribute(day: HDay): Double {
             return (if (day.mainTourType == ActivityType.WORK) 1.0 else 0.0)
         }
     },
-    haupttour_education("haupttour_education") {
+    haupttour_education{
         override fun getAttribute(day: HDay): Double {
             return (if (day.mainTourType == ActivityType.EDUCATION) 1.0 else 0.0)
         }
     },
-    haupttour_leisure("haupttour_leisure") {
+    haupttour_leisure{
         override fun getAttribute(day: HDay): Double {
             return (if (day.mainTourType == ActivityType.LEISURE) 1.0 else 0.0)
         }
     },
-    haupttour_shopping("haupttour_shopping") {
+    haupttour_shopping{
         override fun getAttribute(day: HDay): Double {
             return (if (day.mainTourType == ActivityType.SHOPPING) 1.0 else 0.0)
         }
     },
-    haupttour_transport("haupttour_transport") {
+    haupttour_transport{
         override fun getAttribute(day: HDay): Double {
             return (if (day.mainTourType == ActivityType.TRANSPORT) 1.0 else 0.0)
         }
@@ -147,42 +147,42 @@ enum class HDayParameters
     /*
      * Dauer Hauptakt Tag
      */
-    dauer_hauptakt_tag_0bis2std("dauer_hauptakt_tag_0bis2std") {
+    dauer_hauptakt_tag_0bis2std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 0 * 60 && day.calculatedurationofmainactivitiesonday() < 2 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_2bis4std("dauer_hauptakt_tag_2bis4std") {
+    dauer_hauptakt_tag_2bis4std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 2 * 60 && day.calculatedurationofmainactivitiesonday() < 4 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_4bis6std("dauer_hauptakt_tag_4bis6std") {
+    dauer_hauptakt_tag_4bis6std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 4 * 60 && day.calculatedurationofmainactivitiesonday() < 6 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_6bis8std("dauer_hauptakt_tag_6bis8std") {
+    dauer_hauptakt_tag_6bis8std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 6 * 60 && day.calculatedurationofmainactivitiesonday() < 8 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_8bis10std("dauer_hauptakt_tag_8bis10std") {
+    dauer_hauptakt_tag_8bis10std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 8 * 60 && day.calculatedurationofmainactivitiesonday() < 10 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_10bis12std("dauer_hauptakt_tag_10bis12std") {
+    dauer_hauptakt_tag_10bis12std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 10 * 60 && day.calculatedurationofmainactivitiesonday() < 12 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_12bis14std("dauer_hauptakt_tag_12bis14std") {
+    dauer_hauptakt_tag_12bis14std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 12 * 60 && day.calculatedurationofmainactivitiesonday() < 14 * 60) 1.0 else 0.0)
         }
     },
-    dauer_hauptakt_tag_ueber14std("dauer_hauptakt_tag_ueber14std") {
+    dauer_hauptakt_tag_ueber14std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.calculatedurationofmainactivitiesonday() >= 14 * 60) 1.0 else 0.0)
         }
@@ -192,27 +192,27 @@ enum class HDayParameters
     /*
      * Dauer alle Akt Tag
      */
-    dauer_akt_tag_4bis6std("dauer_akt_tag_4bis6std") {
+    dauer_akt_tag_4bis6std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivityTime >= 4 * 60 && day.totalAmountOfActivityTime < 6 * 60) 1.0 else 0.0)
         }
     },
-    dauer_akt_tag_6bis8std("dauer_akt_tag_6bis8std") {
+    dauer_akt_tag_6bis8std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivityTime >= 6 * 60 && day.totalAmountOfActivityTime < 8 * 60) 1.0 else 0.0)
         }
     },
-    dauer_akt_tag_8bis10std("dauer_akt_tag_8bis10std") {
+    dauer_akt_tag_8bis10std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivityTime >= 8 * 60 && day.totalAmountOfActivityTime < 10 * 60) 1.0 else 0.0)
         }
     },
-    dauer_akt_tag_10bis12std("dauer_akt_tag_10bis12std") {
+    dauer_akt_tag_10bis12std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivityTime >= 10 * 60 && day.totalAmountOfActivityTime < 12 * 60) 1.0 else 0.0)
         }
     },
-    dauer_akt_tag_12bis14std("dauer_akt_tag_12bis14std") {
+    dauer_akt_tag_12bis14std{
         override fun getAttribute(day: HDay): Double {
             return (if (day.totalAmountOfActivityTime >= 12 * 60 && day.totalAmountOfActivityTime < 14 * 60) 1.0 else 0.0)
         }
@@ -221,7 +221,7 @@ enum class HDayParameters
     /*
      * Dauer Akt vor Haupttour
      */
-    dauer_akt_vorht_tag_1bis120("dauer_akt_vorht_tag_1bis120") {
+    dauer_akt_vorht_tag_1bis120{
         override fun getAttribute(day: HDay): Double {
             return (if (day.getTotalAmountOfActivityTimeUntilMainTour(day.firstTourOfDay) >= 1 && day.getTotalAmountOfActivityTimeUntilMainTour(
                     day.firstTourOfDay
@@ -229,7 +229,7 @@ enum class HDayParameters
             ) 1.0 else 0.0)
         }
     },
-    dauer_akt_vorht_tag_121bis240("dauer_akt_vorht_tag_121bis240") {
+    dauer_akt_vorht_tag_121bis240{
         override fun getAttribute(day: HDay): Double {
             return (if (day.getTotalAmountOfActivityTimeUntilMainTour(day.firstTourOfDay) >= 121 && day.getTotalAmountOfActivityTimeUntilMainTour(
                     day.firstTourOfDay
@@ -241,7 +241,7 @@ enum class HDayParameters
     /*
      * Dauer Akt ab Haupttour
      */
-    dauer_akt_abht_tag_600bis659("dauer_akt_abht_tag_600bis659") {
+    dauer_akt_abht_tag_600bis659{
         override fun getAttribute(day: HDay): Double {
             return (if (((day.getTotalAmountOfRemainingActivityTime(day.getTour(0))) >= 600 && day.getTotalAmountOfRemainingActivityTime(
                     day.getTour(0)
@@ -249,7 +249,7 @@ enum class HDayParameters
             ) 1.0 else 0.0)
         }
     },
-    dauer_akt_abht_tag_660bis779("dauer_akt_abht_tag_660bis779") {
+    dauer_akt_abht_tag_660bis779{
         override fun getAttribute(day: HDay): Double {
             return (if (((day.getTotalAmountOfRemainingActivityTime(day.getTour(0))) >= 660 && day.getTotalAmountOfRemainingActivityTime(
                     day.getTour(0)
@@ -257,7 +257,7 @@ enum class HDayParameters
             ) 1.0 else 0.0)
         }
     },
-    dauer_akt_abht_tag_780bis899("dauer_akt_abht_tag_780bis899") {
+    dauer_akt_abht_tag_780bis899{
         override fun getAttribute(day: HDay): Double {
             return (if (((day.getTotalAmountOfRemainingActivityTime(day.getTour(0))) >= 780 && day.getTotalAmountOfRemainingActivityTime(
                     day.getTour(0)
@@ -269,23 +269,23 @@ enum class HDayParameters
     /*
      * AnzTouren Vor/Nach Haupttour
      */
-    anztourenvorhaupttour("anztourenvorhaupttour") {
+    anztourenvorhaupttour{
         override fun getAttribute(day: HDay): Double {
             return ((-1) * day.lowestTourIndex).toDouble()
         }
     },
-    anztourennachhaupttour("anztourennachhaupttour") {
+    anztourennachhaupttour{
         override fun getAttribute(day: HDay): Double {
             return ((+1) * day.highestTourIndex).toDouble()
         }
     },
 
-    tagvorher_0vortouren("tagvorher_0vortouren") {
+    tagvorher_0vortouren{
         override fun getAttribute(day: HDay): Double {
             val previousday = day.previousDay
             var tagvorhervortouren = 999
-            if (previousday != null) {
-                tagvorhervortouren = if (previousday.isHomeDay) {
+            if (previousday != null)  {
+                tagvorhervortouren = if (previousday.isHomeDay)  {
                     0
                 } else {
                     -1 * previousday.lowestTourIndex
@@ -294,12 +294,12 @@ enum class HDayParameters
             return (if (tagvorhervortouren == 0) 1.0 else 0.0)
         }
     },
-    tagvorher_1vortour("tagvorher_1vortour") {
+    tagvorher_1vortour{
         override fun getAttribute(day: HDay): Double {
             val previousday = day.previousDay
             var tagvorhervortouren = 999
-            if (previousday != null) {
-                tagvorhervortouren = if (previousday.isHomeDay) {
+            if (previousday != null)  {
+                tagvorhervortouren = if (previousday.isHomeDay)  {
                     0
                 } else {
                     -1 * previousday.lowestTourIndex
@@ -308,12 +308,12 @@ enum class HDayParameters
             return (if (tagvorhervortouren == 1) 1.0 else 0.0)
         }
     },
-    tagvorher_0nachtouren("tagvorher_0nachtouren") {
+    tagvorher_0nachtouren{
         override fun getAttribute(day: HDay): Double {
             val previousday = day.previousDay
             var tagvorhernachtouren = 999
-            if (previousday != null) {
-                tagvorhernachtouren = if (previousday.isHomeDay) {
+            if (previousday != null)  {
+                tagvorhernachtouren = if (previousday.isHomeDay)  {
                     0
                 } else {
                     +1 * previousday.highestTourIndex
@@ -322,12 +322,12 @@ enum class HDayParameters
             return (if (tagvorhernachtouren == 0) 1.0 else 0.0)
         }
     },
-    tagvorher_1nachtour("tagvorher_1nachtour") {
+    tagvorher_1nachtour{
         override fun getAttribute(day: HDay): Double {
             val previousday = day.previousDay
             var tagvorhernachtouren = 999
-            if (previousday != null) {
-                tagvorhernachtouren = if (previousday.isHomeDay) {
+            if (previousday != null)  {
+                tagvorhernachtouren = if (previousday.isHomeDay)  {
                     0
                 } else {
                     +1 * previousday.highestTourIndex
@@ -341,7 +341,7 @@ enum class HDayParameters
     /*
      * AnzahlTouren am Tag
      */
-    anztourenamtag("anztourenamtag") {
+    anztourenamtag{
         override fun getAttribute(day: HDay): Double {
             return day.amountOfTours.toDouble()
         }
