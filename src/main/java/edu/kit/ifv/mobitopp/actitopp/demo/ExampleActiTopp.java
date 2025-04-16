@@ -283,7 +283,7 @@ public class ExampleActiTopp {
         assert householdmap != null : "could not create householdmap.";
 
         // Model Household using parallel streams
-        householdmap.values().parallelStream().forEach(ExampleActiTopp::runHousehold);
+        householdmap.values().stream().forEach(ExampleActiTopp::runHousehold);
 
         try {
             // Output information as csv files
@@ -326,7 +326,17 @@ public class ExampleActiTopp {
             DebugLoggers hhlogger = new DebugLoggers(debugloggers);
 
             //create activity schedules for the whole household
-            acthousehold.generateSchedules(fileBase, randomgenerator, hhlogger);
+            var why = true;
+            while(why) {
+                try {
+                    acthousehold.generateSchedules(fileBase, randomgenerator, hhlogger);
+                    randomgenerator.getRandomValue();
+                } catch (Exception e) {
+
+                }
+            }
+
+
 
             //System.out.println("HHdone: " + key);
             householdscheduleOK = true;

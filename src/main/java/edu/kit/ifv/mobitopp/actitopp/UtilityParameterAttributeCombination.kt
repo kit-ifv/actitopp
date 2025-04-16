@@ -10,19 +10,10 @@ package edu.kit.ifv.mobitopp.actitopp
  *
  * @author Tim Hilgert
  */
-class UtilityParameterAttributeCombination(val name: String, parameterValue: Double, attributeValue: Double) {
-    private var parameterValue = -99999.0
-    private var attributeValue = -99999.0
-
-    /**
-     * @param name
-     * @param parameterValue
-     * @param attributeValue
-     */
-    init {
-        this.parameterValue = parameterValue
-        this.attributeValue = attributeValue
-    }
+class UtilityParameterAttributeCombination(val name: String,
+                                           private var parameterValue: Double = -99999.0,
+                                           private var attributeValue: Double = -99999.0
+) {
 
 
     fun getattributeValue(): Double {

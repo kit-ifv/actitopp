@@ -23,7 +23,6 @@ class HTour(parent: HDay, index: Int) {
      * @param index
      */
     init {
-        checkNotNull(parent) { "day is not initialized" }
         this.day = parent
         this.index = (index)
         this.activities = ArrayList()

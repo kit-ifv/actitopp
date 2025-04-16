@@ -30,6 +30,12 @@ class HActivity {
             field = value
         }
     var duration = -1
+        set(value) {
+            if(value >= 1000 && this.acttype != ActivityType.HOME) {
+                println("You maniac")
+            }
+            field = value
+        }
     private var starttime = -1
 
 
