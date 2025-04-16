@@ -1,5 +1,9 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
+import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+
 
 /**
  * @author Tim Hilgert
@@ -9,7 +13,6 @@ class HTrip(parent: HActivity, type: TripStatus, tripduration: Int) {
      * @return the activity
      */
     // each trip is bound to an activity
-    @JvmField
     val activity: HActivity
 
     // indicator if trip is one before or after an activity

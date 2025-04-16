@@ -1,7 +1,10 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import edu.kit.ifv.mobitopp.actitopp.ActivityType.Companion.getTypeFromChar
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
+import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 import kotlin.math.max
 import kotlin.math.min
 

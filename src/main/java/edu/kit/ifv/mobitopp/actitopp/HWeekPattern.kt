@@ -1,5 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
+
 /**
  * @author Tim Hilgert
  */

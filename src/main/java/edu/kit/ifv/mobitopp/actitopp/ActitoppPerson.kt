@@ -1,17 +1,13 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import java.util.Collections
 import kotlin.math.max
 
 
-
-
-
-
 class ActitoppPerson {
-    /**
-     * @return the household
-     */
+
     //corresponding household
     val household: ActiToppHousehold
 
@@ -551,7 +547,6 @@ class ActitoppPerson {
      * @param randomgenerator
      * @throws InvalidPatternException
      */
-    @Throws(InvalidPatternException::class)
     fun generateSchedule(modelbase: ModelFileBase, randomgenerator: RNGHelper) {
         //create an empty Default-Pattern
         weekPattern = HWeekPattern(this)

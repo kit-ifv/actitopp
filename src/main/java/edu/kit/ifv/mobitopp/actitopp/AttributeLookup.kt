@@ -1,5 +1,10 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActitoppPersonParameters
+import edu.kit.ifv.mobitopp.actitopp.enums.HActivityParameters
+import edu.kit.ifv.mobitopp.actitopp.enums.HDayParameters
+import edu.kit.ifv.mobitopp.actitopp.enums.HTourParameters
+
 /**
  * @author Tim Hilgert
  */

@@ -1,5 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
+import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 import java.util.Collections
 import kotlin.math.max
 import kotlin.math.min
@@ -56,7 +59,6 @@ class HActivity {
      * @param index
      */
     constructor(parent: HTour, index: Int) {
-        checkNotNull(parent) { "tour is not initialized" }
         this.tour = parent
 
         this.day = parent.day
@@ -87,7 +89,6 @@ class HActivity {
      * @param starttime
      */
     constructor(parent: HDay, type: ActivityType, duration: Int, starttime: Int) {
-        checkNotNull(parent) { "day is not initialized" }
         this.day = parent
         activityType = type
         this.duration = duration
@@ -104,12 +105,12 @@ class HActivity {
     var activityType: ActivityType
         get() {
             assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
-            if (!person!!.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
+            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
             return acttype
         }
         set(acttype) {
             assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
-            if (!person!!.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
+            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
             this.acttype = acttype
         }
 
@@ -425,9 +426,9 @@ class HActivity {
             // default
             var actualTripTime_afterTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR
             // better than default if we have commuting information
-            if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = person!!.commutingDuration_work
+            if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = person.commutingDuration_work
             if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip =
-                person!!.commutingDuration_education
+                person.commutingDuration_education
             if (tripafteractivity == null) {
                 tripafteractivity = HTrip(this, TripStatus.TRIP_AFTER_ACT, actualTripTime_afterTrip)
             } else {
