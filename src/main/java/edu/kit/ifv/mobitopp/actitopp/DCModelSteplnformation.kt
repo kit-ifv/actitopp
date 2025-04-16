@@ -34,8 +34,11 @@ class DCModelSteplnformation {
         return parameterNamesContexts
     }
 
-    fun getParameterValuesforAlternativeDepre(alternativeName: String): HashMap<String, Double> {
-        return alternativesParameters[alternativeName]?.allParameterValues ?: HashMap()
+    /**
+     * This does not need to be a HashMap. Map is sufficient
+     */
+    fun getParameterValuesforAlternativeDepre(alternativeName: String): Map<String, Double> {
+        return alternativesParameters[alternativeName] ?: emptyMap()
     }
 
     fun getContextforParameterDepre(parameterName: String): String? {
