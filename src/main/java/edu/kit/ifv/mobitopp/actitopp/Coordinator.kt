@@ -1064,7 +1064,7 @@ class Coordinator(
                          *
                          */
                         // initialize object based on chosen time category
-                        val chosenTimeCategory = currentActivity.attributesMap["actdurcat_index"]!!
+                        val chosenTimeCategory = currentActivity.attributesMap["actdurcat_index"]
                         val step_wrd = WRDDefaultModelStep(
                             id_wrd, Category(chosenTimeCategory.toInt()), currentActivity.activityType,
                             this

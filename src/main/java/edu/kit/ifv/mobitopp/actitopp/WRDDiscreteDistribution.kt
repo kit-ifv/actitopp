@@ -1,12 +1,28 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import java.util.Collections
+import java.util.NavigableMap
+import java.util.SortedMap
 import java.util.TreeMap
 
-class WRDDiscreteDistribution(private val distributionelements: MutableMap<Int, Int>) {
+class MutableDistributionEntry(var int: Int) {
 
-    constructor(distributioninformation: WRDModelDistributionInformation): this(distributioninformation.toMutableMap())
+}
 
+/**
+ * ROBIN: It appears that this distribution takes a histogram as input. This knowledge is rather helpful.
+ * We can assume that the map is sorted along the keys.
+ */
+class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
+
+    constructor(distributioninformation: WRDModelDistributionInformation): this(TreeMap(distributioninformation))
+
+    /**
+     * No reason not to remember the lowest and highest key, the key structure of this class is never changing, only the values
+     */
+    private val lowestKey: Int = histogram.keys.min()
+
+    private val highestKey: Int = histogram.keys.max()
     /**
      * return the sum of all distributionselements
      *
@@ -14,7 +30,7 @@ class WRDDiscreteDistribution(private val distributionelements: MutableMap<Int, 
      */
     private fun getsumofalldistributionelements(): Int {
         var sum = 0
-        for ((_, value) in distributionelements) {
+        for ((_, value) in histogram) {
             sum += value
         }
         assert(sum != 0) { "sum is zero : no entries in distribution?" }
@@ -30,37 +46,26 @@ class WRDDiscreteDistribution(private val distributionelements: MutableMap<Int, 
      */
     private fun getsumofalldistributionelements(lowerbound: Int, upperbound: Int): Int {
         var sum = 0
-        for ((key, value) in distributionelements) {
+        for ((key, value) in histogram) {
             if (key >= lowerbound && key <= upperbound) sum += value
         }
         return sum
     }
 
-    private val lowestKey: Int
-        /**
-         * return the lowest key element
-         *
-         * @return
-         */
-        get() = Collections.min(distributionelements.keys)
 
-    private val highestKey: Int
-        /**
-         * return the highest key element
-         *
-         * @return
-         */
-        get() = Collections.max(distributionelements.keys)
 
     /**
      * method to modify an element of the distribution
      *
      * @param slot
      */
+
     fun modifydistributionelement(slot: Int) {
-        val oldvalue = distributionelements[slot]!!
+
+        val oldvalue = histogram[slot]!!
         val newvalue = oldvalue + (0.5 * getsumofalldistributionelements()).toInt()
-        distributionelements[slot] = newvalue
+
+        histogram[slot] = newvalue
     }
 
     /**
@@ -105,7 +110,7 @@ class WRDDiscreteDistribution(private val distributionelements: MutableMap<Int, 
             firstslot = usedLowerBound
             lastslot = usedUpperBound
         } else {
-            for ((slot, amount) in distributionelements) {
+            for ((slot, amount) in histogram) {
                 if (slot >= usedLowerBound && slot <= usedUpperBound) {
                     //check if the rand value lies between the runninshare of the last slot and the actual slot
 
