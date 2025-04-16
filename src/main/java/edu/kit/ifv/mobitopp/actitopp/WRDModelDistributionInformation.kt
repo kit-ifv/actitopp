@@ -7,15 +7,8 @@ import java.util.TreeMap
  *
  * @author Tim Hilgert
  */
-class WRDModelDistributionInformation {
-    /**
-     * @return the distributionElements
-     */
-    /*
-          * main information about the distribution
-          * contains all elements with an identifier (e.g. duration in minutes) and their amount based on empirical data
-          */
-    val distributionElements: TreeMap<Int, Int> = TreeMap()
+class WRDModelDistributionInformation(val distributionElements: MutableMap<Int, Int> = mutableMapOf()): MutableMap<Int, Int> by distributionElements {
+
 
     /**
      * @param slot

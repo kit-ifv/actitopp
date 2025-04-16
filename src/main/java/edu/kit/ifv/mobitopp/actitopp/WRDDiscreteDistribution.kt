@@ -3,24 +3,9 @@ package edu.kit.ifv.mobitopp.actitopp
 import java.util.Collections
 import java.util.TreeMap
 
-class WRDDiscreteDistribution(distributioninformation: WRDModelDistributionInformation) {
-    /*
-        * map to store distributionelements and their amounts
-        */
-    private val distributionelements = TreeMap<Int, Int>()
+class WRDDiscreteDistribution(private val distributionelements: MutableMap<Int, Int>) {
 
-
-    /**
-     * creates a new object that represents the distribution used for the model step
-     *
-     * @param distributioninformation
-     */
-    init {
-        // read all elements from distributioninformation from model file base and add them to the distribution of the concrete modeling
-        for ((slot, amount) in distributioninformation.distributionElements) {
-            distributionelements[slot] = amount
-        }
-    }
+    constructor(distributioninformation: WRDModelDistributionInformation): this(distributioninformation.toMutableMap())
 
     /**
      * return the sum of all distributionselements

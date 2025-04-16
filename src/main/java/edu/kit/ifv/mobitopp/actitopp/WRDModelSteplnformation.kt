@@ -19,6 +19,7 @@ class WRDModelSteplnformation {
      * @param category
      * @param distribution
      */
+    @Deprecated("This class can be killed")
     fun addDistributionInformation(category: String, distribution: WRDModelDistributionInformation) {
         distributionInformation[category] = distribution
     }
@@ -26,18 +27,21 @@ class WRDModelSteplnformation {
     /**
      * Reduce visual clutter via operators: TODO kill the original function once behaviour tested
      */
+    @Deprecated("This class can be killed")
     operator fun set(category: String, distribution: WRDModelDistributionInformation) = addDistributionInformation(category, distribution)
     /**
      * Robin: This method is only used in one place, and if the return value would be null the program would
      * run into a null pointer exception. In that case we can throw an exception, which actually provides meaningful
      * input to find the error instead of running into nullability issues.
      */
-    fun getWRDDistribution(category: String): WRDModelDistributionInformation {
+    @Deprecated("This class can be killed")
+    private fun getWRDDistribution(category: String): WRDModelDistributionInformation {
         return distributionInformation[category] ?: throw NoSuchElementException("No distribution information for category $category")
     }
 
     /**
      * Reduce visual clutter via operators: TODO kill the original function once behaviour tested
      */
+    @Deprecated("This class can be killed")
     operator fun get(category: String) = getWRDDistribution(category)
 }

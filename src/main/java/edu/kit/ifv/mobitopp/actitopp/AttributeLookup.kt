@@ -53,7 +53,7 @@ class AttributeLookup(var currentPerson: ActitoppPerson) {
     ) : this(currentPerson, currentDay, currentTour) {
         this.currentActivity = currentActivity
     }
-
+    private val cache: MutableMap<Pair<String, String>, Double> = mutableMapOf()
     /**
      * Get AttributeValue for specific reference
      *
@@ -62,6 +62,7 @@ class AttributeLookup(var currentPerson: ActitoppPerson) {
      * @return
      */
     fun getAttributeValue(reference: String, attributeName: String): Double {
+        if(cache.containsKey(reference to attributeName)) { return cache.getValue(reference to attributeName)}
         var attributeValue = 999999.0
         assert(reference == "default" || reference == "person" || reference == "day" || reference == "tour" || reference == "activity") { "Unknown reference Value - $reference" }
 
@@ -86,6 +87,7 @@ class AttributeLookup(var currentPerson: ActitoppPerson) {
         }
 
         assert(attributeValue != 999999.0) { "AttributeValue couldn't be read! - Reference: $reference - Attribute: $attributeName" }
+        cache[reference to attributeName] = attributeValue
         return attributeValue
     }
 
