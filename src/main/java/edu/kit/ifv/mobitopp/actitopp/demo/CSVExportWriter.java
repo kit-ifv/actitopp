@@ -82,13 +82,13 @@ public class CSVExportWriter {
         String rueckgabe = "";
 
         // HHIndex
-        rueckgabe += trip.activity.getPerson().getHousehold().getHouseholdIndex() + ";";
+        rueckgabe += trip.getActivity().getPerson().getHousehold().getHouseholdIndex() + ";";
         // PersNr
-        rueckgabe += trip.activity.getPerson().getPersNrinHousehold() + ";";
+        rueckgabe += trip.getActivity().getPerson().getPersNrinHousehold() + ";";
         // PersIndex
-        rueckgabe += trip.activity.getPerson().getPersIndex() + ";";
+        rueckgabe += trip.getActivity().getPerson().getPersIndex() + ";";
         // Weekday
-        rueckgabe += trip.activity.getWeekDay() + ";";
+        rueckgabe += trip.getActivity().getWeekDay() + ";";
         // anzeit (endtime)
         rueckgabe += trip.getEndTime() + ";";
         // anzeit_woche (endtime_week)

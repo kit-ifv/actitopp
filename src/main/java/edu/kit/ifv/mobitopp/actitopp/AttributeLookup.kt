@@ -67,7 +67,7 @@ class AttributeLookup(var currentPerson: ActitoppPerson) {
 
         when (reference) {
             "default", "person" -> {
-                attributeValue = ActitoppPersonParameters.getEnumValue(attributeName).getAttribute(
+                attributeValue = ActitoppPersonParameters.getPersonParameterFromString(attributeName).getAttribute(
                     currentPerson
                 )
             }

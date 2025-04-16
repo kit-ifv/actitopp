@@ -547,6 +547,7 @@ class ActitoppPerson {
      * @param randomgenerator
      * @throws InvalidPatternException
      */
+    @Throws(InvalidPatternException::class)
     fun generateSchedule(modelbase: ModelFileBase, randomgenerator: RNGHelper) {
         //create an empty Default-Pattern
         weekPattern = HWeekPattern(this)
