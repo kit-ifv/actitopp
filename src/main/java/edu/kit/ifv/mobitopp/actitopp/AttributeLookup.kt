@@ -73,15 +73,15 @@ class AttributeLookup(var currentPerson: ActitoppPerson) {
             }
 
             "day" -> {
-                attributeValue = HDayParameters.getEnumValue(attributeName).getAttribute(currentDay)
+                attributeValue = HDayParameters.getDayParameterFromString(attributeName).getAttribute(currentDay)
             }
 
             "tour" -> {
-                attributeValue = HTourParameters.getEnumValue(attributeName).getAttribute(currentTour)
+                attributeValue = HTourParameters.getTourParameterFromString(attributeName).getAttribute(currentTour)
             }
 
             "activity" -> {
-                attributeValue = HActivityParameters.getEnumValue(attributeName).getAttribute(currentActivity)
+                attributeValue = HActivityParameters.getActivityParameterFromString(attributeName).getAttribute(currentActivity)
             }
         }
 

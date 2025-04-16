@@ -359,31 +359,8 @@ enum class HDayParameters
          * @param name
          * @return
          */
-        fun getEnumValue(name: String): HDayParameters {
-            // Eindeutigkeitspruefung
-            checkUniqueness(name)
-
-            // Rueckgabe des passenden Enums
-            for (parameter in entries) {
-                if (parameter.description == name) return parameter
-            }
-            throw IllegalArgumentException("$name not found")
-        }
-
-
-        /**
-         * Methode zur Pruefung der Eindeutigkeit der Enum-Namensvariable
-         *
-         * @param name
-         */
-        private fun checkUniqueness(name: String) {
-            var counter = 0
-            for (parameter in entries) {
-                if (parameter.description == name) {
-                    counter++
-                    require(counter <= 1) { "$name identifier is not unique - wrong enum specification" }
-                }
-            }
+        fun getDayParameterFromString(name: String): HDayParameters {
+            return entries.first {it.name == name}
         }
     }
 }

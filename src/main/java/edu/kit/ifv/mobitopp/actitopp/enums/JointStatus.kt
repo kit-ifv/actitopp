@@ -30,12 +30,8 @@ enum class JointStatus(val typeasInt: Int) {
 
 
         fun getTypeFromInt(intValue: Int): JointStatus {
-            for (type in EnumSet.allOf(JointStatus::class.java)) {
-                if (type.typeasInt == intValue) {
-                    return type
-                }
-            }
-            throw NoSuchElementException("No type with value $intValue")
+            return entries.firstOrNull { it.typeasInt == intValue }
+                ?: throw NoSuchElementException("No type with value $intValue")
         }
     }
 }
