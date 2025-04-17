@@ -7,14 +7,4 @@ import java.util.TreeMap
  *
  * @author Tim Hilgert
  */
-class WRDModelDistributionInformation(val distributionElements: MutableMap<Int, Int> = mutableMapOf()): MutableMap<Int, Int> by distributionElements {
-
-
-    /**
-     * @param slot
-     * @param amount
-     */
-    fun addDistributionElement(slot: Int, amount: Int) {
-        distributionElements[slot] = amount
-    }
-}
+class WRDModelDistributionInformation(private val distributionElements: Map<Int, Int> =mapOf()): Map<Int, Int> by distributionElements

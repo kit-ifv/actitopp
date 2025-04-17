@@ -11,16 +11,15 @@ fun loadDistributionInformationFromFile(path: Path): WRDModelDistributionInforma
     require(path.exists()) {
         "The path $path does not exist."
     }
-    val distributionInformation = WRDModelDistributionInformation()
-    path.useLines { lines ->
-        lines.drop(1).forEach { line ->
+    return path.useLines { lines ->
+        val map = lines.drop(1).associate { line ->
             val split = line.split(";")
             val slot = split[0].toInt()
             val amount = split[1].toInt()
-            distributionInformation.addDistributionElement(slot, amount)
+            slot to amount
         }
-
+        WRDModelDistributionInformation(map)
     }
 
-    return distributionInformation
+
 }

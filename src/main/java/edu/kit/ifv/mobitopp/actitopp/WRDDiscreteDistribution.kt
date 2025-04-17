@@ -5,6 +5,10 @@ import java.util.TreeMap
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+  TODO this could be used if we want to switch from a amount based histogram to a distribution that directly holds
+ the selection probabilities.
+ */
 class HistogramDistribution(initialMap: Map<Int, Int>) {
 
     private var distribution : Map<Int, Double>
@@ -52,7 +56,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
     private val highestKey: Int = histogram.keys.max()
 
-    private fun getsumofalldistributionelements(): Int {
+    private fun sum(): Int {
         return histogram.values.sum()
     }
 
@@ -69,7 +73,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
     fun modifydistributionelement(slot: Int) {
         val oldvalue = histogram[slot]!!
-        val newvalue = oldvalue + (0.5 * getsumofalldistributionelements()).toInt()
+        val newvalue = oldvalue + (0.5 * sum()).toInt()
         histogram[slot] = newvalue
     }
 
