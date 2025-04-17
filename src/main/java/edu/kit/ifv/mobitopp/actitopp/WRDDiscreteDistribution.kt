@@ -75,39 +75,26 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
         val rand = randomgenerator.randomValue
 
         //Phase 3: create a map with valid elements (within the boundaries) and their accumulated share (according to all valid elements)
-        val sumofvalidelements = getsumofalldistributionelements(usedLowerBound, usedUpperBound)
-
-        var runningshare = 0.0
-
-        var firstslot = -1
-        var lastslot = -1
+        /* Issue 4) The sum of valid distribution elements, and the check if the slot from the histogram lies within the
+           bounds of the range later in the code could be trivially simplified by just filtering the histogram.
+        * */
+        val relevantElements = histogram.filterKeys { it in usedLowerBound..usedUpperBound }
+        val sumofvalidelements = relevantElements.values.sum()
 
         // if all element values are equal to zero, choose one of them randomly
         if (sumofvalidelements == 0) {
             return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound, 1)
         }
+        var acc = 0.0
+        val normalizedValues = relevantElements.mapValues { acc += it.value.toDouble() / sumofvalidelements; acc }
+        /* Issue 5) A detailed analysis of the original code showed that the selection of a firstslot / lastslot would
+        ALWAYS result in the same element being used for both slots, this is most likely not what the author intended
+        BUT, it is what the author has written. This behaviour can be easily be reproduced by just returning the first
+        element with a cumulative sum larger than the random value.
 
-        for ((slot, amount) in histogram) {
-            if (slot >= usedLowerBound && slot <= usedUpperBound) {
-                //check if the rand value lies between the runninshare of the last slot and the actual slot
+         */
+        val selectedElement = normalizedValues.entries.firstOrNull{it.value > rand}?.key ?: normalizedValues.keys.last()
+        return selectedElement
 
-                if (rand >= runningshare) firstslot = slot
-
-                //update runningsahre / accumulated share for the distribution element
-                val share = amount.toDouble() / sumofvalidelements.toDouble()
-                runningshare += share
-
-                //check if the slot ist the last value where rand is smaller than the runningshare
-                if (lastslot == -1 && rand <= runningshare) lastslot = slot
-            }
-        }
-        assert(Math.round(runningshare).toDouble() == 1.0) { "sum of valid element share is not equal to 1!" }
-
-
-        assert(firstslot != -1) { "could not determine firstslot for randomPick" }
-        assert(lastslot != -1) { "could not determine lastslot for randomPick" }
-
-        //choose one of the possible slots
-        return randomgenerator.getRandomValueBetween(firstslot, lastslot, 1)
     }
 }

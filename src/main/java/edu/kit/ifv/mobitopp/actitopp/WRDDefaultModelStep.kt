@@ -31,7 +31,7 @@ class WRDDefaultModelStep(
 
 
     /*Use lateinit to avoid having to initialize with some invalid default value like -1 */
-    private lateinit var bounds: IntRange
+    private var bounds: IntRange = Int.MIN_VALUE..Int.MAX_VALUE
 
     /**
      * creates wrd model step element without a given activity type
