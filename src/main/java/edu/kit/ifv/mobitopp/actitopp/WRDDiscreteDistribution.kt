@@ -4,6 +4,8 @@ import java.util.Collections
 import java.util.NavigableMap
 import java.util.SortedMap
 import java.util.TreeMap
+import kotlin.math.max
+import kotlin.math.min
 
 class MutableDistributionEntry(var int: Int) {
 
@@ -51,26 +53,20 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
      * returns an element from the distribution based on a random number
      * WRD = weighted random draw - the selection of the element is dependent on their share within the distribution
      *
-     * @param lowerbound
-     * @param upperbound
-     * @param randomgenerator
-     * @return
      */
     fun getRandomPickFromDistribution(lowerbound: Int, upperbound: Int, randomgenerator: RNGHelper): Int {
         //Phase1: check and apply bounds
+        /*Issue 1) The assignment to usedLowerBound /upperbound can be solved via max/min, instead of assignment -> if
+          Issue 2) Assert statements have two effects: Disabled -> Useless, Enabled -> Error. Why can we pass lowerbound
+          and upper bound as parameters, if the software always (wih assertions) collapses if the input parameters would
+          actually limit the method. In that case we could simply skip this process of using upper and lower bounds.
+          Issue 3) upperbound and lowerbound are integers, and upperbound could be smaller than lowerbound. This can be
+          avoided altogether if the input passed to this method is not two naked Ints, but a range.
+           */
 
-        var usedLowerBound = lowestKey
-        var usedUpperBound = highestKey
+        val usedLowerBound = max(lowestKey, lowerbound)
+        val usedUpperBound = min(highestKey, upperbound)
 
-        if (lowerbound != -1 && upperbound != -1) {
-            // make sure that boundaries determined by preconditions fit the boundaries of the wrd distribution
-            assert(lowerbound <= usedUpperBound) { "inconsistent boundaries! lowerBound from preconditions: $lowerbound does not match wrd distributions boundaries: $usedLowerBound - $usedUpperBound" }
-            assert(upperbound >= usedLowerBound) { "inconsistent boundaries! upperBound from preconditions: $upperbound does not match wrd distributions boundaries: $usedLowerBound - $usedUpperBound" }
-            assert(lowerbound <= upperbound) { "inconsistent boundaries! upperbound < lowerbound!" }
-
-            if (lowerbound >= usedLowerBound) usedLowerBound = lowerbound
-            if (upperbound <= usedUpperBound) usedUpperBound = upperbound
-        }
 
 
         //Phase2: get random value
