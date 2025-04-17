@@ -77,7 +77,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
         //Phase 3: create a map with valid elements (within the boundaries) and their accumulated share (according to all valid elements)
         val sumofvalidelements = getsumofalldistributionelements(usedLowerBound, usedUpperBound)
-        val validelements = TreeMap<Int, Double>()
+
         var runningshare = 0.0
 
         var firstslot = -1
@@ -97,7 +97,6 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
                     //update runningsahre / accumulated share for the distribution element
                     val share = amount.toDouble() / sumofvalidelements.toDouble()
                     runningshare += share
-                    validelements[slot] = runningshare
 
                     //check if the slot ist the last value where rand is smaller than the runningshare
                     if (lastslot == -1 && rand <= runningshare) lastslot = slot
