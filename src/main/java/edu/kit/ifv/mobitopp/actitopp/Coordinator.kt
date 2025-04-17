@@ -21,11 +21,10 @@ import kotlin.math.min
 class Coordinator @JvmOverloads constructor(
     /** ///////////// */
     private val person: ActitoppPerson,
-    val fileBase: ModelFileBase,     val randomGenerator: RNGHelper,     private val debugloggers: DebugLoggers? = null) {
+    val fileBase: ModelFileBase, val randomGenerator: RNGHelper, private val debugloggers: DebugLoggers? = null,
+) {
     /**///////////// */ //	declaration of variables
     private val pattern: HWeekPattern? = person.weekPattern
-
-
 
 
     /*
@@ -44,6 +43,9 @@ class Coordinator @JvmOverloads constructor(
     private val numberoftoursperday_lowerboundduetojointactions = intArrayOf(0, 0, 0, 0, 0, 0, 0)
 
 
+    private fun log(id: String, element: Any, other: Any) {
+        debugloggers?.let { it.getLogger(id)[element] = other.toString() }
+    }
 
     /**
      * main method to coordinate all model steps
@@ -138,7 +140,7 @@ class Coordinator @JvmOverloads constructor(
 
         // first sanity checks: check for overlapping activities. if found, throw exception and redo activityweek
         // Robin: TODO i reaaaaly dislike the idea of communicating via errors or exceptions but apparently that is the desired behaviour
-        if(!pattern.weekPatternisFreeofOverlaps()) {
+        if (!pattern.weekPatternisFreeofOverlaps()) {
             throw AssertionError("Some elements overlap in the pattern")
         }
 
@@ -195,8 +197,8 @@ class Coordinator @JvmOverloads constructor(
 
         person.addAttributetoMap(variablenname, decision)
 
-        if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-            debugloggers!!.getLogger(id)[person] = decision.toString()
+        if (debugloggers != null && debugloggers.existsLogger(id)) {
+            debugloggers.getLogger(id)[person] = decision.toString()
         }
     }
 
@@ -254,9 +256,7 @@ class Coordinator @JvmOverloads constructor(
                 val decision = step.doStep()
                 val activityType = getTypeFromChar(step.alternativeChosen[0])
 
-                if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                    debugloggers!!.getLogger(id)[currentDay] = activityType.toString()
-                }
+                log(id, currentDay, activityType.toString())
 
                 if (activityType != ActivityType.HOME) {
                     // add a new tour into the pattern if not existing
@@ -326,9 +326,7 @@ class Coordinator @JvmOverloads constructor(
             // make selection
             val decision = step.doStep()
 
-            if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                debugloggers!!.getLogger(id)[currentDay] = decision.toString()
-            }
+            log(id, currentDay, decision.toString())
 
             // create tours based on the decision and add them to the pattern
             for (j in 1..decision) {
@@ -389,9 +387,7 @@ class Coordinator @JvmOverloads constructor(
                     val decision = step.doStep()
                     val activityType = getTypeFromChar(step.alternativeChosen[0])
 
-                    if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                        debugloggers!!.getLogger(id)[currentTour] = activityType.toString()
-                    }
+                    log(id, currentTour, activityType.toString())
 
                     var activity: HActivity? = null
 
@@ -455,9 +451,7 @@ class Coordinator @JvmOverloads constructor(
                 // make selection
                 val decision = step.doStep()
 
-                if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                    debugloggers!!.getLogger(id)[currentTour] = decision.toString()
-                }
+                log(id, currentTour, decision.toString())
 
                 // create activities based on the decision and add them to the pattern
                 for (j in 1..decision) {
@@ -527,9 +521,7 @@ class Coordinator @JvmOverloads constructor(
                         val activityType = getTypeFromChar(step.alternativeChosen[0])
                         currentActivity.activityType = activityType
 
-                        if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                            debugloggers!!.getLogger(id)[currentActivity] = activityType.toString()
-                        }
+                        log(id, currentActivity, activityType.toString())
                     }
                 }
             }
@@ -854,9 +846,8 @@ class Coordinator @JvmOverloads constructor(
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
             val decision = step.doStep()
 
-            if (debugloggers != null && debugloggers.existsLogger(id)) {
-                debugloggers.getLogger(id)[person] = decision.toString()
-            }
+
+            log(id, person, decision.toString())
 
             person.addAttributetoMap(activitytype.toString() + "budget_category_index", decision.toDouble())
             person.addAttributetoMap(
@@ -884,9 +875,7 @@ class Coordinator @JvmOverloads constructor(
             val step = WRDDefaultModelStep(id, Category(chosenIndex.toInt()), activitytype, this)
             val chosenTime = step.doStep()
 
-            if (debugloggers != null && debugloggers.existsLogger(id)) {
-                debugloggers.getLogger(id)[person] = chosenTime.toString()
-            }
+            log(id, person, chosenTime.toString())
 
             person.addAttributetoMap(activitytype.toString() + "budget_exact", chosenTime.toDouble())
         }
@@ -915,9 +904,7 @@ class Coordinator @JvmOverloads constructor(
                     val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
                     val decision = step.doStep()
 
-                    if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                        debugloggers!!.getLogger(id)[currentActivity] = step.alternativeChosen.toString()
-                    }
+                    log(id, currentActivity, step.alternativeChosen.toString())
 
                     // save attribute for work and education activities if coordinated modeling is enabled
                     if (Configuration.coordinated_modelling && (currentActivity.activityType == ActivityType.WORK || currentActivity.activityType == ActivityType.EDUCATION)) {
@@ -976,9 +963,7 @@ class Coordinator @JvmOverloads constructor(
                         if (currentActivity.attributesMap["standarddauer"] == 1.0) {
                             val timeCategory = currentActivity.calculateMeanTimeCategory()
 
-                            if (debugloggers != null && debugloggers!!.existsLogger("meantime")) {
-                                debugloggers!!.getLogger("meantime")[currentActivity] = timeCategory.toString()
-                            }
+                            log("meantime", currentActivity, timeCategory.toString())
 
                             // lower bound minimum is 0
                             val from = max((timeCategory - 1).toDouble(), 0.0).toInt()
@@ -1021,9 +1006,7 @@ class Coordinator @JvmOverloads constructor(
                         // make selection
                         val decision = step_dc.doStep()
 
-                        if (debugloggers != null && debugloggers!!.existsLogger(id_dc)) {
-                            debugloggers!!.getLogger(id_dc)[currentActivity] = decision.toString()
-                        }
+                        log(id_dc, currentActivity, decision.toString())
 
                         currentActivity.addAttributetoMap("actdurcat_index", decision.toDouble())
 
@@ -1046,9 +1029,7 @@ class Coordinator @JvmOverloads constructor(
                         // make selection
                         val chosenTime = step_wrd.doStep()
 
-                        if (debugloggers != null && debugloggers!!.existsLogger(id_wrd)) {
-                            debugloggers!!.getLogger(id_wrd)[currentActivity] = chosenTime.toString()
-                        }
+                        log(id_wrd, currentActivity, chosenTime.toString())
 
                         currentActivity.duration = chosenTime
 
@@ -1119,9 +1100,7 @@ class Coordinator @JvmOverloads constructor(
                         // make selection
                         val decision = step_dc.doStep()
 
-                        if (debugloggers != null && debugloggers!!.existsLogger(id_dc)) {
-                            debugloggers!!.getLogger(id_dc)[currentActivity] = decision.toString()
-                        }
+                        log(id_dc, currentActivity, decision.toString())
 
                         currentActivity.addAttributetoMap("actdurcat_index", decision.toDouble())
 
@@ -1142,9 +1121,7 @@ class Coordinator @JvmOverloads constructor(
                         // make selection
                         val chosenTime = step_wrd.doStep()
 
-                        if (debugloggers != null && debugloggers!!.existsLogger(id_wrd)) {
-                            debugloggers!!.getLogger(id_wrd)[currentActivity] = chosenTime.toString()
-                        }
+                        log(id_wrd, currentActivity, chosenTime.toString())
 
                         currentActivity.duration = chosenTime
 
@@ -1170,9 +1147,7 @@ class Coordinator @JvmOverloads constructor(
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
             val decision = step.doStep()
 
-            if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                debugloggers!!.getLogger(id)[person] = decision.toString()
-            }
+            log(id, person, decision.toString())
 
             person.addAttributetoMap("first_tour_default_start_cat", decision.toDouble())
         }
@@ -1199,9 +1174,7 @@ class Coordinator @JvmOverloads constructor(
                     val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
                     val decision = step.doStep()
 
-                    if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                        debugloggers!!.getLogger(id)[currentTour] = step.alternativeChosen.toString()
-                    }
+                    log(id, currentTour, step.alternativeChosen.toString())
 
                     currentTour.addAttributetoMap(
                         "default_start_cat_yes",
@@ -1319,9 +1292,7 @@ class Coordinator @JvmOverloads constructor(
                 // make selection
                 val decision = step_dc.doStep()
 
-                if (debugloggers != null && debugloggers!!.existsLogger(id_dc)) {
-                    debugloggers!!.getLogger(id_dc)[currentTour] = decision.toString()
-                }
+                log(id_dc, currentTour, decision.toString())
 
                 currentTour.addAttributetoMap("tourStartCat_index", decision.toDouble())
 
@@ -1343,9 +1314,7 @@ class Coordinator @JvmOverloads constructor(
                 // make selection
                 val chosenStartTime = step_wrd.doStep()
 
-                if (debugloggers != null && debugloggers!!.existsLogger(id_wrd)) {
-                    debugloggers!!.getLogger(id_wrd)[currentTour] = chosenStartTime.toString()
-                }
+                log(id_wrd, currentTour, chosenStartTime.toString())
 
                 currentTour.startTime = chosenStartTime
                 currentTour.createStartTimesforActivities()
@@ -1394,9 +1363,7 @@ class Coordinator @JvmOverloads constructor(
                     // make selection
                     val decision = dcstep.doStep()
 
-                    if (debugloggers != null && debugloggers!!.existsLogger("10S")) {
-                        debugloggers!!.getLogger("10S")[currentTour] = decision.toString()
-                    }
+                    log("10S", currentTour, decision.toString())
 
                     val chosenHomeTimeCategory = decision
 
@@ -1412,9 +1379,7 @@ class Coordinator @JvmOverloads constructor(
                     val chosenTime = step_wrd.doStep()
 
 
-                    if (debugloggers != null && debugloggers!!.existsLogger("10T")) {
-                        debugloggers!!.getLogger("10T")[currentTour] = chosenTime.toString()
-                    }
+                    log("10T", currentTour, chosenTime.toString())
 
                     val starttimetour = currentDay.getTour(currentTour.index - 1).endTime + chosenTime
                     currentTour.startTime = starttimetour
@@ -1459,9 +1424,7 @@ class Coordinator @JvmOverloads constructor(
                         val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
                         val decision = step.doStep()
 
-                        if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                            debugloggers!!.getLogger(id)[currentActivity] = step.alternativeChosen.toString()
-                        }
+                        log(id, currentActivity, step.alternativeChosen.toString())
 
                         currentActivity.jointStatus = JointStatus.getTypeFromInt(step.alternativeChosen.toInt())
                     } else {
@@ -2209,7 +2172,7 @@ class Coordinator @JvmOverloads constructor(
     fun getOrCreateWeightedDistribution(
         id: String,
         category: Category,
-        activityType: ActivityType
+        activityType: ActivityType,
     ): WRDDiscreteDistribution {
         return personalWRDDistributions[id + category + activityType] ?: run {
             val distribution = fileBase.getDistributionFor(id, category)
