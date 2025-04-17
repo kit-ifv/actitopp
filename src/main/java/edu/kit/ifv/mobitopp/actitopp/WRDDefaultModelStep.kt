@@ -27,7 +27,8 @@ class WRDDefaultModelStep(
     private var modifydistribution = false
 
     // element that is finally chosen based on weighted random draw
-    private var chosenDistributionElement = 0
+    var chosenDistributionElement = 0
+        private set
 
 
     /*Use lateinit to avoid having to initialize with some invalid default value like -1 */
@@ -60,7 +61,7 @@ class WRDDefaultModelStep(
             weightedDistribution.modifydistributionelement(chosenDistributionElement)
         }
 
-        return getchosenDistributionElement()
+        return chosenDistributionElement
     }
 
 
@@ -82,10 +83,6 @@ class WRDDefaultModelStep(
             "Cannot set a range to $lowerbound $upperbound somehow the upperbound is smaller than the lower bound"
         }
         this.bounds = lowerbound..upperbound
-    }
-
-    fun getchosenDistributionElement(): Int {
-        return chosenDistributionElement
     }
 
     fun setModifydistribution(modifydistribution: Boolean) {

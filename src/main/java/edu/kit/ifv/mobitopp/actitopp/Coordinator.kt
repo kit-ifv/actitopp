@@ -913,7 +913,7 @@ class Coordinator(
             val step = WRDDefaultModelStep(id, Category(chosenIndex.toInt()), activitytype, this)
             step.doStep()
 
-            val chosenTime = step.getchosenDistributionElement()
+            val chosenTime = step.chosenDistributionElement
 
             if (debugloggers != null && debugloggers!!.existsLogger(id)) {
                 debugloggers!!.getLogger(id)[person] = chosenTime.toString()
@@ -1076,7 +1076,7 @@ class Coordinator(
 
                         // make selection
                         step_wrd.doStep()
-                        val chosenTime = step_wrd.getchosenDistributionElement()
+                        val chosenTime = step_wrd.chosenDistributionElement
 
                         if (debugloggers != null && debugloggers!!.existsLogger(id_wrd)) {
                             debugloggers!!.getLogger(id_wrd)[currentActivity] = chosenTime.toString()
@@ -1173,7 +1173,7 @@ class Coordinator(
 
                         // make selection
                         step_wrd.doStep()
-                        val chosenTime = step_wrd.getchosenDistributionElement()
+                        val chosenTime = step_wrd.chosenDistributionElement
 
                         if (debugloggers != null && debugloggers!!.existsLogger(id_wrd)) {
                             debugloggers!!.getLogger(id_wrd)[currentActivity] = chosenTime.toString()
@@ -1375,7 +1375,7 @@ class Coordinator(
 
                 // make selection
                 step_wrd.doStep()
-                val chosenStartTime = step_wrd.getchosenDistributionElement()
+                val chosenStartTime = step_wrd.chosenDistributionElement
 
                 if (debugloggers != null && debugloggers!!.existsLogger(id_wrd)) {
                     debugloggers!!.getLogger(id_wrd)[currentTour] = chosenStartTime.toString()
@@ -1444,7 +1444,7 @@ class Coordinator(
 
                     // make selection
                     step_wrd.doStep()
-                    val chosenTime = step_wrd.getchosenDistributionElement()
+                    val chosenTime = step_wrd.chosenDistributionElement
 
                     if (debugloggers != null && debugloggers!!.existsLogger("10T")) {
                         debugloggers!!.getLogger("10T")[currentTour] = chosenTime.toString()
