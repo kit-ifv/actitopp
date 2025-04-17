@@ -26,12 +26,9 @@ class WRDDefaultModelStep(
     // decision if the distribution should be adapted after drawing
     private var modifydistribution = false
 
-    // element that is finally chosen based on weighted random draw
-    var chosenDistributionElement = 0
-        private set
 
 
-    /*Use lateinit to avoid having to initialize with some invalid default value like -1 */
+
     private var bounds: IntRange = Int.MIN_VALUE..Int.MAX_VALUE
 
 
@@ -39,17 +36,19 @@ class WRDDefaultModelStep(
     public override fun doStep(): Int {
         // pick a random number within the given boundaries
 
-        chosenDistributionElement = weightedDistribution.getRandomPickFromDistribution(
+        val selection = weightedDistribution.getRandomPickFromDistribution(
             this.bounds, modelCoordinator.randomGenerator
         )
 
         if (modifydistribution) {
-            weightedDistribution.modifydistributionelement(chosenDistributionElement)
+            weightedDistribution.modifydistributionelement(selection)
         }
 
-        return chosenDistributionElement
+        return selection.also { chosenDistributionElement = selection }
     }
 
+    @Deprecated("Only used in the print method below")
+    private var chosenDistributionElement = 0
 
     fun printDecisionProcess() {
         println("--------------- MC-Simulation @ " + this.id + this.category + this.activityType + " ---------------")
