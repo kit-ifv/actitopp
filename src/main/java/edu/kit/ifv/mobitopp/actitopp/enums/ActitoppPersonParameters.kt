@@ -145,7 +145,7 @@ enum class ActitoppPersonParameters{
      */
     male{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.gender == 1) 1.0 else 0.0)
+            return (if (actitoppPerson.gender == Gender.MALE) 1.0 else 0.0)
         }
     },
 
@@ -154,27 +154,27 @@ enum class ActitoppPersonParameters{
      */
     Raumtyp_mobitopp_rural{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.areatype == 1) 1.0 else 0.0)
+            return (if (actitoppPerson.areatype == AreaType.RURAL) 1.0 else 0.0)
         }
     },
     Raumtyp_mobitopp_provincial{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.areatype == 2) 1.0 else 0.0)
+            return (if (actitoppPerson.areatype == AreaType.PROVINCIAL) 1.0 else 0.0)
         }
     },
     Raumtyp_mobitopp_cityoutskirt{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.areatype == 3) 1.0 else 0.0)
+            return (if (actitoppPerson.areatype == AreaType.CITYOUTSKIRT) 1.0 else 0.0)
         }
     },
     Raumtyp_mobitopp_metropolitan{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.areatype == 4) 1.0 else 0.0)
+            return (if (actitoppPerson.areatype == AreaType.METROPOLITAN) 1.0 else 0.0)
         }
     },
     Raumtyp_mobitopp_conurbation{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.areatype == 5) 1.0 else 0.0)
+            return (if (actitoppPerson.areatype == AreaType.CONURBATION) 1.0 else 0.0)
         }
     },
 

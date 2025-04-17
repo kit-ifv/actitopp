@@ -1,111 +1,39 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
+
 /**
  * @author Tim Hilgert
  */
-class ActiToppHousehold {
+class ActiToppHousehold @JvmOverloads constructor(
+    val householdIndex: Int,
+    val children0_10: Int,
+    val children_u18: Int,
+    areatypeCode: Int,
+    val numberofcarsinhousehold: Int = 0,
+) {
+
+    val areatype = AreaType.fromCode(areatypeCode)
+
     /**
      * @return the householdIndex
      */
 
-    val householdIndex: Int
 
-    val householdmembers: MutableMap<Int, ActitoppPerson>
+    private val householdmembers: MutableMap<Int, ActitoppPerson> = mutableMapOf()
 
-    /**
-     * @return the children0_10
-     */
-    /**
-     * @param children0_10 the children0_10 to set
-     */
-    // household properties
-    
-    var children0_10: Int
-    /**
-     * @return the children_u18
-     */
-    /**
-     * @param children_u18 the children_u18 to set
-     */
-    
-    var children_u18: Int
-    /**
-     * @return the areatype
-     */
-    /**
-     * @param areatype the areatype to set
-     */
-    
-    var areatype: Int
-    /**
-     * @return the numberofcarsinhousehold
-     */
-    /**
-     * @param numberofcarsinhousehold the numberofcarsinhousehold to set
-     */
-    
-    var numberofcarsinhousehold: Int = 0
-
-    /**
-     * constructor with number of cars in household
-     *
-     * @param householdIndex
-     * @param children0_10
-     * @param children_u18
-     * @param areatype
-     * @param numberofcarsinhousehold
-     */
-    constructor(
-        householdIndex: Int,
-        children0_10: Int,
-        children_u18: Int,
-        areatype: Int,
-        numberofcarsinhousehold: Int
-    ) : super() {
-        this.householdIndex = householdIndex
-
-        this.children0_10 = children0_10
-        this.children_u18 = children_u18
-        this.areatype = areatype
-        this.numberofcarsinhousehold = numberofcarsinhousehold
-
-        this.householdmembers = HashMap()
-    }
-
-    /**
-     * constructor without number of cars in household
-     *
-     * @param householdIndex
-     * @param children0_10
-     * @param children_u18
-     * @param areatype
-     */
-    constructor(householdIndex: Int, children0_10: Int, children_u18: Int, areatype: Int) : super() {
-        this.householdIndex = householdIndex
-
-        this.children0_10 = children0_10
-        this.children_u18 = children_u18
-        this.areatype = areatype
-
-        this.householdmembers = HashMap()
-    }
-
-    /**
-     * constructor used to "clone" household including all persons in the household
-     *
-     * @param tmphh
-     */
-    constructor(tmphh: ActiToppHousehold) : this(
-        tmphh.householdIndex,
-        tmphh.children0_10,
-        tmphh.children_u18,
-        tmphh.areatype,
-        tmphh.numberofcarsinhousehold
-    ) {
-        // "clone" all householdmembers
-        for (tmppers in tmphh.householdmembersasList) {
-            ActitoppPerson(tmppers, this)
+    fun clone(): ActiToppHousehold {
+        val clone = ActiToppHousehold(
+            this.householdIndex,
+            this.children0_10,
+            this.children_u18,
+            this.areatype.code,
+            this.numberofcarsinhousehold
+        )
+        householdmembersasList.forEach {
+            clone.addHouseholdmember(it, it.persNrinHousehold)
         }
+        return clone
     }
 
     /**

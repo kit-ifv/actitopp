@@ -2,6 +2,9 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
+import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1A
+import edu.kit.ifv.mobitopp.actitopp.changes.Situation1A
+import edu.kit.ifv.mobitopp.actitopp.changes.step1AModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
@@ -86,12 +89,12 @@ class Coordinator(
             determineMinimumTourActivityBounds()
         }
 
-        executeStep1("1A", "anztage_w")
-        executeStep1("1B", "anztage_e")
-        executeStep1("1C", "anztage_l")
-        executeStep1("1D", "anztage_s")
-        executeStep1("1E", "anztage_t")
-        executeStep1("1F", "anztage_immobil")
+        executeStep1("1A", "anztage_w") // Appears to determine amount of days working?
+        executeStep1("1B", "anztage_e") // Determines the amount of days with education
+        executeStep1("1C", "anztage_l") // The Amount of leisue
+        executeStep1("1D", "anztage_s") // The days with shopping
+        executeStep1("1E", "anztage_t") // Those with service
+        executeStep1("1F", "anztage_immobil") // And those doing nothing.
 
         executeStep1("1K", "anztourentag_mean")
         executeStep1("1L", "anzakttag_mean")
@@ -215,6 +218,7 @@ class Coordinator(
 
         // create step object
         val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
+        val selection = step1AModel.probabilities((0..7).map { Situation1A(it, person) }.toSet(), ParameterSet1A)
         step.doStep()
 
         // save result

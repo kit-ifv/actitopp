@@ -1,8 +1,9 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import edu.kit.ifv.mobitopp.actitopp.enums.ActitoppPersonParameters
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
 import edu.kit.ifv.mobitopp.actitopp.enums.Employment
+import edu.kit.ifv.mobitopp.actitopp.enums.Gender
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.isEmployedAnywhere
 import edu.kit.ifv.mobitopp.actitopp.enums.isStudentOrAzubi
@@ -16,11 +17,12 @@ class ActitoppPerson@JvmOverloads constructor(
     val persIndex: Int,
     val age: Int,
     employmentCode: Int,
-    val gender: Int,
+    genderCode: Int,
     val commutingdistance_work: Double = 0.0,
     val commutingdistance_education: Double = .0,
 ) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
+    val gender: Gender = Gender.fromCode(genderCode)
     val employment: Employment = Employment.fromInt(employmentCode)
     val isAllowedToWork: Boolean = true
     var weekPattern: HWeekPattern? = null
@@ -37,7 +39,7 @@ class ActitoppPerson@JvmOverloads constructor(
         tmppers.persIndex,
         tmppers.age,
         tmppers.employment.code,
-        tmppers.gender,
+        tmppers.gender.code,
         tmppers.commutingdistance_work,
         tmppers.commutingdistance_education
     )
@@ -97,7 +99,7 @@ class ActitoppPerson@JvmOverloads constructor(
         get() = household.children_u18
 
 
-    val areatype: Int
+    val areatype: AreaType
         /**
          * @return the areatype
          */
