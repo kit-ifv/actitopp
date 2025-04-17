@@ -54,7 +54,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
      * WRD = weighted random draw - the selection of the element is dependent on their share within the distribution
      *
      */
-    fun getRandomPickFromDistribution(lowerbound: Int, upperbound: Int, randomgenerator: RNGHelper): Int {
+    fun getRandomPickFromDistribution(bounds: IntRange, randomgenerator: RNGHelper): Int {
         //Phase1: check and apply bounds
         /*Issue 1) The assignment to usedLowerBound /upperbound can be solved via max/min, instead of assignment -> if
           Issue 2) Assert statements have two effects: Disabled -> Useless, Enabled -> Error. Why can we pass lowerbound
@@ -63,9 +63,12 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
           Issue 3) upperbound and lowerbound are integers, and upperbound could be smaller than lowerbound. This can be
           avoided altogether if the input passed to this method is not two naked Ints, but a range.
            */
-
-        val usedLowerBound = max(lowestKey, lowerbound)
-        val usedUpperBound = min(highestKey, upperbound)
+        // In order to honor the legacy code, let's throw an exception if the range is somehow empty
+        require(!bounds.isEmpty()) {
+            "Cannot operate on an invalid bounds $bounds"
+        }
+        val usedLowerBound = max(lowestKey, bounds.first)
+        val usedUpperBound = min(highestKey, bounds.last)
 
 
 

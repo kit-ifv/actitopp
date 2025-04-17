@@ -29,9 +29,9 @@ class WRDDefaultModelStep(
     // element that is finally chosen based on weighted random draw
     private var chosenDistributionElement = 0
 
-    //limits the range in which a number should be picked randomly.
-    private var lowerBoundLimiter = -1
-    private var upperBoundLimiter = -1
+
+    /*Use lateinit to avoid having to initialize with some invalid default value like -1 */
+    private lateinit var bounds: IntRange
 
     /**
      * creates wrd model step element without a given activity type
@@ -53,8 +53,7 @@ class WRDDefaultModelStep(
         // pick a random number within the given boundaries
 
         chosenDistributionElement = weightedDistribution.getRandomPickFromDistribution(
-            this.lowerBoundLimiter,
-            this.upperBoundLimiter, modelCoordinator.randomGenerator
+            this.bounds, modelCoordinator.randomGenerator
         )
 
         if (modifydistribution) {
@@ -67,8 +66,8 @@ class WRDDefaultModelStep(
 
     fun printDecisionProcess() {
         println("--------------- MC-Simulation @ " + this.id + this.category + this.activityType + " ---------------")
-        println("From " + this.lowerBoundLimiter)
-        println("To " + this.upperBoundLimiter)
+        println("From " + this.bounds.first)
+        println("To " + this.bounds.last)
         println("Random Value: " + modelCoordinator.randomGenerator.lastRandomValue)
         println("Chosen: $chosenDistributionElement")
         println("")
@@ -79,8 +78,10 @@ class WRDDefaultModelStep(
      * @param upperbound
      */
     fun setRangeBounds(lowerbound: Int, upperbound: Int) {
-        this.lowerBoundLimiter = lowerbound
-        this.upperBoundLimiter = upperbound
+        require(lowerbound <= upperbound) {
+            "Cannot set a range to $lowerbound $upperbound somehow the upperbound is smaller than the lower bound"
+        }
+        this.bounds = lowerbound..upperbound
     }
 
     fun getchosenDistributionElement(): Int {
