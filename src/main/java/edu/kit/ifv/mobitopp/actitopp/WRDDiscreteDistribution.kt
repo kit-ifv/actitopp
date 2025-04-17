@@ -7,8 +7,32 @@ import java.util.TreeMap
 import kotlin.math.max
 import kotlin.math.min
 
-class MutableDistributionEntry(var int: Int) {
+class HistogramDistribution(initialMap: Map<Int, Int>) {
 
+    private var distribution : Map<Int, Double>
+    init {
+        val sum = initialMap.values.sum()
+        distribution = initialMap.mapValues { it.value.toDouble() / sum }
+    }
+
+    fun update(element: Int) {
+        require(element in distribution) {
+            "How did you manage to update an element that you didn't select from the distribution in the first place"
+        }
+        val originalProbability = distribution.getValue(element)
+        val probabilityOfNotSelecting = 1 - originalProbability
+        val newProbability = originalProbability + (1.0/3) * probabilityOfNotSelecting
+        val remainingProbabilityOfNotSelecting = 1 - newProbability
+        val factor = remainingProbabilityOfNotSelecting / probabilityOfNotSelecting
+        val changableMap = distribution.toMutableMap()
+
+        changableMap.forEach {(key, value) ->
+            changableMap[key] = value * factor
+        }
+        changableMap[element] = newProbability
+        distribution = changableMap
+
+    }
 }
 
 /**
@@ -30,23 +54,28 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
         return histogram.values.sum()
     }
 
-    private fun getsumofalldistributionelements(lowerbound: Int, upperbound: Int): Int {
-        return histogram.filterKeys { it in lowerbound..upperbound }.values.sum()
-    }
-
-
     /**
      * method to modify an element of the distribution
      *
-     * @param slot
+     * TODO this method appears to shift the selection probability towards the selected element "IF" the element has
+     *   been selected and the modification is allowed. From the first appearance it seems to boost the selection
+     *   probability of the selected element by 50% relative selection probability. This means that the map could
+     *   internally be represented by the selection probabilities, instead of the amount of occurences.
+     *
+     *   UPDATE IT IS 33.3% not 50%. Try to guess that from the code below
      */
-
+    private val distribution = HistogramDistribution(histogram)
     fun modifydistributionelement(slot: Int) {
 
         val oldvalue = histogram[slot]!!
         val newvalue = oldvalue + (0.5 * getsumofalldistributionelements()).toInt()
 
         histogram[slot] = newvalue
+        val otherDistribution = HistogramDistribution(histogram)
+        distribution.update(slot)
+        println("EERORO")
+
+
     }
 
     /**
