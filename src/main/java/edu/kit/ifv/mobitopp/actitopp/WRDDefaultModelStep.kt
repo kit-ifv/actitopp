@@ -12,7 +12,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 class WRDDefaultModelStep(
     id: String, // category to get a random draw
     private val category: Category, // activitytype for personal, activity type specific distributions
-    private val activityType: ActivityType, // surrounding modelCoordinator for this step
+    private val activityType: ActivityType = ActivityType.UNKNOWN, // surrounding modelCoordinator for this step
     private val modelCoordinator: Coordinator
 ) :
     AbsHModelStep(id) {
@@ -34,20 +34,6 @@ class WRDDefaultModelStep(
     /*Use lateinit to avoid having to initialize with some invalid default value like -1 */
     private var bounds: IntRange = Int.MIN_VALUE..Int.MAX_VALUE
 
-    /**
-     * creates wrd model step element without a given activity type
-     * may be used when wrddist should not be dependent from activity type
-     *
-     * @param id
-     * @param category
-     * @param modelCoordinator
-     */
-    constructor(id: String, category: Category, modelCoordinator: Coordinator) : this(
-        id,
-        category,
-        ActivityType.UNKNOWN,
-        modelCoordinator
-    )
 
 
     public override fun doStep(): Int {
