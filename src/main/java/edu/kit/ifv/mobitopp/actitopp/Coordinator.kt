@@ -2248,17 +2248,9 @@ class Coordinator(
         return personalWRDDistributions[id + category + activityType] ?: run {
             val distribution = fileBase.getDistributionFor(id, category)
             WRDDiscreteDistribution(distribution).also {
-                addpersonalWRDdistribution(id, category, activityType, it)
+                personalWRDDistributions[id + category + activityType] = it
+
             }
         }
-    }
-
-    fun addpersonalWRDdistribution(
-        id: String,
-        category: Category,
-        activityType: ActivityType,
-        wrddist: WRDDiscreteDistribution
-    ) {
-        personalWRDDistributions[id + category + activityType] = wrddist
     }
 }
