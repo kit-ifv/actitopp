@@ -1,8 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.Collections
 import java.util.NavigableMap
-import java.util.SortedMap
 import java.util.TreeMap
 import kotlin.math.max
 import kotlin.math.min
@@ -15,22 +13,26 @@ class HistogramDistribution(initialMap: Map<Int, Int>) {
         distribution = initialMap.mapValues { it.value.toDouble() / sum }
     }
 
-    fun update(element: Int) {
+    /**
+     * I figured out the original code: Roughly translated it says -> Take the probability of the selected element, shift
+     * it by a third of the probability of not selecting that element, and update all other elements accordingly
+     */
+    fun increaseProbabilityFor(element: Int) {
         require(element in distribution) {
             "How did you manage to update an element that you didn't select from the distribution in the first place"
         }
-        val originalProbability = distribution.getValue(element)
-        val probabilityOfNotSelecting = 1 - originalProbability
-        val newProbability = originalProbability + (1.0/3) * probabilityOfNotSelecting
-        val remainingProbabilityOfNotSelecting = 1 - newProbability
-        val factor = remainingProbabilityOfNotSelecting / probabilityOfNotSelecting
-        val changableMap = distribution.toMutableMap()
+        val original = distribution.getValue(element)
+        val nonSelectionProbability = 1 - original
+        val updated = original + (1.0/3) * nonSelectionProbability
+        val remaining = 1 - updated
+        val scalingFactor = remaining / nonSelectionProbability
+        val updatedDistribution = distribution.toMutableMap()
 
-        changableMap.forEach {(key, value) ->
-            changableMap[key] = value * factor
+        updatedDistribution.forEach { (key, value) ->
+            updatedDistribution[key] = value * scalingFactor
         }
-        changableMap[element] = newProbability
-        distribution = changableMap
+        updatedDistribution[element] = updated
+        distribution = updatedDistribution
 
     }
 }
@@ -64,18 +66,11 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
      *
      *   UPDATE IT IS 33.3% not 50%. Try to guess that from the code below
      */
-    private val distribution = HistogramDistribution(histogram)
-    fun modifydistributionelement(slot: Int) {
 
+    fun modifydistributionelement(slot: Int) {
         val oldvalue = histogram[slot]!!
         val newvalue = oldvalue + (0.5 * getsumofalldistributionelements()).toInt()
-
         histogram[slot] = newvalue
-        val otherDistribution = HistogramDistribution(histogram)
-        distribution.update(slot)
-        println("EERORO")
-
-
     }
 
     /**
