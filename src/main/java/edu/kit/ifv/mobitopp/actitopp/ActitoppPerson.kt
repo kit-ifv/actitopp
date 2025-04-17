@@ -2,7 +2,10 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActitoppPersonParameters
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.Employment
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
+import edu.kit.ifv.mobitopp.actitopp.enums.isEmployedAnywhere
+import edu.kit.ifv.mobitopp.actitopp.enums.isStudentOrAzubi
 import java.util.Collections
 import kotlin.math.max
 
@@ -12,12 +15,13 @@ class ActitoppPerson@JvmOverloads constructor(
     val persNrinHousehold: Int,
     val persIndex: Int,
     val age: Int,
-    val employment: Int,
+    employmentCode: Int,
     val gender: Int,
     val commutingdistance_work: Double = 0.0,
     val commutingdistance_education: Double = .0,
 ) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
+    val employment: Employment = Employment.fromInt(employmentCode)
     val isAllowedToWork: Boolean = true
     var weekPattern: HWeekPattern? = null
         private set
@@ -32,7 +36,7 @@ class ActitoppPerson@JvmOverloads constructor(
         tmppers.persNrinHousehold,
         tmppers.persIndex,
         tmppers.age,
-        tmppers.employment,
+        tmppers.employment.code,
         tmppers.gender,
         tmppers.commutingdistance_work,
         tmppers.commutingdistance_education
@@ -352,8 +356,7 @@ class ActitoppPerson@JvmOverloads constructor(
      * @return
      */
     fun personisAnywayEmployed(): Boolean {
-        val employmenttype = employment
-        return (employmenttype == 1 || employmenttype == 2 || employmenttype == 21 || employmenttype == 22 || employmenttype == 5)
+        return employment.isEmployedAnywhere()
     }
 
     /**
@@ -362,8 +365,7 @@ class ActitoppPerson@JvmOverloads constructor(
      * @return
      */
     fun personisinEducation(): Boolean {
-        val employmenttype = employment
-        return (employmenttype == 4 || employmenttype == 40 || employmenttype == 41 || employmenttype == 42 || employmenttype == 5)
+        return employment.isStudentOrAzubi()
     }
 
 

@@ -6,6 +6,8 @@ import kotlin.math.max
 /**
  * @author Tim Hilgert
  */
+
+inline val Boolean.D get() = if(this) 1.0 else 0.0
 enum class ActitoppPersonParameters{
     /*
         * Kinder 0-10
@@ -36,60 +38,42 @@ enum class ActitoppPersonParameters{
      */
     beruf_vollzeit{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.employment == 1) 1.0 else 0.0)
+            return (actitoppPerson.employment == Employment.FULLTIME).D
         }
     },
     beruf_teilzeit{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            val employmentType = actitoppPerson.employment
-            var returnvalue = 0.0
-            if (employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue = 1.0
-            return returnvalue
+            return actitoppPerson.employment.isParttime().D
         }
     },
     beruf_ohneerwerb{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            val employmentType = actitoppPerson.employment
-            var returnvalue = 0.0
-            if (employmentType == 3 || employmentType == 6) returnvalue = 1.0
-            return returnvalue
+            return actitoppPerson.employment.isNotEarning().D
         }
     },
     beruf_schueler{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            val employmentType = actitoppPerson.employment
-            var returnvalue = 0.0
-            if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42) returnvalue =
-                1.0
-            return returnvalue
+            return actitoppPerson.employment.isStudent().D
         }
     },
     beruf_azubi{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.employment == 5) 1.0 else 0.0)
+            return (actitoppPerson.employment == Employment.VOCATIONAL).D
         }
     },
     beruf_schueler_azubi{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            val employmentType = actitoppPerson.employment
-            var returnvalue = 0.0
-            if (employmentType == 4 || employmentType == 40 || employmentType == 41 || employmentType == 42 || employmentType == 5) returnvalue =
-                1.0
-            return returnvalue
+            return actitoppPerson.employment.isStudentOrAzubi().D
         }
     },
     beruf_erwerbstaetig{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            val employmentType = actitoppPerson.employment
-            var returnvalue = 0.0
-            if (employmentType == 1 || employmentType == 2 || employmentType == 21 || employmentType == 22) returnvalue =
-                1.0
-            return returnvalue
+            return actitoppPerson.employment.isEarning().D
         }
     },
     beruf_rentner{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.employment == 7) 1.0 else 0.0)
+            return (actitoppPerson.employment == Employment.RETIRED).D
         }
     },
 
@@ -108,7 +92,7 @@ enum class ActitoppPersonParameters{
     },
     rentnerin2pershh{
         override fun getAttribute(actitoppPerson: ActitoppPerson): Double {
-            return (if (actitoppPerson.household.numberofPersonsinHousehold == 2 && actitoppPerson.employment == 7) 1.0 else 0.0)
+            return (if (actitoppPerson.household.numberofPersonsinHousehold == 2 && actitoppPerson.employment == Employment.RETIRED) 1.0 else 0.0)
         }
     },
 

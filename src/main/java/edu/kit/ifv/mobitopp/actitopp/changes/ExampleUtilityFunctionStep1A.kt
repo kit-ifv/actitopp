@@ -1,11 +1,13 @@
 package edu.kit.ifv.mobitopp.actitopp.changes
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
+import edu.kit.ifv.mobitopp.actitopp.enums.Employment
+import edu.kit.ifv.mobitopp.actitopp.enums.isParttime
+import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.D
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.DiscreteChoiceModel
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.Logit
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.UtilityFunction
 
 data class BiggerParameterCollection(
     val option1: ParametersStepOne,
@@ -22,7 +24,7 @@ data class ParametersStepOne(
     val employmentFullTime: Double,
     val employmentPartTime: Double,
     val employmentStudent: Double,
-    val employmentTrainee: Double,
+    val employmentVocational: Double,
     val genderIsMale: Double,
     val areaTypeConurburation: Double,
     val areaTypeRural: Double,
@@ -34,8 +36,10 @@ data class ParametersStepOne(
     val ageIn61to70: Double,
     val householdHasChildenBelowAge10: Double,
 )
+inline operator fun Boolean.times(other: Double): Double = this.D * other
 class Situation(override val choice: Int, val person: ActitoppPerson): ChoiceSituation<Int>() {
     val employment = person.employment
+    val age = person.age
 
 }
 val step1Model = DiscreteChoiceModel<Int, Situation, BiggerParameterCollection>(AllocatedLogit.create {
@@ -47,5 +51,16 @@ val step1Model = DiscreteChoiceModel<Int, Situation, BiggerParameterCollection>(
 })
 
 val standardUtilityFunction:  ParametersStepOne.(Situation) -> Double = {
-    base
+    base +
+            (it.employment == Employment.FULLTIME) * employmentFullTime +
+            (it.employment.isParttime()) * employmentPartTime +
+            (it.employment.isStudent()) * employmentStudent +
+            (it.employment == Employment.VOCATIONAL) * employmentVocational+
+
+            (it.age in 10..17) * ageIn10to17 +
+            (it.age in 18..25) * ageIn18To25 +
+            (it.age in 26..35) * ageIn26To35 +
+            (it.age in 36..50) * ageIn36To50 +
+            (it.age in 51..60) * ageIn51to60 +
+            (it.age in 61..70) * ageIn61to70
 }
