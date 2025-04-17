@@ -15,7 +15,7 @@ class MutableDistributionEntry(var int: Int) {
  */
 class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
-    constructor(distributioninformation: WRDModelDistributionInformation): this(TreeMap(distributioninformation))
+    constructor(distributioninformation: WRDModelDistributionInformation) : this(TreeMap(distributioninformation))
 
     /**
      * No reason not to remember the lowest and highest key, the key structure of this class is never changing, only the values
@@ -23,35 +23,14 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
     private val lowestKey: Int = histogram.keys.min()
 
     private val highestKey: Int = histogram.keys.max()
-    /**
-     * return the sum of all distributionselements
-     *
-     * @return
-     */
+
     private fun getsumofalldistributionelements(): Int {
-        var sum = 0
-        for ((_, value) in histogram) {
-            sum += value
-        }
-        assert(sum != 0) { "sum is zero : no entries in distribution?" }
-        return sum
+        return histogram.values.sum()
     }
 
-    /**
-     * returns the sum of all distribtionselements within the given boundaries
-     *
-     * @param lowerbound
-     * @param upperbound
-     * @return
-     */
     private fun getsumofalldistributionelements(lowerbound: Int, upperbound: Int): Int {
-        var sum = 0
-        for ((key, value) in histogram) {
-            if (key >= lowerbound && key <= upperbound) sum += value
-        }
-        return sum
+        return histogram.filterKeys { it in lowerbound..upperbound }.values.sum()
     }
-
 
 
     /**
