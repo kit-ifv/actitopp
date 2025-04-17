@@ -71,7 +71,6 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
         val usedUpperBound = min(highestKey, bounds.last)
 
 
-
         //Phase2: get random value
         val rand = randomgenerator.randomValue
 
@@ -85,25 +84,25 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
         // if all element values are equal to zero, choose one of them randomly
         if (sumofvalidelements == 0) {
-            firstslot = usedLowerBound
-            lastslot = usedUpperBound
-        } else {
-            for ((slot, amount) in histogram) {
-                if (slot >= usedLowerBound && slot <= usedUpperBound) {
-                    //check if the rand value lies between the runninshare of the last slot and the actual slot
-
-                    if (rand >= runningshare) firstslot = slot
-
-                    //update runningsahre / accumulated share for the distribution element
-                    val share = amount.toDouble() / sumofvalidelements.toDouble()
-                    runningshare += share
-
-                    //check if the slot ist the last value where rand is smaller than the runningshare
-                    if (lastslot == -1 && rand <= runningshare) lastslot = slot
-                }
-            }
-            assert(Math.round(runningshare).toDouble() == 1.0) { "sum of valid element share is not equal to 1!" }
+            return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound, 1)
         }
+
+        for ((slot, amount) in histogram) {
+            if (slot >= usedLowerBound && slot <= usedUpperBound) {
+                //check if the rand value lies between the runninshare of the last slot and the actual slot
+
+                if (rand >= runningshare) firstslot = slot
+
+                //update runningsahre / accumulated share for the distribution element
+                val share = amount.toDouble() / sumofvalidelements.toDouble()
+                runningshare += share
+
+                //check if the slot ist the last value where rand is smaller than the runningshare
+                if (lastslot == -1 && rand <= runningshare) lastslot = slot
+            }
+        }
+        assert(Math.round(runningshare).toDouble() == 1.0) { "sum of valid element share is not equal to 1!" }
+
 
         assert(firstslot != -1) { "could not determine firstslot for randomPick" }
         assert(lastslot != -1) { "could not determine lastslot for randomPick" }
