@@ -6,12 +6,13 @@ package edu.kit.ifv.mobitopp.actitopp
  *
  * - name 						: name of the parameter
  * - parameterValue 	: value of the parameter. Is loaded from the file system at beginning of model execution process
+ * ROBIN: Which means that this field can be read only
  * - attributevalue 	: value of the according attribute. Is determined at runtime depeding on actual person, day, tour or activity
  *
  * @author Tim Hilgert
  */
 class UtilityParameterAttributeCombination(val name: String,
-                                           private var parameterValue: Double = -99999.0,
+                                           private val parameterValue: Double = -99999.0,
                                            private var attributeValue: Double = -99999.0
 ) {
 

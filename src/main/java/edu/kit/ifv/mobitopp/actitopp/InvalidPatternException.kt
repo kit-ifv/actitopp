@@ -23,7 +23,7 @@ class InvalidPatternException
 ) :
     AbsInvalidPatternException() {
     init {
-        println("Creating")
+        println("Creating InvalidPatternException")
     }
     companion object {
         private const val serialVersionUID = -3030772908826568766L

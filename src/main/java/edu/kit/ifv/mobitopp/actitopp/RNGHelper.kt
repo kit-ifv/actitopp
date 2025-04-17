@@ -1,6 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import java.util.Random
+import kotlin.random.Random
 
 /**
  * @author Tim Hilgert
@@ -11,11 +11,12 @@ class RNGHelper(
      */
     val seed: Long
 ) {
-    private val rng = Random(seed)
+    private val rng : Random = Random(seed)
 
     /**
      * @return
      */
+    @Deprecated("Seems to be only used for debug printing")
     var lastRandomValue: Double = 0.0
         private set
 
@@ -47,26 +48,14 @@ class RNGHelper(
 
 
     /**
-     * get random from range (from...to) with the specified "size" of the steps
-     * uniform distribution!
+     * Nowhere in the codebase is the stepSize set to anything other than 1, so we can kill that procedure.
+     * Also random generation can be done without allocating an array and then picking randomly from it
      *
-     * @param from
-     * @param to
-     * @param stepSize
-     * @return
+     * If in the future anyone requires stepSize -> In kotlin you can pass the stepSize to the range.
      */
-    fun getRandomValueBetween(from: Int, to: Int, stepSize: Int): Int {
-        require(from <= to) { "FROM bigger than TO" }
-        val steps = (to - from) / stepSize
-        val range = IntArray(steps + 1)
-        for (i in 0..<steps) {
-            range[i] = from + (i * stepSize)
-        }
-        range[steps] = to
+    fun getRandomValueBetween(from: Int, to: Int): Int {
 
-        val rangeSize = range.size - 1
-        val result = range[rng.nextInt(rangeSize - 0 + 1) + 0]
-
-        return result
+        require(from <= to) { "FROM bigger than TO $from $to" }
+        return (from..to).random(rng)
     }
 }

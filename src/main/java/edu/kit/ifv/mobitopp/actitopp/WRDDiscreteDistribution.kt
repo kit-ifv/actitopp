@@ -111,7 +111,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
         // if all element values are equal to zero, choose one of them randomly
         if (sumofvalidelements == 0) {
-            return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound, 1)
+            return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound)
         }
         var acc = 0.0
         val normalizedValues = relevantElements.mapValues { acc += it.value.toDouble() / sumofvalidelements; acc }

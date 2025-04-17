@@ -782,7 +782,7 @@ class Coordinator(
             /*
              * step 10: choose randomly on of the remaining activities
              */
-            val rnd = randomGenerator.getRandomValueBetween(0, possibleact.size - 1, 1)
+            val rnd = randomGenerator.getRandomValueBetween(0, possibleact.size - 1)
             val actforreplacement = possibleact[rnd]
 
             /*
