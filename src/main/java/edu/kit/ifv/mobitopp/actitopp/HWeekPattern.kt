@@ -112,7 +112,7 @@ class HWeekPattern(
      * @param activityType
      * @return
      */
-    fun countDaysWithSpecificActivity(activityType: ActivityType?): Int = days.count {it.totalAmountOfActivitites > 0}
+    fun countDaysWithSpecificActivity(activityType: ActivityType): Int = days.count {it.hasActivity(activityType)}
 
 
 

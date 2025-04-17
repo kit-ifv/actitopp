@@ -44,7 +44,7 @@ class Coordinator @JvmOverloads constructor(
 
 
     private fun log(id: String, element: Any, other: Any) {
-        debugloggers?.let { it.getLogger(id)[element] = other.toString() }
+        // debugloggers?.let { it.getLogger(id)[element] = other.toString() }
     }
 
     /**
@@ -1851,6 +1851,9 @@ class Coordinator @JvmOverloads constructor(
         } else {
             tourday.highestTourIndex
         }
+        val other = (tour.index..tourindexforsearch).map{tourday.getTour(it)}
+        val otherDur = other.sumOf{it.tourDuration}
+        val homeDurs = other.size
         for (i in tour.index..tourindexforsearch) {
             val tmptour = tourday.getTour(i)
             tmptourdurations += tmptour.tourDuration

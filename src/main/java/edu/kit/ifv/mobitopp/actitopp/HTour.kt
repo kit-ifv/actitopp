@@ -143,11 +143,7 @@ class HTour(parent: HDay, index: Int) {
          * @return
          */
         get() {
-            var sum = 0
-            for (act in activities) {
-                sum += (if (act.durationisScheduled()) act.duration else 0)
-            }
-            return sum
+            return activities.filter{it.durationisScheduled()}.sumOf { it.duration }
         }
 
     val tripDuration: Int
@@ -157,12 +153,9 @@ class HTour(parent: HDay, index: Int) {
          * @return
          */
         get() {
-            var sum = 0
-            for (act in activities) {
-                sum += (if (act.tripBeforeActivityisScheduled()) act.estimatedTripTimeBeforeActivity else 0)
-                sum += (if (act.tripAfterActivityisScheduled()) act.estimatedTripTimeAfterActivity else 0)
-            }
-            return sum
+            val beforeSum = activities.filter{it.tripBeforeActivityisScheduled()}.sumOf { it.estimatedTripTimeBeforeActivity }
+            val afterSum = activities.filter{it.tripAfterActivityisScheduled()}.sumOf { it.estimatedTripTimeAfterActivity }
+            return beforeSum + afterSum
         }
 
 
@@ -174,39 +167,18 @@ class HTour(parent: HDay, index: Int) {
      * @return
      */
     fun getActivity(index: Int): HActivity {
-        var indexact: HActivity? = null
-        for (activity in activities) {
-            if (activity.index == index) {
-                indexact = activity
-            }
-        }
-        checkNotNull(indexact) {
-            "could not find activity with index $index"
-        }
-        return indexact
+        return activities[index]
     }
 
 
     val lowestActivityIndex: Int
         get() {
-            var min = +99
-            for (act in this.activities) {
-                if (act.index < min) min = act.index
-            }
-            assert(min <= 0) { "minimum activity index of this tour is > 0 - index: $min" }
-            return min
+            return activities.minOf { it.index }.also { require(it >= 0){"Apparently bad stuff happens when the index is negative  ¯\\_(ツ)_/¯"} }
         }
 
     val highestActivityIndex: Int
         get() {
-            var max = -99
-            for (act in this.activities) {
-                if (act.index > max) {
-                    max = act.index
-                }
-            }
-            assert(max >= 0) { "maximum activity index of this tour is < 0  - index: $max" }
-            return max
+            return activities.maxOf{it.index}.also { require(it >= 0) {"Negative index, Actitopp no Like  ¯\\_(ツ)_/¯"} }
         }
 
 

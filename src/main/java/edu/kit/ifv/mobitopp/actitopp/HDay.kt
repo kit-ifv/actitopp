@@ -56,7 +56,9 @@ class HDay(parent: HWeekPattern, weekday: Int) {
 
 
 
-
+    fun hasActivity(activityType: ActivityType): Boolean {
+        return tours.any { t -> t.activities.any { it.activityType == activityType && it.isScheduled } }
+    }
     fun addTour(tour: HTour) {
         assert(tour.index != -99) { "index of the tour is not initialized" }
         var tourindexexisitiert = false
