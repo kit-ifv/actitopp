@@ -16,8 +16,8 @@ class DCDefaultModelStep(
     private val randomgenerator: RNGHelper
 ) :
     AbsHModelStep(id) {
-    var decision: Int = -1
-        private set
+
+
     lateinit var alternativeChosen: String
         private set
     private val choiceFunction: ChoiceFunction = LogitFunction()
@@ -112,7 +112,7 @@ class DCDefaultModelStep(
          * decide for one alternative
          */
         val randomvalue = randomgenerator.randomValue
-        decision = choiceFunction.chooseAlternative(alternatives, randomvalue)
+        val decision = choiceFunction.chooseAlternative(alternatives, randomvalue)
         alternativeChosen = alternatives[decision].name
 
         // DEBUG USE ONLY
@@ -123,7 +123,6 @@ class DCDefaultModelStep(
         assert(decision != -1) { "could not make a decision!" }
         return decision
     }
-
     /**
      * Limits the DC-process to a certain alternative range. this method must be called before doStep() if necessary
      *

@@ -18,16 +18,15 @@ import kotlin.math.min
  * class to coordinate the modeling of week activity schedules
  * will be called from [ActitoppPerson] to generate schedules
  */
-class Coordinator(
+class Coordinator @JvmOverloads constructor(
     /** ///////////// */
-    private val person: ActitoppPerson, fileBase: ModelFileBase, randomgenerator: RNGHelper) {
+    private val person: ActitoppPerson,
+    val fileBase: ModelFileBase,     val randomGenerator: RNGHelper,     private val debugloggers: DebugLoggers? = null) {
     /**///////////// */ //	declaration of variables
-    private val pattern: HWeekPattern?
+    private val pattern: HWeekPattern? = person.weekPattern
 
-    @JvmField
-    val fileBase: ModelFileBase
-    val randomGenerator: RNGHelper
-    private var debugloggers: DebugLoggers? = null
+
+
 
     /*
      * - distributions for wrd (weighted random draw) model steps are personalized.
@@ -37,45 +36,13 @@ class Coordinator(
      * a 8-hour working activity, the distribution element (8 hours) will get a bonus that it is more likely to choose
      * 8 hours again the next time for this person. This ensures better stability of duration and starttime modeling.
      */
-    private val personalWRDDistributions: HashMap<String, WRDDiscreteDistribution>
+    private val personalWRDDistributions: HashMap<String, WRDDiscreteDistribution> = HashMap()
 
 
     // Important for modeling joint actions
     private val numberofactsperday_lowerboundduetojointactions = intArrayOf(0, 0, 0, 0, 0, 0, 0)
     private val numberoftoursperday_lowerboundduetojointactions = intArrayOf(0, 0, 0, 0, 0, 0, 0)
 
-
-    /**
-     * Constructor
-     *
-     * @param person
-     * @param fileBase
-     * @param randomgenerator
-     */
-    init {
-        this.pattern = person.weekPattern
-        this.fileBase = fileBase
-        this.randomGenerator = randomgenerator
-
-        this.personalWRDDistributions = HashMap()
-    }
-
-    /**
-     * Constructor including debug-loggers
-     *
-     * @param person
-     * @param fileBase
-     * @param randomgenerator
-     * @param debugloggers
-     */
-    constructor(
-        person: ActitoppPerson,
-        fileBase: ModelFileBase,
-        randomgenerator: RNGHelper,
-        debugloggers: DebugLoggers?
-    ) : this(person, fileBase, randomgenerator) {
-        this.debugloggers = debugloggers
-    }
 
 
     /**
@@ -284,7 +251,7 @@ class Coordinator(
                 }
 
                 // make selection
-                step.doStep()
+                val decision = step.doStep()
                 val activityType = getTypeFromChar(step.alternativeChosen[0])
 
                 if (debugloggers != null && debugloggers!!.existsLogger(id)) {
@@ -357,14 +324,14 @@ class Coordinator(
 
 
             // make selection
-            step.doStep()
+            val decision = step.doStep()
 
             if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                debugloggers!!.getLogger(id)[currentDay] = step.decision.toString()
+                debugloggers!!.getLogger(id)[currentDay] = decision.toString()
             }
 
             // create tours based on the decision and add them to the pattern
-            for (j in 1..step.decision) {
+            for (j in 1..decision) {
                 var tour: HTour? = null
                 // 3A - tours before main tour
                 if (id == "3A" && !currentDay.existsTour(-1 * j)) tour = HTour(currentDay, (-1) * j)
@@ -419,7 +386,7 @@ class Coordinator(
                     }
 
                     // make selection
-                    step.doStep()
+                    val decision = step.doStep()
                     val activityType = getTypeFromChar(step.alternativeChosen[0])
 
                     if (debugloggers != null && debugloggers!!.existsLogger(id)) {
@@ -486,14 +453,14 @@ class Coordinator(
                 step.limitLowerBoundOnly(minimumnumberofactivities)
 
                 // make selection
-                step.doStep()
+                val decision = step.doStep()
 
                 if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                    debugloggers!!.getLogger(id)[currentTour] = step.decision.toString()
+                    debugloggers!!.getLogger(id)[currentTour] = decision.toString()
                 }
 
                 // create activities based on the decision and add them to the pattern
-                for (j in 1..step.decision) {
+                for (j in 1..decision) {
                     var act: HActivity? = null
                     // 5A - activity before main activity
                     if (id == "5A" && !currentDay.existsActivity(currentTour.index, -1 * j)) act =
@@ -554,7 +521,7 @@ class Coordinator(
                         }
 
                         //make selection
-                        step.doStep()
+                        val decision = step.doStep()
 
                         // set activity type
                         val activityType = getTypeFromChar(step.alternativeChosen[0])
@@ -885,13 +852,13 @@ class Coordinator(
 
             // create step object
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-            step.doStep()
+            val decision = step.doStep()
 
-            if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                debugloggers!!.getLogger(id)[person] = step.decision.toString()
+            if (debugloggers != null && debugloggers.existsLogger(id)) {
+                debugloggers.getLogger(id)[person] = decision.toString()
             }
 
-            person.addAttributetoMap(activitytype.toString() + "budget_category_index", step.decision.toDouble())
+            person.addAttributetoMap(activitytype.toString() + "budget_category_index", decision.toDouble())
             person.addAttributetoMap(
                 activitytype.toString() + "budget_category_alternative",
                 step.alternativeChosen.toDouble()
@@ -917,8 +884,8 @@ class Coordinator(
             val step = WRDDefaultModelStep(id, Category(chosenIndex.toInt()), activitytype, this)
             val chosenTime = step.doStep()
 
-            if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                debugloggers!!.getLogger(id)[person] = chosenTime.toString()
+            if (debugloggers != null && debugloggers.existsLogger(id)) {
+                debugloggers.getLogger(id)[person] = chosenTime.toString()
             }
 
             person.addAttributetoMap(activitytype.toString() + "budget_exact", chosenTime.toDouble())
@@ -946,7 +913,7 @@ class Coordinator(
 
                     // create step object
                     val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-                    step.doStep()
+                    val decision = step.doStep()
 
                     if (debugloggers != null && debugloggers!!.existsLogger(id)) {
                         debugloggers!!.getLogger(id)[currentActivity] = step.alternativeChosen.toString()
@@ -1052,13 +1019,13 @@ class Coordinator(
                         assert(step_dc.lowerBound <= step_dc.upperBound)
 
                         // make selection
-                        step_dc.doStep()
+                        val decision = step_dc.doStep()
 
                         if (debugloggers != null && debugloggers!!.existsLogger(id_dc)) {
-                            debugloggers!!.getLogger(id_dc)[currentActivity] = step_dc.decision.toString()
+                            debugloggers!!.getLogger(id_dc)[currentActivity] = decision.toString()
                         }
 
-                        currentActivity.addAttributetoMap("actdurcat_index", step_dc.decision.toDouble())
+                        currentActivity.addAttributetoMap("actdurcat_index", decision.toDouble())
 
                         /*
                          *
@@ -1150,13 +1117,13 @@ class Coordinator(
                         assert(step_dc.lowerBound <= step_dc.upperBound)
 
                         // make selection
-                        step_dc.doStep()
+                        val decision = step_dc.doStep()
 
                         if (debugloggers != null && debugloggers!!.existsLogger(id_dc)) {
-                            debugloggers!!.getLogger(id_dc)[currentActivity] = step_dc.decision.toString()
+                            debugloggers!!.getLogger(id_dc)[currentActivity] = decision.toString()
                         }
 
-                        currentActivity.addAttributetoMap("actdurcat_index", step_dc.decision.toDouble())
+                        currentActivity.addAttributetoMap("actdurcat_index", decision.toDouble())
 
                         /*
                          *
@@ -1201,13 +1168,13 @@ class Coordinator(
 
             // create step object
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-            step.doStep()
+            val decision = step.doStep()
 
             if (debugloggers != null && debugloggers!!.existsLogger(id)) {
-                debugloggers!!.getLogger(id)[person] = step.decision.toString()
+                debugloggers!!.getLogger(id)[person] = decision.toString()
             }
 
-            person.addAttributetoMap("first_tour_default_start_cat", step.decision.toDouble())
+            person.addAttributetoMap("first_tour_default_start_cat", decision.toDouble())
         }
     }
 
@@ -1230,7 +1197,7 @@ class Coordinator(
 
                     // create step object
                     val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-                    step.doStep()
+                    val decision = step.doStep()
 
                     if (debugloggers != null && debugloggers!!.existsLogger(id)) {
                         debugloggers!!.getLogger(id)[currentTour] = step.alternativeChosen.toString()
@@ -1350,13 +1317,13 @@ class Coordinator(
                 }
 
                 // make selection
-                step_dc.doStep()
+                val decision = step_dc.doStep()
 
                 if (debugloggers != null && debugloggers!!.existsLogger(id_dc)) {
-                    debugloggers!!.getLogger(id_dc)[currentTour] = step_dc.decision.toString()
+                    debugloggers!!.getLogger(id_dc)[currentTour] = decision.toString()
                 }
 
-                currentTour.addAttributetoMap("tourStartCat_index", step_dc.decision.toDouble())
+                currentTour.addAttributetoMap("tourStartCat_index", decision.toDouble())
 
 
                 /*
@@ -1383,7 +1350,7 @@ class Coordinator(
                 currentTour.startTime = chosenStartTime
                 currentTour.createStartTimesforActivities()
 
-                //TODO previousTour needs to be scheduled if modeling is chronological 
+                //TODO previousTour needs to be scheduled if modeling is chronological
 
                 // ensure that there are no temporal overlaps
                 val previousTour = currentTour.previousTourinPattern
@@ -1425,13 +1392,13 @@ class Coordinator(
                     dcstep.limitUpperandLowerBound(lowerbound, upperbound)
 
                     // make selection
-                    dcstep.doStep()
+                    val decision = dcstep.doStep()
 
                     if (debugloggers != null && debugloggers!!.existsLogger("10S")) {
-                        debugloggers!!.getLogger("10S")[currentTour] = dcstep.decision.toString()
+                        debugloggers!!.getLogger("10S")[currentTour] = decision.toString()
                     }
 
-                    val chosenHomeTimeCategory = dcstep.decision
+                    val chosenHomeTimeCategory = decision
 
                     // 10T
                     val step_wrd = WRDDefaultModelStep(
@@ -1490,7 +1457,7 @@ class Coordinator(
 
                         // create step object
                         val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-                        step.doStep()
+                        val decision = step.doStep()
 
                         if (debugloggers != null && debugloggers!!.existsLogger(id)) {
                             debugloggers!!.getLogger(id)[currentActivity] = step.alternativeChosen.toString()

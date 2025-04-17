@@ -406,8 +406,9 @@ class HActivity: Comparable<HActivity> {
 
         var actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR
         // better than default if we have commuting information
-        if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person!!.commutingDuration_work
-        if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person!!.commutingDuration_education
+        if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person.commutingDuration_work
+        if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person.commutingDuration_education
+
         if (tripbeforeactivity == null) {
             tripbeforeactivity = HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime_beforeTrip)
         } else {
