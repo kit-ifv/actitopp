@@ -19,7 +19,11 @@ class LinRegEstimate(
      * @param name the name to set
      */
     var name: String,
-    value: Double, contextIdentifier: String
+    value: Double,
+    /**
+     * @param contextIdentifier the contextIdentifier to set
+     */
+    var contextIdentifier: String
 ) {
     /**
      * @return the name
@@ -27,24 +31,8 @@ class LinRegEstimate(
     /**
      * @return the contextIdentifier
      */
-    /**
-     * @param contextIdentifier the contextIdentifier to set
-     */
-    var contextIdentifier: String
-    var estimateValue = -99999.0
+    val estimateValue = value
     var attributeValue = -99999.0
-
-    /**
-     * Konstruktor
-     *
-     * @param name
-     * @param value
-     * @param contextIdentifier
-     */
-    init {
-        this.estimateValue = value
-        this.contextIdentifier = contextIdentifier
-    }
 
 
     override fun toString(): String {

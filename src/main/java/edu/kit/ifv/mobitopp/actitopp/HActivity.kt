@@ -433,7 +433,7 @@ class HActivity: Comparable<HActivity> {
     }
 
     val isScheduled: Boolean
-        get() = durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (if (Configuration.model_joint_actions) jointStatus != JointStatus.UNKNOWN else true)
+        get() = durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (if (Configuration.modelJointActions) jointStatus != JointStatus.UNKNOWN else true)
 
     fun activitytypeisScheduled(): Boolean {
         return this.acttype != ActivityType.UNKNOWN

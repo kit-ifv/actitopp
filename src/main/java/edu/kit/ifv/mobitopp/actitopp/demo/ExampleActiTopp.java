@@ -46,7 +46,7 @@ public class ExampleActiTopp {
      * Create a person including activity schedule - example 1
      */
     public static void createAndModelOnePerson_Example1() {
-        ActitoppPerson testperson = new ActitoppPerson(
+        ActitoppPerson testperson = ActitoppPerson.Companion.invoke(
                 10,    // PersIndex
                 0,        // number of children 0-10
                 1,        // number of children below 18
@@ -81,7 +81,7 @@ public class ExampleActiTopp {
     }
 
     public static void createAndModelOnePerson_Example1_nocarinfo() {
-        ActitoppPerson testperson = new ActitoppPerson(
+        ActitoppPerson testperson = ActitoppPerson.Companion.invoke(
                 10,    // PersIndex
                 0,        // number of children 0-10
                 1,        // number of children below 18
@@ -119,7 +119,7 @@ public class ExampleActiTopp {
      * Create a person including activity schedule - example 2
      */
     public static void createAndModelOnePerson_Example2() {
-        ActitoppPerson testperson = new ActitoppPerson(
+        ActitoppPerson testperson = ActitoppPerson.Companion.invoke(
                 20,    // PersIndex
                 0,        // number of children 0-10
                 1,        // number of children below 18

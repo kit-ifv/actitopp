@@ -35,16 +35,14 @@ public class CSVExportWriter {
         for (Object referenceobject : maptoexport.values()) {
 
             // Householdmap
-            if (referenceobject instanceof ActiToppHousehold) {
-                ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
+            if (referenceobject instanceof ActiToppHousehold acthousehold) {
                 for (ActitoppPerson actperson : acthousehold.getHouseholdmembersasList()) {
                     exportTripData_singlePerson(actperson);
                 }
             }
 
             // Personmap
-            if (referenceobject instanceof ActitoppPerson) {
-                ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
+            if (referenceobject instanceof ActitoppPerson actperson) {
                 exportTripData_singlePerson(actperson);
             }
         }
@@ -102,7 +100,7 @@ public class CSVExportWriter {
         // type of trip
         rueckgabe += trip.getType().getTypeasChar() + ";";
         // jointStatus
-        rueckgabe += (Configuration.INSTANCE.getModel_joint_actions() ? trip.getJointStatus() : "-99") + "";
+        rueckgabe += (Configuration.INSTANCE.getModelJointActions() ? trip.getJointStatus() : "-99") + "";
 
         rueckgabe += "\n";
         return rueckgabe;
@@ -123,16 +121,14 @@ public class CSVExportWriter {
         for (Object referenceobject : maptoexport.values()) {
 
             // Householdmap
-            if (referenceobject instanceof ActiToppHousehold) {
-                ActiToppHousehold acthousehold = ((ActiToppHousehold) referenceobject);
+            if (referenceobject instanceof ActiToppHousehold acthousehold) {
                 for (ActitoppPerson actperson : acthousehold.getHouseholdmembersasList()) {
                     exportActivityData_singlePerson(actperson);
                 }
             }
 
             // Personmap
-            if (referenceobject instanceof ActitoppPerson) {
-                ActitoppPerson actperson = ((ActitoppPerson) referenceobject);
+            if (referenceobject instanceof ActitoppPerson actperson) {
                 exportActivityData_singlePerson(actperson);
             }
         }
@@ -205,7 +201,7 @@ public class CSVExportWriter {
         // Zweck
         rueckgabe += act.getActivityType().getTypeasChar() + ";";
         // joint Status
-        rueckgabe += (Configuration.INSTANCE.getModel_joint_actions() ? act.getJointStatus() : "-99") + "";
+        rueckgabe += (Configuration.INSTANCE.getModelJointActions() ? act.getJointStatus() : "-99") + "";
 
         rueckgabe += "\n";
         return rueckgabe;

@@ -34,7 +34,7 @@ object Configuration {
      * modeling joint actions within household
      */
     //TODO try to get joint actions back to work
-    var model_joint_actions: Boolean = false
+    var modelJointActions: Boolean = false
 
 
 

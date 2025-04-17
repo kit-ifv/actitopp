@@ -192,7 +192,7 @@ class CSVExportLogger(var basepath: File) {
         // purpose
         returnstring += act.activityType.typeasChar.toString() + ";"
         // joint Status
-        returnstring += (if (Configuration.model_joint_actions) act.jointStatus else "-99").toString() + ""
+        returnstring += (if (Configuration.modelJointActions) act.jointStatus else "-99").toString() + ""
 
         returnstring += "\n"
         return returnstring
@@ -230,7 +230,7 @@ class CSVExportLogger(var basepath: File) {
         // type of trip
         returnstring += trip.type.typeasChar.toString() + ";"
         // jointStatus
-        returnstring += (if (Configuration.model_joint_actions) trip.jointStatus else "-99").toString() + ""
+        returnstring += (if (Configuration.modelJointActions) trip.jointStatus else "-99").toString() + ""
 
         returnstring += "\n"
         return returnstring

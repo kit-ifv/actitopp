@@ -82,7 +82,7 @@ class Coordinator(
      */
     @Throws(InvalidPatternException::class)
     fun executeModel() {
-        if (Configuration.model_joint_actions) {
+        if (Configuration.modelJointActions) {
             determineMinimumTourActivityBounds()
         }
 
@@ -111,7 +111,7 @@ class Coordinator(
         createTripTimesforActivities()
 
         // joint activities
-        if (Configuration.model_joint_actions) {
+        if (Configuration.modelJointActions) {
             placeJointActivitiesIntoPattern()
         }
 
@@ -146,7 +146,7 @@ class Coordinator(
 
         executeStep10ST()
 
-        if (Configuration.model_joint_actions) {
+        if (Configuration.modelJointActions) {
             executeStep11("11")
             // select other persons to join activity or trip
             selectWithWhomforJointActions()

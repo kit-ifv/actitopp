@@ -26,6 +26,7 @@ class InvalidPatternException
         println("Creating InvalidPatternException")
     }
     companion object {
+        // Why? You don't even serialize your Exception
         private const val serialVersionUID = -3030772908826568766L
     }
 }

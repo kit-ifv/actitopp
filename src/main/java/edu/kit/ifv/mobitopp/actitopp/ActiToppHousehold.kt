@@ -144,7 +144,6 @@ class ActiToppHousehold {
      * @param persnr
      */
     fun addHouseholdmember(member: ActitoppPerson, persnr: Int) {
-        checkNotNull(member) { "Householdmember is null" }
         assert(householdmembers[persnr] == null) { "Householdmember using this identifier already exists - persnr $persnr" }
         householdmembers[persnr] = member
     }
@@ -204,7 +203,7 @@ class ActiToppHousehold {
 
     fun generateSchedules(fileBase: ModelFileBase, randomgenerator: RNGHelper) {
         val hhmembers = householdmembersasList
-        if (Configuration.model_joint_actions) ActitoppPerson.Companion.sortPersonListOnProbabilityofJointActions_DESC(
+        if (Configuration.modelJointActions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(
             hhmembers,
             fileBase
         )
@@ -233,7 +232,7 @@ class ActiToppHousehold {
                      * person only.
                      */
 
-                    if (Configuration.model_joint_actions) {
+                    if (Configuration.modelJointActions) {
                         throw InvalidPatternException("Household", actperson.weekPattern, "Remodel Household")
                     }
                 }
@@ -252,7 +251,7 @@ class ActiToppHousehold {
 
     fun generateSchedules(fileBase: ModelFileBase, randomgenerator: RNGHelper, debugloggers: DebugLoggers) {
         val hhmembers = householdmembersasList
-        if (Configuration.model_joint_actions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(
+        if (Configuration.modelJointActions) ActitoppPerson.sortPersonListOnProbabilityofJointActions_DESC(
             hhmembers,
             fileBase
         )
@@ -282,7 +281,7 @@ class ActiToppHousehold {
                      * person only.
                      */
                     // TODO fix this insanity.
-                    if (Configuration.model_joint_actions) {
+                    if (Configuration.modelJointActions) {
                         throw InvalidPatternException("Household", actperson.weekPattern, "Remodel Household")
                     }
                 }

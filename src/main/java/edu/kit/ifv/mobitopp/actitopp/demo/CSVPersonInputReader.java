@@ -69,7 +69,7 @@ public class CSVPersonInputReader {
 
             try {
 
-                ActitoppPerson tmpperson = new ActitoppPerson(
+                ActitoppPerson tmpperson = ActitoppPerson.Companion.invoke(
                         Integer.parseInt(splitted[0]),        // PersIndex
                         Integer.parseInt(splitted[1]),        // Kinder 0-10
                         Integer.parseInt(splitted[2]),        // Kinder unter 18

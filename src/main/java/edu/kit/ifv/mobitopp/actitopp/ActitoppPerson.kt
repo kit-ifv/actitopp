@@ -1,335 +1,32 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActitoppPersonParameters
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import java.util.Collections
 import kotlin.math.max
 
 
-class ActitoppPerson {
-
-    //corresponding household
-    val household: ActiToppHousehold
-
-    // stores all attributes that are not directly accessible by variables
-    private val attributes: MutableMap<String, Double>
-
-    /**
-     * @return the weekPattern
-     */
-    // stores all activity information of the week pattern
+class ActitoppPerson@JvmOverloads constructor(
+    val household: ActiToppHousehold,
+    val persNrinHousehold: Int,
+    val persIndex: Int,
+    val age: Int,
+    val employment: Int,
+    val gender: Int,
+    val commutingdistance_work: Double = 0.0,
+    val commutingdistance_education: Double = .0,
+) {
+    private val attributes: MutableMap<String, Double> = mutableMapOf()
+    val isAllowedToWork: Boolean = true
     var weekPattern: HWeekPattern? = null
         private set
-    fun days() = weekPattern?.days ?: emptyList()
-    /**
-     * Robin: This function delegates the call to the weekpattern, which should not be exposed
-     */
-    fun countActivityTypes(activityType: ActivityType): Int {
-        return weekPattern?.countActivitiesPerWeek(activityType) ?: 0
-    }
-    fun countTourTypes(activityType: ActivityType): Int = weekPattern?.countToursPerWeek(activityType) ?: 0
-    fun countDaysWithSpecificActivity(activityType: ActivityType): Int = weekPattern?.countDaysWithSpecificActivity(activityType) ?: 0
-    /**
-     * @return the persIndex
-     */
-    /**
-     * @param persIndex the persIndex to set
-     */
-    var persIndex: Int = 0
 
-    /**
-     * @return the age
-     */
-    /**
-     * @param age the age to set
-     */
-
-    var age: Int = 0
-    /**
-     * @return the gender
-     */
-    /**
-     * @param gender the gender to set
-     */
-
-    var gender: Int = 0
-    /**
-     * @return the employment
-     */
-    /**
-     * @param employment the employment to set
-     */
-
-    var employment: Int = 0
-
-    /**
-     * determines if a person is allowed to work
-     * this may be disabled for minors to totally block them from having working activities
-     *
-     * @return
-     */
-    /**
-     * sets if a person is allowed to work
-     * this may be disabled for minors to totally block them from having working activities
-     *
-     * @param isAllowedToWork
-     */
-
-    var isAllowedToWork: Boolean = true
-
-    /**
-     * @return the commutingdistance_work
-     */
-    /**
-     * @param commutingdistance_work the commutingdistance_work to set
-     */
-    // commuting distance are 0 by default, i.e. not available or person is not commuting
-    var commutingdistance_work: Double = 0.0
-    /**
-     * @return the commutingdistance_education
-     */
-    /**
-     * @param commutingdistance_education the commutingdistance_education to set
-     */
-
-    var commutingdistance_education: Double = 0.0
-
-    /**
-     * @return the probableshareofjointactions
-     */
-    // Variables used for modeling of joint actions
-    // based on linear regression model to determine modeling order within the household
-    var probableshareofjointactions: Double = -1.0
-        private set
-
-    // List of joint actions to consider that are first created from other household members
-    private var jointActivitiesforConsideration: MutableList<HActivity>
-
-
-    /**
-     * constructor to create a person without household context
-     *
-     * @param PersIndex
-     * @param children0_10
-     * @param children_u18
-     * @param age
-     * @param employment
-     * @param gender
-     * @param areatype
-     * @param numberofcarsinhousehold
-     */
-    constructor(
-        PersIndex: Int,
-        children0_10: Int,
-        children_u18: Int,
-        age: Int,
-        employment: Int,
-        gender: Int,
-        areatype: Int,
-        numberofcarsinhousehold: Int
-    ) {
-        /*
-                 * Person can be generated without having household context.
-                 * To simplify the internal modeling process, a household object
-                 * containing this person only will be created for these cases.
-                 */
-
-        this.household = ActiToppHousehold(
-            PersIndex,
-            children0_10,
-            children_u18,
-            areatype,
-            numberofcarsinhousehold
-        )
-        household.addHouseholdmember(this, 1)
-
-        this.persIndex = PersIndex
-        this.age = age
-        this.employment = employment
-        this.gender = gender
-
-        this.attributes = HashMap()
-        this.jointActivitiesforConsideration = ArrayList()
-
-        this.addAttributetoMap("numbermodeledinhh", (1).toDouble())
+    init {
+        household.addHouseholdmember(this, persNrinHousehold)
+        attributes["numbermodeledinhh"] = persNrinHousehold.toDouble()
     }
 
-
-    /**
-     * constructor to create a person without household context
-     *
-     * @param PersIndex
-     * @param children0_10
-     * @param children_u18
-     * @param age
-     * @param employment
-     * @param gender
-     * @param areatype
-     */
-    constructor(
-        PersIndex: Int,
-        children0_10: Int,
-        children_u18: Int,
-        age: Int,
-        employment: Int,
-        gender: Int,
-        areatype: Int
-    ) {
-        /*
-                 * Person can be generated without having household context.
-                 * To simplify the internal modeling process, a household object
-                 * containing this person only will be created for these cases.
-                 */
-
-        this.household = ActiToppHousehold(
-            PersIndex,
-            children0_10,
-            children_u18,
-            areatype
-        )
-        household.addHouseholdmember(this, 1)
-
-        this.persIndex = PersIndex
-        this.age = age
-        this.employment = employment
-        this.gender = gender
-
-        this.attributes = HashMap()
-        this.jointActivitiesforConsideration = ArrayList()
-
-        this.addAttributetoMap("numbermodeledinhh", (1).toDouble())
-    }
-
-
-    /**
-     * constructor to create a person without household context but with commuting distances
-     *
-     * @param PersIndex
-     * @param children0_10
-     * @param children_u18
-     * @param age
-     * @param employment
-     * @param gender
-     * @param areatype
-     * @param numberofcarsinhousehold
-     * @param commutingdistance_work
-     * @param commutingdistance_education
-     */
-    constructor(
-        PersIndex: Int,
-        children0_10: Int,
-        children_u18: Int,
-        age: Int,
-        employment: Int,
-        gender: Int,
-        areatype: Int,
-        numberofcarsinhousehold: Int,
-        commutingdistance_work: Double,
-        commutingdistance_education: Double
-    ) : this(PersIndex, children0_10, children_u18, age, employment, gender, areatype, numberofcarsinhousehold) {
-        this.commutingdistance_work = commutingdistance_work
-        this.commutingdistance_education = commutingdistance_education
-    }
-
-
-    /**
-     * constructor to create a person without household context but with commuting distances
-     *
-     * @param PersIndex
-     * @param children0_10
-     * @param children_u18
-     * @param age
-     * @param employment
-     * @param gender
-     * @param areatype
-     * @param commutingdistance_work
-     * @param commutingdistance_education
-     */
-    constructor(
-        PersIndex: Int,
-        children0_10: Int,
-        children_u18: Int,
-        age: Int,
-        employment: Int,
-        gender: Int,
-        areatype: Int,
-        commutingdistance_work: Double,
-        commutingdistance_education: Double
-    ) : this(PersIndex, children0_10, children_u18, age, employment, gender, areatype) {
-        this.commutingdistance_work = commutingdistance_work
-        this.commutingdistance_education = commutingdistance_education
-    }
-
-
-    /**
-     * constructor to create a person with household context
-     *
-     * @param household
-     * @param PersIndex
-     * @param age
-     * @param employment
-     * @param gender
-     */
-    constructor(
-        household: ActiToppHousehold,
-        persnrinhousehold: Int,
-        PersIndex: Int,
-        age: Int,
-        employment: Int,
-        gender: Int
-    ) {
-        this.household = household
-        this.household.addHouseholdmember(this, persnrinhousehold)
-
-        this.persIndex = PersIndex
-        this.age = age
-        this.employment = employment
-        this.gender = gender
-
-        this.attributes = HashMap()
-        this.jointActivitiesforConsideration = ArrayList()
-
-        /*
-         * set modeling order within the household.
-         * When modeling joint actions, this will be changed depending on linear regression model
-         * to determine probable share of joint actions
-         */
-        this.addAttributetoMap("numbermodeledinhh", persnrinhousehold.toDouble())
-    }
-
-
-    /**
-     * constructor to create a person with household context and commuting distances
-     *
-     * @param household
-     * @param PersIndex
-     * @param age
-     * @param employment
-     * @param gender
-     * @param commutingdistance_work
-     * @param commutingdistance_education
-     */
-    constructor(
-        household: ActiToppHousehold,
-        persnrinhousehold: Int,
-        PersIndex: Int,
-        age: Int,
-        employment: Int,
-        gender: Int,
-        commutingdistance_work: Double,
-        commutingdistance_education: Double
-    ) : this(household, persnrinhousehold, PersIndex, age, employment, gender) {
-        this.commutingdistance_work = commutingdistance_work
-        this.commutingdistance_education = commutingdistance_education
-    }
-
-
-    /**
-     * constructor to "clone" household including all persons in the household
-     *
-     * @param tmppers
-     * @param tmphh
-     */
     constructor(tmppers: ActitoppPerson, tmphh: ActiToppHousehold) : this(
         tmphh,
         tmppers.persNrinHousehold,
@@ -342,22 +39,45 @@ class ActitoppPerson {
     )
 
 
-    val persNrinHousehold: Int
-        /**
-         * @return the personnr in the household
-         */
-        get() {
-            var result = -1
-            val tmpmap =
-                household.householdmembers
+    // stores all attributes that are not directly accessible by variables
 
-            for ((key, value) in tmpmap) {
-                if (value == this) result = key
-            }
 
-            assert(result != -1) { "Person does not exist in this household or has no PersNr in this household" }
-            return result
-        }
+    /**
+     * @return the weekPattern
+     */
+    // stores all activity information of the week pattern
+
+    fun days() = weekPattern?.days ?: emptyList()
+
+    /**
+     * Robin: This function delegates the call to the weekpattern, which should not be exposed
+     */
+    fun countActivityTypes(activityType: ActivityType): Int {
+        return weekPattern?.countActivitiesPerWeek(activityType) ?: 0
+    }
+
+    fun countTourTypes(activityType: ActivityType): Int = weekPattern?.countToursPerWeek(activityType) ?: 0
+    fun countDaysWithSpecificActivity(activityType: ActivityType): Int =
+        weekPattern?.countDaysWithSpecificActivity(activityType) ?: 0
+
+    // Variables used for modeling of joint actions
+    // based on linear regression model to determine modeling order within the household
+    var probableshareofjointactions: Double = -1.0
+        private set
+
+    // List of joint actions to consider that are first created from other household members
+    private val jointActivitiesforConsideration: MutableList<HActivity> = mutableListOf()
+
+
+    /**
+     * constructor to "clone" household including all persons in the household
+     *
+     * @param tmppers
+     * @param tmphh
+     */
+
+
+
 
 
     val children0_10: Int
@@ -589,12 +309,12 @@ class ActitoppPerson {
          */
         get() = jointActivitiesforConsideration
 
-    /**
-     * @param aktliste
-     */
-    fun setAllJointActivitiesforConsideration(aktliste: MutableList<HActivity>) {
-        this.jointActivitiesforConsideration = aktliste
-    }
+//    /**
+//     * @param aktliste
+//     */
+//    fun setAllJointActivitiesforConsideration(aktliste: MutableList<HActivity>) {
+//        this.jointActivitiesforConsideration = aktliste
+//    }
 
     /**
      * add activity to list of joint actions to consider when there if no conflict
@@ -694,11 +414,50 @@ class ActitoppPerson {
                 }
             }
         }
+
+
+        @JvmOverloads
+        operator fun invoke(
+            PersIndex: Int,
+            children0_10: Int,
+            children_u18: Int,
+            age: Int,
+            employment: Int,
+            gender: Int,
+            areatype: Int,
+            numberofcarsinhousehold: Int = 0,
+            commutingdistance_work: Double = .0,
+            commutingdistance_education: Double = .0,
+        ): ActitoppPerson {
+            val household = ActiToppHousehold(
+                PersIndex,
+                children0_10,
+                children_u18,
+                areatype,
+                numberofcarsinhousehold
+            )
+
+            val person = ActitoppPerson(
+                household,
+                1,
+                PersIndex,
+                age,
+                employment,
+                gender,
+                commutingdistance_work,
+                commutingdistance_education
+            )
+
+            return person
+
+        }
     }
 }
 
-
-class DefaultDoubleMap<K>(val original: Map<K, Double>): Map<K, Double> by original {
+/**
+ * Because very often if something doesnt exist legacy actitopp returned 0.0
+ */
+class DefaultDoubleMap<K>(val original: Map<K, Double>) : Map<K, Double> by original {
     override operator fun get(key: K): Double {
         return original.getOrDefault(key, 0.0)
     }
