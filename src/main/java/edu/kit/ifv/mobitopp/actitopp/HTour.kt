@@ -167,13 +167,15 @@ class HTour(parent: HDay, index: Int) {
      * @return
      */
     fun getActivity(index: Int): HActivity {
-        return activities[index]
+        return activities.last{it.index == index}
     }
 
 
     val lowestActivityIndex: Int
         get() {
-            return activities.minOf { it.index }.also { require(it >= 0){"Apparently bad stuff happens when the index is negative  ¯\\_(ツ)_/¯"} }
+            return activities.minOf { it.index }.also { require(it <= 0){
+                "Apparently bad stuff happens when the index is positive  ¯\\_(ツ)_/¯"
+            } }
         }
 
     val highestActivityIndex: Int

@@ -1,4 +1,5 @@
 package edu.kit.ifv.mobitopp.actitopp.utilityFunctions
+import jdk.jshell.execution.Util
 import kotlin.math.exp
 
 class Logit<X, P> : DistributionFunction<X, P> {
@@ -13,13 +14,27 @@ class Logit<X, P> : DistributionFunction<X, P> {
         return currentExp.mapValues { it.value / sum }
     }
 }
+class ChangableUtilityFunction<X, P>(private var utilityFunction: UtilityFunction<X, P>): UtilityFunction<X, P> {
+    fun changeTo(new: UtilityFunction<X, P>) {
+        utilityFunction = new
+    }
 
+    override fun calculateUtility(alternative: X, parameterObject: P): Double {
+        return utilityFunction.calculateUtility(alternative, parameterObject)
+    }
+
+}
+
+fun <X, P> UtilityFunction<X, P>.toMutableFunction(): ChangableUtilityFunction<X, P> {
+    return ChangableUtilityFunction(this)
+}
 class AllocatedLogit<X : Any, SIT : ChoiceSituation<X>, P>(
-    override val options: Set<X>,
-    override val rules: List<Pair<(SIT) -> Boolean, UtilityFunction<SIT, P>>>,
+    private val optionsMap: Map<X, ChangableUtilityFunction<SIT, P>>,
+    override var rules: List<Pair<(SIT) -> Boolean, ChangableUtilityFunction<SIT, P>>>,
     override val name: String = "Unnamed allocated logit",
 
-) : RuleBasedAssociation<X, SIT, P>, OptionDistributionFunction<X, SIT, P> {
+) : RuleBasedAssociation<X, SIT, P>, ModifiableDistributionFunction<X, SIT, P> {
+    override val options = optionsMap.keys
     override val translation: Map<X, UtilityFunction<SIT, P>> = emptyMap()
 
     override fun calculateProbabilities(evaluators: Map<SIT, Double>, parameters: P): Map<SIT, Double> {
@@ -29,25 +44,30 @@ class AllocatedLogit<X : Any, SIT : ChoiceSituation<X>, P>(
     override fun translation(target: SIT): UtilityFunction<SIT, P> {
         return super<RuleBasedAssociation>.translation(target)
     }
-
+    override fun modify(option: X, lambda: (UtilityFunction<SIT, P>) -> UtilityFunction<SIT, P>) {
+        val originalUtilityFunction = optionsMap[option] ?: return
+        val newFunction = lambda(originalUtilityFunction)
+        originalUtilityFunction.changeTo(newFunction)
+    }
     companion object {
 
         private const val DEFAULT_NAME = "Unnamed MNL model"
 
         class LogitBuilder<X : Any, SIT : ChoiceSituation<X>, PARAMS>(preknownOptions: Collection<X>) :
             OptionBasedSituationBuilder<X, SIT, PARAMS>, RuleBasedSituationBuilder<X, SIT, PARAMS> {
-            val rules: MutableList<Pair<(SIT) -> Boolean, UtilityFunction<SIT, PARAMS>>> = mutableListOf()
-            val options: MutableSet<X> = preknownOptions.toMutableSet()
+            val rules: MutableList<Pair<(SIT) -> Boolean, ChangableUtilityFunction<SIT, PARAMS>>> = mutableListOf()
+            val options: MutableMap<X, ChangableUtilityFunction<SIT, PARAMS>> = preknownOptions.associateWith { UtilityFunction<SIT, PARAMS>{ _, _ -> 0.0}.toMutableFunction() }.toMutableMap()
             override fun addUtilityFunctionByIdentifier(x: X, utilityFunction: UtilityFunction<SIT, PARAMS>) {
-                rules.add({ sit: SIT -> sit.choice == x } to utilityFunction)
-                options.add(x)
+                val mutableUtilityFunction = utilityFunction.toMutableFunction()
+                rules.add({ sit: SIT -> sit.choice == x } to mutableUtilityFunction)
+                options[x] = mutableUtilityFunction
             }
 
             override fun addUtilityFunctionByRule(
                 rule: (SIT) -> Boolean,
                 utilityFunction: UtilityFunction<SIT, PARAMS>
             ) {
-                rules.add(rule to utilityFunction)
+                rules.add(rule to utilityFunction.toMutableFunction())
             }
         }
 

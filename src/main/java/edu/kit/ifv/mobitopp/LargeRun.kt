@@ -36,20 +36,29 @@ private fun generateHousehold(): ActiToppHousehold {
         random.nextInt(0, 10)
     )
 }
-private fun generateHouseholds(amount: Int): List<ActiToppHousehold> {
-    return (0..amount).map { generateHousehold() }
+fun generateHouseholds(amount: Int): List<ActiToppHousehold> {
+    return (0..<amount).map { generateHousehold() }
 }
 fun ActiToppHousehold.generatePersons(amount: Int): List<ActitoppPerson> {
-    return (0..amount).map {
+    return (0..<amount).map {
         this.generatePerson(it)
     }
 }
 
 fun ActiToppHousehold.generatePerson(number: Int): ActitoppPerson {
-    return         ActitoppPerson(this, number, number, random.nextInt(0,100), random.nextInt(0, 100), random.nextInt(), random.nextDouble(), random.nextDouble()).also{this.addHouseholdmember(it, it.persIndex)}
+    return         ActitoppPerson(
+        household = this,
+        persNrinHousehold = number,
+        persIndex = number,
+        age = random.nextInt(0,100),
+        employmentCode = random.nextInt(0, 42),
+        genderCode = random.nextInt(0, 3),
+        commutingdistance_work = random.nextDouble(),
+        commutingdistance_education = random.nextDouble()
+    )
 }
 fun Collection<ActitoppPerson>.generateSchedules() {
-    forEach { it.generateSchedule(fileBase, randomgenerator, debugloggers) }
+    withIndex().forEach { (index, person) -> person.generateSchedule(fileBase, randomgenerator, debugloggers).also { if(index % 100 == 0)println("Working on person $index done") } }
 }
 fun main() {
     val targets = generateHouseholds(10000).flatMap { it.generatePersons(5) }

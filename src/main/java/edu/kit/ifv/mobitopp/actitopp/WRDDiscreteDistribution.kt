@@ -106,6 +106,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
         /* Issue 4) The sum of valid distribution elements, and the check if the slot from the histogram lies within the
            bounds of the range later in the code could be trivially simplified by just filtering the histogram.
         * */
+        //TODO big Idea, we could probably use subsetting to get the valid elements, and would probably not need a map, but a set<Pair<X; Y>> could suffice
         val relevantElements = histogram.filterKeys { it in usedLowerBound..usedUpperBound }
         val sumofvalidelements = relevantElements.values.sum()
 
@@ -114,6 +115,8 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
             return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound)
         }
         var acc = 0.0
+        //TODO big Idea, if we know the first and last element in the range, and cumulate beforehand, we can translate the random number
+        //  to the number range of the bounded histogram.
         val normalizedValues = relevantElements.mapValues { acc += it.value.toDouble() / sumofvalidelements; acc }
         /* Issue 5) A detailed analysis of the original code showed that the selection of a firstslot / lastslot would
         ALWAYS result in the same element being used for both slots, this is most likely not what the author intended

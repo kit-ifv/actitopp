@@ -28,7 +28,11 @@ class DCDefaultModelStep(
 */
     private val modelinfo: DCModelSteplnformation = modelFileBase.getModelInformationforDCStep(id)
 
-    private val alternatives = ArrayList<DCAlternative>()
+    val alternatives: List<DCAlternative> = modelinfo.alternativesList.map { DCAlternative(it) }.sortedBy { it.name }
+
+    fun getProbability(alternativeName: String): Double {
+        return alternatives.first { it.name == alternativeName }.probability
+    }
 
     //restrict alternatives to a specific range
     var lowerBound: Int = 0
@@ -37,14 +41,7 @@ class DCDefaultModelStep(
         private set
 
 
-    init {
-        /*
-         *  create an object for each step alternative
-         */
-        for (s in modelinfo.alternativesList) {
-            alternatives.add(DCAlternative(s))
-        }
-    }
+
 
 
     /**
@@ -54,7 +51,11 @@ class DCDefaultModelStep(
         /*
                  * set rangeLimiter (UpperBound) if not yet determinded
                  */
+        val randomvalue = randomgenerator.randomValue
+        return doStep(randomvalue)
+    }
 
+    fun doStep(randomvalue: Double): Int {
         upperBound = if (upperBound >= 0) upperBound else alternatives.size
 
         assert(upperBound >= lowerBound) { "fromRangeLimiter > toRangeLimiter!" }
@@ -111,7 +112,7 @@ class DCDefaultModelStep(
         /*
          * decide for one alternative
          */
-        val randomvalue = randomgenerator.randomValue
+
         val decision = choiceFunction.chooseAlternative(alternatives, randomvalue)
         alternativeChosen = alternatives[decision].name
 
@@ -123,6 +124,7 @@ class DCDefaultModelStep(
         assert(decision != -1) { "could not make a decision!" }
         return decision
     }
+
     /**
      * Limits the DC-process to a certain alternative range. this method must be called before doStep() if necessary
      *

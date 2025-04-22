@@ -6,22 +6,31 @@ import edu.kit.ifv.mobitopp.actitopp.enums.Employment
 import edu.kit.ifv.mobitopp.actitopp.enums.Gender
 import edu.kit.ifv.mobitopp.actitopp.enums.isParttime
 import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
+import edu.kit.ifv.mobitopp.actitopp.toModifiable
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.D
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.DiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 
-data class BiggerParameterCollection(
-    val option1: ParametersStepOne,
-    val option2: ParametersStepOne,
-    val option3: ParametersStepOne,
-    val option4: ParametersStepOne,
-    val option5: ParametersStepOne,
-    val option6: ParametersStepOne,
-    val option7: ParametersStepOne,
-)
-val ParameterSet1A = BiggerParameterCollection(
-    option1 = ParametersStepOne(
+interface ParameterCollectionStep1<T> {
+    val option1: T
+    val option2: T
+    val option3: T
+    val option4: T
+    val option5: T
+    val option6: T
+    val option7: T
+}
+data class ParameterCollectionStep1A(
+    override val option1: ParametersStep1A,
+    override val option2: ParametersStep1A,
+    override val option3: ParametersStep1A,
+    override val option4: ParametersStep1A,
+    override val option5: ParametersStep1A,
+    override val option6: ParametersStep1A,
+    override val option7: ParametersStep1A,
+): ParameterCollectionStep1<ParametersStep1A>
+val ParameterSet1A = ParameterCollectionStep1A(
+    option1 = ParametersStep1A(
         base = -2.6967,
         employmentFullTime = 1.3924,
         employmentPartTime = 1.9951,
@@ -38,7 +47,7 @@ val ParameterSet1A = BiggerParameterCollection(
         householdHasChildenBelowAge10 = -0.2274,
         genderIsMale = 0.2584,
     ),
-    option2 = ParametersStepOne(
+    option2 = ParametersStep1A(
         base = -3.7312,
         employmentFullTime = 2.2435,
         employmentPartTime = 3.2298,
@@ -55,7 +64,7 @@ val ParameterSet1A = BiggerParameterCollection(
         householdHasChildenBelowAge10 = -0.2287,
         genderIsMale = 0.3238,
     ),
-    option3 = ParametersStepOne(
+    option3 = ParametersStep1A(
         base = -4.9095,
         employmentFullTime = 3.2366,
         employmentPartTime = 3.9843,
@@ -72,7 +81,7 @@ val ParameterSet1A = BiggerParameterCollection(
         householdHasChildenBelowAge10 = -0.5606,
         genderIsMale = 0.3756,
     ),
-    option4 = ParametersStepOne(
+    option4 = ParametersStep1A(
         base = -5.2542,
         employmentFullTime = 4.5024,
         employmentPartTime = 4.5377,
@@ -89,7 +98,7 @@ val ParameterSet1A = BiggerParameterCollection(
         householdHasChildenBelowAge10 = -0.5594,
         genderIsMale = 0.2290,
     ),
-    option5 = ParametersStepOne(
+    option5 = ParametersStep1A(
         base = -5.2060,
         employmentFullTime = 5.4192,
         employmentPartTime = 4.5107,
@@ -106,7 +115,7 @@ val ParameterSet1A = BiggerParameterCollection(
         householdHasChildenBelowAge10 = -0.4192,
         genderIsMale = 0.3755,
     ),
-    option6 = ParametersStepOne(
+    option6 = ParametersStep1A(
         base = -5.7256,
         employmentFullTime = 4.9968,
         employmentPartTime = 4.2828,
@@ -123,7 +132,7 @@ val ParameterSet1A = BiggerParameterCollection(
         householdHasChildenBelowAge10 = -0.7847,
         genderIsMale = 0.6314,
     ),
-    option7 = ParametersStepOne(
+    option7 = ParametersStep1A(
         base = -18.3579,
         employmentFullTime = 4.8243,
         employmentPartTime = 4.3736,
@@ -141,7 +150,14 @@ val ParameterSet1A = BiggerParameterCollection(
         genderIsMale = 0.0489,
     )
 )
-data class ParametersStepOne(
+
+/**
+ * @param base originally called "Grundnutzen"
+ * @param employmentFullTime originally called "beruf_vollzeit"
+ * @param employmentPartTime originally called "beruf_teilzeit"
+ * @param
+ */
+data class ParametersStep1A(
     val base: Double,
     val employmentFullTime: Double,
     val employmentPartTime: Double,
@@ -159,14 +175,15 @@ data class ParametersStepOne(
     val genderIsMale: Double,
 )
 inline operator fun Boolean.times(other: Double): Double = this.D * other
-class Situation1A(override val choice: Int, val person: ActitoppPerson): ChoiceSituation<Int>() {
+class Situation1A(override val choice: Int, person: ActitoppPerson): PersonSituation(choice, person.toModifiable()) {
     val employment = person.employment
     val age = person.age
     val areaType = person.areatype
     val hasChildrenUnder10 = person.children0_10 > 0
     val gender = person.gender
 }
-val step1AModel = DiscreteChoiceModel<Int, Situation1A, BiggerParameterCollection>(AllocatedLogit.create {
+
+val step1AModel = ModifiableDiscreteChoiceModel<Int, Situation1A, ParameterCollectionStep1A>(AllocatedLogit.create {
     option(0) {
         0.0
     }
@@ -180,7 +197,7 @@ val step1AModel = DiscreteChoiceModel<Int, Situation1A, BiggerParameterCollectio
     
 })
 
-private val standardUtilityFunction:  ParametersStepOne.(Situation1A) -> Double = {
+private val standardUtilityFunction:  ParametersStep1A.(Situation1A) -> Double = {
     base +
             (it.employment == Employment.FULLTIME) * employmentFullTime +
             (it.employment.isParttime()) * employmentPartTime +

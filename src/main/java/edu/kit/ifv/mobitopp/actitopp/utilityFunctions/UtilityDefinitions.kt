@@ -32,7 +32,9 @@ interface ExtractableDistributionFunction<X : Any, SIT : ChoiceSituation<X>, PAR
         )
     }
 }
-
+interface ModifiableDistributionFunction<X : Any, SIT : ChoiceSituation<X>, PARAMS>: OptionDistributionFunction<X, SIT, PARAMS> {
+    fun modify(option: X, lambda: (UtilityFunction<SIT, PARAMS>) -> UtilityFunction<SIT, PARAMS>)
+}
 fun <X : Any, SIT : ChoiceSituation<X>, PARAMS> ExtractableDistributionFunction<X, SIT, PARAMS>.calculateDebug(
     alternatives: Set<SIT>,
     parameters: PARAMS,

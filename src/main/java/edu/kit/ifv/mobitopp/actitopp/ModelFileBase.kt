@@ -22,7 +22,7 @@ class ModelFileBase private constructor(
 ) {
     private interface Input {
         @Throws(IOException::class)
-        fun newInputStream(name: String): InputStream?
+        fun newInputStream(name: String): InputStream
     }
 
     private class FileInput(private val basePath: File) : Input {
@@ -34,7 +34,7 @@ class ModelFileBase private constructor(
     }
 
     private class JarInput(private val parameterset: String) : Input {
-        override fun newInputStream(name: String): InputStream? {
+        override fun newInputStream(name: String): InputStream {
             println("loading file from JAR: $name from parameter set $parameterset")
             return ModelFileBase::class.java.getResourceAsStream(this.parameterset + "/" + name)
         }
@@ -195,7 +195,7 @@ class ModelFileBase private constructor(
         for (name in linregsteps_filenames) {
             newInputStream(name).use { input ->
                 val loader = CSVLinRegEstimatesLoader()
-                val tmpmap = loader.getEstimates(input!!)
+                val tmpmap = loader.getEstimates(input)
                 linearregressionestimatesmap.put(name, tmpmap)
             }
         }
@@ -207,7 +207,7 @@ class ModelFileBase private constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun newInputStream(name: String): InputStream? {
+    private fun newInputStream(name: String): InputStream {
         return inputType.newInputStream("$name.csv")
     }
 }

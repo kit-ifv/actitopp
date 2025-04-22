@@ -2,12 +2,22 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
+import edu.kit.ifv.mobitopp.actitopp.changes.ParameterCollectionStep1
 import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1A
+import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1B
+import edu.kit.ifv.mobitopp.actitopp.changes.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.changes.Situation1A
+import edu.kit.ifv.mobitopp.actitopp.changes.Situation1B
 import edu.kit.ifv.mobitopp.actitopp.changes.step1AModel
+import edu.kit.ifv.mobitopp.actitopp.changes.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.SelectionFunction
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.select
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -57,7 +67,8 @@ class Coordinator @JvmOverloads constructor(
         if (Configuration.modelJointActions) {
             determineMinimumTourActivityBounds()
         }
-
+        val personModifierFields = ActitoppPersonModifierFields(person)
+        personModifierFields.amountOfWorkingDays = determineNumberOfWorkingDays()
         executeStep1("1A", "anztage_w") // Appears to determine amount of days working?
         executeStep1("1B", "anztage_e") // Determines the amount of days with education
         executeStep1("1C", "anztage_l") // The Amount of leisue
@@ -176,19 +187,35 @@ class Coordinator @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Behaves exactly as "executeStep1(1A, "workDays") except it aint writing to the person map but returns the value
+     * of the calculation to be used externally.
+     */
+    fun determineNumberOfWorkingDays(): Int {
+        if(!person.isAllowedToWork) return 0
+        return step1AModel.select(ParameterSet1A, randomGenerator.randomValue) {
+            Situation1A(it, person)
+        }
+    }
 
+    fun determineNumberOfEducationDays(modifiableElement: ActitoppPersonModifierFields): Int {
+        return step1BModel.select(ParameterSet1B, randomGenerator.randomValue) {
+            Situation1B(it, modifiableElement)
+        }
+    }
     /**
      * @param id
      * @param variablenname
      */
-    private fun executeStep1(id: String, variablenname: String) {
+    private fun executeStep1(id: String,
+                             variablenname: String) {
         // create attribute lookup
         val lookup = AttributeLookup(person)
 
         // create step object
         val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-        val selection = step1AModel.probabilities((0..7).map { Situation1A(it, person) }.toSet(), ParameterSet1A)
-        step.doStep()
+        val rand = randomGenerator.randomValue
+        step.doStep(rand)
 
         // save result
         var decision = step.alternativeChosen.toDouble()
@@ -272,7 +299,7 @@ class Coordinator @JvmOverloads constructor(
                     var activity: HActivity? = null
                     if (!currentDay.existsActivity(0, 0)) {
                         activity = HActivity(mainTour, 0, activityType)
-                        mainTour!!.addActivity(activity)
+                        mainTour.addActivity(activity)
                     } else {
                         activity = currentDay.getTour(0).getActivity(0)
                         activity.activityType = activityType
@@ -1530,7 +1557,7 @@ class Coordinator @JvmOverloads constructor(
         } else {
             //TODO WHY IS THIS 1620 ?
 //            startingpointupperbound = 1620
-            startingpointupperbound = 1440
+            startingpointupperbound = 1439
             val nextday = dayofact.nextDay
             if (nextday != null && !nextday.isHomeDay) {
                 val firstactnextday = nextday.firstTourOfDay.firstActivityInTour
