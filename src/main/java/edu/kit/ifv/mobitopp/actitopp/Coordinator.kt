@@ -29,7 +29,7 @@ class Coordinator @JvmOverloads constructor(
     val fileBase: ModelFileBase, val randomGenerator: RNGHelper, private val debugloggers: DebugLoggers? = null,
 ) {
     /**///////////// */ //	declaration of variables
-    private val pattern: HWeekPattern? = person.weekPattern
+    private val pattern: HWeekPattern = person.weekPattern
 
 
     /*
@@ -134,7 +134,7 @@ class Coordinator @JvmOverloads constructor(
         // finalizing activity schedules
 
         // 1) create and sort a list including all modeled activities of the whole week
-        val allModeledActivities = pattern!!.allOutofHomeActivities.sortedBy { it.startTimeWeekContext }
+        val allModeledActivities = pattern.allOutofHomeActivities.sortedBy { it.startTimeWeekContext }
 
         // 2) create home activities to be performed between tours
         createHomeActivities(allModeledActivities)
@@ -229,7 +229,7 @@ class Coordinator @JvmOverloads constructor(
      */
     private fun executeStep2(id: String) {
         // STEP 2A Main tour and main activity
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // execute step if main activity type does not exist
             if (!currentDay.existsActivityTypeforActivity(0, 0)) {
                 // create attribute lookup
@@ -308,7 +308,7 @@ class Coordinator @JvmOverloads constructor(
      * @param id
      */
     private fun executeStep3(id: String) {
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -372,7 +372,7 @@ class Coordinator @JvmOverloads constructor(
      */
     private fun executeStep4(id: String) {
         // STEP 4A Main activity for all other tours
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -430,7 +430,7 @@ class Coordinator @JvmOverloads constructor(
      * @param id
      */
     private fun executeStep5(id: String) {
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -499,7 +499,7 @@ class Coordinator @JvmOverloads constructor(
      */
     private fun executeStep6(id: String) {
         // STEP 6A Non-Main-Activity Type Decision
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -554,7 +554,7 @@ class Coordinator @JvmOverloads constructor(
      * determination of default trip times for all activities
      */
     private fun createTripTimesforActivities() {
-        for (day in pattern!!.days) {
+        for (day in pattern.days) {
             for (tour in day.tours) {
                 for (act in tour.activities) {
                     act.createTripsforActivity()
@@ -613,7 +613,7 @@ class Coordinator @JvmOverloads constructor(
              *  Step 1: All available activities of the day
              */
             run {
-                for (act in pattern!!.getDay(jointact_dayindey).allActivitiesoftheDay) {
+                for (act in pattern.getDay(jointact_dayindey).allActivitiesoftheDay) {
                     possibleact.add(act)
                 }
                 HActivity.sortActivityListbyIndices(possibleact)
@@ -830,7 +830,7 @@ class Coordinator @JvmOverloads constructor(
             }
 
             // step 12: check again for temporal overlaps
-            for (act in pattern!!.getDay(jointact_dayindey).allActivitiesoftheDay) {
+            for (act in pattern.getDay(jointact_dayindey).allActivitiesoftheDay) {
                 if ((act.startTimeisScheduled()
                             && act.overlaps(actforreplacement))
                     ||
@@ -860,7 +860,7 @@ class Coordinator @JvmOverloads constructor(
      * @param variablenname
      */
     private fun executeStep7DC(id: String, activitytype: ActivityType) {
-        if (pattern!!.countActivitiesPerWeek(activitytype) > 0) {
+        if (pattern.countActivitiesPerWeek(activitytype) > 0) {
             // create attribute lookup
             val lookup = AttributeLookup(person)
 
@@ -890,7 +890,7 @@ class Coordinator @JvmOverloads constructor(
      * @param activitytype
      */
     private fun executeStep7WRD(id: String, activitytype: ActivityType) {
-        if (pattern!!.countActivitiesPerWeek(activitytype) > 0) {
+        if (pattern.countActivitiesPerWeek(activitytype) > 0) {
             // get decision from step 7 DC
             val chosenIndex = person.getAttributefromMap(activitytype.toString() + "budget_category_index")
             //TODO why is get Attribute returning a double, which is then cast to an int. Skip the intermediate step
@@ -909,7 +909,7 @@ class Coordinator @JvmOverloads constructor(
     private fun executeStep8A(id: String) {
         // STEP8a: yes/no decision for "activity is in average time class xyz".
         // only applies to main activities
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -950,7 +950,7 @@ class Coordinator @JvmOverloads constructor(
      */
     @Throws(InvalidPatternException::class)
     private fun executeStep8_MainAct(id_dc: String, id_wrd: String) {
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -1070,7 +1070,7 @@ class Coordinator @JvmOverloads constructor(
      */
     @Throws(InvalidPatternException::class)
     private fun executeStep8_NonMainAct(id_dc: String, id_wrd: String) {
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -1182,7 +1182,7 @@ class Coordinator @JvmOverloads constructor(
     private fun executeStep10A(id: String) {
         // Step 10a: check if first tour is work/edu lies within standard start time (applies only to work/edu persons)
         if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled) {
-            for (currentDay in pattern!!.days) {
+            for (currentDay in pattern.days) {
                 if (currentDay.isHomeDay) {
                     continue
                 }
@@ -1215,7 +1215,7 @@ class Coordinator @JvmOverloads constructor(
      */
     @Throws(InvalidPatternException::class)
     private fun createTourStartTimesDueToScheduledActivities() {
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             if (currentDay.isHomeDay) {
                 continue
             }
@@ -1274,7 +1274,7 @@ class Coordinator @JvmOverloads constructor(
     private fun executeStep10(id_dc: String, id_wrd: String, tournrdestages: Int) {
         // STEP 10: determine time class for the start of the x tour of the day
 
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             if (currentDay.isHomeDay || currentDay.amountOfTours < tournrdestages) {
                 continue
             }
@@ -1359,7 +1359,7 @@ class Coordinator @JvmOverloads constructor(
         // Step 10s and Step10t: determine home time before tour starts and then define tour start time
         //											 only for the fourth tour if the day and following
 
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             if (currentDay.isHomeDay) {
                 continue
             }
@@ -1418,7 +1418,7 @@ class Coordinator @JvmOverloads constructor(
     private fun executeStep11(id: String) {
         // STEP 11 - Decision on joint activities
 
-        for (currentDay in pattern!!.days) {
+        for (currentDay in pattern.days) {
             // skip day if person is at home
             if (currentDay.isHomeDay) {
                 continue
@@ -2062,7 +2062,7 @@ class Coordinator @JvmOverloads constructor(
                 "person error - no home activity possible at beginning of the week!"
             )
 
-            pattern!!.addHomeActivity(HActivity(pattern.getDay(0), homeact, duration1, 0))
+            pattern.addHomeActivity(HActivity(pattern.getDay(0), homeact, duration1, 0))
 
             // loop through all activities and create home activities after last activity in a tour
             for (i in 0..<allmodeledActivities.size - 1) {
@@ -2108,7 +2108,7 @@ class Coordinator @JvmOverloads constructor(
                 pattern.addHomeActivity(HActivity(pattern.getDay(day), homeact, duration3, ende_lastTour % 1440))
             }
         } else {
-            pattern!!.addHomeActivity(HActivity(pattern.getDay(0), homeact, 10080, 0))
+            pattern.addHomeActivity(HActivity(pattern.getDay(0), homeact, 10080, 0))
         }
     }
 
@@ -2116,7 +2116,7 @@ class Coordinator @JvmOverloads constructor(
      * select possible other household members as participants for a joint activity
      */
     private fun selectWithWhomforJointActions() {
-        for (tmpactivity in pattern!!.allOutofHomeActivities) {
+        for (tmpactivity in pattern.allOutofHomeActivities) {
             /*
              * consider activity if activity has a joint status and was created by the person itself
              */
@@ -2166,7 +2166,7 @@ class Coordinator @JvmOverloads constructor(
                         if (0.95 <= randomvalue && randomvalue <= 1) numberofadditionalmembers = 4
                     }
 
-                    //TODO improvement: make the choice sensitive of the context (e.g., two pensioners is more likely than a pensioner and a student, ...)
+                    //TODO improvement: make the choice sensitive of the context (e.g., two pensioners is more likely than a pensioner and a student, ...) Robin: This TODO aint from me
                     val anzahlweiterepers =
                         min(numberofadditionalmembers.toDouble(), otherunmodeledpersinhh.size.toDouble()).toInt()
                     for (i in 1..anzahlweiterepers) {
