@@ -1,5 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
+import edu.kit.ifv.mobitopp.actitopp.IO.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
 import edu.kit.ifv.mobitopp.actitopp.enums.Employment
@@ -25,8 +27,7 @@ class ActitoppPerson@JvmOverloads constructor(
     val gender: Gender = Gender.fromCode(genderCode)
     val employment: Employment = Employment.fromInt(employmentCode)
     val isAllowedToWork: Boolean = true
-    var weekPattern: HWeekPattern? = null
-        private set
+    var weekPattern: HWeekPattern = HWeekPattern(this)
 
     init {
         household.addHouseholdmember(this, persNrinHousehold)
@@ -53,18 +54,18 @@ class ActitoppPerson@JvmOverloads constructor(
      */
     // stores all activity information of the week pattern
 
-    fun days() = weekPattern?.days ?: emptyList()
+    fun days() = weekPattern.days
 
     /**
      * Robin: This function delegates the call to the weekpattern, which should not be exposed
      */
     fun countActivityTypes(activityType: ActivityType): Int {
-        return weekPattern?.countActivitiesPerWeek(activityType) ?: 0
+        return weekPattern.countActivitiesPerWeek(activityType)
     }
 
-    fun countTourTypes(activityType: ActivityType): Int = weekPattern?.countToursPerWeek(activityType) ?: 0
+    fun countTourTypes(activityType: ActivityType): Int = weekPattern.countToursPerWeek(activityType)
     fun countDaysWithSpecificActivity(activityType: ActivityType): Int =
-        weekPattern?.countDaysWithSpecificActivity(activityType) ?: 0
+        weekPattern.countDaysWithSpecificActivity(activityType)
 
     // Variables used for modeling of joint actions
     // based on linear regression model to determine modeling order within the household
@@ -74,13 +75,6 @@ class ActitoppPerson@JvmOverloads constructor(
     // List of joint actions to consider that are first created from other household members
     private val jointActivitiesforConsideration: MutableList<HActivity> = mutableListOf()
 
-
-    /**
-     * constructor to "clone" household including all persons in the household
-     *
-     * @param tmppers
-     * @param tmphh
-     */
 
 
 
@@ -275,12 +269,12 @@ class ActitoppPerson@JvmOverloads constructor(
      */
     @Throws(InvalidPatternException::class)
     fun generateSchedule(modelbase: ModelFileBase, randomgenerator: RNGHelper) {
-        //create an empty Default-Pattern
+        //create an empty Default-Pattern //TODO perhaps just use a weekpattern.clear() call, if properly implemented
         weekPattern = HWeekPattern(this)
 
         if (age < 10) {
 //			System.err.println("actitopp can only create correct activity schedules for persons aged 10 years and older! - creating full-week home activity instead");
-            weekPattern!!.addHomeActivity(HActivity(weekPattern!!.getDay(0), ActivityType.HOME, 10080, 0))
+            weekPattern.addHomeActivity(HActivity(weekPattern.getDay(0), ActivityType.HOME, 10080, 0))
         } else {
             val modelCoordinator = Coordinator(this, modelbase, randomgenerator)
             modelCoordinator.executeModel()
@@ -298,11 +292,11 @@ class ActitoppPerson@JvmOverloads constructor(
     @Throws(InvalidPatternException::class)
     fun generateSchedule(modelbase: ModelFileBase, randomgenerator: RNGHelper, debugloggers: DebugLoggers) {
         //create an empty Default-Pattern
-        weekPattern = HWeekPattern(this)
+        weekPattern = HWeekPattern(this) //TODO perhaps just use a weekpattern.clear() call, if properly implemented
 
         if (age < 10) {
 //			System.err.println("actitopp can only create correct activity schedules for persons aged 10 years and older! - creating full-week home activity instead");
-            weekPattern!!.addHomeActivity(HActivity(weekPattern!!.getDay(0), ActivityType.HOME, 10080, 0))
+            weekPattern.addHomeActivity(HActivity(weekPattern.getDay(0), ActivityType.HOME, 10080, 0))
         } else {
             val modelCoordinator = Coordinator(this, modelbase, randomgenerator, debugloggers)
             modelCoordinator.executeModel()
@@ -377,7 +371,7 @@ class ActitoppPerson@JvmOverloads constructor(
          */
         get() {
             if (personisAnywayEmployed() || personisinEducation()) {
-                for (day in weekPattern!!.days) {
+                for (day in weekPattern.days) {
                     for (tour in day.tours) {
                         if (tour.getActivity(0).activityType == ActivityType.WORK || tour.getActivity(0)
                                 .activityType == ActivityType.EDUCATION

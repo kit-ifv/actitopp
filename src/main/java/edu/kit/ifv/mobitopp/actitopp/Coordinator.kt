@@ -1,11 +1,11 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
+import edu.kit.ifv.mobitopp.actitopp.IO.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
-import edu.kit.ifv.mobitopp.actitopp.changes.ParameterCollectionStep1
 import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1A
 import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1B
-import edu.kit.ifv.mobitopp.actitopp.changes.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.changes.Situation1A
 import edu.kit.ifv.mobitopp.actitopp.changes.Situation1B
 import edu.kit.ifv.mobitopp.actitopp.changes.step1AModel
@@ -13,11 +13,6 @@ import edu.kit.ifv.mobitopp.actitopp.changes.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.SelectionFunction
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.select
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
