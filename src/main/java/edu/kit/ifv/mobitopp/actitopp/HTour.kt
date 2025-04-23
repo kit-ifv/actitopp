@@ -8,33 +8,17 @@ import java.util.Collections
  */
 class HTour(parent: HDay, index: Int) {
     //stores all attributes that are not directly accessible by variables
-    private val attributes: MutableMap<String?, Double?>
+    private val attributes: MutableMap<String, Double> = mutableMapOf()
 
-    val day: HDay
-    val activities: MutableList<HActivity>
-    var index = -99
+    val day: HDay = parent
+    val activities: MutableList<HActivity> = mutableListOf()
+    var index = index
     private var starttime = -1
 
-
-    /**
-     * Constructor
-     *
-     * @param parent
-     * @param index
-     */
-    init {
-        this.day = parent
-        this.index = (index)
-        this.activities = ArrayList()
-
-        this.attributes = HashMap()
-    }
     
-    val weekPattern: HWeekPattern
-        get() = day.pattern
+    val weekPattern: HWeekPattern = day.pattern
 
-    val person: ActitoppPerson
-        get() = day.person
+    val person: ActitoppPerson = day.person
 
 
 
@@ -250,15 +234,15 @@ class HTour(parent: HDay, index: Int) {
      * @param name specific attribute from map
      * @return
      */
-    fun getAttributefromMap(name: String?): Double {
-        return attributes[name]!!
+    fun getAttributefromMap(name: String): Double {
+        return attributes[name] ?: throw NoSuchElementException("No element of $name in $attributes")
     }
 
     /**
      * @param name  specific attribute for map
      * @param value
      */
-    fun addAttributetoMap(name: String?, value: Double?) {
+    fun addAttributetoMap(name: String, value: Double) {
         attributes[name] = value
     }
 
@@ -270,7 +254,7 @@ class HTour(parent: HDay, index: Int) {
         return attributes[name] != null
     }
 
-    val attributesMap: Map<String?, Double?>
+    val attributesMap: Map<String, Double>
         /**
          * @return the attributes
          */

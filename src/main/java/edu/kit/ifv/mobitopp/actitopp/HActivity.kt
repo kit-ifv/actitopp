@@ -14,11 +14,15 @@ import kotlin.math.min
 class HActivity @JvmOverloads constructor(
     parent: HTour,
     index: Int,
-    var acttype: ActivityType = ActivityType.UNKNOWN,
+    acttype: ActivityType = ActivityType.UNKNOWN,
     var jointStatus: JointStatus = JointStatus.UNKNOWN,
     var duration: Int = -1,
-    var starttime: Int = -1
+    starttime: Int = -1
 ) : Comparable<HActivity> {
+
+
+    constructor(parent: HDay, type: ActivityType, duration: Int, starttime: Int): this(HTour(parent, -1), -1, acttype= type, duration = duration, starttime = starttime)
+
     val day: HDay = parent.day
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
@@ -30,23 +34,24 @@ class HActivity @JvmOverloads constructor(
         }
 
 
-    constructor(parent: HDay, type: ActivityType, duration: Int, starttime: Int): this(HTour(parent, -1), -1, acttype= type, duration = duration, starttime = starttime)
     //stores all attributes that are not directly accessible by variables
 
 
     val tour: HTour = parent
+    var startTime: Int = starttime
+        set(starttime) {
+            require(starttime >= 0) { "starttime is not >0: $starttime" }
+            field = starttime
+        }
 
-
-    var activityType: ActivityType
+    var activityType: ActivityType = acttype
         get() {
-            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
-            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
-            return acttype
+            if (!person.isAllowedToWork) assert(field != ActivityType.WORK) { "person is not allowed to work!" }
+            return field
         }
         set(acttype) {
-            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
             if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
-            this.acttype = acttype
+            field = acttype
         }
 
 
@@ -76,15 +81,7 @@ class HActivity @JvmOverloads constructor(
         get() = day.person
 
 
-    var startTime: Int
-        get() {
-            assert(starttime != -1) { "starttime is not set" }
-            return starttime
-        }
-        set(starttime) {
-            assert(starttime >= 0) { "starttime is not >0: $starttime" }
-            this.starttime = starttime
-        }
+
 
 
     val estimatedTripTimeBeforeActivity: Int
@@ -133,14 +130,14 @@ class HActivity @JvmOverloads constructor(
                     " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
                     " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
                     " duration: " + (if (durationisScheduled()) duration else "n.a.") +
-                    " type: " + (if (activitytypeisScheduled()) acttype.typeasChar else "n.a.") +
+                    " type: " + (if (activitytypeisScheduled()) activityType.typeasChar else "n.a.") +
                     " jointStatus: " + this.jointStatus
         } else {
             dayIndex.toString() + "/" + tour!!.index + "/" + index +
                     " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
                     " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
                     " duration: " + (if (durationisScheduled()) duration else "n.a.") +
-                    " type: " + (if (activitytypeisScheduled()) acttype.typeasChar else "n.a.") +
+                    " type: " + (if (activitytypeisScheduled()) activityType.typeasChar else "n.a.") +
                     " jointStatus: " + this.jointStatus +
                     " trip before: " + (if (tripBeforeActivityisScheduled()) estimatedTripTimeBeforeActivity else "n.a.") +
                     " trip after: " + (if (tripAfterActivityisScheduled()) estimatedTripTimeAfterActivity else "n.a.")
@@ -164,7 +161,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasWorkCommutingTripbeforeActivity(): Boolean {
-        return (if (isActivityFirstinTour && activityType == ActivityType.WORK && (person!!.commutingdistance_work != 0.0)) true else false)
+        return (isActivityFirstinTour && activityType == ActivityType.WORK && (person!!.commutingdistance_work != 0.0))
     }
 
     /**
@@ -392,7 +389,7 @@ class HActivity @JvmOverloads constructor(
         get() = durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (if (Configuration.modelJointActions) jointStatus != JointStatus.UNKNOWN else true)
 
     fun activitytypeisScheduled(): Boolean {
-        return this.acttype != ActivityType.UNKNOWN
+        return this.activityType != ActivityType.UNKNOWN
     }
 
     fun tripBeforeActivityisScheduled(): Boolean {
@@ -408,7 +405,7 @@ class HActivity @JvmOverloads constructor(
     }
 
     fun startTimeisScheduled(): Boolean {
-        return starttime != -1
+        return startTime != -1
     }
 
     /**
@@ -416,8 +413,8 @@ class HActivity @JvmOverloads constructor(
      * @param value
      */
     fun addAttributetoMap(name: String, value: Double) {
-        assert(!attributes!!.containsKey(name)) { "attribute is already in map" }
-        attributes!![name] = value
+        assert(!attributes.containsKey(name)) { "attribute is already in map" }
+        attributes[name] = value
     }
 
     /**
@@ -425,7 +422,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun getAttributefromMap(name: String): Double? {
-        return attributes!![name]
+        return attributes[name]
     }
 
 
