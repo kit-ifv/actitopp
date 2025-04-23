@@ -6,6 +6,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.isEarning
 import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
 val ParameterSet1B = ParameterCollectionStep1B(
     option1 = ParametersStep1B(
@@ -128,6 +129,8 @@ val step1BModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterC
     option(7, parameters = {option7}) { standardUtilityFunction(this, it)}
 }
 )
+
+val step1BWithParams = step1BModel.initializeWithParameters(ParameterSet1B)
 
 private val standardUtilityFunction:  ParametersStep1B.(PersonSituation) -> Double = {
     base +

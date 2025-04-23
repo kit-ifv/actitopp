@@ -465,4 +465,8 @@ class DefaultDoubleMap<K>(val original: Map<K, Double>) : Map<K, Double> by orig
     override operator fun get(key: K): Double {
         return original.getOrDefault(key, 0.0)
     }
+
+    override fun toString(): String {
+        return original.toString()
+    }
 }

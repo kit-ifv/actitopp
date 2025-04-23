@@ -1,13 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp.changes
 
-import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields
-import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
-import edu.kit.ifv.mobitopp.actitopp.enums.Employment
-import edu.kit.ifv.mobitopp.actitopp.enums.isEarning
-import edu.kit.ifv.mobitopp.actitopp.enums.isParttime
-import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
 val ParameterSet1E = ParameterCollectionStep1E(
     option1 = ParametersStep1E(
@@ -18,7 +13,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = -0.0203,
         ageIn36to50 = 0.0688,
         areaTypeIsConurbation = -0.1962,
-        householdHasYouths = 0.2413,
+        householdAmountYouths = 0.2413,
         householdHasChildren = 0.2955,
         isMale = 0.0740,
     ),
@@ -30,7 +25,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = -0.0528,
         ageIn36to50 = 0.3667,
         areaTypeIsConurbation = -0.2582,
-        householdHasYouths = 0.4494,
+        householdAmountYouths = 0.4494,
         householdHasChildren = 0.4345,
         isMale = 0.1216,
     ),
@@ -42,7 +37,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = 0.1707,
         ageIn36to50 = 0.4437,
         areaTypeIsConurbation = -0.3219,
-        householdHasYouths = 0.6039,
+        householdAmountYouths = 0.6039,
         householdHasChildren = 0.7027,
         isMale = 0.2155,
     ),
@@ -54,7 +49,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = 0.6319,
         ageIn36to50 = 0.8019,
         areaTypeIsConurbation = -0.2717,
-        householdHasYouths = 0.6232,
+        householdAmountYouths = 0.6232,
         householdHasChildren = 1.4051,
         isMale = -0.0667,
     ),
@@ -66,7 +61,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = 0.9999,
         ageIn36to50 = 1.0698,
         areaTypeIsConurbation = -0.2423,
-        householdHasYouths = 0.4820,
+        householdAmountYouths = 0.4820,
         householdHasChildren = 2.4615,
         isMale = -0.6287,
     ),
@@ -78,7 +73,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = 1.0719,
         ageIn36to50 = 1.1898,
         areaTypeIsConurbation = -0.3103,
-        householdHasYouths = 0.7116,
+        householdAmountYouths = 0.7116,
         householdHasChildren = 1.6530,
         isMale = -0.5425,
     ),
@@ -90,7 +85,7 @@ val ParameterSet1E = ParameterCollectionStep1E(
         ageIn26to35 = 1.2377,
         ageIn36to50 = 1.4420,
         areaTypeIsConurbation = -0.3470,
-        householdHasYouths = 0.7588,
+        householdAmountYouths = 0.7588,
         householdHasChildren = 1.0888,
         isMale = -0.5573,
     )
@@ -115,21 +110,11 @@ data class ParametersStep1E(
     val ageIn26to35: Double,
     val ageIn36to50: Double,
     val areaTypeIsConurbation: Double,
-    val householdHasYouths: Double,
+    val householdAmountYouths: Double,
     val householdHasChildren: Double,
     val isMale: Double
 )
-
-class Situation1E(override val choice: Int, modPerson: ActitoppPersonModifierFields): PersonSituation(choice, modPerson) {
-    val employment = modPerson.original.employment
-    val age = modPerson.original.age
-    val amountOfWorkingDays = modPerson.amountOfWorkingDays
-    val householdHasChildren = modPerson.original.children0_10 > 0
-    val householdHasYouths = modPerson.original.children_u18 > 0
-    val areaType = modPerson.original.areatype
-}
-
-val step1EModel = ModifiableDiscreteChoiceModel<Int, Situation1E, ParameterCollectionStep1E>(AllocatedLogit.create {
+val step1EModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterCollectionStep1E>(AllocatedLogit.create {
     option(0) {
         0.0
     }
@@ -142,8 +127,8 @@ val step1EModel = ModifiableDiscreteChoiceModel<Int, Situation1E, ParameterColle
     option(7, parameters = {option7}) { standardUtilityFunction(this, it)}
 }
 )
-
-private val standardUtilityFunction:  ParametersStep1E.(Situation1E) -> Double = {
+val step1EWithParams = step1EModel.initializeWithParameters(ParameterSet1E)
+private val standardUtilityFunction:  ParametersStep1E.(PersonSituation) -> Double = {
     base +
             (it.isFulltimeEmployee()) * employmentIsFulltime +
             (it.isParttimeEmployee()) * employmentIsParttime +
@@ -152,6 +137,7 @@ private val standardUtilityFunction:  ParametersStep1E.(Situation1E) -> Double =
             (it.isAged36To50()) * ageIn36to50 +
             (it.areaTypeConurbation()) * areaTypeIsConurbation +
             (it.hasChildrenInHousehold()) * householdHasChildren +
-            (it.hasYouthsInHousehold()) * householdHasYouths
+            (it.amountOfYouthsInHousehold()) * householdAmountYouths +
+            (it.isMale()) * isMale
 
 }

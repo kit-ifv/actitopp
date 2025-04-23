@@ -71,6 +71,10 @@ class ModifiableDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(overri
     fun select(parameters: P, randomNumber: Double, situation: (X) -> SIT): X {
         return select(distributionFunction.options.map{situation(it)}.toSet(), parameters, randomNumber)
     }
+
+    fun select(parameters: P, situation: (X) -> SIT): X {
+        return selectionFunction.calculateSelection(distributionFunction.calculateProbabilities(distributionFunction.options.map(situation).toSet(), parameters)).choice
+    }
 }
 class KnownDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
     override val distributionFunction: OptionDistributionFunction<X, SIT, P>
@@ -88,5 +92,14 @@ class KnownDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
 
 
 }
+class ParametrizedDiscreteChoiceModel<X: Any, SIT: ChoiceSituation<X>, P>(val original: ModifiableDiscreteChoiceModel<X, SIT, P>, var parameters: P) {
 
+    fun select(converter: (X) -> SIT) = original.select(parameters, converter)
+    fun select(randomNumber: Double, converter: (X) -> SIT) = original.select(parameters, randomNumber, converter)
+    fun utilities(converter: (X) -> SIT) = original.utilities(parameters, converter)
+}
+
+fun <X: Any, SIT: ChoiceSituation<X>, PARAMS> ModifiableDiscreteChoiceModel<X, SIT, PARAMS>.initializeWithParameters(parameter: PARAMS): ParametrizedDiscreteChoiceModel<X, SIT, PARAMS> {
+    return ParametrizedDiscreteChoiceModel<X, SIT, PARAMS>(this, parameter)
+}
 val GlobalRandomizer = Random(1)

@@ -7,6 +7,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.isEarning
 import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
 val ParameterSet1D = ParameterCollectionStep1D(
     option1 = ParametersStep1D(
@@ -118,18 +119,7 @@ data class ParametersStep1D(
     val amountOfLeisureDays: Double,
 )
 
-
-class Situation1D(override val choice: Int, modPerson: ActitoppPersonModifierFields) :
-    PersonSituation(choice, modPerson) {
-    val employment = modPerson.original.employment
-    val age = modPerson.original.age
-    val amountOfWorkingDays = modPerson.amountOfWorkingDays
-    val amountOfEducationDays = modPerson.amountOfEducationDays
-    val amountOfLeisureDays = modPerson.amountOfLeisureDays
-    val areaType = modPerson.original.areatype
-}
-
-val step1DModel = ModifiableDiscreteChoiceModel<Int, Situation1D, ParameterCollectionStep1D>(AllocatedLogit.create {
+val step1DModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterCollectionStep1D>(AllocatedLogit.create {
     option(0) {
         0.0
     }
@@ -142,8 +132,8 @@ val step1DModel = ModifiableDiscreteChoiceModel<Int, Situation1D, ParameterColle
     option(7, parameters = { option7 }) { standardUtilityFunction(this, it) }
 }
 )
-
-private val standardUtilityFunction: ParametersStep1D.(Situation1D) -> Double = {
+val step1DWithParams = step1DModel.initializeWithParameters(ParameterSet1D)
+private val standardUtilityFunction: ParametersStep1D.(PersonSituation) -> Double = {
     base +
             (it.isEarningMoney()) * employmentIsEarning +
             (it.isStudent()) * emplomentStudent +

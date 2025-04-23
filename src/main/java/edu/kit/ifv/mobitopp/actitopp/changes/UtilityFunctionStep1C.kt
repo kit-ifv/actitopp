@@ -3,6 +3,8 @@ package edu.kit.ifv.mobitopp.actitopp.changes
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
+import java.lang.reflect.Parameter
 
 val ParameterSet1C = ParameterCollectionStep1C(
     option1 = ParametersStep1C(
@@ -90,13 +92,7 @@ data class ParametersStep1C(
     val amountOfWorkingDays: Double
 )
 
-class Situation1C(override val choice: Int, modPerson: ActitoppPersonModifierFields): PersonSituation(choice, modPerson) {
-    val employment = modPerson.original.employment
-    val age = modPerson.original.age
-
-}
-
-val step1CModel = ModifiableDiscreteChoiceModel<Int, Situation1C, ParameterCollectionStep1C>(AllocatedLogit.create {
+val step1CModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterCollectionStep1C>(AllocatedLogit.create {
     option(0) {
         0.0
     }
@@ -109,8 +105,8 @@ val step1CModel = ModifiableDiscreteChoiceModel<Int, Situation1C, ParameterColle
     option(7, parameters = {option7}) { standardUtilityFunction(this, it)}
 }
 )
-
-private val standardUtilityFunction:  ParametersStep1C.(Situation1C) -> Double = {
+val step1CWithParams = step1CModel.initializeWithParameters(ParameterSet1C)
+private val standardUtilityFunction:  ParametersStep1C.(PersonSituation) -> Double = {
     base +
             (it.isEarningMoney()) * employmentIsEarning +
             (it.isStudent()) * emplomentStudent +
