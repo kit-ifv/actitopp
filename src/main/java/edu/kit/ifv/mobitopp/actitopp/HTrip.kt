@@ -13,7 +13,7 @@ class HTrip(parent: HActivity, type: TripStatus, tripduration: Int) {
      * @return the activity
      */
     // each trip is bound to an activity
-    val activity: HActivity
+    val activity: HActivity = parent
 
     // indicator if trip is one before or after an activity
     private val status: TripStatus
@@ -23,8 +23,6 @@ class HTrip(parent: HActivity, type: TripStatus, tripduration: Int) {
 
     init {
         assert(tripduration > 0) { "duration is less or equal 0!" }
-
-        this.activity = parent
         this.status = type
         this.duration = tripduration
     }

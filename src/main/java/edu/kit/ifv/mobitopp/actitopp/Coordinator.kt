@@ -81,10 +81,10 @@ class Coordinator @JvmOverloads constructor(
 
         executeStep4("4A")
 
-        executeStep5("5A")
-        executeStep5("5B")
+        executeStep5("5A") // Create Activities before main activity (?)
+        executeStep5("5B") // Create Activities after  main activity (?)
 
-        executeStep6("6A")
+        executeStep6("6A") // Determine Activity Type for all non main activities (?)
 
         createTripTimesforActivities()
 

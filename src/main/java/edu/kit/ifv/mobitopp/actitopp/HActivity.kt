@@ -13,7 +13,7 @@ import kotlin.math.min
  */
 class HActivity @JvmOverloads constructor(
     parent: HTour,
-    index: Int,
+    val index: Int,
     acttype: ActivityType = ActivityType.UNKNOWN,
     var jointStatus: JointStatus = JointStatus.UNKNOWN,
     var duration: Int = -1,
@@ -27,15 +27,6 @@ class HActivity @JvmOverloads constructor(
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     var creatorPersonIndex: Int = parent.day.person.persIndex
-    var index = index
-        set(value) {
-            println("Evil Setter")
-            field = value
-        }
-
-
-    //stores all attributes that are not directly accessible by variables
-
 
     val tour: HTour = parent
     var startTime: Int = starttime
@@ -133,7 +124,7 @@ class HActivity @JvmOverloads constructor(
                     " type: " + (if (activitytypeisScheduled()) activityType.typeasChar else "n.a.") +
                     " jointStatus: " + this.jointStatus
         } else {
-            dayIndex.toString() + "/" + tour!!.index + "/" + index +
+            dayIndex.toString() + "/" + tour.index + "/" + index +
                     " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
                     " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
                     " duration: " + (if (durationisScheduled()) duration else "n.a.") +
@@ -161,7 +152,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasWorkCommutingTripbeforeActivity(): Boolean {
-        return (isActivityFirstinTour && activityType == ActivityType.WORK && (person!!.commutingdistance_work != 0.0))
+        return (isActivityFirstinTour && activityType == ActivityType.WORK && (person.commutingdistance_work != 0.0))
     }
 
     /**
@@ -172,7 +163,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasWorkCommutingTripafterActivity(): Boolean {
-        return (if (isActivityLastinTour && activityType == ActivityType.WORK && (person!!.commutingdistance_work != 0.0)) true else false)
+        return (if (isActivityLastinTour && activityType == ActivityType.WORK && (person.commutingdistance_work != 0.0)) true else false)
     }
 
     /**
@@ -183,7 +174,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasEducationCommutingTripbeforeActivity(): Boolean {
-        return (if (isActivityFirstinTour && activityType == ActivityType.EDUCATION && (person!!.commutingdistance_education != 0.0)) true else false)
+        return (if (isActivityFirstinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0)) true else false)
     }
 
     /**
@@ -194,7 +185,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasEducationCommutingTripafterActivity(): Boolean {
-        return (if (isActivityLastinTour && activityType == ActivityType.EDUCATION && (person!!.commutingdistance_education != 0.0)) true else false)
+        return (if (isActivityLastinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0)) true else false)
     }
 
     val isHomeActivity: Boolean
@@ -242,39 +233,6 @@ class HActivity @JvmOverloads constructor(
         }
 
 
-    val previousOutOfHomeActivityinPattern: HActivity?
-        /**
-         * @return
-         */
-        get() {
-            var previousact: HActivity? = null
-
-            // if this is the first actitvity, get the last one from previous tour
-            if (isActivityFirstinTour) {
-                val previousTour = tour.previousTourinPattern
-                if (previousTour != null) previousact = previousTour.lastActivityInTour
-            } else {
-                previousact = previousActivityinTour
-            }
-            return previousact
-        }
-
-    val nextOutOfHomeActivityinPattern: HActivity?
-        /**
-         * @return
-         */
-        get() {
-            var nextact: HActivity? = null
-
-            // if this is the last actitvity, get the first one from next tour
-            if (isActivityLastinTour) {
-                val nexttour = tour.nextTourinPattern
-                if (nexttour != null) nextact = nexttour.firstActivityInTour
-            } else {
-                nextact = nextActivityinTour
-            }
-            return nextact
-        }
 
 
     val endTime: Int
@@ -318,7 +276,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun calculateMeanTime(): Int {
-        val timebudget = person!!.getAttributefromMap(activityType.toString() + "budget_exact")
+        val timebudget = person.getAttributefromMap(activityType.toString() + "budget_exact")
         val daysWithAct = weekPattern.countDaysWithSpecificActivity(activityType).toDouble()
         val specificActivitiesForCurrentDay = day.getTotalNumberOfActivitites(activityType).toDouble()
 
@@ -478,7 +436,7 @@ class HActivity @JvmOverloads constructor(
          * @return
          */
         get() {
-            var defaulttime = -1
+            var defaulttime: Int
             defaulttime = when (activityType) {
                 ActivityType.WORK -> 472 / day.getTotalNumberOfActivitites(ActivityType.WORK)
                 ActivityType.EDUCATION -> 340 / day.getTotalNumberOfActivitites(ActivityType.EDUCATION)
@@ -514,6 +472,39 @@ class HActivity @JvmOverloads constructor(
     fun overlaps(other: HActivity): Boolean {
         return startTimeNew < other.endTimeNew && endTimeNew > other.startTimeNew
     }
+    val previousOutOfHomeActivityinPattern: HActivity?
+        /**
+         * @return
+         */
+        get() {
+            var previousact: HActivity? = null
+
+            // if this is the first actitvity, get the last one from previous tour
+            if (isActivityFirstinTour) {
+                val previousTour = tour.previousTourinPattern
+                if (previousTour != null) previousact = previousTour.lastActivityInTour
+            } else {
+                previousact = previousActivityinTour
+            }
+            return previousact
+        }
+
+    val nextOutOfHomeActivityinPattern: HActivity?
+        /**
+         * @return
+         */
+        get() {
+            var nextact: HActivity? = null
+
+            // if this is the last actitvity, get the first one from next tour
+            if (isActivityLastinTour) {
+                val nexttour = tour.nextTourinPattern
+                if (nexttour != null) nextact = nexttour.firstActivityInTour
+            } else {
+                nextact = nextActivityinTour
+            }
+            return nextact
+        }
 
     companion object {
         /**

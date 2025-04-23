@@ -24,11 +24,13 @@ class HTour(parent: HDay, index: Int) {
 
     fun addActivity(act: HActivity) {
         assert(act.index != -99) { "index of the activity is not initialized" }
+
         var actindexexisitiert = false
         for (tmpact in activities) {
             if (tmpact.index == act.index) actindexexisitiert = true
         }
-        assert(!actindexexisitiert) { "an activity using this index already exists" }
+
+        require(!actindexexisitiert) { "an activity using this index already exists" }
         activities.add(act)
     }
 
