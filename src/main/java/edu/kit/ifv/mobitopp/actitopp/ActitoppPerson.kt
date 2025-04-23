@@ -200,13 +200,13 @@ class ActitoppPerson@JvmOverloads constructor(
     fun clearAttributesMap() {
         attributes.clear()
     }
-
-    /**
-     * delete weekpattern of person
-     */
-    fun clearWeekPattern() {
-        weekPattern = null
-    }
+// TODO this is the only reason why weekpattern could be null, and if we remove it we get a large benefit
+//    /**
+//     * delete weekpattern of person
+//     */
+//    fun clearWeekPattern() {
+//        weekPattern = null
+//    }
 
     /**
      * delete all joint actions to consider

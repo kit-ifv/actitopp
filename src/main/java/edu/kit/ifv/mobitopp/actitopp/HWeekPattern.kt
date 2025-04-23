@@ -9,16 +9,10 @@ import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 class HWeekPattern(
     val person: ActitoppPerson,
 ) {
-    val days: MutableList<HDay> = ArrayList()
+    val days: List<HDay> = (0..6).map { HDay(this, it) }
 
     private val homeactivitities: MutableList<HActivity> = ArrayList()
 
-
-    init {
-        for (i in 0..6) {
-            days.add(HDay(this, i + 1))
-        }
-    }
 
     fun getDay(index: Int): HDay {
         return days[index]
@@ -28,7 +22,7 @@ class HWeekPattern(
      * returns activities of the week (only out of home, no home activities) in a list.
      * Robin: It appears that in the modelling process everything that is part of a tour is an activity that takes place
      * out of home. In the original code there was no filter at all, just a concatenation of all activities
-     *
+     * TODO Check against legacy code to ensure I don't talk nonsense
      * @return
      */
     val allOutofHomeActivities: List<HActivity> get() = days.flatMap { it.tours.flatMap { it.activities } }

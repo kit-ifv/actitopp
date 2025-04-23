@@ -86,13 +86,14 @@ class ActiToppHousehold @JvmOverloads constructor(
     /**
      * resets all modeling results for this household
      */
-    fun resetHouseholdModelingResults() {
-        for (actperson in householdmembersasList) {
-            actperson.clearAttributesMap()
-            actperson.clearWeekPattern()
-            actperson.clearJointActivitiesforConsideration()
-        }
-    }
+    //TODO rebuild this method, but replace clearing the week pattern by something useful, rather than just setting null
+//    fun resetHouseholdModelingResults() {
+//        for (actperson in householdmembersasList) {
+//            actperson.clearAttributesMap()
+//            actperson.clearWeekPattern()
+//            actperson.clearJointActivitiesforConsideration()
+//        }
+//    }
 
 
     override fun toString(): String {
