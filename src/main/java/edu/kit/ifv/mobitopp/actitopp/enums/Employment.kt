@@ -1,7 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp.enums
 
 /**
- * TODO I have no Idea what the unknown codes should be, I can only implement the function ound in the codebase.
+ * TODO I have no Idea what the unknown codes should be, I can only implement the function found in the codebase. Robin, 25
  */
 enum class Employment(val code: Int) {
     FULLTIME(1),

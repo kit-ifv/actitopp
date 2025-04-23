@@ -1,7 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
-import edu.kit.ifv.mobitopp.actitopp.IO.ModelFileBase
+import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1A

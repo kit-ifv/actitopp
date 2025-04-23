@@ -5,49 +5,36 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 /**
  * @author Tim Hilgert
  */
-class HDay(parent: HWeekPattern, weekday: Int) {
+
+
+class HDay(parent: HWeekPattern, val weekday: Int) {
     //stores all attributes that are not directly accessible by variables
-    private val attributes: MutableMap<String, Double>
+    private val attributes: MutableMap<String, Double> = mutableMapOf()
 
-    val pattern: HWeekPattern
-    var weekday: Int = 0
-        /**
-         * returns the weekday number
-         * 1 - Monday
-         * 2 - Tuesday
-         * 3 - Wednesday
-         * 4 - Thursday
-         * 5 - Friday
-         * 6 - Saturday
-         * 7 - Sunday
-         *
-         * @return
-         */
-        get() {
-            assert(field in 1..7) { "week day is out of range - weekday: $field" }
-            return field
-        }
-        set(weekday) {
-            assert(weekday in 1..7) { "week day is out of range - weekday: $weekday" }
-            field = weekday
-        }
-    val tours: MutableList<HTour>
+    val pattern: HWeekPattern = parent
+//    var weekday: Int = 0
+//        /**
+//         * returns the weekday number
+//         * 1 - Monday
+//         * 2 - Tuesday
+//         * 3 - Wednesday
+//         * 4 - Thursday
+//         * 5 - Friday
+//         * 6 - Saturday
+//         * 7 - Sunday
+//         *
+//         * @return
+//         */
+//        get() {
+//            assert(field in 1..7) { "week day is out of range - weekday: $field" }
+//            return field
+//        }
+//        set(weekday) {
+//            assert(weekday in 1..7) { "week day is out of range - weekday: $weekday" }
+//            field = weekday
+//        }
+    val tours: MutableList<HTour> = mutableListOf()
 
-
-    /**
-     * Constructor
-     *
-     * @param parent
-     * @param weekday
-     */
-    init {
-        checkNotNull(parent) { "pattern is not initialized" }
-        this.pattern = parent
-        this.weekday = weekday
-
-        tours = ArrayList()
-        this.attributes = HashMap()
-    }
 
 
 

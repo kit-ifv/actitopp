@@ -1,6 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import edu.kit.ifv.mobitopp.actitopp.IO.ModelFileBase
+import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 
 class LinRegDefaultCalculation(
     private val regressionname: String,

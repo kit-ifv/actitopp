@@ -3,7 +3,7 @@ package edu.kit.ifv.mobitopp
 import edu.kit.ifv.mobitopp.actitopp.ActiToppHousehold
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
-import edu.kit.ifv.mobitopp.actitopp.IO.ModelFileBase
+import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
 import kotlin.random.Random
 

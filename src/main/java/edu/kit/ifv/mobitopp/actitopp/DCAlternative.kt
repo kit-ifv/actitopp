@@ -1,5 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.deprecated.UtilityFunction
+
 /**
  * @author Tim Hilgert
  */

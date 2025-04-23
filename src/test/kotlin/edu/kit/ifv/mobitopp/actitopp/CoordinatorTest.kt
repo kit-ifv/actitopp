@@ -1,6 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import edu.kit.ifv.mobitopp.actitopp.IO.ModelFileBase
+import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1A
 import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1B
 import edu.kit.ifv.mobitopp.actitopp.changes.PersonSituation
