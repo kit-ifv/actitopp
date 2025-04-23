@@ -1,14 +1,13 @@
 package edu.kit.ifv.mobitopp.actitopp.enums
-
 import java.util.Collections
 import java.util.EnumSet
 // TODO find out whether Unknown is deliberately set to a lower case letter so that the getTypeFromChar Throws
-enum class ActivityType(val typeasChar: Char) {
-    WORK('W'),
-    EDUCATION('E'),
-    LEISURE('L'),
-    SHOPPING('S'),
-    TRANSPORT('T'),
+enum class ActivityType(val typeasChar: Char, val defaultActivityTime: Int = 278) {
+    WORK('W', 472),
+    EDUCATION('E', 340),
+    LEISURE('L', 130),
+    SHOPPING('S', 41),
+    TRANSPORT('T', 15),
     HOME('H'),
     UNKNOWN('x');
 

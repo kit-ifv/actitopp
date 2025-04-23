@@ -109,6 +109,11 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     override fun compareTo(other: HActivity): Int {
+
+        require(weekDay == other.weekDay) {
+            "weekDay != other.weekDay"
+        }
+
         return compareValuesBy(this, other, { it.weekDay }, { it.tour.index }, { it.index })
     }
 
@@ -163,7 +168,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasWorkCommutingTripafterActivity(): Boolean {
-        return (if (isActivityLastinTour && activityType == ActivityType.WORK && (person.commutingdistance_work != 0.0)) true else false)
+        return (isActivityLastinTour && activityType == ActivityType.WORK && (person.commutingdistance_work != 0.0))
     }
 
     /**
@@ -174,7 +179,7 @@ class HActivity @JvmOverloads constructor(
      * @return
      */
     fun hasEducationCommutingTripbeforeActivity(): Boolean {
-        return (if (isActivityFirstinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0)) true else false)
+        return (isActivityFirstinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0))
     }
 
     /**
@@ -194,11 +199,7 @@ class HActivity @JvmOverloads constructor(
          */
         get() = (activitytypeisScheduled() && activityType == ActivityType.HOME)
 
-    val isMainActivityoftheTour: Boolean
-        /**
-         * @return
-         */
-        get() = this.index == 0
+    val isMainActivityoftheTour: Boolean = this.index == 0
 
     val isMainActivityoftheDay: Boolean
         /**
@@ -243,14 +244,11 @@ class HActivity @JvmOverloads constructor(
          */
         get() = startTime + duration
 
-    val weekDay: Int
-        get() = day.weekday
-
-    val dayIndex: Int
-        get() = day.index
-
-    val tourIndex: Int
-        get() = tour.index
+    val weekDay: Int = day.weekday
+    // Can be held as field, since day does not change (anymore)
+    val dayIndex: Int = day.index
+    // Can be held, cause immutability
+    val tourIndex: Int = tour.index
 
     val startTimeWeekContext: Int
         get() = 1440 * dayIndex + startTime
@@ -425,31 +423,7 @@ class HActivity @JvmOverloads constructor(
         }
     }
 
-    val defaultActivityTime: Int
-        /**
-         * determines a default activity time based on activity type and the amount of activities for this type on the specific day
-         *
-         *
-         * empirical values are based on MEDIAN-values of duration per day [min] based on German Mobility Panel data
-         * default activity time: defaulttime = empirical value / numberofactivites(type, day)
-         *
-         * @return
-         */
-        get() {
-            var defaulttime: Int
-            defaulttime = when (activityType) {
-                ActivityType.WORK -> 472 / day.getTotalNumberOfActivitites(ActivityType.WORK)
-                ActivityType.EDUCATION -> 340 / day.getTotalNumberOfActivitites(ActivityType.EDUCATION)
-
-                ActivityType.LEISURE -> 130 / day.getTotalNumberOfActivitites(ActivityType.LEISURE)
-                ActivityType.SHOPPING -> 41 / day.getTotalNumberOfActivitites(ActivityType.SHOPPING)
-                ActivityType.TRANSPORT -> 15 / day.getTotalNumberOfActivitites(ActivityType.TRANSPORT)
-
-                else -> 278 / day.totalAmountOfActivitites
-            }
-            assert(defaulttime != -1) { "could not determine defaultTime!" }
-            return defaulttime
-        }
+    val defaultActivityTime: Int get()= activityType.defaultActivityTime / day.getTotalNumberOfActivitites(activityType)
 
     /* TODO these temporary fields should get removed when the other shenanigans with tripBeforeaActivity are cleaned up
          and the weekContext Field is killed by using Duration

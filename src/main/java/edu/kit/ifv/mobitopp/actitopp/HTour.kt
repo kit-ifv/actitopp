@@ -1,6 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import java.util.Collections
+import java.util.NavigableSet
+import java.util.TreeSet
 
 
 /**
@@ -12,6 +14,8 @@ class HTour(parent: HDay, index: Int) {
 
     val day: HDay = parent
     val activities: MutableList<HActivity> = mutableListOf()
+
+    val betterActivities: NavigableSet<HActivity> = TreeSet<HActivity>()
     var index = index
     private var starttime = -1
 
