@@ -11,26 +11,44 @@ import kotlin.math.min
 /**
  * @author Tim Hilgert
  */
-class HActivity: Comparable<HActivity> {
-    //stores all attributes that are not directly accessible by variables
-    private lateinit var attributes: MutableMap<String, Double>
+class HActivity @JvmOverloads constructor(
+    parent: HTour,
+    index: Int,
+    var acttype: ActivityType = ActivityType.UNKNOWN,
+    var jointStatus: JointStatus = JointStatus.UNKNOWN,
+    var duration: Int = -1,
+    var starttime: Int = -1
+) : Comparable<HActivity> {
+    val day: HDay = parent.day
+    private val attributes: MutableMap<String, Double> = mutableMapOf()
 
-    val day: HDay
-    lateinit var tour: HTour
-        private set
-
-    private var acttype = ActivityType.UNKNOWN
-
-    var index: Int = -99
-        get() {
-            assert(field != -99) { "index is not set" }
-            return field
-        }
+    var creatorPersonIndex: Int = parent.day.person.persIndex
+    var index = index
         set(value) {
+            println("Evil Setter")
             field = value
         }
-    var duration = -1
-    private var starttime = -1
+
+
+    constructor(parent: HDay, type: ActivityType, duration: Int, starttime: Int): this(HTour(parent, -1), -1, acttype= type, duration = duration, starttime = starttime)
+    //stores all attributes that are not directly accessible by variables
+
+
+    val tour: HTour = parent
+
+
+    var activityType: ActivityType
+        get() {
+            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
+            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
+            return acttype
+        }
+        set(acttype) {
+            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
+            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
+            this.acttype = acttype
+        }
+
 
 
     /**
@@ -48,73 +66,16 @@ class HActivity: Comparable<HActivity> {
      */
     var tripafteractivity: HTrip? = null
 
-    var jointStatus = JointStatus.UNKNOWN
 
     private var jointParticipants: MutableList<ActitoppPerson> = ArrayList()
 
-    /**
-     * constructor
-     *
-     * @param parent
-     * @param index
-     */
-    constructor(parent: HTour, index: Int) {
-        this.tour = parent
 
-        this.day = parent.day
-        this.index = index
-
-        this.attributes = HashMap()
-        creatorPersonIndex = day.person.persIndex
-    }
-
-    /**
-     * constructor
-     *
-     * @param parent
-     * @param index
-     * @param type
-     */
-    constructor(parent: HTour, index: Int, type: ActivityType) : this(parent, index) {
-        assert(type != ActivityType.UNKNOWN) { "unknown activity type!" }
-        activityType = type
-    }
-
-    /**
-     * constructor for home activities
-     *
-     * @param parent
-     * @param type
-     * @param duration
-     * @param starttime
-     */
-    constructor(parent: HDay, type: ActivityType, duration: Int, starttime: Int) {
-        this.day = parent
-        activityType = type
-        this.duration = duration
-        startTime = starttime
-        jointStatus = JointStatus.NOJOINTELEMENT
-    }
-
-    val weekPattern: HWeekPattern
-        get() = day.pattern
+    val weekPattern: HWeekPattern get() = day.pattern
 
     val person: ActitoppPerson
         get() = day.person
 
-    var activityType: ActivityType
-        get() {
-            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
-            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
-            return acttype
-        }
-        set(acttype) {
-            assert(ActivityType.FULLSET.contains(acttype)) { "unknown activity type:$acttype" }
-            if (!person.isAllowedToWork) assert(acttype != ActivityType.WORK) { "person is not allowed to work!" }
-            this.acttype = acttype
-        }
 
-    
     var startTime: Int
         get() {
             assert(starttime != -1) { "starttime is not set" }
@@ -124,7 +85,7 @@ class HActivity: Comparable<HActivity> {
             assert(starttime >= 0) { "starttime is not >0: $starttime" }
             this.starttime = starttime
         }
-    
+
 
     val estimatedTripTimeBeforeActivity: Int
         /**
@@ -156,11 +117,11 @@ class HActivity: Comparable<HActivity> {
      * TODO figure out if there is ever a scenario where an activity has no known start / end time and this weird
      *   index comparison shenanigans is actually necessary - The code suggests that this "could" happen, but inspections
      *   show no such occurrence.
-     * @param acttocompare
+     * @param other
      * @return
      */
-    override fun compareTo(acttocompare: HActivity): Int {
-        return compareValuesBy(this, acttocompare, {it.weekDay }, {it.tour.index}, {it.index})
+    override fun compareTo(other: HActivity): Int {
+        return compareValuesBy(this, other, { it.weekDay }, { it.tour.index }, { it.index })
     }
 
 
@@ -439,7 +400,7 @@ class HActivity: Comparable<HActivity> {
     }
 
     fun tripAfterActivityisScheduled(): Boolean {
-        return tripafteractivity?.isScheduled?:false
+        return tripafteractivity?.isScheduled ?: false
     }
 
     fun durationisScheduled(): Boolean {
@@ -474,34 +435,6 @@ class HActivity: Comparable<HActivity> {
          */
         get() = DefaultDoubleMap(attributes)
 
-    var creatorPersonIndex: Int
-        /**
-         * returns personindex of person that first created this activity.
-         * if modeling joint actions this may be another person of the household that was modeled previous
-         * in modeling order and that first created this joint activity.
-         *
-         * @return
-         */
-        get() {
-            val result: Int = if (attributes!!.containsKey("CreatorPersonIndex")) {
-                getAttributefromMap("CreatorPersonIndex")!!.toInt()
-            } else {
-                person.persIndex
-            }
-            assert(result != -1) { "could not determine CreatorPersonIndex!" }
-            return result
-        }
-        /**
-         * sets the personindex of person that first created this activity.
-         *
-         * @param persindex
-         */
-        set(persindex) {
-            if (attributes!!.containsKey("CreatorPersonIndex")) {
-                attributes!!.remove("CreatorPersonIndex")
-            }
-            attributes!!["CreatorPersonIndex"] = persindex.toDouble()
-        }
 
     /**
      * @return the JointParticipants
@@ -532,7 +465,9 @@ class HActivity: Comparable<HActivity> {
         jointParticipants.remove(person)
 
         // if there is no other jointParticipant left, remove jointStatus of the activity
-        if (jointParticipants.size == 0) {jointStatus = (JointStatus.NOJOINTELEMENT) }
+        if (jointParticipants.size == 0) {
+            jointStatus = (JointStatus.NOJOINTELEMENT)
+        }
     }
 
     val defaultActivityTime: Int
@@ -565,21 +500,24 @@ class HActivity: Comparable<HActivity> {
          and the weekContext Field is killed by using Duration
 
      */
-    private val startTimeNew: Int get() {
-        return startTimeWeekContext - if (tripBeforeActivityisScheduled()) estimatedTripTimeBeforeActivity else 0
-    }
-    private val endTimeNew: Int get() {
-        return (if (this.durationisScheduled()) this.endTimeWeekContext else this.startTimeWeekContext) +
-        if (this.tripAfterActivityisScheduled()) this.estimatedTripTimeAfterActivity else 0
+    private val startTimeNew: Int
+        get() {
+            return startTimeWeekContext - if (tripBeforeActivityisScheduled()) estimatedTripTimeBeforeActivity else 0
+        }
+    private val endTimeNew: Int
+        get() {
+            return (if (this.durationisScheduled()) this.endTimeWeekContext else this.startTimeWeekContext) +
+                    if (this.tripAfterActivityisScheduled()) this.estimatedTripTimeAfterActivity else 0
 
-    }
+        }
 
     /**
      * overlap checks do not belong in the companion object, since you already have a comparison object.....
      */
-    fun overlaps(other: HActivity) : Boolean {
+    fun overlaps(other: HActivity): Boolean {
         return startTimeNew < other.endTimeNew && endTimeNew > other.startTimeNew
     }
+
     companion object {
         /**
          * sorts list of activities ascending by week-order start time

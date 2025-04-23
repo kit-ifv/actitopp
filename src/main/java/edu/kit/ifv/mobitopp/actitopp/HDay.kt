@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import java.time.DayOfWeek
 
 /**
  * @author Tim Hilgert
@@ -12,27 +13,6 @@ class HDay(parent: HWeekPattern, val weekday: Int) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     val pattern: HWeekPattern = parent
-//    var weekday: Int = 0
-//        /**
-//         * returns the weekday number
-//         * 1 - Monday
-//         * 2 - Tuesday
-//         * 3 - Wednesday
-//         * 4 - Thursday
-//         * 5 - Friday
-//         * 6 - Saturday
-//         * 7 - Sunday
-//         *
-//         * @return
-//         */
-//        get() {
-//            assert(field in 1..7) { "week day is out of range - weekday: $field" }
-//            return field
-//        }
-//        set(weekday) {
-//            assert(weekday in 1..7) { "week day is out of range - weekday: $weekday" }
-//            field = weekday
-//        }
     val tours: MutableList<HTour> = mutableListOf()
 
 
@@ -41,7 +21,9 @@ class HDay(parent: HWeekPattern, val weekday: Int) {
     val person: ActitoppPerson
         get() = pattern.person
 
-
+    fun dayss(){
+        DayOfWeek.MONDAY.value
+    }
 
     fun hasActivity(activityType: ActivityType): Boolean {
         return tours.any { t -> t.activities.any { it.activityType == activityType && it.isScheduled } }

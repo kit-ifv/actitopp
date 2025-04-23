@@ -2062,7 +2062,8 @@ class Coordinator @JvmOverloads constructor(
                 "person error - no home activity possible at beginning of the week!"
             )
 
-            pattern.addHomeActivity(HActivity(pattern.getDay(0), homeact, duration1, 0))
+            val home = HActivity(pattern.getDay(0), homeact, duration1, 0)
+            pattern.addHomeActivity(home)
 
             // loop through all activities and create home activities after last activity in a tour
             for (i in 0..<allmodeledActivities.size - 1) {

@@ -158,7 +158,9 @@ class HWeekPattern(
      * @param act
      */
     fun addHomeActivity(act: HActivity) {
-        require(act.activityType == ActivityType.HOME) { "no home activity" }
+        require(act.activityType == ActivityType.HOME) {
+            "no home activity"
+        }
         homeactivitities.add(act)
     }
 
