@@ -11,6 +11,7 @@ import edu.kit.ifv.mobitopp.actitopp.toModifiable
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.D
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
 interface ParameterCollectionStep1<T> {
     val option1: T
@@ -184,7 +185,7 @@ class Situation1A(override val choice: Int, person: ActitoppPerson): PersonSitua
     val gender = person.gender
 }
 
-val step1AModel = ModifiableDiscreteChoiceModel<Int, Situation1A, ParameterCollectionStep1A>(AllocatedLogit.create {
+val step1AModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterCollectionStep1A>(AllocatedLogit.create {
     option(0) {
         0.0
     }
@@ -197,23 +198,23 @@ val step1AModel = ModifiableDiscreteChoiceModel<Int, Situation1A, ParameterColle
     option(7, parameters = {option7}, { standardUtilityFunction(this, it) })
     
 })
-
-private val standardUtilityFunction:  ParametersStep1A.(Situation1A) -> Double = {
+val step1AWithParams = step1AModel.initializeWithParameters(ParameterSet1A)
+private val standardUtilityFunction:  ParametersStep1A.(PersonSituation) -> Double = {
     base +
-            (it.employment == Employment.FULLTIME) * employmentFullTime +
-            (it.employment.isParttime()) * employmentPartTime +
-            (it.employment.isStudent()) * employmentStudent +
-            (it.employment == Employment.VOCATIONAL) * employmentVocational+
+            (it.isFulltimeEmployee()) * employmentFullTime +
+            (it.isParttimeEmployee()) * employmentPartTime +
+            (it.isStudent()) * employmentStudent +
+            (it.isVocational()) * employmentVocational+
 
-            (it.age in 10..17) * ageIn10to17 +
-            (it.age in 18..25) * ageIn18To25 +
-            (it.age in 26..35) * ageIn26To35 +
-            (it.age in 36..50) * ageIn36To50 +
-            (it.age in 51..60) * ageIn51to60 +
-            (it.age in 61..70) * ageIn61to70 +
+            (it.isAged10To17()) * ageIn10to17 +
+            (it.isAged18To25()) * ageIn18To25 +
+            (it.isAged26To35()) * ageIn26To35 +
+            (it.isAged36To50()) * ageIn36To50 +
+            (it.isAged51To60()) * ageIn51to60 +
+            (it.isAged61To70()) * ageIn61to70 +
 
-            (it.areaType == AreaType.CONURBATION) * areaTypeConurburation +
-            (it.areaType == AreaType.RURAL) * areaTypeRural +
-            (it.hasChildrenUnder10) * householdHasChildenBelowAge10 +
-            (it.gender == Gender.MALE) * genderIsMale
+            (it.areaTypeConurbation()) * areaTypeConurburation +
+            (it.areaTypeRural()) * areaTypeRural +
+            (it.hasChildrenInHousehold()) * householdHasChildenBelowAge10 +
+            (it.isMale()) * genderIsMale
 }
