@@ -2,22 +2,27 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import java.time.DayOfWeek
+import java.util.NavigableMap
 import java.util.NavigableSet
+import java.util.SortedMap
+import java.util.TreeMap
 import java.util.TreeSet
+
+
+fun <K, V> SortedMap<K, V>.lastValue(): V = this.getValue(lastKey())
+fun <K, V> SortedMap<K, V>.firstValue(): V = this.getValue(firstKey())
 
 /**
  * @author Tim Hilgert
  */
-
-
 class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     //stores all attributes that are not directly accessible by variables
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     val pattern: HWeekPattern = parent
 
-    private val premiumTours: NavigableSet<HTour> = TreeSet { t1, t2 -> t1.index.compareTo(t2.index) }
-    val tours: List<HTour> get() = premiumTours.toList()
+    private val premiumTours: NavigableMap<Int, HTour> = TreeMap()
+    val tours: List<HTour> get() = premiumTours.values.toList()
 
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
@@ -33,22 +38,23 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * that would trigger if either the day has no tours or only "preMainActivity" tours with negative indices. It can
      * be assumed that this decision was a programmer oversight and not deliberate.
      */
-    val highestTourIndex: Int get() = premiumTours.last.index
+    val highestTourIndex: Int get() = premiumTours.lastValue().index
 
 
-    val lowestTourIndex: Int get() = premiumTours.first.index
+    val lowestTourIndex: Int get() = premiumTours.firstValue().index
 
-    val firstTourOfDay: HTour get() = premiumTours.first
+    val firstTourOfDay: HTour get() = premiumTours.firstValue()
 
-    val lastTourOfDay: HTour get() = premiumTours.last
+    val lastTourOfDay: HTour get() = premiumTours.lastValue()
 
     val isHomeDay: Boolean get() = premiumTours.isEmpty()
     val amountOfTours: Int get() = premiumTours.size
 
 
-    val allActivitiesoftheDay: List<HActivity> get() {
-        return premiumTours.flatMap { it.activities }
-    }
+    val allActivitiesoftheDay: List<HActivity>
+        get() {
+            return premiumTours.values.flatMap { it.activities }
+        }
 
     val mainTourType: ActivityType
         get() = getTour(0).getActivity(0).activityType
@@ -86,10 +92,13 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
     fun addTour(tour: HTour) {
-        require(premiumTours.add(tour)) {
+        require(!premiumTours.containsKey(tour.index)) {
             "Cannot insert tour as another tour with that index is already found, " +
                     "TODO maybe kill the require, the old code didn't fail at this point but caused wild behaviour"
+
         }
+        premiumTours[tour.index] = tour
+
     }
 
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
@@ -107,16 +116,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @param index
      * @return
      */
-    fun getTour(index: Int): HTour {
-        var indextour: HTour? = null
-        for (tour in this.tours) {
-            if (tour.index == index) {
-                indextour = tour
-            }
-        }
-        checkNotNull(indextour) { "could not determine tour - index: $index" }
-        return indextour
-    }
+    fun getTour(index: Int): HTour = premiumTours.getValue(index)
 
 
     /**
@@ -150,17 +150,8 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun existsActivity(tourindex: Int, activityindex: Int): Boolean {
-        var result = false
-        if (existsTour(tourindex)) {
-            var indexact: HActivity? = null
-            for (act in getTour(tourindex).activities) {
-                if (act.index == activityindex) {
-                    indexact = act
-                }
-            }
-            if (indexact != null) result = true
-        }
-        return result
+        if (!premiumTours.containsKey(tourindex)) return false // No tour with specified index exists
+        return premiumTours.getValue(tourindex).activities.any { it.index == activityindex }
     }
 
     /**
