@@ -613,7 +613,7 @@ class Coordinator @JvmOverloads constructor(
                 for (act in pattern.getDay(jointact_dayindey).allActivitiesoftheDay) {
                     possibleact.add(act)
                 }
-                HActivity.sortActivityListbyIndices(possibleact)
+                //HActivity.sortActivityListbyIndices(possibleact) TODO probably this sort can be killed, because the pattern should also return a sorted list, also the placeJointActivities is never triggered ???
             }
 
             /*

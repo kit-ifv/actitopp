@@ -151,6 +151,9 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun getTotalAmountOfActivityTimeUntilMainTour(referencePoint: HTour): Int {
+        if(referencePoint.index > -1) {
+            return 0
+        }
         return mappedTours.subMap(referencePoint.index, true, -1, true).values.sumOf { it.actDuration }
     }
 

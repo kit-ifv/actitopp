@@ -123,10 +123,10 @@ class HTour(parent: HDay, val index: Int) {
      * @return
      */
     fun getActivity(index: Int): HActivity {
-        return activities.last{it.index == index}
+        return betterActivities.getValue(index)
     }
 
-    fun getActivityOrNull(index: Int): HActivity? = activities.lastOrNull{it.index == index}
+    fun getActivityOrNull(index: Int): HActivity? = betterActivities[index]
 
     val lowestActivityIndex: Int
         get() {
