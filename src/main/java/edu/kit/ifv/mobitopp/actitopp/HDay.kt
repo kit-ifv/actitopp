@@ -26,18 +26,12 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      */
     val index: Int = weekday.value - 1
 
-
-    val highestTourIndex: Int
-        get() {
-            var index = -99
-            for (tour in this.tours) {
-                if (tour.index > index) {
-                    index = tour.index
-                }
-            }
-            assert(index >= 0) { "maximum tour index is below 0 - index: $index" }
-            return index
-        }
+    /**
+     * Return the highest tour index, the original code had an assert where negative indices would cause an assertion
+     * that would trigger if either the day has no tours or only "preMainActivity" tours with negative indices. It can
+     * be assumed that this decision was a programmer oversight and not deliberate.
+     */
+    val highestTourIndex: Int get() = tours.maxOf { it.index }
 
 
     val lowestTourIndex: Int
