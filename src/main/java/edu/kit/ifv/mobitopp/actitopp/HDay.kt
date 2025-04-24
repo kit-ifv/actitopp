@@ -2,6 +2,8 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import java.time.DayOfWeek
+import java.util.NavigableSet
+import java.util.TreeSet
 
 /**
  * @author Tim Hilgert
@@ -14,7 +16,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
 
     val pattern: HWeekPattern = parent
     val tours: MutableList<HTour> = mutableListOf()
-
+    val premiumTours: NavigableSet<HTour> = TreeSet { t1, t2 -> t1.index.compareTo(t2.index) }
 
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
@@ -52,7 +54,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
             return allactivities
         }
 
-    val mainTourType: ActivityType?
+    val mainTourType: ActivityType
         get() = getTour(0).getActivity(0).activityType
 
 

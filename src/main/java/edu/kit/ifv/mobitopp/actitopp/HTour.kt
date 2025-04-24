@@ -8,7 +8,7 @@ import java.util.TreeSet
 /**
  * @author Tim Hilgert
  */
-class HTour(parent: HDay, index: Int) {
+class HTour(parent: HDay, val index: Int) {
     //stores all attributes that are not directly accessible by variables
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
@@ -16,7 +16,6 @@ class HTour(parent: HDay, index: Int) {
     val activities: MutableList<HActivity> = mutableListOf()
 
     val betterActivities: NavigableSet<HActivity> = TreeSet<HActivity>()
-    var index = index
     private var starttime = -1
 
     
