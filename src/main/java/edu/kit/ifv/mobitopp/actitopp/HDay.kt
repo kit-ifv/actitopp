@@ -8,7 +8,7 @@ import java.util.SortedMap
 import java.util.TreeMap
 import java.util.TreeSet
 
-
+// TODO move these extension functions to something called utils, they should not loiter here
 fun <K, V> SortedMap<K, V>.lastValue(): V = this.getValue(lastKey())
 fun <K, V> SortedMap<K, V>.firstValue(): V = this.getValue(firstKey())
 
@@ -102,7 +102,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
     // TODO when activitytypeIsScheduled() is just a comparision against activityType Unknown the expression would collapse.
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
-        return tours.sumOf { it.activities.count { it.activitytypeisScheduled() && it.activityType == acttype } }
+        return tours.sumOf { it.activities.count { act -> act.activityType == acttype&& act.activitytypeisScheduled()   } }
     }
 
 
