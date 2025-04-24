@@ -3,10 +3,8 @@ package edu.kit.ifv.mobitopp.actitopp
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import java.time.DayOfWeek
 import java.util.NavigableMap
-import java.util.NavigableSet
 import java.util.SortedMap
 import java.util.TreeMap
-import java.util.TreeSet
 
 // TODO move these extension functions to something called utils, they should not loiter here
 fun <K, V> SortedMap<K, V>.lastValue(): V = this.getValue(lastKey())
@@ -21,8 +19,8 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
 
     val pattern: HWeekPattern = parent
 
-    private val premiumTours: NavigableMap<Int, HTour> = TreeMap()
-    val tours: List<HTour> get() = premiumTours.values.toList()
+    private val mappedTours: NavigableMap<Int, HTour> = TreeMap()
+    val tours: List<HTour> get() = mappedTours.values.toList()
 
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
@@ -38,22 +36,22 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * that would trigger if either the day has no tours or only "preMainActivity" tours with negative indices. It can
      * be assumed that this decision was a programmer oversight and not deliberate.
      */
-    val highestTourIndex: Int get() = premiumTours.lastValue().index
+    val highestTourIndex: Int get() = mappedTours.lastValue().index
 
 
-    val lowestTourIndex: Int get() = premiumTours.firstValue().index
+    val lowestTourIndex: Int get() = mappedTours.firstValue().index
 
-    val firstTourOfDay: HTour get() = premiumTours.firstValue()
+    val firstTourOfDay: HTour get() = mappedTours.firstValue()
 
-    val lastTourOfDay: HTour get() = premiumTours.lastValue()
+    val lastTourOfDay: HTour get() = mappedTours.lastValue()
 
-    val isHomeDay: Boolean get() = premiumTours.isEmpty()
-    val amountOfTours: Int get() = premiumTours.size
+    val isHomeDay: Boolean get() = mappedTours.isEmpty()
+    val amountOfTours: Int get() = mappedTours.size
 
 
     val allActivitiesoftheDay: List<HActivity>
         get() {
-            return premiumTours.values.flatMap { it.activities }
+            return mappedTours.values.flatMap { it.activities }
         }
 
     val mainTourType: ActivityType
@@ -92,12 +90,12 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
     fun addTour(tour: HTour) {
-        require(!premiumTours.containsKey(tour.index)) {
+        require(!mappedTours.containsKey(tour.index)) {
             "Cannot insert tour as another tour with that index is already found, " +
                     "TODO maybe kill the require, the old code didn't fail at this point but caused wild behaviour"
 
         }
-        premiumTours[tour.index] = tour
+        mappedTours[tour.index] = tour
 
     }
     // TODO when activitytypeIsScheduled() is just a comparision against activityType Unknown the expression would collapse.
@@ -106,9 +104,9 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
 
-    fun getTour(index: Int): HTour = premiumTours.getValue(index)
+    fun getTour(index: Int): HTour = mappedTours.getValue(index)
 
-    fun existsTour(index: Int): Boolean = index in premiumTours
+    fun existsTour(index: Int): Boolean = index in mappedTours
 
     fun isStandardWorkingDay(): Boolean = weekday.value in 1..5
 
@@ -121,8 +119,8 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun existsActivity(tourindex: Int, activityindex: Int): Boolean {
-        if (!premiumTours.containsKey(tourindex)) return false // No tour with specified index exists
-        return premiumTours.getValue(tourindex).activities.any { it.index == activityindex }
+        if (!mappedTours.containsKey(tourindex)) return false // No tour with specified index exists
+        return mappedTours.getValue(tourindex).activities.any { it.index == activityindex }
     }
 
     /**
@@ -132,7 +130,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @param activityindex
      * @return
      */
-    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean  = premiumTours[tourindex]?.getActivityOrNull(activityindex)?.activitytypeisScheduled() ?: false
+    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean  = mappedTours[tourindex]?.getActivityOrNull(activityindex)?.activitytypeisScheduled() ?: false
 
 
     /**
@@ -142,7 +140,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun getTotalAmountOfRemainingActivityTime(referencePoint: HTour): Int {
-        return premiumTours.tailMap(referencePoint.index, true).values.sumOf { it.actDuration }
+        return mappedTours.tailMap(referencePoint.index, true).values.sumOf { it.actDuration }
 
     }
 
@@ -153,12 +151,12 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun getTotalAmountOfActivityTimeUntilMainTour(referencePoint: HTour): Int {
-        return premiumTours.subMap(referencePoint.index, true, -1, true).values.sumOf { it.actDuration }
+        return mappedTours.subMap(referencePoint.index, true, -1, true).values.sumOf { it.actDuration }
     }
 
 
     fun calculatedurationofmainactivitiesonday(): Int {
-        return premiumTours.values.sumOf { it.getActivity(0).duration }
+        return mappedTours.values.sumOf { it.getActivity(0).duration }
     }
 
     /**

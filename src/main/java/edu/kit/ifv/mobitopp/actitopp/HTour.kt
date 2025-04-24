@@ -1,7 +1,9 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import java.util.Collections
+import java.util.NavigableMap
 import java.util.NavigableSet
+import java.util.TreeMap
 import java.util.TreeSet
 
 
@@ -15,37 +17,26 @@ class HTour(parent: HDay, val index: Int) {
     val day: HDay = parent
     val activities: MutableList<HActivity> = mutableListOf()
 
-    val betterActivities: NavigableSet<HActivity> = TreeSet<HActivity>()
-    private var starttime = -1
+    private val betterActivities: NavigableMap<Int, HActivity> = TreeMap()
 
-    
-    val weekPattern: HWeekPattern = day.pattern
+
 
     val person: ActitoppPerson = day.person
 
 
 
     fun addActivity(act: HActivity) {
-        assert(act.index != -99) { "index of the activity is not initialized" }
-
-        var actindexexisitiert = false
-        for (tmpact in activities) {
-            if (tmpact.index == act.index) actindexexisitiert = true
-        }
-
-        require(!actindexexisitiert) { "an activity using this index already exists" }
-        activities.add(act)
+        betterActivities[act.index] = act
     }
 
-
-    var startTime: Int
+    var startTime: Int = -1
         get() {
-            assert(starttime >= 0) { "start time is negative - start time: $starttime" }
-            return starttime
+            assert(field >= 0) { "start time is negative - start time: $field" }
+            return field
         }
         set(chosenStartTime) {
             assert(chosenStartTime >= 0) { "start time is negative - start time: $chosenStartTime" }
-            this.starttime = chosenStartTime
+            field = chosenStartTime
         }
 
 
@@ -108,7 +99,7 @@ class HTour(parent: HDay, val index: Int) {
 
 
     val isScheduled: Boolean
-        get() = starttime != -1
+        get() = startTime != -1
 
     val isMainTouroftheDay: Boolean
         get() = this.index == 0
@@ -273,7 +264,6 @@ class HTour(parent: HDay, val index: Int) {
          * @param list
          */
         fun sortTourList(list: List<HTour>) {
-            checkNotNull(list) { "list to sort is empty" }
 
             Collections.sort(list, java.util.Comparator { o1, o2 ->
                 if (o1.index < o2.index) return@Comparator -1
