@@ -16,7 +16,6 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     val tours: MutableList<HTour> = mutableListOf()
 
 
-
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
 
@@ -34,30 +33,15 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     val highestTourIndex: Int get() = tours.maxOf { it.index }
 
 
-    val lowestTourIndex: Int
-        get() {
-            var index = +99
-            for (tour in this.tours) {
-                if (tour.index < index) {
-                    index = tour.index
-                }
-            }
-            assert(index <= 0) { "minimum tour index is over 0 - index: $index" }
-            return index
-        }
+    val lowestTourIndex: Int get() = tours.minOf { it.index }
 
-    val firstTourOfDay: HTour
-        get() = getTour(lowestTourIndex)
+    val firstTourOfDay: HTour get() = getTour(lowestTourIndex)
 
-    val lastTourOfDay: HTour
-        get() = getTour(highestTourIndex)
+    val lastTourOfDay: HTour get() = getTour(highestTourIndex)
 
+    val isHomeDay: Boolean get() = tours.isEmpty()
+    val amountOfTours: Int get() = tours.size
 
-
-
-
-    val isHomeDay: Boolean
-        get() = (amountOfTours == 0)
 
     val allActivitiesoftheDay: List<HActivity>
         get() {
@@ -85,10 +69,6 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
             }
 
             return sum
-        }
-    val amountOfTours: Int
-        get() {
-            return tours.size
         }
 
 
@@ -145,6 +125,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     fun hasActivity(activityType: ActivityType): Boolean {
         return tours.any { t -> t.activities.any { it.activityType == activityType && it.isScheduled } }
     }
+
     fun addTour(tour: HTour) {
         assert(tour.index != -99) { "index of the tour is not initialized" }
         var tourindexexisitiert = false
@@ -154,6 +135,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         assert(!tourindexexisitiert) { "a tour using this index already exists" }
         tours.add(tour)
     }
+
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
         var sum = 0
         for (tour in this.tours) {
@@ -163,7 +145,6 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
         return sum
     }
-
 
 
     /**
@@ -242,10 +223,6 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
 
-
-
-
-
     /**
      * returns total activity time (without trips) from reference tour until last tour of the day
      *
@@ -277,7 +254,6 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
 
-
     fun calculatedurationofmainactivitiesonday(): Int {
         var totalActivityTime = 0
         for (tour in this.tours) {
@@ -285,6 +261,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
         return totalActivityTime
     }
+
     /**
      * @param name  specific attribute for map
      * @param value
@@ -330,6 +307,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
         return totalTime
     }
+
     override fun toString(): String {
         return "Wochentag " + weekday +
                 " #Touren " + amountOfTours +
