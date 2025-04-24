@@ -25,6 +25,24 @@ class HDay(parent: HWeekPattern, val weekday: Int) {
         DayOfWeek.MONDAY.value
     }
 
+    val index: Int
+        /**
+         * returns the weekday index
+         *
+         *
+         * 0 - Monday
+         * 1 - Tuesday
+         * 2 - Wednesday
+         * 3 - Thursday
+         * 4 - Friday
+         * 5 - Saturday
+         * 6 - Sunday
+         *
+         * @return
+         */
+        get() = weekday - 1
+
+
     fun hasActivity(activityType: ActivityType): Boolean {
         return tours.any { t -> t.activities.any { it.activityType == activityType && it.isScheduled } }
     }
@@ -294,22 +312,6 @@ class HDay(parent: HWeekPattern, val weekday: Int) {
     }
 
 
-    val index: Int
-        /**
-         * returns the weekday index
-         *
-         *
-         * 0 - Monday
-         * 1 - Tuesday
-         * 2 - Wednesday
-         * 3 - Thursday
-         * 4 - Friday
-         * 5 - Saturday
-         * 6 - Sunday
-         *
-         * @return
-         */
-        get() = weekday - 1
 
     val previousDay: HDay?
         get() {

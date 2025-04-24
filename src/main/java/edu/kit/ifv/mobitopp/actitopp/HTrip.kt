@@ -4,11 +4,35 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 
-
+/**
+ * A Trip in actitopp has:
+ * @property activity an activity from which the trip is spawned
+ * @property duration a duration encoded in a naked int. Presumed unit is minutes. TODO make duration instead.
+ */
+interface Trip {
+    val activity: HActivity
+    var duration: Int
+}
 /**
  * @author Tim Hilgert
  */
 class HTrip(parent: HActivity, type: TripStatus, tripduration: Int) {
+
+    init {
+        require(tripduration != -1) {
+            "This require block tries to locate scenarios where a trip is set to -1 duration, which has a specific encoding, should this happen you know" +
+                    "that somewhere in actiTopp an unspecified duration is required, If you never see this message, you can kill the [isScheduled] field"
+        }
+    }
+
+    var duration: Int = tripduration
+        set(value) {
+            require(value != -1) {
+                "This require block tries to locate scenarios where a trip is set to -1 duration, which has a specific encoding, should this happen you know" +
+                        "that somewhere in actiTopp an unspecified duration is required, If you never see this message, you can kill the [isScheduled] field"
+            }
+            field = value
+        }
     /**
      * @return the activity
      */
@@ -17,14 +41,13 @@ class HTrip(parent: HActivity, type: TripStatus, tripduration: Int) {
 
     // indicator if trip is one before or after an activity
     private val status: TripStatus = type
+    // The setter is only called in HActivity.createTripsforActivity()
 
-    var duration: Int = tripduration
 
-    val isScheduled: Boolean
-        /**
-         * @return
-         */
-        get() = duration != -1
+    val isScheduled: Boolean get()  {
+
+        return duration != -1
+    }
 
     val startTime: Int get() {
         return when(status) {
