@@ -1,4 +1,4 @@
-package edu.kit.ifv.mobitopp.actitopp.changes
+package edu.kit.ifv.mobitopp.actitopp.steps
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields

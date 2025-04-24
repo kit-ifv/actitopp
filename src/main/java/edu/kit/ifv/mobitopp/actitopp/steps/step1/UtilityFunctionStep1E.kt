@@ -1,5 +1,6 @@
-package edu.kit.ifv.mobitopp.actitopp.changes
+package edu.kit.ifv.mobitopp.actitopp.steps.step1
 
+import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
@@ -118,13 +119,13 @@ val step1EModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterC
     option(0) {
         0.0
     }
-    option(1, parameters = {option1}) { standardUtilityFunction(this, it)}
-    option(2, parameters = {option2}) { standardUtilityFunction(this, it)}
-    option(3, parameters = {option3}) { standardUtilityFunction(this, it)}
-    option(4, parameters = {option4}) { standardUtilityFunction(this, it)}
-    option(5, parameters = {option5}) { standardUtilityFunction(this, it)}
-    option(6, parameters = {option6}) { standardUtilityFunction(this, it)}
-    option(7, parameters = {option7}) { standardUtilityFunction(this, it)}
+    option(1, parameters = {option1}) { standardUtilityFunction(this, it) }
+    option(2, parameters = {option2}) { standardUtilityFunction(this, it) }
+    option(3, parameters = {option3}) { standardUtilityFunction(this, it) }
+    option(4, parameters = {option4}) { standardUtilityFunction(this, it) }
+    option(5, parameters = {option5}) { standardUtilityFunction(this, it) }
+    option(6, parameters = {option6}) { standardUtilityFunction(this, it) }
+    option(7, parameters = {option7}) { standardUtilityFunction(this, it) }
 }
 )
 val step1EWithParams = step1EModel.initializeWithParameters(ParameterSet1E)

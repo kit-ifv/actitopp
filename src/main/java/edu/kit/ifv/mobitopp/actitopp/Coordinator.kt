@@ -1,15 +1,14 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
-import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
-import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1A
-import edu.kit.ifv.mobitopp.actitopp.changes.ParameterSet1B
-import edu.kit.ifv.mobitopp.actitopp.changes.Situation1A
-import edu.kit.ifv.mobitopp.actitopp.changes.Situation1B
-import edu.kit.ifv.mobitopp.actitopp.changes.step1AModel
-import edu.kit.ifv.mobitopp.actitopp.changes.step1BModel
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.ParameterSet1A
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.ParameterSet1B
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.Situation1A
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.Situation1B
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1AModel
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus

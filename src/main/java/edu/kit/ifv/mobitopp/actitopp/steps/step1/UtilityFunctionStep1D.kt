@@ -1,10 +1,6 @@
-package edu.kit.ifv.mobitopp.actitopp.changes
+package edu.kit.ifv.mobitopp.actitopp.steps.step1
 
-import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields
-import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
-import edu.kit.ifv.mobitopp.actitopp.enums.Employment
-import edu.kit.ifv.mobitopp.actitopp.enums.isEarning
-import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
+import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters

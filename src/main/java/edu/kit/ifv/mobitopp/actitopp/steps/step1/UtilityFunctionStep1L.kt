@@ -1,16 +1,9 @@
-package edu.kit.ifv.mobitopp.actitopp.changes
+package edu.kit.ifv.mobitopp.actitopp.steps.step1
 
-import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields
-import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
-import edu.kit.ifv.mobitopp.actitopp.enums.Employment
-import edu.kit.ifv.mobitopp.actitopp.enums.Gender
-import edu.kit.ifv.mobitopp.actitopp.enums.isEarning
-import edu.kit.ifv.mobitopp.actitopp.enums.isNotEarning
-import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
+import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
-import java.lang.reflect.Parameter
 
 val ParameterSet1L = ParameterCollectionStep1L(
     option2 = ParametersStep1L(
@@ -93,7 +86,7 @@ data class ParameterCollectionStep1L(
     val option5: ParametersStep1L,
     val option6: ParametersStep1L,
 
-)
+    )
 
 data class ParametersStep1L(
     val base: Double,
@@ -116,11 +109,11 @@ val step1LModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterC
     option(1) {
         0.0
     }
-    option(2, parameters = {option2}) { standardUtilityFunction(this, it)}
-    option(3, parameters = {option3}) { standardUtilityFunction(this, it)}
-    option(4, parameters = {option4}) { standardUtilityFunction(this, it)}
-    option(5, parameters = {option5}) { standardUtilityFunction(this, it)}
-    option(6, parameters = {option6}) { standardUtilityFunction(this, it)}
+    option(2, parameters = {option2}) { standardUtilityFunction(this, it) }
+    option(3, parameters = {option3}) { standardUtilityFunction(this, it) }
+    option(4, parameters = {option4}) { standardUtilityFunction(this, it) }
+    option(5, parameters = {option5}) { standardUtilityFunction(this, it) }
+    option(6, parameters = {option6}) { standardUtilityFunction(this, it) }
 }
 )
 

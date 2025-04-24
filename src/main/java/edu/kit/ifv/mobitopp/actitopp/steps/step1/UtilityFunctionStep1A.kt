@@ -1,4 +1,4 @@
-package edu.kit.ifv.mobitopp.actitopp.changes
+package edu.kit.ifv.mobitopp.actitopp.steps.step1
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
@@ -6,6 +6,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.Employment
 import edu.kit.ifv.mobitopp.actitopp.enums.Gender
 import edu.kit.ifv.mobitopp.actitopp.enums.isParttime
 import edu.kit.ifv.mobitopp.actitopp.enums.isStudent
+import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.toModifiable
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.D
@@ -187,13 +188,13 @@ val step1AModel = ModifiableDiscreteChoiceModel<Int, Situation1A, ParameterColle
     option(0) {
         0.0
     }
-    option(1, parameters = {option1}, {standardUtilityFunction(this, it)})
-    option(2, parameters = {option2}, {standardUtilityFunction(this, it)})
-    option(3, parameters = {option3}, {standardUtilityFunction(this, it)})
-    option(4, parameters = {option4}, {standardUtilityFunction(this, it)})
-    option(5, parameters = {option5}, {standardUtilityFunction(this, it)})
-    option(6, parameters = {option6}, {standardUtilityFunction(this, it)})
-    option(7, parameters = {option7}, {standardUtilityFunction(this, it)})
+    option(1, parameters = {option1}, { standardUtilityFunction(this, it) })
+    option(2, parameters = {option2}, { standardUtilityFunction(this, it) })
+    option(3, parameters = {option3}, { standardUtilityFunction(this, it) })
+    option(4, parameters = {option4}, { standardUtilityFunction(this, it) })
+    option(5, parameters = {option5}, { standardUtilityFunction(this, it) })
+    option(6, parameters = {option6}, { standardUtilityFunction(this, it) })
+    option(7, parameters = {option7}, { standardUtilityFunction(this, it) })
     
 })
 
