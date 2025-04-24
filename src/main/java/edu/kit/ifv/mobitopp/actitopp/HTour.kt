@@ -159,6 +159,7 @@ class HTour(parent: HDay, val index: Int) {
         return activities.last{it.index == index}
     }
 
+    fun getActivityOrNull(index: Int): HActivity? = activities.lastOrNull{it.index == index}
 
     val lowestActivityIndex: Int
         get() {

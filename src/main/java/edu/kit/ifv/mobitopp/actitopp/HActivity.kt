@@ -345,6 +345,7 @@ class HActivity @JvmOverloads constructor(
     val isScheduled: Boolean
         get() = durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (if (Configuration.modelJointActions) jointStatus != JointStatus.UNKNOWN else true)
 
+    // TODO apparently activityTypeIsScheduled means that the type is no longer unknown, change the naming to express this behaviour
     fun activitytypeisScheduled(): Boolean {
         return this.activityType != ActivityType.UNKNOWN
     }

@@ -100,39 +100,18 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         premiumTours[tour.index] = tour
 
     }
-
+    // TODO when activitytypeIsScheduled() is just a comparision against activityType Unknown the expression would collapse.
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
-        var sum = 0
-        for (tour in this.tours) {
-            for (act in tour.activities) {
-                if (act.activitytypeisScheduled() && act.activityType == acttype) sum++
-            }
-        }
-        return sum
+        return tours.sumOf { it.activities.count { it.activitytypeisScheduled() && it.activityType == acttype } }
     }
 
 
-    /**
-     * @param index
-     * @return
-     */
     fun getTour(index: Int): HTour = premiumTours.getValue(index)
 
-
-    /**
-     * @param index
-     * @return
-     */
     fun existsTour(index: Int): Boolean = index in premiumTours
 
+    fun isStandardWorkingDay(): Boolean = weekday.value in 1..5
 
-
-    /**
-     * Determine whether a day is a normal working day (Mo-Fr) by comparing against the numeric value of DayOfWeek
-     */
-    fun isStandardWorkingDay(): Boolean {
-        return weekday.value in 1..5
-    }
 
     /**
      * check if activity given tour and activity index exists on that day
@@ -153,13 +132,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @param activityindex
      * @return
      */
-    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean {
-        var result = false
-        if (existsActivity(tourindex, activityindex) && getTour(tourindex).getActivity(activityindex)
-                .activitytypeisScheduled()
-        ) result = true
-        return result
-    }
+    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean  = premiumTours[tourindex]?.getActivityOrNull(activityindex)?.activitytypeisScheduled() ?: false
 
 
     /**
@@ -169,12 +142,8 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun getTotalAmountOfRemainingActivityTime(referencePoint: HTour): Int {
-        var totalTime = 0
+        return premiumTours.tailMap(referencePoint.index, true).values.sumOf { it.actDuration }
 
-        for (i in referencePoint.index..highestTourIndex) {
-            totalTime += getTour(i).actDuration
-        }
-        return totalTime
     }
 
     /**
@@ -184,21 +153,12 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun getTotalAmountOfActivityTimeUntilMainTour(referencePoint: HTour): Int {
-        var totalTime = 0
-
-        for (i in referencePoint.index..-1) {
-            totalTime += getTour(i).actDuration
-        }
-        return totalTime
+        return premiumTours.subMap(referencePoint.index, true, -1, true).values.sumOf { it.actDuration }
     }
 
 
     fun calculatedurationofmainactivitiesonday(): Int {
-        var totalActivityTime = 0
-        for (tour in this.tours) {
-            totalActivityTime += tour.getActivity(0).duration
-        }
-        return totalActivityTime
+        return premiumTours.values.sumOf { it.getActivity(0).duration }
     }
 
     /**
