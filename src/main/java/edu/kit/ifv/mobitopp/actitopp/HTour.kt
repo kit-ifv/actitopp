@@ -15,7 +15,7 @@ class HTour(parent: HDay, val index: Int) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     val day: HDay = parent
-    val activities: MutableList<HActivity> = mutableListOf()
+    val activities: List<HActivity> get() = betterActivities.values.toList()
 
     private val betterActivities: NavigableMap<Int, HActivity> = TreeMap()
 
@@ -46,19 +46,9 @@ class HTour(parent: HDay, val index: Int) {
      * @return
      */
     fun tourisFreeofGaps(): Boolean {
-        var gapfree = true
-        HActivity.Companion.sortActivityListbyIndices(activities)
-
-        for (i in 0..<activities.size - 1) {
-            val actualact = activities[i]
-            val nextact = activities[i + 1]
-
-            if (actualact.endTimeWeekContext != nextact.tripStartTimeBeforeActivityWeekContext) {
-                gapfree = false
-            }
+        return activities.zipWithNext().none { (first, second) ->
+            first.endTimeWeekContext != second.tripStartTimeBeforeActivityWeekContext
         }
-
-        return gapfree
     }
 
     override fun toString(): String {
