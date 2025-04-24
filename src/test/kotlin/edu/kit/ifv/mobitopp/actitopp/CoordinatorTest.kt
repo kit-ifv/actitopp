@@ -106,6 +106,7 @@ class CoordinatorTest {
             it.generateEducationDays()
             it.generateLeisureDays()
             it.generateShoppingDays()
+            it.generateServiceDays()
         }
     }
 

@@ -16,7 +16,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -0.3952,
         amountOfEducationDays = -0.2284,
         amountOfLeisureDays = -0.5973,
-        amountOfServiceDays = -0.3244,
+        amountOfShoppingDays = -0.3244,
     ),
     option2 = ParametersStep1F(
         base = 7.6320,
@@ -28,7 +28,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -1.0750,
         amountOfEducationDays = -0.7947,
         amountOfLeisureDays = -1.1970,
-        amountOfServiceDays = -0.9637,
+        amountOfShoppingDays = -0.9637,
     ),
     option3 = ParametersStep1F(
         base = 11.8825,
@@ -40,7 +40,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -2.0793,
         amountOfEducationDays = -1.8776,
         amountOfLeisureDays = -1.9709,
-        amountOfServiceDays = -1.8096,
+        amountOfShoppingDays = -1.8096,
     ),
     option4 = ParametersStep1F(
         base = 15.1575,
@@ -52,7 +52,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -2.9798,
         amountOfEducationDays = -2.6430,
         amountOfLeisureDays = -2.7910,
-        amountOfServiceDays = -2.8184,
+        amountOfShoppingDays = -2.8184,
     ),
     option5 = ParametersStep1F(
         base = 18.9161,
@@ -64,7 +64,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -4.6381,
         amountOfEducationDays = -4.1567,
         amountOfLeisureDays = -4.1593,
-        amountOfServiceDays = -4.4475,
+        amountOfShoppingDays = -4.4475,
     ),
     option6 = ParametersStep1F(
         base = 22.0357,
@@ -76,7 +76,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -5.9946,
         amountOfEducationDays = -6.0716,
         amountOfLeisureDays = -5.9283,
-        amountOfServiceDays = -6.6534,
+        amountOfShoppingDays = -6.6534,
     ),
     option7 = ParametersStep1F(
         base = 21.1712,
@@ -88,7 +88,7 @@ val ParameterSet1F = ParameterCollectionStep1F(
         amountOfWorkingDays = -12.3041,
         amountOfEducationDays = -13.9196,
         amountOfLeisureDays = -25.1790,
-        amountOfServiceDays = -25.2436,
+        amountOfShoppingDays = -25.2436,
     )
 )
 
@@ -112,7 +112,7 @@ data class ParametersStep1F(
     val amountOfWorkingDays: Double,
     val amountOfEducationDays: Double,
     val amountOfLeisureDays: Double,
-    val amountOfServiceDays: Double,
+    val amountOfShoppingDays: Double,
 )
 
 
@@ -126,7 +126,9 @@ val step1FModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterC
     option(4, parameters = {option4}) { standardUtilityFunction(this, it) }
     option(5, parameters = {option5}) { standardUtilityFunction(this, it) }
     option(6, parameters = {option6}) { standardUtilityFunction(this, it) }
-    option(7, parameters = {option7}) { standardUtilityFunction(this, it) }
+    option(7, parameters = {option7}) {
+        standardUtilityFunction(this, it)
+    }
 }
 )
 
@@ -142,5 +144,5 @@ private val standardUtilityFunction:  ParametersStep1F.(PersonSituation) -> Doub
             it.amountOfWorkingDays() * amountOfWorkingDays +
             it.amountOfEducationDays() * amountOfEducationDays +
             it.amountOfLeisureDays() * amountOfLeisureDays +
-            it.amountOfServiceDays() * amountOfServiceDays
+            it.amountOfShoppingDays() * amountOfShoppingDays
 }

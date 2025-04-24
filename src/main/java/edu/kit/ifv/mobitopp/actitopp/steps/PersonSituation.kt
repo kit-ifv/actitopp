@@ -40,6 +40,7 @@ open class PersonSituation(override val choice: Int, val personModifiers: Actito
     fun amountOfWorkingDays() = personModifiers.amountOfWorkingDays
     fun amountOfLeisureDays() = personModifiers.amountOfLeisureDays
     fun amountOfEducationDays() = personModifiers.amountOfEducationDays
+    fun amountOfShoppingDays() = personModifiers.amountOfShoppingDays
     fun amountOfServiceDays() = personModifiers.amountOfServiceDays
 
     fun commuteIn0To5km() = person.maxCommute in 0.0..5.0

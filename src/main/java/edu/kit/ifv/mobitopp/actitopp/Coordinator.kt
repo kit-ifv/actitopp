@@ -12,6 +12,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,8 +26,11 @@ import kotlin.math.min
 class Coordinator @JvmOverloads constructor(
     /** ///////////// */
     private val person: ActitoppPerson,
-    val fileBase: ModelFileBase, val randomGenerator: RNGHelper, private val debugloggers: DebugLoggers? = null,
+    val fileBase: ModelFileBase,  private val debugloggers: DebugLoggers? = null,
 ) {
+
+    val randomGenerator = person.personalRNG
+    val rngCopy = randomGenerator.copy()
     /**///////////// */ //	declaration of variables
     private val pattern: HWeekPattern = person.weekPattern
 
@@ -61,8 +65,10 @@ class Coordinator @JvmOverloads constructor(
         if (Configuration.modelJointActions) {
             determineMinimumTourActivityBounds()
         }
-        val personModifierFields = ActitoppPersonModifierFields(person)
-        personModifierFields.amountOfWorkingDays = determineNumberOfWorkingDays()
+
+        val weekRoutine = person.assignWeekRoutine(rngCopy)
+
+
         executeStep1("1A", "anztage_w") // Appears to determine amount of days working?
         executeStep1("1B", "anztage_e") // Determines the amount of days with education
         executeStep1("1C", "anztage_l") // The Amount of leisue
@@ -72,7 +78,9 @@ class Coordinator @JvmOverloads constructor(
 
         executeStep1("1K", "anztourentag_mean")
         executeStep1("1L", "anzakttag_mean")
-
+        require(weekRoutine.similarToAttributeMap(person.attributesMap)) {
+            "Mismatch between week routine and person map \n$weekRoutine \n${person.attributesMap}"
+        }
         executeStep2("2A")
 
         executeStep3("3A")
@@ -210,7 +218,6 @@ class Coordinator @JvmOverloads constructor(
         val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
         val rand = randomGenerator.randomValue
         step.doStep(rand)
-
         // save result
         var decision = step.alternativeChosen.toDouble()
         // set anztage_w to 0 if person is not allowed to work (this may be configured for minors)

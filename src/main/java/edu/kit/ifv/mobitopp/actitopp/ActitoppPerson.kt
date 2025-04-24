@@ -28,6 +28,8 @@ class ActitoppPerson@JvmOverloads constructor(
     val employment: Employment = Employment.fromInt(employmentCode)
     val isAllowedToWork: Boolean = true
     var weekPattern: HWeekPattern = HWeekPattern(this)
+    // TODO make RNG a bit more random, there could be overlaps in the hash generation.
+    val personalRNG: RNGHelper = RNGHelper((household.householdIndex.hashCode() + persNrinHousehold.hashCode()).toLong())
 
     init {
         household.addHouseholdmember(this, persNrinHousehold)
@@ -74,8 +76,6 @@ class ActitoppPerson@JvmOverloads constructor(
 
     // List of joint actions to consider that are first created from other household members
     private val jointActivitiesforConsideration: MutableList<HActivity> = mutableListOf()
-
-
 
 
 
@@ -276,11 +276,10 @@ class ActitoppPerson@JvmOverloads constructor(
 //			System.err.println("actitopp can only create correct activity schedules for persons aged 10 years and older! - creating full-week home activity instead");
             weekPattern.addHomeActivity(HActivity(weekPattern.getDay(0), ActivityType.HOME, 10080, 0))
         } else {
-            val modelCoordinator = Coordinator(this, modelbase, randomgenerator)
+            val modelCoordinator = Coordinator(this, modelbase)
             modelCoordinator.executeModel()
         }
     }
-
     /**
      * create activity schedule for this person using debug loggers to log results
      *
@@ -298,7 +297,7 @@ class ActitoppPerson@JvmOverloads constructor(
 //			System.err.println("actitopp can only create correct activity schedules for persons aged 10 years and older! - creating full-week home activity instead");
             weekPattern.addHomeActivity(HActivity(weekPattern.getDay(0), ActivityType.HOME, 10080, 0))
         } else {
-            val modelCoordinator = Coordinator(this, modelbase, randomgenerator, debugloggers)
+            val modelCoordinator = Coordinator(this, modelbase, debugloggers)
             modelCoordinator.executeModel()
         }
     }

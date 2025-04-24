@@ -25,6 +25,7 @@ class Limits {
 }
 private val fileBase = ModelFileBase()
 private val randomgenerator = RNGHelper(1234)
+
 private val debugloggers = DebugLoggers()
 private val random = Random(1)
 private fun generateHousehold(): ActiToppHousehold {

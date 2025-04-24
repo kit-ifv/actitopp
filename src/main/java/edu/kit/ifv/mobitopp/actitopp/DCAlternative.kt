@@ -51,6 +51,6 @@ class DCAlternative( var name: String) {
         get() = utilityFunction.utility * utilityweithingfactor
 
     override fun toString(): String {
-        return name
+        return "$name($utility)"
     }
 }

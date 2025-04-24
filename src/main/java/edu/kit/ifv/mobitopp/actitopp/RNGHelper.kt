@@ -5,14 +5,13 @@ import kotlin.random.Random
 /**
  * @author Tim Hilgert
  */
-class RNGHelper(
-    /**
-     * @return
-     */
-    val seed: Long
-) {
-    private val rng : Random = Random(seed)
+class RNGHelper private constructor(
 
+    val seed: Long,
+    private val rng : Random
+) {
+
+    constructor(seed: Long): this(seed = seed, rng = Random(seed))
     /**
      * @return
      */
@@ -57,5 +56,9 @@ class RNGHelper(
 
         require(from <= to) { "FROM bigger than TO $from $to" }
         return (from..to).random(rng)
+    }
+
+    fun copy(): RNGHelper {
+        return RNGHelper(seed)
     }
 }
