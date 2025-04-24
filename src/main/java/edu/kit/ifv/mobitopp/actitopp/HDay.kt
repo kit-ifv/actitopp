@@ -123,17 +123,9 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @param index
      * @return
      */
-    fun existsTour(index: Int): Boolean {
-        var result = false
-        var indextour: HTour? = null
-        for (tour in this.tours) {
-            if (tour.index == index) {
-                indextour = tour
-            }
-        }
-        if (indextour != null) result = true
-        return result
-    }
+    fun existsTour(index: Int): Boolean = index in premiumTours
+
+
 
     /**
      * Determine whether a day is a normal working day (Mo-Fr) by comparing against the numeric value of DayOfWeek
