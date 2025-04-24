@@ -54,49 +54,10 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         get() = getTour(0).getActivity(0).activityType
 
 
-    val totalAmountOfActivitites: Int
-        /**
-         * returns the amount of activities without home activities
-         *
-         * @return
-         */
-        get() {
-            var sum = 0
-            for (tour in this.tours) {
-                sum += tour.amountOfActivities
-            }
+    val totalAmountOfActivitites: Int get() = tours.sumOf { it.amountOfActivities }
+    val totalAmountOfActivityTime: Int get() = tours.sumOf { it.actDuration }
+    val totalAmountOfTripTime: Int get() = tours.sumOf { it.tripDuration }
 
-            return sum
-        }
-
-
-    val totalAmountOfActivityTime: Int
-        /**
-         * returns total activity duration on that day
-         *
-         * @return
-         */
-        get() {
-            var totalTime = 0
-            for (tour in this.tours) {
-                totalTime += tour.actDuration
-            }
-            return totalTime
-        }
-
-    val totalAmountOfTripTime: Int
-        /**
-         * returns total trip duration on that day
-         *
-         * @return
-         */
-        get() {
-            var totalTime = 0
-            for (tour in this.tours) {
-                totalTime += tour.tripDuration
-            }
-            return totalTime
-        }
 
     val previousDay: HDay?
         get() {
