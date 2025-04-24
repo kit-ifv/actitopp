@@ -590,7 +590,7 @@ class HActivity @JvmOverloads constructor(
          *
          * @param actliste
          */
-        fun createPossibleStarttimes(actliste: List<HActivity>) {
+        fun createPossibleStarttimes(actliste: Collection<HActivity>) {
             for (act in actliste) {
                 if (!act.startTimeisScheduled()) {
                     /*

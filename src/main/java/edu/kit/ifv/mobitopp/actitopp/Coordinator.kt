@@ -487,8 +487,6 @@ class Coordinator @JvmOverloads constructor(
 
                     if (act != null) currentTour.addActivity(act)
                 }
-
-                HActivity.sortActivityListbyIndices(currentTour.activities)
             }
             if (id == "5B") assert(currentDay.totalAmountOfActivitites >= numberofactsperday_lowerboundduetojointactions[currentDay.index]) { "wrong number of activities - violating lower bound due to joint actions" }
         }
@@ -1227,7 +1225,6 @@ class Coordinator @JvmOverloads constructor(
                     var tripdurations = 0
                     var activitydurations = 0
 
-                    HActivity.sortActivityListbyIndices(currentTour.activities)
                     for (tmpact in currentTour.activities) {
                         /*
                          * if start time of an activity is determined, set this as fixed element and subtract all activity and trip durations until then

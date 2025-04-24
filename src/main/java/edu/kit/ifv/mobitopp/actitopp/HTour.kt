@@ -15,7 +15,7 @@ class HTour(parent: HDay, val index: Int) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     val day: HDay = parent
-    val activities: List<HActivity> get() = betterActivities.values.toList()
+    val activities: Collection<HActivity> get() = betterActivities.values
 
     private val betterActivities: NavigableMap<Int, HActivity> = TreeMap()
 
@@ -51,28 +51,14 @@ class HTour(parent: HDay, val index: Int) {
         }
     }
 
-    override fun toString(): String {
-        var tostring = ""
-        tostring = if (this.isScheduled) {
-            day.index.toString() + "/" + index +
-                    " start: " + startTimeWeekContext +
-                    " end: " + endTimeWeekContext +
-                    " duration: " + tourDuration
-        } else {
-            day.index.toString() + "/" + index +
-                    " start: --- " +
-                    " end: --- " +
-                    " duration: " + tourDuration
-        }
-        return tostring
-    }
+
 
     /**
      * create start times for each activity of a tour
      */
     fun createStartTimesforActivities() {
-        // ! sorts the list permanently
-        HActivity.Companion.sortActivityListbyIndices(activities)
+
+
 
         for (act in activities) {
             // first activity: start time is given by tour start time
@@ -246,7 +232,21 @@ class HTour(parent: HDay, val index: Int) {
          * @return the attributes
          */
         get() = attributes
-
+    override fun toString(): String {
+        var tostring = ""
+        tostring = if (this.isScheduled) {
+            day.index.toString() + "/" + index +
+                    " start: " + startTimeWeekContext +
+                    " end: " + endTimeWeekContext +
+                    " duration: " + tourDuration
+        } else {
+            day.index.toString() + "/" + index +
+                    " start: --- " +
+                    " end: --- " +
+                    " duration: " + tourDuration
+        }
+        return tostring
+    }
     companion object {
         /**
          * sort a list of tours by index
