@@ -15,8 +15,9 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     val pattern: HWeekPattern = parent
-    val tours: MutableList<HTour> = mutableListOf()
-    val premiumTours: NavigableSet<HTour> = TreeSet { t1, t2 -> t1.index.compareTo(t2.index) }
+
+    private val premiumTours: NavigableSet<HTour> = TreeSet { t1, t2 -> t1.index.compareTo(t2.index) }
+    val tours: List<HTour> get() = premiumTours.toList()
 
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
@@ -32,27 +33,22 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * that would trigger if either the day has no tours or only "preMainActivity" tours with negative indices. It can
      * be assumed that this decision was a programmer oversight and not deliberate.
      */
-    val highestTourIndex: Int get() = tours.maxOf { it.index }
+    val highestTourIndex: Int get() = premiumTours.last.index
 
 
-    val lowestTourIndex: Int get() = tours.minOf { it.index }
+    val lowestTourIndex: Int get() = premiumTours.first.index
 
-    val firstTourOfDay: HTour get() = getTour(lowestTourIndex)
+    val firstTourOfDay: HTour get() = premiumTours.first
 
-    val lastTourOfDay: HTour get() = getTour(highestTourIndex)
+    val lastTourOfDay: HTour get() = premiumTours.last
 
-    val isHomeDay: Boolean get() = tours.isEmpty()
-    val amountOfTours: Int get() = tours.size
+    val isHomeDay: Boolean get() = premiumTours.isEmpty()
+    val amountOfTours: Int get() = premiumTours.size
 
 
-    val allActivitiesoftheDay: List<HActivity>
-        get() {
-            val allactivities: MutableList<HActivity> = ArrayList()
-            for (tmptour in this.tours) {
-                allactivities.addAll(tmptour.activities)
-            }
-            return allactivities
-        }
+    val allActivitiesoftheDay: List<HActivity> get() {
+        return premiumTours.flatMap { it.activities }
+    }
 
     val mainTourType: ActivityType
         get() = getTour(0).getActivity(0).activityType
@@ -129,13 +125,10 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
     fun addTour(tour: HTour) {
-        assert(tour.index != -99) { "index of the tour is not initialized" }
-        var tourindexexisitiert = false
-        for (tmptour in tours) {
-            if (tmptour.index == tour.index) tourindexexisitiert = true
+        require(premiumTours.add(tour)) {
+            "Cannot insert tour as another tour with that index is already found, " +
+                    "TODO maybe kill the require, the old code didn't fail at this point but caused wild behaviour"
         }
-        assert(!tourindexexisitiert) { "a tour using this index already exists" }
-        tours.add(tour)
     }
 
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
