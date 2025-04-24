@@ -3,6 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import java.time.DayOfWeek
 import java.util.Collections
 import kotlin.math.max
 import kotlin.math.min
@@ -244,7 +245,7 @@ class HActivity @JvmOverloads constructor(
          */
         get() = startTime + duration
 
-    val weekDay: Int = day.weekday
+    val weekDay: DayOfWeek = day.weekday
     // Can be held as field, since day does not change (anymore)
     val dayIndex: Int = day.index
     // Can be held, cause immutability

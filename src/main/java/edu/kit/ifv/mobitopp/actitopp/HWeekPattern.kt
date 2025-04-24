@@ -2,6 +2,7 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
+import java.time.DayOfWeek
 
 /**
  * @author Tim Hilgert
@@ -9,7 +10,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 class HWeekPattern(
     val person: ActitoppPerson,
 ) {
-    val days: List<HDay> = (1..7).map { HDay(this, it) }
+    val days: List<HDay> = (1..7).map { HDay(this, DayOfWeek.of(it)) }
 
     private val homeactivitities: MutableList<HActivity> = ArrayList()
 

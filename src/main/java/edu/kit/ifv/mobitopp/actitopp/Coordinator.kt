@@ -265,11 +265,11 @@ class Coordinator @JvmOverloads constructor(
                     }
 
                     // utility bonus for alternative W if person is employed and day is from Monday to Friday
-                    if (person.personisAnywayEmployed() && currentDay.weekday < 6 && step.alternativeisEnabled("W")) {
+                    if (person.personisAnywayEmployed() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("W")) {
                         step.adaptUtilityFactor("W", 1.3)
                     }
                     // utility bonus for alternative E if person is in Education and day is from Monday to Friday
-                    if (person.personisinEducation() && currentDay.weekday < 6 && step.alternativeisEnabled("E")) {
+                    if (person.personisinEducation() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("E")) {
                         step.adaptUtilityFactor("E", 1.3)
                     }
                 }

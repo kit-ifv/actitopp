@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp.enums
 
 import edu.kit.ifv.mobitopp.actitopp.HDay
+import java.time.DayOfWeek
 
 /**
  * @author Tim Hilgert
@@ -16,37 +17,37 @@ enum class HDayParameters
         */
     tag_mo{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 1) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.MONDAY) 1.0 else 0.0)
         }
     },
     tag_di{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 2) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.TUESDAY) 1.0 else 0.0)
         }
     },
     tag_mi{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 3) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.WEDNESDAY) 1.0 else 0.0)
         }
     },
     tag_do{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 4) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.THURSDAY) 1.0 else 0.0)
         }
     },
     tag_fr{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 5) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.FRIDAY) 1.0 else 0.0)
         }
     },
     tag_sa{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 6) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.SATURDAY) 1.0 else 0.0)
         }
     },
     tag_so{
         override fun getAttribute(day: HDay): Double {
-            return (if (day.weekday == 7) 1.0 else 0.0)
+            return (if (day.weekday == DayOfWeek.SUNDAY) 1.0 else 0.0)
         }
     },
 

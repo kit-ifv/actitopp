@@ -8,7 +8,7 @@ import java.time.DayOfWeek
  */
 
 
-class HDay(parent: HWeekPattern, val weekday: Int) {
+class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     //stores all attributes that are not directly accessible by variables
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
@@ -40,7 +40,7 @@ class HDay(parent: HWeekPattern, val weekday: Int) {
          *
          * @return
          */
-        get() = weekday - 1
+        get() = weekday.value - 1
 
 
     fun hasActivity(activityType: ActivityType): Boolean {
@@ -177,6 +177,12 @@ class HDay(parent: HWeekPattern, val weekday: Int) {
         return result
     }
 
+    /**
+     * Determine whether a day is a normal working day (Mo-Fr) by comparing against the numeric value of DayOfWeek
+     */
+    fun isStandardWorkingDay(): Boolean {
+        return weekday.value in 1..5
+    }
 
     /**
      * check if activity given tour and activity index exists on that day
