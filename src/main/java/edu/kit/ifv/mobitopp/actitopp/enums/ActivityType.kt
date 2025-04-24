@@ -3,12 +3,12 @@ import java.util.Collections
 import java.util.EnumSet
 // TODO find out whether Unknown is deliberately set to a lower case letter so that the getTypeFromChar Throws
 enum class ActivityType(val typeasChar: Char, val defaultActivityTime: Int = 278) {
-    WORK('W', 472),
     EDUCATION('E', 340),
+    HOME('H'),
     LEISURE('L', 130),
     SHOPPING('S', 41),
     TRANSPORT('T', 15),
-    HOME('H'),
+    WORK('W', 472),
     UNKNOWN('x');
 
 
@@ -25,12 +25,12 @@ enum class ActivityType(val typeasChar: Char, val defaultActivityTime: Int = 278
 
         val FULLSET: Set<ActivityType> = Collections.unmodifiableSet(
             EnumSet.of(
-                WORK,
                 EDUCATION,
+                HOME,
                 LEISURE,
                 SHOPPING,
                 TRANSPORT,
-                HOME
+                WORK,
             )
         )
 

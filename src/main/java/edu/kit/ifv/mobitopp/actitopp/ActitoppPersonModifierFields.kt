@@ -27,7 +27,6 @@ class ActitoppPersonModifierFields(val original: ActitoppPerson) {
 }
 
 
-
 data class PersonWeekRoutine(
     val amountOfWorkingDays: Int,
     val amountOfEducationDays: Int,
@@ -40,14 +39,29 @@ data class PersonWeekRoutine(
 ) {
     fun similarToAttributeMap(attributeMap: Map<String, Double>): Boolean {
         return amountOfWorkingDays == attributeMap["anztage_w"]?.toInt() &&
-        amountOfEducationDays == attributeMap["anztage_e"]?.toInt() &&
-        amountOfLeisureDays == attributeMap["anztage_l"]?.toInt() &&
-        amountOfShoppingDays == attributeMap["anztage_s"]?.toInt() &&
-        amountOfServiceDays == attributeMap["anztage_t"]?.toInt() &&
-        amountOfImmobileDays == attributeMap["anztage_immobil"]?.toInt() &&
-        averageAmountOfTours == attributeMap["anztourentag_mean"]?.toInt() &&
-        averageAmountOfActivities == attributeMap["anzakttag_mean"]?.toInt()
+                amountOfEducationDays == attributeMap["anztage_e"]?.toInt() &&
+                amountOfLeisureDays == attributeMap["anztage_l"]?.toInt() &&
+                amountOfShoppingDays == attributeMap["anztage_s"]?.toInt() &&
+                amountOfServiceDays == attributeMap["anztage_t"]?.toInt() &&
+                amountOfImmobileDays == attributeMap["anztage_immobil"]?.toInt() &&
+                averageAmountOfTours == attributeMap["anztourentag_mean"]?.toInt() &&
+                averageAmountOfActivities == attributeMap["anzakttag_mean"]?.toInt()
+    }
+
+    /**
+     * To enable testing, we need to be able to load the person attributes based on the Person Week Routine.
+     */
+    fun loadToAttributeMap(attributeMap: MutableMap<String, Double>) {
+        attributeMap["anztage_w"] = amountOfWorkingDays.toDouble()
+        attributeMap["anztage_e"] = amountOfEducationDays.toDouble()
+        attributeMap["anztage_l"] = amountOfLeisureDays.toDouble()
+        attributeMap["anztage_s"] = amountOfShoppingDays.toDouble()
+        attributeMap["anztage_t"] = amountOfServiceDays.toDouble()
+        attributeMap["anztage_immobil"] = amountOfImmobileDays.toDouble()
+        attributeMap["anztourentag_mean"] = averageAmountOfTours.toDouble()
+        attributeMap["anzakttag_mean"] = averageAmountOfActivities.toDouble()
     }
 }
+
 fun ActitoppPerson.toModifiable() = ActitoppPersonModifierFields(this)
 

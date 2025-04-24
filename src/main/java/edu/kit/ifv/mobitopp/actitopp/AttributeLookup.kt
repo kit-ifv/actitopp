@@ -8,7 +8,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.HTourParameters
 /**
  * @author Tim Hilgert
  */
-class AttributeLookup(var currentPerson: ActitoppPerson) {
+class AttributeLookup constructor(var currentPerson: ActitoppPerson) {
     lateinit var currentDay: HDay
     lateinit var currentTour: HTour
     lateinit var currentActivity: HActivity

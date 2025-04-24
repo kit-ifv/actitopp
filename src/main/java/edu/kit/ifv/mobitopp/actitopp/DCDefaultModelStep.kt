@@ -3,6 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp
 import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.deprecated.LogitFunction
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.deprecated.UtilityParameterAttributeCombination
+import org.jetbrains.annotations.TestOnly
 import java.text.NumberFormat
 
 
@@ -16,7 +17,7 @@ class DCDefaultModelStep(
     id: String,
     modelFileBase: ModelFileBase,
     private val attributeLookup: AttributeLookup,
-    private val randomgenerator: RNGHelper
+    private val randomgenerator: RNGHelper,
 ) :
     AbsHModelStep(id) {
 
@@ -45,7 +46,9 @@ class DCDefaultModelStep(
 
 
 
-
+    fun <T> utilities(converter: (String) ->T ): Map<T, Double> {
+        return alternatives.associate { converter(it.name) to it.utility }
+    }
 
     /**
      * method to do a dc model step

@@ -1,7 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
-import edu.kit.ifv.mobitopp.actitopp.ModelFileBase
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
 import edu.kit.ifv.mobitopp.actitopp.enums.Employment
@@ -9,6 +8,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.Gender
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.isEmployedAnywhere
 import edu.kit.ifv.mobitopp.actitopp.enums.isStudentOrAzubi
+import org.jetbrains.annotations.TestOnly
 import java.util.Collections
 import kotlin.math.max
 
@@ -24,6 +24,8 @@ class ActitoppPerson@JvmOverloads constructor(
     val commutingdistance_education: Double = .0,
 ) {
     private val attributes: MutableMap<String, Double> = mutableMapOf()
+    @TestOnly
+    internal fun getMutableMapForTest(): MutableMap<String, Double> = attributes
     val gender: Gender = Gender.fromCode(genderCode)
     val employment: Employment = Employment.fromInt(employmentCode)
     val isAllowedToWork: Boolean = true
@@ -350,7 +352,7 @@ class ActitoppPerson@JvmOverloads constructor(
      *
      * @return
      */
-    fun personisAnywayEmployed(): Boolean {
+    fun isAnywayEmployed(): Boolean {
         return employment.isEmployedAnywhere()
     }
 
@@ -359,7 +361,7 @@ class ActitoppPerson@JvmOverloads constructor(
      *
      * @return
      */
-    fun personisinEducation(): Boolean {
+    fun isinEducation(): Boolean {
         return employment.isStudentOrAzubi()
     }
 
@@ -369,7 +371,7 @@ class ActitoppPerson@JvmOverloads constructor(
          * @return
          */
         get() {
-            if (personisAnywayEmployed() || personisinEducation()) {
+            if (isAnywayEmployed() || isinEducation()) {
                 for (day in weekPattern.days) {
                     for (tour in day.tours) {
                         if (tour.getActivity(0).activityType == ActivityType.WORK || tour.getActivity(0)

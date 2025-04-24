@@ -12,6 +12,8 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.assignMainActivityCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import kotlin.math.max
 import kotlin.math.min
@@ -81,6 +83,7 @@ class Coordinator @JvmOverloads constructor(
         require(weekRoutine.similarToAttributeMap(person.attributesMap)) {
             "Mismatch between week routine and person map \n$weekRoutine \n${person.attributesMap}"
         }
+        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
         executeStep2("2A")
 
         executeStep3("3A")
@@ -254,28 +257,33 @@ class Coordinator @JvmOverloads constructor(
 
                 if (Configuration.coordinated_modelling) {
                     // if number of working days is achieved, disable W as alternative
-                    if (person.getAttributefromMap("anztage_w") <= pattern.countDaysWithSpecificActivity(ActivityType.WORK) && currentDay.getTotalNumberOfActivitites(
+                    if (person.getAttributefromMap("anztage_w") <=
+                        pattern.countDaysWithSpecificActivity(ActivityType.WORK)
+                        && currentDay.getTotalNumberOfActivitites(
                             ActivityType.WORK
                         ) == 0 &&
-                        person.personisAnywayEmployed()
+                        person.isAnywayEmployed()
                     ) {
                         step.disableAlternative("W")
                     }
                     // if number of education days is achieved, disable E as alternative
-                    if (person.getAttributefromMap("anztage_e") <= pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION) && currentDay.getTotalNumberOfActivitites(
+                    if (person.getAttributefromMap("anztage_e") <=
+                        pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION)
+                        && currentDay.getTotalNumberOfActivitites(
                             ActivityType.EDUCATION
                         ) == 0 &&
-                        person.personisinEducation()
+                        person.isinEducation()
                     ) {
                         step.disableAlternative("E")
                     }
 
                     // utility bonus for alternative W if person is employed and day is from Monday to Friday
-                    if (person.personisAnywayEmployed() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("W")) {
+                    if (person.isAnywayEmployed() && currentDay.isStandardWorkingDay()
+                        && step.alternativeisEnabled("W")) {
                         step.adaptUtilityFactor("W", 1.3)
                     }
                     // utility bonus for alternative E if person is in Education and day is from Monday to Friday
-                    if (person.personisinEducation() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("E")) {
+                    if (person.isinEducation() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("E")) {
                         step.adaptUtilityFactor("E", 1.3)
                     }
                 }
@@ -284,15 +292,21 @@ class Coordinator @JvmOverloads constructor(
                 val decision = step.doStep()
                 val activityType = getTypeFromChar(step.alternativeChosen[0])
 
+
+
                 log(id, currentDay, activityType.toString())
 
                 if (activityType != ActivityType.HOME) {
                     // add a new tour into the pattern if not existing
                     var mainTour: HTour? = null
                     if (!currentDay.existsTour(0)) {
+
                         mainTour = HTour(currentDay, 0)
                         currentDay.addTour(mainTour)
                     } else {
+                        require(false) {
+                            "can this code even trigger?"
+                        }
                         mainTour = currentDay.getTour(0)
                     }
 
@@ -302,6 +316,9 @@ class Coordinator @JvmOverloads constructor(
                         activity = HActivity(mainTour, 0, activityType)
                         mainTour.addActivity(activity)
                     } else {
+                        require(false) {
+                            "can this code even trigger?"
+                        }
                         activity = currentDay.getTour(0).getActivity(0)
                         activity.activityType = activityType
                     }

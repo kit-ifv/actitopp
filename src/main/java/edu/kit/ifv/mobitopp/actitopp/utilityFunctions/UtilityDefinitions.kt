@@ -1,4 +1,5 @@
 package edu.kit.ifv.mobitopp.actitopp.utilityFunctions
+
 /**
  * A utility function takes in an alternative and a parameter object and returns the utility of said alternative.
  */
@@ -31,15 +32,38 @@ interface ExtractableDistributionFunction<X : Any, SIT : ChoiceSituation<X>, PAR
             parameters
         )
     }
+
+    fun calculateProbabilitiesInjected(
+        alternatives: Set<InjectedSituation<SIT>>,
+        parameters: PARAMS,
+    ): Map<SIT, Double> {
+        return calculateProbabilities(
+            alternatives.associate {
+                it.situation to
+                        it.injection(translation(it.situation).calculateUtility(it.situation, parameters))
+
+            },
+            parameters
+        )
+    }
+
 }
-interface ModifiableDistributionFunction<X : Any, SIT : ChoiceSituation<X>, PARAMS>: OptionDistributionFunction<X, SIT, PARAMS> {
+
+data class InjectedSituation<SIT>(
+    val situation: SIT,
+    val injection: (Double) -> Double = {it},
+)
+
+interface ModifiableDistributionFunction<X : Any, SIT : ChoiceSituation<X>, PARAMS> :
+    OptionDistributionFunction<X, SIT, PARAMS> {
     fun modify(option: X, lambda: (UtilityFunction<SIT, PARAMS>) -> UtilityFunction<SIT, PARAMS>)
 }
+
 fun <X : Any, SIT : ChoiceSituation<X>, PARAMS> ExtractableDistributionFunction<X, SIT, PARAMS>.calculateDebug(
     alternatives: Set<SIT>,
     parameters: PARAMS,
     callback: (Map<SIT, Double>) -> Unit = {
-    }
+    },
 ): Map<SIT, Double> {
     return calculateProbabilities(alternatives.associateWith {
         translation(it).calculateUtility(it, parameters)
@@ -53,8 +77,10 @@ fun <X : Any, SIT : ChoiceSituation<X>, PARAMS> ExtractableDistributionFunction<
 fun interface DistributionFunction<SIT, PARAMS> {
     fun calculateProbabilities(
         evaluators: Map<SIT, Double>,
-        parameters: PARAMS
+        parameters: PARAMS,
     ): Map<SIT, Double>
+
+
 }
 
 fun interface UtilityFunctionAssociation<SIT, PARAMS> {
@@ -76,7 +102,7 @@ interface RuleBasedAssociation<X : Any, SIT : ChoiceSituation<X>, PARAMS> :
         val firstMatchingRule = rules.firstOrNull { it.first.invoke(to) }
             ?: throw NoSuchElementException(
                 "The choice model: [$name] cannot associate the target element " +
-                    "${to.choice} to a utility function. Is the option defined in the choice model?"
+                        "${to.choice} to a utility function. Is the option defined in the choice model?"
             )
         return firstMatchingRule.second
     }

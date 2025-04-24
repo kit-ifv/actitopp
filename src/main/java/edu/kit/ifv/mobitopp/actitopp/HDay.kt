@@ -103,9 +103,8 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         return tours.sumOf { it.activities.count { act -> act.activityType == acttype&& act.activitytypeisScheduled()   } }
     }
 
-
     fun getTour(index: Int): HTour = mappedTours.getValue(index)
-
+    fun getTourOrNull(index: Int) = mappedTours[index]
     fun existsTour(index: Int): Boolean = index in mappedTours
 
     fun isStandardWorkingDay(): Boolean = weekday.value in 1..5
@@ -222,5 +221,9 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
             if (tmpact.isActivityLastinTour) result = "$result //"
         }
         return result
+    }
+    // TODO this differs from hasActivity, because isScheduled and activityTypeisScheduled are two differnt things. They shouldn't though
+    fun hasAnyActivity(activityType: ActivityType): Boolean {
+        return tours.any{t-> t.activities.any{it.activityType == activityType && it.activitytypeisScheduled()}}
     }
 }

@@ -21,14 +21,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertThrows
-import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 
-class CoordinatorTest {
-    private  val fileBase: ModelFileBase = ModelFileBase()
-    private val randomgenerator: RNGHelper = RNGHelper(1234)
+class CoordinatorTest: CoordinatorTestUtilities() {
 
     private val persons = generateHouseholds(200).flatMap { it.generatePersons(5) }
 
@@ -129,7 +126,7 @@ class CoordinatorTest {
             DynamicTest.dynamicTest("person $i $testName") {
                 val modifierFields = ActitoppPersonModifierFields(person)
                 modifierFields.apply(initializationBlock)
-                val originalUtilities = generateUtilities(stepId, person)
+                val originalUtilities = generateIntUtilities(stepId, person)
                 val newUtilities = generateModernUtilities(model, modifierFields)
                 val equality = testDoubleMapEquality(originalUtilities, newUtilities)
                 assertTrue(equality, message = "$\n${coerceMap(originalUtilities)}\n${coerceMap(newUtilities)}\n${originalUtilities.minus(newUtilities)}\n${PersonSituation(0, modifierFields).debug()}\n${person.attributesMap}\n$person")
@@ -137,13 +134,7 @@ class CoordinatorTest {
         }
     }
 
-    private fun DCDefaultModelStep.probabilities(): Map<Int, Double> {
-        return alternatives.associate { it.name.toInt() to it.probability }
-    }
 
-    private fun DCDefaultModelStep.utilities(): Map<Int, Double> {
-        return alternatives.associate { it.name.toInt() to it.utility }
-    }
 
     private fun ActitoppPersonModifierFields.generateWorkingDays() {
         val workingDays = step1AModel.select((0..7).map { Situation1A(it, original) }.toSet(), ParameterSet1A, randomgenerator.randomValue)
@@ -162,18 +153,14 @@ class CoordinatorTest {
     }
 
     private fun ActitoppPersonModifierFields.generateShoppingDays() {
-        amountOfServiceDays = step1DWithParams.select { PersonSituation(it, this) }
-        original.addAttributetoMap("anztage_s", amountOfServiceDays.toDouble())
+        amountOfShoppingDays = step1DWithParams.select { PersonSituation(it, this) }
+        original.addAttributetoMap("anztage_s", amountOfShoppingDays.toDouble())
     }
     private fun ActitoppPersonModifierFields.generateServiceDays() {
         amountOfServiceDays = step1EWithParams.select { PersonSituation(it, this) }
         original.addAttributetoMap("anztage_t", amountOfServiceDays.toDouble())
     }
-    private fun generateUtilities(id: String, person: ActitoppPerson): Map<Int, Double> {
-        val step = DCDefaultModelStep(id, fileBase, AttributeLookup(person), randomgenerator)
-        step.doStep()
-        return step.utilities()
-    }
+
 
     private fun <P> generateModernUtilities(model: ParametrizedDiscreteChoiceModel<Int, PersonSituation, P>, person: ActitoppPerson): Map<Int, Double> {
         return model.utilities { PersonSituation(it, person.toModifiable()) }
@@ -183,30 +170,11 @@ class CoordinatorTest {
         return model.utilities { PersonSituation(it, modifiable) }
     }
 
-    private fun <K> coerceMap(map: Map<K, Double>): String {
-        return map.entries.joinToString(", ") { "${it.key}=${it.value.toString().take(5).padEnd(5, '0')}"  }
-    }
+
 }
 private fun <T> ModifiableDiscreteChoiceModel<Int, PersonSituation, T>.select(person: ActitoppPerson, parameters: T): Int {
     val alternatives =  (0..7).map { PersonSituation(it, person.toModifiable()) }.toSet()
     return select(alternatives, parameters)
 }
 
-private fun <K> Map<K, Double>.minus(other: Map<K, Double>): Map<K, Double> {
-    return entries.associate { it.key to it.value - (other[it.key] ?: 0.0 )}
-}
-fun <K> testDoubleMapEquality(
-    expected: Map<K, Double>,
-    actual: Map<K, Double>,
-    delta: Double = 1e-8
-): Boolean {
-    require(expected.keys == actual.keys) {
-        "Key mismatch: expected keys ${expected.keys}, got ${actual.keys}"
-    }
-    return expected.keys.all {
-        val expectedValue = expected.getValue(it)
-        val actualValue = actual.getValue(it)
-        abs(expectedValue - actualValue) < delta
-    }
 
-}
