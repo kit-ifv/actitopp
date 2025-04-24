@@ -247,19 +247,4 @@ class HTour(parent: HDay, val index: Int) {
         }
         return tostring
     }
-    companion object {
-        /**
-         * sort a list of tours by index
-         *
-         * @param list
-         */
-        fun sortTourList(list: List<HTour>) {
-
-            Collections.sort(list, java.util.Comparator { o1, o2 ->
-                if (o1.index < o2.index) return@Comparator -1
-                if (o1.index > o2.index) return@Comparator 1
-                0
-            })
-        }
-    }
 }

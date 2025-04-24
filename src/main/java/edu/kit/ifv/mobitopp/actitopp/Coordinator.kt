@@ -361,7 +361,6 @@ class Coordinator @JvmOverloads constructor(
                 if (tour != null) currentDay.addTour(tour)
             }
 
-            HTour.sortTourList(currentDay.tours)
 
             if (id == "3B") assert(currentDay.amountOfTours >= numberoftoursperday_lowerboundduetojointactions[currentDay.index]) { "wrong number of tours - violating lower bound due to joint actions" }
         }

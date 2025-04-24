@@ -483,42 +483,6 @@ class HActivity @JvmOverloads constructor(
         }
 
     companion object {
-        /**
-         * sorts list of activities ascending by week-order start time
-         *
-         * @param actList
-         */
-        fun sortActivityListbyWeekStartTimes(actList: MutableList<HActivity>) {
-            actList.sortBy { it.startTimeWeekContext }
-
-        }
-
-        /**
-         * sorts list of activities ascending by week-order indices
-         *
-         * @param list
-         */
-        fun sortActivityListbyIndices(list: List<HActivity>) {
-            checkNotNull(list) { "list is empty" }
-
-            Collections.sort(list) { o1, o2 ->
-                var result = 99
-                result = if (o1.dayIndex < o2.dayIndex) -1
-                else if (o1.dayIndex > o2.dayIndex) +1
-                else {
-                    if (o1.tour!!.index < o2.tour!!.index) -1
-                    else if (o1.tour!!.index > o2.tour!!.index) +1
-                    else {
-                        if (o1.index < o2.index) -1
-                        else if (o1.index > o2.index) +1
-                        else 0
-                    }
-                }
-
-                assert(result != 99) { "Could not compare these two activities! - Act1: $o1 - Act2: $o2" }
-                result
-            }
-        }
 
         /**
          * calculates duration between end of first activity (including trip after activity if there is one)

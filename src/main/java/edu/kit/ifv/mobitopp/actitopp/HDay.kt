@@ -20,7 +20,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     val pattern: HWeekPattern = parent
 
     private val mappedTours: NavigableMap<Int, HTour> = TreeMap()
-    val tours: List<HTour> get() = mappedTours.values.toList()
+    val tours: Collection<HTour> get() = mappedTours.values
 
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
