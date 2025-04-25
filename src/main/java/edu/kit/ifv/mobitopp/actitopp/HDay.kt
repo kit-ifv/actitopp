@@ -86,7 +86,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
 
     fun hasActivity(activityType: ActivityType): Boolean {
-        return tours.any { t -> t.activities.any { it.activityType == activityType && it.isScheduled } }
+        return tours.any { t -> t.activities.any { it.activityType == activityType && it.activityTypeIsSpecified() } }
     }
 
     fun addTour(tour: HTour) {
@@ -100,7 +100,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
     // TODO when activitytypeIsScheduled() is just a comparision against activityType Unknown the expression would collapse.
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
-        return tours.sumOf { it.activities.count { act -> act.activityType == acttype&& act.activitytypeisScheduled()   } }
+        return tours.sumOf { it.activities.count { act -> act.activityType == acttype&& act.activityTypeIsSpecified()   } }
     }
 
     fun getTour(index: Int): HTour = mappedTours.getValue(index)
@@ -129,7 +129,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @param activityindex
      * @return
      */
-    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean  = mappedTours[tourindex]?.getActivityOrNull(activityindex)?.activitytypeisScheduled() ?: false
+    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean  = mappedTours[tourindex]?.getActivityOrNull(activityindex)?.activityTypeIsSpecified() ?: false
 
 
     /**
@@ -224,6 +224,6 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
     // TODO this differs from hasActivity, because isScheduled and activityTypeisScheduled are two differnt things. They shouldn't though
     fun hasAnyActivity(activityType: ActivityType): Boolean {
-        return tours.any{t-> t.activities.any{it.activityType == activityType && it.activitytypeisScheduled()}}
+        return tours.any{t-> t.activities.any{it.activityType == activityType && it.activityTypeIsSpecified()}}
     }
 }

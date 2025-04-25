@@ -4,7 +4,6 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 import java.time.DayOfWeek
-import java.util.Collections
 import kotlin.math.max
 import kotlin.math.min
 
@@ -127,14 +126,14 @@ class HActivity @JvmOverloads constructor(
                     " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
                     " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
                     " duration: " + (if (durationisScheduled()) duration else "n.a.") +
-                    " type: " + (if (activitytypeisScheduled()) activityType.typeasChar else "n.a.") +
+                    " type: " + (if (activityTypeIsSpecified()) activityType.typeasChar else "n.a.") +
                     " jointStatus: " + this.jointStatus
         } else {
             dayIndex.toString() + "/" + tour.index + "/" + index +
                     " start " + (if (startTimeisScheduled()) startTimeWeekContext else "n.a.") +
                     " end " + (if (startTimeisScheduled() && durationisScheduled()) endTimeWeekContext else "n.a.") +
                     " duration: " + (if (durationisScheduled()) duration else "n.a.") +
-                    " type: " + (if (activitytypeisScheduled()) activityType.typeasChar else "n.a.") +
+                    " type: " + (if (activityTypeIsSpecified()) activityType.typeasChar else "n.a.") +
                     " jointStatus: " + this.jointStatus +
                     " trip before: " + (if (tripBeforeActivityisScheduled()) estimatedTripTimeBeforeActivity else "n.a.") +
                     " trip after: " + (if (tripAfterActivityisScheduled()) estimatedTripTimeAfterActivity else "n.a.")
@@ -198,7 +197,7 @@ class HActivity @JvmOverloads constructor(
         /**
          * @return
          */
-        get() = (activitytypeisScheduled() && activityType == ActivityType.HOME)
+        get() = (activityTypeIsSpecified() && activityType == ActivityType.HOME)
 
     val isMainActivityoftheTour: Boolean = this.index == 0
 
@@ -342,11 +341,16 @@ class HActivity @JvmOverloads constructor(
         }
     }
 
-    val isScheduled: Boolean
-        get() = durationisScheduled() && startTimeisScheduled() && activitytypeisScheduled() && (if (Configuration.modelJointActions) jointStatus != JointStatus.UNKNOWN else true)
+    val hasScheduledDuration: Boolean
+        get() = durationisScheduled() && startTimeisScheduled() && activityTypeIsSpecified() && (if (Configuration.modelJointActions) jointStatus != JointStatus.UNKNOWN else true)
 
-    // TODO apparently activityTypeIsScheduled means that the type is no longer unknown, change the naming to express this behaviour
-    fun activitytypeisScheduled(): Boolean {
+    /**
+     * The original method was called activitytypeIsScheduled, which is overlapping with the legaycy isScheduled () method.
+     * Since these two have different behaviour, we renamed this function to activity type is specified, since this method
+     * is only used to check whether the activity type is not unknown. In the future perhaps the activityType.Unknown could
+     * be removed. In that instance this method would become obsolete
+     */
+    fun activityTypeIsSpecified(): Boolean {
         return this.activityType != ActivityType.UNKNOWN
     }
 

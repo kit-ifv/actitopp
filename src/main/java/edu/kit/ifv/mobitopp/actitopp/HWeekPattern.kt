@@ -107,7 +107,9 @@ class HWeekPattern(
      * @param activityType
      * @return
      */
-    fun countDaysWithSpecificActivity(activityType: ActivityType): Int = days.count {it.hasActivity(activityType)}
+    fun countDaysWithSpecificActivity(activityType: ActivityType): Int = days.count {
+        it.hasActivity(activityType)
+    }
 
 
 
@@ -176,4 +178,5 @@ class HWeekPattern(
         return allActivities.zipWithNext().none { (first, second) -> first.overlaps(second) }
 
     }
+
 }

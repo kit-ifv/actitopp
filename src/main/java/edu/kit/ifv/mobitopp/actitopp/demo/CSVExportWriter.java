@@ -147,7 +147,7 @@ public class CSVExportWriter {
     private void exportActivityData_singlePerson(ActitoppPerson actperson) throws IOException {
         // Fuege alle Aktivitaeten hinzu
         for (HActivity act : actperson.getWeekPattern().getAllActivities()) {
-            if (act.isScheduled()) {
+            if (act.getHasScheduledDuration()) {
                 writer.append(writeActivity(act));
                 writer.flush();
             }
@@ -162,7 +162,7 @@ public class CSVExportWriter {
      * @return
      */
     private String writeActivity(HActivity act) {
-        assert act.isScheduled() : "Activity is not fully scheduled";
+        assert act.getHasScheduledDuration() : "Activity is not fully scheduled";
         String rueckgabe = "";
 
         /*

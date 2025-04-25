@@ -3,15 +3,17 @@ package edu.kit.ifv.mobitopp.actitopp
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DaySituation
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.assignMainActivityCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.coordinatedStep2AWithParams
 import edu.kit.ifv.mobitopp.generateHouseholds
 import edu.kit.ifv.mobitopp.generatePersons
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
+import kotlin.test.assertTrue
 
 class CoordinatorStep2Test: CoordinatorTestUtilities() {
 
@@ -41,7 +43,7 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
                 val weekRoutine = randomWeekRoutine(person)
                 weekRoutine.loadToAttributeMap(person.getMutableMapForTest())
                 // Test ordering matters, since the old code produces side effects.
-                val expected = person.weekPattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
+                val expected = GenerateCoordinated(rngCopy).generate(PersonWithRoutine(person, weekRoutine), person.weekPattern.days)
                 executeStep2("2A", person)
 
                 val test = person.weekPattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
@@ -55,7 +57,28 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
 
         }
     }
+    @TestFactory
+    fun coordinatedWhenSpawningTooManyAlternatives(): Collection<DynamicTest> {
+        return persons.map {person ->
+            DynamicTest.dynamicTest("Generating too many activities for person") {
 
+                val weekRoutine = randomWeekRoutine(person)
+                weekRoutine.loadToAttributeMap(person.getMutableMapForTest())
+                val weekPattern = person.weekPattern
+                val actualWorkdays = person.getAttributefromMap("anztage_w")
+                val targetNumber = actualWorkdays.toInt()
+                (0..targetNumber).forEach {
+                    val day = weekPattern.getDay(it)
+                    val tour = HTour(day, 0)
+                    day.addTour(tour)
+                    val activity = HActivity(tour, 0, ActivityType.WORK)
+                    tour.addActivity(activity)
+                }
+                val expected = weekPattern.countDaysWithSpecificActivity(ActivityType.WORK)
+                assertTrue(expected >= actualWorkdays, "\n expected: $actualWorkdays , actual: $expected \n $weekPattern")
+            }
+        }
+    }
 
     private fun generateMainActivityUtilities(person: ActitoppPerson, routine: PersonWeekRoutine, day: HDay): Map<ActivityType, Double> {
         // Sorting is necessary to ensure that the order of the map stays the same, which is relevant for the selection process.
@@ -88,46 +111,7 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
                 // create step object
                 val step = DCDefaultModelStep(id, fileBase, lookup, randomgenerator)
 
-                // if there are existing tours (e.g., from joint activities) , disable H as alternative as being at home is no longer a valid alternative
-                if (currentDay.amountOfTours > 0 || numberoftoursperday_lowerboundduetojointactions[currentDay.index] > 0) {
-                    step.disableAlternative("H")
-                }
-
-                // disable working activity if person is not allowed to work
-                if (!person.isAllowedToWork) step.disableAlternative("W")
-
-                if (Configuration.coordinated_modelling) {
-                    // if number of working days is achieved, disable W as alternative
-                    if (person.getAttributefromMap("anztage_w") <=
-                        pattern.countDaysWithSpecificActivity(ActivityType.WORK)
-                        && currentDay.getTotalNumberOfActivitites(
-                            ActivityType.WORK
-                        ) == 0 &&
-                        person.isAnywayEmployed()
-                    ) {
-                        step.disableAlternative("W")
-                    }
-                    // if number of education days is achieved, disable E as alternative
-                    if (person.getAttributefromMap("anztage_e") <=
-                        pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION)
-                        && currentDay.getTotalNumberOfActivitites(
-                            ActivityType.EDUCATION
-                        ) == 0 &&
-                        person.isinEducation()
-                    ) {
-                        step.disableAlternative("E")
-                    }
-
-                    // utility bonus for alternative W if person is employed and day is from Monday to Friday
-                    if (person.isAnywayEmployed() && currentDay.isStandardWorkingDay()
-                        && step.alternativeisEnabled("W")) {
-                        step.adaptUtilityFactor("W", 1.3)
-                    }
-                    // utility bonus for alternative E if person is in Education and day is from Monday to Friday
-                    if (person.isinEducation() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("E")) {
-                        step.adaptUtilityFactor("E", 1.3)
-                    }
-                }
+                initializeStep(currentDay, step, person, pattern)
 
                 // make selection
                 val rnd = person.personalRNG.randomValue
@@ -135,9 +119,6 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
                 val decision = step.doStep(rnd)
                 val activityType = getTypeFromChar(step.alternativeChosen[0])
                 val utilities = step.utilities { getTypeFromChar(it[0])}
-                println("Old: [$rnd] $utilities") // Utilities
-                println()
-                println("Old: [$rnd] ${step.probabilities { it }}") // Utilities
 
                 if (activityType != ActivityType.HOME) {
                     // add a new tour into the pattern if not existing
@@ -166,6 +147,55 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
                         activity.activityType = activityType
                     }
                 }
+            }
+        }
+    }
+
+    private fun initializeStep(
+        currentDay: HDay,
+        step: DCDefaultModelStep,
+        person: ActitoppPerson,
+        pattern: HWeekPattern,
+    ) {
+        // if there are existing tours (e.g., from joint activities) , disable H as alternative as being at home is no longer a valid alternative
+        if (currentDay.amountOfTours > 0 || numberoftoursperday_lowerboundduetojointactions[currentDay.index] > 0) {
+            step.disableAlternative("H")
+        }
+
+        // disable working activity if person is not allowed to work
+        if (!person.isAllowedToWork) step.disableAlternative("W")
+
+        if (Configuration.coordinated_modelling) {
+            // if number of working days is achieved, disable W as alternative
+            if (person.getAttributefromMap("anztage_w") <=
+                pattern.countDaysWithSpecificActivity(ActivityType.WORK)
+                && currentDay.getTotalNumberOfActivitites(
+                    ActivityType.WORK
+                ) == 0 &&
+                person.isAnywayEmployed()
+            ) {
+                step.disableAlternative("W")
+            }
+            // if number of education days is achieved, disable E as alternative
+            if (person.getAttributefromMap("anztage_e") <=
+                pattern.countDaysWithSpecificActivity(ActivityType.EDUCATION)
+                && currentDay.getTotalNumberOfActivitites(
+                    ActivityType.EDUCATION
+                ) == 0 &&
+                person.isinEducation()
+            ) {
+                step.disableAlternative("E")
+            }
+
+            // utility bonus for alternative W if person is employed and day is from Monday to Friday
+            if (person.isAnywayEmployed() && currentDay.isStandardWorkingDay()
+                && step.alternativeisEnabled("W")
+            ) {
+                step.adaptUtilityFactor("W", 1.3)
+            }
+            // utility bonus for alternative E if person is in Education and day is from Monday to Friday
+            if (person.isinEducation() && currentDay.isStandardWorkingDay() && step.alternativeisEnabled("E")) {
+                step.adaptUtilityFactor("E", 1.3)
             }
         }
     }

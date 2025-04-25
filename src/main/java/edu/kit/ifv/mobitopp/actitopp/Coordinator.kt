@@ -13,7 +13,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.assignMainActivityCoordinated
+
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import kotlin.math.max
 import kotlin.math.min
@@ -83,7 +83,7 @@ class Coordinator @JvmOverloads constructor(
         require(weekRoutine.similarToAttributeMap(person.attributesMap)) {
             "Mismatch between week routine and person map \n$weekRoutine \n${person.attributesMap}"
         }
-        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
+//        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
         executeStep2("2A")
 
         executeStep3("3A")
@@ -192,22 +192,7 @@ class Coordinator @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Behaves exactly as "executeStep1(1A, "workDays") except it aint writing to the person map but returns the value
-     * of the calculation to be used externally.
-     */
-    fun determineNumberOfWorkingDays(): Int {
-        if(!person.isAllowedToWork) return 0
-        return step1AModel.select(ParameterSet1A, randomGenerator.randomValue) {
-            Situation1A(it, person)
-        }
-    }
 
-    fun determineNumberOfEducationDays(modifiableElement: ActitoppPersonModifierFields): Int {
-        return step1BModel.select(ParameterSet1B, randomGenerator.randomValue) {
-            Situation1B(it, modifiableElement)
-        }
-    }
     /**
      * @param id
      * @param variablenname
@@ -249,6 +234,9 @@ class Coordinator @JvmOverloads constructor(
 
                 // if there are existing tours (e.g., from joint activities) , disable H as alternative as being at home is no longer a valid alternative
                 if (currentDay.amountOfTours > 0 || numberoftoursperday_lowerboundduetojointactions[currentDay.index] > 0) {
+                    require(false) {
+                        "can this code even trigger?"
+                    }
                     step.disableAlternative("H")
                 }
 
@@ -528,7 +516,7 @@ class Coordinator @JvmOverloads constructor(
             for (currentTour in currentDay.tours) {
                 for (currentActivity in currentTour.activities) {
                     // only use activities whose type has not been decided yet
-                    if (!currentActivity.activitytypeisScheduled()) {
+                    if (!currentActivity.activityTypeIsSpecified()) {
                         // create attribute lookup
                         val lookup = AttributeLookup(person, currentDay, currentTour, currentActivity)
 
@@ -854,12 +842,12 @@ class Coordinator @JvmOverloads constructor(
                 if ((act.startTimeisScheduled()
                             && act.overlaps(actforreplacement))
                     ||
-                    (act.isScheduled && act.isActivityLastinTour && actforreplacement.isActivityFirstinTour && act.tourIndex != actforreplacement.tourIndex && HActivity.getTimebetweenTwoActivities(
+                    (act.hasScheduledDuration && act.isActivityLastinTour && actforreplacement.isActivityFirstinTour && act.tourIndex != actforreplacement.tourIndex && HActivity.getTimebetweenTwoActivities(
                         act,
                         actforreplacement
                     ) == 0)
                     ||
-                    (act.isScheduled && act.isActivityFirstinTour && actforreplacement.isActivityLastinTour && act.tourIndex != actforreplacement.tourIndex && HActivity.getTimebetweenTwoActivities(
+                    (act.hasScheduledDuration && act.isActivityFirstinTour && actforreplacement.isActivityLastinTour && act.tourIndex != actforreplacement.tourIndex && HActivity.getTimebetweenTwoActivities(
                         act,
                         actforreplacement
                     ) == 0)

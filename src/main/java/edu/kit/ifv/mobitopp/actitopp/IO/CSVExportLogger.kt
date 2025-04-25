@@ -94,7 +94,7 @@ class CSVExportLogger(var basepath: File) {
     private fun exportsinglePerson(person: ActitoppPerson) {
         // Export activity data
         for (act in person.weekPattern!!.allActivities) {
-            if (act.isScheduled) {
+            if (act.hasScheduledDuration) {
                 activitywriter!!.append(writeActivity(act))
                 activitywriter!!.flush()
             }
@@ -158,7 +158,7 @@ class CSVExportLogger(var basepath: File) {
      * @return
      */
     private fun writeActivity(act: HActivity): String {
-        assert(act.isScheduled) { "Activity is not fully scheduled" }
+        assert(act.hasScheduledDuration) { "Activity is not fully scheduled" }
         var returnstring = ""
 
         /*
