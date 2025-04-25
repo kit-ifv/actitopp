@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import java.util.Collections
 import java.util.NavigableMap
 import java.util.NavigableSet
@@ -27,6 +28,16 @@ class HTour(parent: HDay, val index: Int) {
 
     fun addActivity(act: HActivity) {
         betterActivities[act.index] = act
+    }
+
+    fun generateMainActivity(activityType: ActivityType) = generateActivity(0, activityType)
+    fun generateActivity(activityIndex: Int, activityType: ActivityType): HActivity {
+        require(activityIndex !in betterActivities) {
+            "Cannot create activity $activityIndex since the index is already found ${betterActivities}for tour $this"
+        }
+        val activity = HActivity(this, activityIndex, activityType)
+        addActivity(activity)
+        return activity
     }
 
     var startTime: Int = -1

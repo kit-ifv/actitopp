@@ -12,7 +12,9 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.generateMainActivities
 
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import kotlin.math.max
@@ -83,9 +85,14 @@ class Coordinator @JvmOverloads constructor(
         require(weekRoutine.similarToAttributeMap(person.attributesMap)) {
             "Mismatch between week routine and person map \n$weekRoutine \n${person.attributesMap}"
         }
-//        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
-        executeStep2("2A")
 
+
+        executeStep2("2A")
+        val mainActivities = person.generateMainActivities(weekRoutine) {
+            GenerateCoordinated(rngCopy)
+        }.map { it.first }
+        val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
+//        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
         executeStep3("3A")
         executeStep3("3B")
 
@@ -333,9 +340,9 @@ class Coordinator @JvmOverloads constructor(
 
             // initialize minimum number of tours
             var minnumberoftours = 0
-
             // check if minimum number bound is already achieved
             if (currentDay.amountOfTours < numberoftoursperday_lowerboundduetojointactions[currentDay.index]) {
+
                 val remainingnumberoftours =
                     numberoftoursperday_lowerboundduetojointactions[currentDay.index] - currentDay.amountOfTours
                 // Half number of tours for step 3A as some of them will be modeled using step 3B

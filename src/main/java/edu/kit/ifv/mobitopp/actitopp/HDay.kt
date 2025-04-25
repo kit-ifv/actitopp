@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import java.time.DayOfWeek
 import java.util.NavigableMap
 import java.util.SortedMap
@@ -24,7 +25,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
 
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
-
+    val mainActivity: HActivity? get() = getTourOrNull(0)?.getActivityOrNull(0)
     /**
      * Does not need to be get(). Returns the index of the Day similar to DayOfWeek.oridnal()
      * Mo = 0, So = 6
@@ -97,6 +98,25 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
         mappedTours[tour.index] = tour
 
+    }
+
+    /**
+     * To avoid handling naked indices, we will provide named options for functions to keep the index spam outside of
+     * the model classes to a minimum
+     * @see generateTour
+     */
+    fun generateMainTour() = generateTour(0)
+
+    /**
+     * Generate an empty tour for the day, with the specified tour index.
+     */
+    fun generateTour(tourIndex: Int): HTour {
+        require(tourIndex !in mappedTours) {
+            "There is already a tour with index $tourIndex for day $this"
+        }
+        val tour = HTour(this, tourIndex)
+        addTour(tour)
+        return tour
     }
     // TODO when activitytypeIsScheduled() is just a comparision against activityType Unknown the expression would collapse.
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
@@ -222,8 +242,13 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
         return result
     }
-    // TODO this differs from hasActivity, because isScheduled and activityTypeisScheduled are two differnt things. They shouldn't though
-    fun hasAnyActivity(activityType: ActivityType): Boolean {
-        return tours.any{t-> t.activities.any{it.activityType == activityType && it.activityTypeIsSpecified()}}
-    }
+
 }
+// TODO find out whether a home day could feasibly generate a previous tour somehow, otherwise these methods are irrelevant
+fun HDay.hasPreviousTours() = !isHomeDay && lowestTourIndex != 0
+fun HDay.hasNoPreviousTours() = !hasPreviousTours()
+fun HDay.amountOfPreviousTours() = !isHomeDay * -lowestTourIndex
+
+fun HDay.hasLaterTours() = !isHomeDay && highestTourIndex != 0
+fun HDay.hasNoLaterTours() = !hasLaterTours()
+fun HDay.amountOfLaterTours() = !isHomeDay * highestTourIndex

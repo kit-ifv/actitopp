@@ -130,6 +130,8 @@ class ModifiableDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
     fun probabilities(options: Set<X>, parameters: P, converter: (X) -> SIT): Map<X, Double> {
         return probabilities(options.map(converter).toSet(),parameters).mapKeys { it.key.choice }
     }
+
+    fun registeredOptions() = distributionFunction.options
 }
 
 class KnownDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
@@ -163,6 +165,7 @@ class ParametrizedDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
     fun probabilities(converter: (X) -> SIT) = original.probabilities(parameters, converter)
     fun probabilities(options: Set<X>, converter: (X) -> SIT) = original.probabilities(options, parameters, converter)
     fun selectInjected(situation: (X) -> SIT, injections: Map<X, (Double) -> Double>): X = original.selectInjected(parameters, situation, injections)
+    fun registeredOptions() = original.registeredOptions()
 }
 
 fun <X : Any, SIT : ChoiceSituation<X>, PARAMS> ModifiableDiscreteChoiceModel<X, SIT, PARAMS>.initializeWithParameters(

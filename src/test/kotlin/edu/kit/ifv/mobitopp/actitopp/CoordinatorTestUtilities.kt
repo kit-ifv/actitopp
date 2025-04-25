@@ -1,6 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import kotlin.math.abs
+import kotlin.random.Random
 
 abstract class CoordinatorTestUtilities {
     protected  val fileBase: ModelFileBase = ModelFileBase()
@@ -29,6 +31,24 @@ abstract class CoordinatorTestUtilities {
         return alternatives.associate { converter(it.name) to it.probability }
     }
 
+    protected fun randomWeekRoutine(person: ActitoppPerson): PersonWeekRoutine {
+        val rng = Random(person.age * 10000 + person.persIndex)
+        return PersonWeekRoutine(
+            amountOfWorkingDays = rng.nextInt(0, 7),
+            amountOfEducationDays = rng.nextInt(0, 7),
+            amountOfLeisureDays = rng.nextInt(0, 7),
+            amountOfShoppingDays = rng.nextInt(0, 7),
+            amountOfServiceDays = rng.nextInt(0, 7),
+            amountOfImmobileDays = rng.nextInt(0, 7),
+            averageAmountOfTours = rng.nextInt(0, 3),
+            averageAmountOfActivities = rng.nextInt(0, 4),
+        )
+    }
+
+    protected fun randomMainActivityTypes(person: ActitoppPerson, amount: Int = 7): List<ActivityType> {
+        val rng = Random(person.persIndex)
+        return (0..<amount).map { ActivityType.FULLSET.random(rng) }
+    }
 
 
     fun <K> testDoubleMapEquality(

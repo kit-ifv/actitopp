@@ -85,19 +85,7 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
         return coordinatedStep2AWithParams.utilities { DaySituation(it, PersonWithRoutine(person, routine), day) }.toSortedMap(comparator =  { o1, o2 -> o1.name.compareTo(o2.name) })
     }
 
-    private fun randomWeekRoutine(person: ActitoppPerson): PersonWeekRoutine {
-        val rng = Random(person.persIndex)
-        return PersonWeekRoutine(
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-            rng.nextInt(0, 7),
-        )
-    }
+
     private val numberoftoursperday_lowerboundduetojointactions = intArrayOf(0, 0, 0, 0, 0, 0, 0)
     private fun executeStep2(id: String, person: ActitoppPerson) {
         val pattern = person.weekPattern

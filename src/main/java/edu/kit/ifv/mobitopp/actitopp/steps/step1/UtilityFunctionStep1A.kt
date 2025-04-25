@@ -10,6 +10,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.toModifiable
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.D
+import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.I
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
@@ -176,7 +177,9 @@ data class ParametersStep1A(
     val householdHasChildenBelowAge10: Double,
     val genderIsMale: Double,
 )
+// TODO move these to a util definition
 inline operator fun Boolean.times(other: Double): Double = this.D * other
+inline operator fun Boolean.times(other: Int): Int = this.I * other
 class Situation1A(override val choice: Int, person: ActitoppPerson): PersonSituation(choice, person.toModifiable()) {
     val employment = person.employment
     val age = person.age

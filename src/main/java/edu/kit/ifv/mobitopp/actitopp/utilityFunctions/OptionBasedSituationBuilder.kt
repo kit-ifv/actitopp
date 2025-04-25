@@ -87,6 +87,7 @@ interface RuleBasedSituationBuilder<X : Any, SIT : ChoiceSituation<X>, PARAMS> {
  * whereever someone creates a utility function, without needing to import.
  */
 inline val Boolean.D get() = if (this) 1.0 else 0.0
+inline val Boolean.I get() = if (this) 1 else 0
 operator fun Boolean.times(double: Double): Double {
     return this.D * double
 }

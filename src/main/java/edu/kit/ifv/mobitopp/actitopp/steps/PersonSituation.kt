@@ -83,6 +83,7 @@ class PersonAttributesFromElement(val person: ActitoppPerson) : PersonAttributes
     }
 }
 
+
 open class PersonSituation(
     override val choice: Int,
     val personModifiers: ActitoppPersonModifierFields,
@@ -120,10 +121,6 @@ open class PersonSituation(
             "hasYouthsInHousehold" to hasYouthsInHousehold(),
             "amountOfYouthsInHousehold" to amountOfYouthsInHousehold(),
             "isMale" to isMale(),
-//        "amountOfWorkingDays" to amountOfWorkingDays(),
-//        "amountOfLeisureDays" to amountOfLeisureDays(),
-//        "amountOfEducationDays" to amountOfEducationDays(),
-//        "amountOfServiceDays" to amountOfServiceDays(),
         ).entries.joinToString(separator = "\n") { "${it.key}: ${it.value}" }
     }
 }

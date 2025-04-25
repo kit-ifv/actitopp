@@ -49,7 +49,7 @@ class DCDefaultModelStep(
     fun <T> utilities(converter: (String) ->T ): Map<T, Double> {
         return alternatives.associate { converter(it.name) to it.utility }
     }
-
+    fun activeOptions() = alternatives.filter { it.isEnabled }.map { it.name }
     /**
      * method to do a dc model step
      */

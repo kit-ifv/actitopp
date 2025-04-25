@@ -23,6 +23,7 @@ class GenerateDefault(private val rngHelper: RNGHelper): GenerateMainActivities 
         return days.map { day ->
             val availableOptions = ActivityType.FULLSET.toMutableSet()
             // TODO implement behaviour of numberoftoursperday_lowerboundduetojointactions > 0
+            // TODO remove day.amountOfTours from here, since there can not be a tour right now
             if(day.amountOfTours > 0) {
                 availableOptions.remove(ActivityType.HOME)
             }
@@ -41,18 +42,21 @@ class GenerateCoordinated(private val rngHelper: RNGHelper): GenerateMainActivit
         val output = days.map { day ->
             val availableOptions = ActivityType.FULLSET.toMutableSet()
             // TODO implement behaviour of numberoftoursperday_lowerboundduetojointactions > 0
+            // TODO remove day.amountOfTours from here, since there can not be a tour right now
             if(day.amountOfTours > 0) {
                 availableOptions.remove(ActivityType.HOME)
             }
             if(!person.isAllowedToWork) availableOptions.remove(ActivityType.WORK)
             if(activityCounts.getValue(ActivityType.WORK) >= input.amountOfWorkingDays() &&
-                !day.hasAnyActivity(ActivityType.WORK) &&
+                // TODO the check whether a day has an activity can also be removed, since the day has nothing right now
+                !day.hasActivity(ActivityType.WORK) &&
                 person.isAnywayEmployed()
             ) {
                 availableOptions.remove(ActivityType.WORK)
             }
             if(activityCounts.getValue(ActivityType.EDUCATION) >= input.amountOfEducationDays() &&
-                !day.hasAnyActivity(ActivityType.EDUCATION) &&
+                // TODO the check whether a day has an activity can also be removed, since the day has nothing right now
+                !day.hasActivity(ActivityType.EDUCATION) &&
                 person.isinEducation()
             ) {
                 availableOptions.remove(ActivityType.EDUCATION)
@@ -66,11 +70,15 @@ class GenerateCoordinated(private val rngHelper: RNGHelper): GenerateMainActivit
     }
 }
 
-fun ActitoppPerson.assignMainActivities(weekRoutine: PersonWeekRoutine, lambda: ActitoppPerson.() -> GenerateMainActivities) {
+fun ActitoppPerson.generateMainActivities(weekRoutine: PersonWeekRoutine, lambda: ActitoppPerson.() -> GenerateMainActivities): List<Pair<ActivityType, HDay>> {
     val strategy = this.lambda()
-    val activitiesPerDay = strategy.generate(this, weekRoutine, weekPattern.days).zip(weekPattern.days)
-    activitiesPerDay.forEach { (activityType, day) ->
-        day
-    }
+    return strategy.generate(this, weekRoutine, weekPattern.days).zip(weekPattern.days)
 
+}
+
+fun ActitoppPerson.assignMainActivities(activitiesPerDay: List<Pair<ActivityType, HDay>>) {
+    activitiesPerDay.forEach { (activityType, day) ->
+        val tour = day.generateMainTour()
+        tour.generateMainActivity(activityType)
+    }
 }

@@ -4,9 +4,9 @@ import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.PersonWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.Employment
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributesFromElement
-import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
@@ -28,33 +28,89 @@ data class PersonWithRoutine(
     fun has5EducationDays() = routine.amountOfEducationDays == 5
 }
 
+interface DayAttributes {
+    fun isMonday(): Boolean
+    fun isTuesday(): Boolean
+    fun isWednesday(): Boolean
+    fun isThursday(): Boolean
+    fun isFriday(): Boolean
+    fun isSaturday(): Boolean
+    fun isSunday(): Boolean
+
+    fun amountOfBeforeTours(): Int
+
+    fun mainActivityIsWork(): Boolean
+    fun mainActivityIsEducation(): Boolean
+    fun mainActivityIsShopping(): Boolean
+}
+
+class DayAttributesFromElement(val element: HDay) : DayAttributes {
+    override fun isMonday() = element.weekday == DayOfWeek.MONDAY
+    override fun isTuesday() = element.weekday == DayOfWeek.TUESDAY
+    override fun isWednesday() = element.weekday == DayOfWeek.WEDNESDAY
+    override fun isThursday() = element.weekday == DayOfWeek.THURSDAY
+    override fun isFriday() = element.weekday == DayOfWeek.FRIDAY
+    override fun isSaturday() = element.weekday == DayOfWeek.SATURDAY
+    override fun isSunday() = element.weekday == DayOfWeek.SUNDAY
+
+    override fun amountOfBeforeTours(): Int = -1 * element.lowestTourIndex
+
+    override fun mainActivityIsWork(): Boolean = element.mainTourType == ActivityType.WORK
+    override fun mainActivityIsEducation(): Boolean = element.mainTourType == ActivityType.EDUCATION
+    override fun mainActivityIsShopping(): Boolean = element.mainTourType == ActivityType.SHOPPING
+}
+
+
+interface RoutineAttributes {
+
+    fun amountOfWorkingDays(): Int
+    fun amountOfLeisureDays(): Int
+    fun amountOfEducationDays(): Int
+    fun amountOfShoppingDays(): Int
+    fun amountOfServiceDays(): Int
+    fun amountOfImmobileDays(): Int
+    fun has5WorkDays(): Boolean
+    fun has5EducationDays(): Boolean
+
+    fun averageAmountOfToursIs1(): Boolean
+    fun averageAmountOfToursIs2(): Boolean
+
+}
+
+class RoutineAttributesFromElement(val element: PersonWeekRoutine) : RoutineAttributes {
+    override fun amountOfWorkingDays() = element.amountOfWorkingDays
+    override fun amountOfLeisureDays() = element.amountOfLeisureDays
+    override fun amountOfEducationDays() = element.amountOfEducationDays
+    override fun amountOfShoppingDays() = element.amountOfShoppingDays
+    override fun amountOfServiceDays() = element.amountOfServiceDays
+    override fun amountOfImmobileDays() = element.amountOfImmobileDays
+    override fun has5WorkDays() = element.amountOfWorkingDays == 5
+    override fun has5EducationDays() = element.amountOfEducationDays == 5
+    override fun averageAmountOfToursIs1(): Boolean = element.averageAmountOfTours == 1
+
+    override fun averageAmountOfToursIs2(): Boolean = element.averageAmountOfTours == 2
+}
+
+interface PersonAndRoutineAttributes: PersonAttributes, RoutineAttributes
+data class PersonAndRoutineFrom(
+    val element: PersonWithRoutine,
+    private val routine: RoutineAttributes = RoutineAttributesFromElement(element.routine),
+    private val person: PersonAttributes = PersonAttributesFromElement(element.person)
+):PersonAndRoutineAttributes,  RoutineAttributes by routine, PersonAttributes by person
+
 class DaySituation(
     override val choice: ActivityType,
-    val personRoutine: PersonWithRoutine,
+    private val personRoutine: PersonWithRoutine,
     val day: HDay,
-    val personAttributesFromElement: PersonAttributesFromElement = PersonAttributesFromElement(
-        personRoutine.person
+    private val personAttributesFromElement: PersonAndRoutineFrom = PersonAndRoutineFrom(
+        personRoutine
     ),
+    private val dayAttributesFromElement: DayAttributesFromElement = DayAttributesFromElement(day),
 ) :
-    ChoiceSituation<ActivityType>(), PersonAttributes by personAttributesFromElement {
+    ChoiceSituation<ActivityType>(), PersonAttributes by personAttributesFromElement, RoutineAttributes by personAttributesFromElement,
+    DayAttributes by dayAttributesFromElement {
 
 
-    fun isMonday() = day.weekday == DayOfWeek.MONDAY
-    fun isTuesday() = day.weekday == DayOfWeek.TUESDAY
-    fun isWednesday() = day.weekday == DayOfWeek.WEDNESDAY
-    fun isThursday() = day.weekday == DayOfWeek.THURSDAY
-    fun isFriday() = day.weekday == DayOfWeek.FRIDAY
-    fun isSaturday() = day.weekday == DayOfWeek.SATURDAY
-    fun isSunday() = day.weekday == DayOfWeek.SUNDAY
-
-    fun amountOfWorkingDays() = personRoutine.amountOfWorkingDays()
-    fun amountOfLeisureDays() = personRoutine.amountOfLeisureDays()
-    fun amountOfEducationDays() = personRoutine.amountOfEducationDays()
-    fun amountOfShoppingDays() = personRoutine.amountOfShoppingDays()
-    fun amountOfServiceDays() = personRoutine.amountOfServiceDays()
-    fun amountOfImmobileDays() = personRoutine.amountOfImmobileDays()
-    fun has5WorkDays() = personRoutine.has5WorkDays()
-    fun has5EducationDays() = personRoutine.has5EducationDays()
 }
 
 val ParameterSet2A = ParameterCollectionStep2A(
@@ -229,7 +285,10 @@ val step2AModel =
 val coordinatedStep2AModel =
     ModifiableDiscreteChoiceModel<ActivityType, DaySituation, ParameterCollectionStep2A>(AllocatedLogit.create {
         option(ActivityType.EDUCATION, parameters = { education }, {
-            (if (it.isStudentOrAzubi() && it.day.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(this, it)
+            (if (it.isStudentOrAzubi() && it.day.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
+                this,
+                it
+            )
         })
         option(ActivityType.HOME) {
             0.0
@@ -244,8 +303,6 @@ val coordinatedStep2AModel =
             )
         }
         )
-
-
 
 
     })
