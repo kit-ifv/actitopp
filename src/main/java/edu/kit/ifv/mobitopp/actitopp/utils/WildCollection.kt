@@ -9,3 +9,19 @@ fun <T> Iterable<T>.zipWithPrevious(): List<Pair<T?, T>> {
     }
     return result
 }
+
+fun <A, B, C> Iterable<A>.zip(
+
+    second: Iterable<B>,
+    third: Iterable<C>
+): List<Triple<A, B, C>> {
+    val iterator1 = iterator()
+    val iterator2 = second.iterator()
+    val iterator3 = third.iterator()
+
+    val result = mutableListOf<Triple<A, B, C>>()
+    while (iterator1.hasNext() && iterator2.hasNext() && iterator3.hasNext()) {
+        result.add(Triple(iterator1.next(), iterator2.next(), iterator3.next()))
+    }
+    return result
+}

@@ -47,6 +47,7 @@ interface PersonAttributes {
     fun commuteIn10To20km(): Boolean
     fun commuteIn20To50km(): Boolean
     fun commuteOver50km(): Boolean
+    fun amountOfPKW(): Int
 }
 
 class PersonAttributesFromElement(val person: ActitoppPerson) : PersonAttributes {
@@ -76,6 +77,7 @@ class PersonAttributesFromElement(val person: ActitoppPerson) : PersonAttributes
     override fun commuteIn10To20km() = person.maxCommute in 10.0..20.0
     override fun commuteIn20To50km() = person.maxCommute in 2.0..50.0
     override fun commuteOver50km() = person.maxCommute > 50.0
+    override fun amountOfPKW(): Int = person.numberofcarsinhousehold
 
     override     fun isEmployedAnywhere(): Boolean = person.employment.isEmployedAnywhere()
     override fun isStudentOrAzubi(): Boolean {

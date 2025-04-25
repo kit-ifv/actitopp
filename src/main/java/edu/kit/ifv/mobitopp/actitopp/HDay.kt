@@ -56,7 +56,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         }
 
     val mainTourType: ActivityType
-        get() = getTour(0).getActivity(0).activityType
+        get() = getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME
 
 
     val totalAmountOfActivitites: Int get() = tours.sumOf { it.amountOfActivities }
@@ -107,6 +107,11 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      */
     fun generateMainTour() = generateTour(0)
 
+    /**
+     * When referencing the lowest index we can always generate a preceding tour by adding one with an even lower index
+     */
+    fun generatePrecedingTour() = generateTour(lowestTourIndex - 1)
+    fun generateFollowingTour() = generateTour(highestTourIndex + 1)
     /**
      * Generate an empty tour for the day, with the specified tour index.
      */

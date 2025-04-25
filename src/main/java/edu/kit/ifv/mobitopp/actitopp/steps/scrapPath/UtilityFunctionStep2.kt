@@ -44,7 +44,7 @@ interface DayAttributes {
     fun mainActivityIsShopping(): Boolean
 }
 
-class DayAttributesFromElement(val element: HDay) : DayAttributes {
+class DayAttributesFromElement(private val element: HDay) : DayAttributes {
     override fun isMonday() = element.weekday == DayOfWeek.MONDAY
     override fun isTuesday() = element.weekday == DayOfWeek.TUESDAY
     override fun isWednesday() = element.weekday == DayOfWeek.WEDNESDAY

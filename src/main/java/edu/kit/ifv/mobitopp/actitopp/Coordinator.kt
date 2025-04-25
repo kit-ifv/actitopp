@@ -1,22 +1,16 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.IO.DebugLoggers
-import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.ParameterSet1A
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.ParameterSet1B
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.Situation1A
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.Situation1B
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1AModel
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.step1BModel
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.generateMainActivities
-
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.generatePrecedingTours
 import kotlin.math.max
 import kotlin.math.min
 
@@ -94,6 +88,10 @@ class Coordinator @JvmOverloads constructor(
         val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
 //        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
         executeStep3("3A")
+
+        val precedingTourAmounts = person.generatePrecedingTours(weekRoutine, numberoftoursperday_lowerboundduetojointactions.toList()) {
+            GenerateSideToursPreceeding(rngCopy)
+        }
         executeStep3("3B")
 
         executeStep4("4A")

@@ -50,7 +50,10 @@ abstract class CoordinatorTestUtilities {
         return (0..<amount).map { ActivityType.FULLSET.random(rng) }
     }
 
-
+    protected fun randomPrecedingTours(person: ActitoppPerson, amount: Int = 7): List<Int> {
+        val rng = Random(person.age)
+        return (0..<amount).map { rng.nextInt(0, 5) }
+    }
     fun <K> testDoubleMapEquality(
         expected: Map<K, Double>,
         actual: Map<K, Double>,

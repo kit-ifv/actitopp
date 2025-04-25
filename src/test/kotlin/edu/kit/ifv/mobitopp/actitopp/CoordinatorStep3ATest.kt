@@ -1,13 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
-import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DaySituation
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.coordinatedStep2AWithParams
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.GeneratePrecedingTours
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.GeneratePrecedingToursDefault
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3AWithParams
 import edu.kit.ifv.mobitopp.actitopp.utils.zipWithPrevious
@@ -15,12 +9,11 @@ import edu.kit.ifv.mobitopp.generateHouseholds
 import edu.kit.ifv.mobitopp.generatePersons
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import kotlin.test.assertContentEquals
-import kotlin.test.assertTrue
 import kotlin.random.Random
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
-class CoordinatorStep3Test: CoordinatorTestUtilities() {
+class CoordinatorStep3ATest: CoordinatorTestUtilities() {
 
     private val persons = generateHouseholds(200).flatMap { it.generatePersons(5) }
 
@@ -64,7 +57,7 @@ class CoordinatorStep3Test: CoordinatorTestUtilities() {
                 person.weekPattern.loadActivities(activityTypes)
 
                 val intArray = random7DaysIntArray(person)
-                val expected = GeneratePrecedingToursDefault(rngCopy).generate(person, weekRoutine, intArray, person.weekPattern.days)
+                val expected = GenerateSideToursPreceeding(rngCopy).generate(person, weekRoutine, intArray.toList(), person.weekPattern.days)
                 executeStep3("3A", person, intArray)
 
                 val test = person.weekPattern.days.map { -it.lowestTourIndex }
@@ -97,8 +90,6 @@ class CoordinatorStep3Test: CoordinatorTestUtilities() {
         }
     }
     private fun executeStep3(id: String, person: ActitoppPerson, numberoftoursperday_lowerboundduetojointactions: IntArray = intArrayOf(0, 0, 0, 0, 0, 0, 0)) {
-        // TODO test: This should be an input, randomly shuffled, to see whether the behaviour changes.
-
         val pattern = person.weekPattern
         for (currentDay in pattern.days) {
             // skip day if person is at home
