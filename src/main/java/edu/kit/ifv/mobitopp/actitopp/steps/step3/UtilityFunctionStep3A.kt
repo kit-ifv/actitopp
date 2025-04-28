@@ -2,7 +2,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step3
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
-import edu.kit.ifv.mobitopp.actitopp.PersonWeekRoutine
+import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.amountOfLaterTours
 import edu.kit.ifv.mobitopp.actitopp.amountOfPreviousTours
 import edu.kit.ifv.mobitopp.actitopp.hasNoLaterTours
@@ -98,7 +98,7 @@ class PreviousDaySituation private constructor(
         previousDayBeforeTours: Int?,
         previousDayAfterTours: Int?,
         person: ActitoppPerson,
-        weekRoutine: PersonWeekRoutine,
+        weekRoutine: WeekRoutine,
     ) : this(
         choice, PreviousDayAttributesNumeric(day, previousDayBeforeTours, previousDayAfterTours), PersonAndRoutineFrom(
             PersonWithRoutine(person, weekRoutine)

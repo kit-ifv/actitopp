@@ -12,8 +12,8 @@ class ActitoppPersonModifierFields(val original: ActitoppPerson) {
     var averageAmountOfTours: Int by Delegates.notNull()
     var averageAmountOfActivities: Int by Delegates.notNull()
 
-    fun toWeekRoutine(): PersonWeekRoutine {
-        return PersonWeekRoutine(
+    fun toWeekRoutine(): WeekRoutine {
+        return WeekRoutine(
             amountOfWorkingDays = amountOfWorkingDays,
             amountOfEducationDays = amountOfEducationDays,
             amountOfLeisureDays = amountOfLeisureDays,
@@ -27,7 +27,7 @@ class ActitoppPersonModifierFields(val original: ActitoppPerson) {
 }
 
 
-data class PersonWeekRoutine(
+data class WeekRoutine(
     val amountOfWorkingDays: Int,
     val amountOfEducationDays: Int,
     val amountOfLeisureDays: Int,

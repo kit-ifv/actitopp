@@ -2,7 +2,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step3
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
-import edu.kit.ifv.mobitopp.actitopp.PersonWeekRoutine
+import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
 
 data class PrecedingInput(
@@ -24,7 +24,7 @@ fun interface GenerateSideTours {
 }
 
 
-fun ActitoppPerson.generatePrecedingTours(weekRoutine: PersonWeekRoutine, lowerBoundsFromJointActions: Collection<Int>, lambda: ActitoppPerson.() -> GenerateSideTours): List<Pair<Int, HDay>> {
+fun ActitoppPerson.generatePrecedingTours(weekRoutine: WeekRoutine, lowerBoundsFromJointActions: Collection<Int>, lambda: ActitoppPerson.() -> GenerateSideTours): List<Pair<Int, HDay>> {
     val strategy = this.lambda()
     val input = PrecedingInput(
         PersonWithRoutine(this, weekRoutine),

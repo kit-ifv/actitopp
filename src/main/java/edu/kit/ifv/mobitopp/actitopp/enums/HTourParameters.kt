@@ -6,11 +6,7 @@ import edu.kit.ifv.mobitopp.actitopp.HTour
  * @author Tim Hilgert
  */
 enum class HTourParameters
-/**
- * privater Konstruktor
- *
- * @param description
- */{
+{
     /*
         * Tourtyp
         */

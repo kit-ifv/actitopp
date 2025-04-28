@@ -6,18 +6,13 @@ import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.coordinatedStep2AWithParams
-import edu.kit.ifv.mobitopp.generateHouseholds
-import edu.kit.ifv.mobitopp.generatePersons
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.assertTrue
 
 class CoordinatorStep2Test: CoordinatorTestUtilities() {
 
-    private val persons = generateHouseholds(200).flatMap { it.generatePersons(5) }
     @TestFactory
     fun coordinatedStep2Utilities(): Collection<DynamicTest> {
             return persons.map { person ->
@@ -80,7 +75,7 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
         }
     }
 
-    private fun generateMainActivityUtilities(person: ActitoppPerson, routine: PersonWeekRoutine, day: HDay): Map<ActivityType, Double> {
+    private fun generateMainActivityUtilities(person: ActitoppPerson, routine: WeekRoutine, day: HDay): Map<ActivityType, Double> {
         // Sorting is necessary to ensure that the order of the map stays the same, which is relevant for the selection process.
         return coordinatedStep2AWithParams.utilities { DaySituation(it, PersonWithRoutine(person, routine), day) }.toSortedMap(comparator =  { o1, o2 -> o1.name.compareTo(o2.name) })
     }

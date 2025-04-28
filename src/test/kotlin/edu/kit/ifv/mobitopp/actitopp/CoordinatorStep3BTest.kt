@@ -1,52 +1,25 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.DayWithBounds
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursFollowing
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.PrecedingInput
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDaySituation
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3AWithParams
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3BWithParams
 import edu.kit.ifv.mobitopp.actitopp.utils.zip
 import edu.kit.ifv.mobitopp.actitopp.utils.zipWithPrevious
-import edu.kit.ifv.mobitopp.generateHouseholds
-import edu.kit.ifv.mobitopp.generatePersons
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
+import kotlin.math.exp
+import kotlin.math.max
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 class CoordinatorStep3BTest: CoordinatorTestUtilities() {
 
-    private val persons = generateHouseholds(200).flatMap { it.generatePersons(5) }
-
-
-    @TestFactory
-    fun testUtilityEquality(): Collection<DynamicTest> {
-        return persons.map { person ->
-            DynamicTest.dynamicTest("${person.household.householdIndex} main Activities") {
-                val weekRoutine = randomWeekRoutine(person) // This is essentially all step 1
-                weekRoutine.loadToAttributeMap(person.getMutableMapForTest())
-                val activityTypes = randomMainActivityTypes(person) // This is the result of step 2
-                person.weekPattern.loadActivities(activityTypes)
-                // Verify proper loading Pre test assert
-                ActivityType.FULLSET.forEach {
-                    val expected = person.weekPattern.countDaysWithSpecificActivity(it)
-                    val actual = activityTypes.count { a -> a == it }
-                    assertEquals(expected, actual, "For Activity $it pattern = $expected generated = $actual $activityTypes")
-                }
-                person.weekPattern.days.zipWithPrevious().forEach {  (previous, day) ->
-
-                    val oldUtilities = generateUtilities("3B", person, day) { it.toInt()}
-                    val newUtilities = generateStep3BUtilitiies(person, weekRoutine, day, previous)
-                    testDoubleMapEquality(oldUtilities, newUtilities)
-                }
-
-            }
-
-        }
-    }
 
 
     @TestFactory
@@ -62,59 +35,99 @@ class CoordinatorStep3BTest: CoordinatorTestUtilities() {
 
                 val intArray = random7DaysIntArray(person)
                 val randomPreceedingTours = randomPrecedingTours(person)
-                randomPreceedingTours.zip(person.weekPattern.days).forEach {(amount, day) ->
-                    repeat(amount) {
-                        day.generatePrecedingTour()
-                    }
-                }
+                loadRandomPrecedingTours(person, randomPreceedingTours)
+
                 val boundDays = person.weekPattern.days.zip(intArray.toList(), randomPreceedingTours).map { (a, b, c)->
                     DayWithBounds(
                         day = a,
                         lowerBoundFromJointAction =b,
-                        amountOfTours = c
+                        amountOfTours = c + 1
                     )
 
 
 
                 }
-                val expected = GenerateSideToursFollowing(rngCopy).generate(person, weekRoutine, boundDays)
-                executeStep3("3B", person, intArray)
 
-                val test = person.weekPattern.days.map { it.highestTourIndex }
-
+                val expected = executeStep3("3B", person, intArray)
+                val actual = GenerateSideToursFollowing(rngCopy).debugInfo(person, weekRoutine, boundDays)
 
 
+                expected.zip(actual).map { (a, b) ->
+                    assertUtilityEquals(a, b)
+                }
 
-                assertContentEquals(expected, test, message = "\nOld:$test\nNew:$expected\n")
+
 
             }
 
         }
     }
-    private fun HWeekPattern.loadActivities(acts: Collection<ActivityType>) {
-        days.zip(acts).forEach { (day, acts) ->
-            val tour = day.generateMainTour()
-            tour.generateMainActivity(acts)
+
+    private fun GenerateSideToursFollowing.debugInfo(
+        person: ActitoppPerson,
+        routine: WeekRoutine,
+        lowerBounds: List<DayWithBounds>,
+    ): List<UtilityDebug<Int>> {
+        val precedingInput = PrecedingInput(
+            PersonWithRoutine(person, routine),
+            lowerBounds)
+        var previousResult: Int? = null
+        return precedingInput.run {
+
+            days.map { day ->
+
+                val availableOptions = determineAvailableOptions(day, precedingInput.input.routine)
+
+                val rnd = rngHelper.randomValue
+                val converter: (Int) -> PreviousDaySituation = {
+                    createChoiceSituation(it, day, previousResult, precedingInput.input)
+
+                }
+                val selection = choiceModel.select(availableOptions, rnd, converter)
+
+
+                UtilityDebug(
+                    availableOptions,
+                    choiceModel.utilities(availableOptions, converter),
+                    choiceModel.probabilities(availableOptions, converter),
+                    rnd,
+                    selection
+                ).also {
+                    previousResult = selection
+                }
+            }
         }
     }
 
-    private fun generateStep3BUtilitiies(person: ActitoppPerson, routine: PersonWeekRoutine, day: HDay, previousDay: HDay?): Map<Int, Double> {
+    private fun generateStep3BUtilitiies(person: ActitoppPerson, routine: WeekRoutine, day: HDay, previousDay: HDay?): Map<Int, Double> {
         // Sorting is necessary to ensure that the order of the map stays the same, which is relevant for the selection process.
         return step3BWithParams.utilities { PreviousDaySituation(it, day,  null, null, person, routine) }
     }
 
     private fun random7DaysIntArray(person: ActitoppPerson): IntArray {
-        val rng = Random(person.age)
+        val rng = Random(person.age + 1337)
         return IntArray(7) {
             rng.nextInt(0, 5)
         }
     }
-    private fun executeStep3(id: String, person: ActitoppPerson, numberoftoursperday_lowerboundduetojointactions: IntArray = intArrayOf(0, 0, 0, 0, 0, 0, 0)) {
+    private fun executeStep3(id: String, person: ActitoppPerson, numberoftoursperday_lowerboundduetojointactions: IntArray = intArrayOf(0, 0, 0, 0, 0, 0, 0)): MutableList<UtilityDebug<Int>> {
 
         val pattern = person.weekPattern
+        val output = mutableListOf<UtilityDebug<Int>>()
+
         for (currentDay in pattern.days) {
             // skip day if person is at home
+
+            val rnd = person.personalRNG.randomValue
             if (currentDay.isHomeDay) {
+                output.add(
+                    UtilityDebug(
+                        setOf(0),
+                        utilities = mapOf(0 to 0.0),
+                        probabilities = mapOf(0 to 1.0),
+                        rnd, 0
+                    )
+                )
                 continue
             }
 
@@ -148,14 +161,19 @@ class CoordinatorStep3BTest: CoordinatorTestUtilities() {
                 if (maxnumberoftours != -1) step.limitUpperBoundOnly((if (maxnumberoftours >= minnumberoftours) maxnumberoftours else minnumberoftours))
             }
 
-            val rnd = person.personalRNG.randomValue
             // make selection
             val decision = step.doStep(rnd)
 
-//            val utilities = step.utilities { it.toInt() }
-//            println("Old: [$rnd] ${step.probabilities()}\n")
-//            println("Old: [$rnd] $utilities")
-//            println("Old: ${step.activeOptions()}")
+            val options = step.activeOptions().map { it.toInt() }
+            output.add(
+                UtilityDebug(
+                    options,
+                    step.utilities { it.toInt() }.filterKeys { it in options },
+                    step.probabilities().filterKeys { it in options },
+                    rnd,
+                    decision
+                )
+            )
 
             // create tours based on the decision and add them to the pattern
             for (j in 1..decision) {
@@ -171,6 +189,7 @@ class CoordinatorStep3BTest: CoordinatorTestUtilities() {
 
             if (id == "3B") assert(currentDay.amountOfTours >= numberoftoursperday_lowerboundduetojointactions[currentDay.index]) { "wrong number of tours - violating lower bound due to joint actions" }
         }
+        return output
     }
 
 }

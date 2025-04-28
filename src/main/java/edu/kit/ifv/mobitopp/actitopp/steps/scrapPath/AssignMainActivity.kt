@@ -2,15 +2,14 @@ package edu.kit.ifv.mobitopp.actitopp.steps.scrapPath
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
-import edu.kit.ifv.mobitopp.actitopp.HWeekPattern
-import edu.kit.ifv.mobitopp.actitopp.PersonWeekRoutine
+import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 
 fun interface GenerateMainActivities {
     fun generate(input: PersonWithRoutine, days: List<HDay>): List<ActivityType>
 
-    fun generate(person: ActitoppPerson, routine: PersonWeekRoutine, days: List<HDay>) = generate(PersonWithRoutine(person, routine), days)
+    fun generate(person: ActitoppPerson, routine: WeekRoutine, days: List<HDay>) = generate(PersonWithRoutine(person, routine), days)
 }
 
 /**
@@ -70,7 +69,7 @@ class GenerateCoordinated(private val rngHelper: RNGHelper): GenerateMainActivit
     }
 }
 
-fun ActitoppPerson.generateMainActivities(weekRoutine: PersonWeekRoutine, lambda: ActitoppPerson.() -> GenerateMainActivities): List<Pair<ActivityType, HDay>> {
+fun ActitoppPerson.generateMainActivities(weekRoutine: WeekRoutine, lambda: ActitoppPerson.() -> GenerateMainActivities): List<Pair<ActivityType, HDay>> {
     val strategy = this.lambda()
     return strategy.generate(this, weekRoutine, weekPattern.days).zip(weekPattern.days)
 

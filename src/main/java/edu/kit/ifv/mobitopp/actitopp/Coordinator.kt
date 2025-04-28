@@ -92,6 +92,9 @@ class Coordinator @JvmOverloads constructor(
         val precedingTourAmounts = person.generatePrecedingTours(weekRoutine, numberoftoursperday_lowerboundduetojointactions.toList()) {
             GenerateSideToursPreceeding(rngCopy)
         }
+        require(precedingTourAmounts.none { it.second.mainTourType == ActivityType.HOME && it.first != 0}) {
+            "Fuckywucky this should not occur"
+        }
         executeStep3("3B")
 
         executeStep4("4A")
@@ -326,6 +329,8 @@ class Coordinator @JvmOverloads constructor(
     private fun executeStep3(id: String) {
         for (currentDay in pattern.days) {
             // skip day if person is at home
+
+            // We don't need this check if the days passed to step3 are only those that are not home days. The new system does that
             if (currentDay.isHomeDay) {
                 continue
             }
@@ -430,6 +435,9 @@ class Coordinator @JvmOverloads constructor(
 
                     // if activity already exits, set activity type only
                     if (currentDay.existsActivity(currentTour.index, 0)) {
+                        require(false) {
+                            "I make the bold statement: This code will never be reached"
+                        }
                         activity = currentTour.getActivity(0)
                         activity.activityType = activityType
                     } else {

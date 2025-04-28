@@ -27,7 +27,6 @@ import kotlin.test.assertTrue
 
 class CoordinatorTest: CoordinatorTestUtilities() {
 
-    private val persons = generateHouseholds(200).flatMap { it.generatePersons(5) }
 
 
     @Test

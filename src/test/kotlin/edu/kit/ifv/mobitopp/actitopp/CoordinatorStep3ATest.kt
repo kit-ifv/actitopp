@@ -1,48 +1,22 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.DayWithBounds
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.PrecedingInput
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3AWithParams
 import edu.kit.ifv.mobitopp.actitopp.utils.zipWithPrevious
-import edu.kit.ifv.mobitopp.generateHouseholds
-import edu.kit.ifv.mobitopp.generatePersons
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
+import kotlin.math.exp
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class CoordinatorStep3ATest: CoordinatorTestUtilities() {
-
-    private val persons = generateHouseholds(200).flatMap { it.generatePersons(5) }
-
-
-    @TestFactory
-    fun testUtilityEquality(): Collection<DynamicTest> {
-        return persons.map { person ->
-            DynamicTest.dynamicTest("${person.household.householdIndex} main Activities") {
-                val weekRoutine = randomWeekRoutine(person) // This is essentially all step 1
-                weekRoutine.loadToAttributeMap(person.getMutableMapForTest())
-                val activityTypes = randomMainActivityTypes(person) // This is the result of step 2
-                person.weekPattern.loadActivities(activityTypes)
-                // Verify proper loading Pre test assert
-                ActivityType.FULLSET.forEach {
-                    val expected = person.weekPattern.countDaysWithSpecificActivity(it)
-                    val actual = activityTypes.count { a -> a == it }
-                    assertEquals(expected, actual, "For Activity $it pattern = $expected generated = $actual $activityTypes")
-                }
-                person.weekPattern.days.zipWithPrevious().forEach {  (previous, day) ->
-
-                    val oldUtilities = generateUtilities("3A", person, day) { it.toInt()}
-                    val newUtilities = generateStep3AUtilitiies(person, weekRoutine, day, previous)
-                    testDoubleMapEquality(oldUtilities, newUtilities)
-                }
-
-            }
-
-        }
-    }
+class CoordinatorStep3ATest : CoordinatorTestUtilities() {
 
 
     @TestFactory
@@ -57,11 +31,15 @@ class CoordinatorStep3ATest: CoordinatorTestUtilities() {
                 person.weekPattern.loadActivities(activityTypes)
 
                 val intArray = random7DaysIntArray(person)
-                val expected = GenerateSideToursPreceeding(rngCopy).generate(person, weekRoutine, intArray.toList(), person.weekPattern.days)
-                executeStep3("3A", person, intArray)
+                val debugOutput = executeStep3("3A", person, intArray)
+                val expectedDebugOutput =
+                    GenerateSideToursPreceeding(rngCopy).debugInfo(person, weekRoutine, intArray.toList())
 
-                val test = person.weekPattern.days.map { -it.lowestTourIndex }
-
+                debugOutput.zip(expectedDebugOutput).forEach { (a, b) ->
+                    assertUtilityEquals(a, b)
+                }
+                val test = person.weekPattern.days.map { if (it.hasTours()) -it.lowestTourIndex else 0 }
+                val expected = expectedDebugOutput.map { it.selection }
 
 
 
@@ -71,16 +49,54 @@ class CoordinatorStep3ATest: CoordinatorTestUtilities() {
 
         }
     }
-    private fun HWeekPattern.loadActivities(acts: Collection<ActivityType>) {
-        days.zip(acts).forEach { (day, acts) ->
-            val tour = day.generateMainTour()
-            tour.generateMainActivity(acts)
+
+
+
+    private fun GenerateSideToursPreceeding.debugInfo(
+        person: ActitoppPerson,
+        routine: WeekRoutine,
+        lowerBounds: Collection<Int>,
+    ): List<UtilityDebug<Int>> {
+        val precedingInput = PrecedingInput(
+            PersonWithRoutine(person, routine),
+            lowerBounds.zip(person.weekPattern.days).map { DayWithBounds(it.second, it.first) })
+        var previousResult: Int? = null
+        return precedingInput.run {
+
+            days.map { day ->
+
+                val availableOptions = determineAvailableOptions(day, precedingInput.input.routine)
+
+                val rnd = rngHelper.randomValue
+                val converter: (Int) -> PreviousDaySituation = {
+                    createChoiceSituation(it, day, previousResult, precedingInput.input)
+
+                }
+                val selection = choiceModel.select(availableOptions, rnd, converter)
+
+
+                UtilityDebug(
+                    availableOptions,
+                    choiceModel.utilities(availableOptions, converter),
+                    choiceModel.probabilities(availableOptions, converter),
+                    rnd,
+                    selection
+                ).also {
+                    previousResult = selection
+                }
+            }
         }
     }
 
-    private fun generateStep3AUtilitiies(person: ActitoppPerson, routine: PersonWeekRoutine, day: HDay, previousDay: HDay?): Map<Int, Double> {
+
+    private fun generateStep3AUtilitiies(
+        person: ActitoppPerson,
+        routine: WeekRoutine,
+        day: HDay,
+        previousDay: HDay?,
+    ): Map<Int, Double> {
         // Sorting is necessary to ensure that the order of the map stays the same, which is relevant for the selection process.
-        return step3AWithParams.utilities { PreviousDaySituation(it, day,  null, null, person, routine) }
+        return step3AWithParams.utilities { PreviousDaySituation(it, day, null, null, person, routine) }
     }
 
     private fun random7DaysIntArray(person: ActitoppPerson): IntArray {
@@ -89,11 +105,27 @@ class CoordinatorStep3ATest: CoordinatorTestUtilities() {
             rng.nextInt(0, 5)
         }
     }
-    private fun executeStep3(id: String, person: ActitoppPerson, numberoftoursperday_lowerboundduetojointactions: IntArray = intArrayOf(0, 0, 0, 0, 0, 0, 0)) {
+
+    private fun executeStep3(
+        id: String,
+        person: ActitoppPerson,
+        numberoftoursperday_lowerboundduetojointactions: IntArray = intArrayOf(0, 0, 0, 0, 0, 0, 0),
+    ): List<UtilityDebug<Int>> {
         val pattern = person.weekPattern
+        val output = mutableListOf<UtilityDebug<Int>>()
         for (currentDay in pattern.days) {
             // skip day if person is at home
+
+            val rnd = person.personalRNG.randomValue
             if (currentDay.isHomeDay) {
+                output.add(
+                    UtilityDebug(
+                        setOf(0),
+                        utilities = mapOf(0 to 0.0),
+                        probabilities = mapOf(0 to 1.0),
+                        rnd, 0
+                    )
+                )
                 continue
             }
 
@@ -127,11 +159,21 @@ class CoordinatorStep3ATest: CoordinatorTestUtilities() {
                 if (maxnumberoftours != -1) step.limitUpperBoundOnly((if (maxnumberoftours >= minnumberoftours) maxnumberoftours else minnumberoftours))
             }
 
-            val rnd = person.personalRNG.randomValue
+
             // make selection
             val decision = step.doStep(rnd)
 
-//            val utilities = step.utilities { it.toInt() }
+
+            val options = step.activeOptions().map { it.toInt() }
+            output.add(
+                UtilityDebug(
+                    options,
+                    step.utilities { it.toInt() }.filterKeys { it in options },
+                    step.probabilities().filterKeys { it in options },
+                    rnd,
+                    decision
+                )
+            )
 //            println("Old: [$rnd] ${step.probabilities()}\n")
 //            println("Old: [$rnd] $utilities")
 //            println("Old: ${step.activeOptions()}")
@@ -150,6 +192,7 @@ class CoordinatorStep3ATest: CoordinatorTestUtilities() {
 
             if (id == "3B") assert(currentDay.amountOfTours >= numberoftoursperday_lowerboundduetojointactions[currentDay.index]) { "wrong number of tours - violating lower bound due to joint actions" }
         }
+        return output
     }
 
 }

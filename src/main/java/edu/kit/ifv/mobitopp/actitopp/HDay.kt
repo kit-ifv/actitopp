@@ -39,14 +39,15 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      */
     val highestTourIndex: Int get() = mappedTours.lastValue().index
 
-
+    // The original code returned +99 if no tour exists. This is always caught before because home activity is treated
+    // special, but the correct implementation would be to return a nullable field.
     val lowestTourIndex: Int get() = mappedTours.firstValue().index
-
     val firstTourOfDay: HTour get() = mappedTours.firstValue()
 
     val lastTourOfDay: HTour get() = mappedTours.lastValue()
 
     val isHomeDay: Boolean get() = mappedTours.isEmpty()
+    fun hasTours() = !isHomeDay
     val amountOfTours: Int get() = mappedTours.size
 
 
