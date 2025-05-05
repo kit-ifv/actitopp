@@ -83,15 +83,33 @@ abstract class CoordinatorTestUtilities {
             }
         }
     }
-
-    protected fun loadRandomFollowingTours(person: ActitoppPerson) {
-        val rng = Random(person.age)
-        person.weekPattern.days.forEach { day ->
+    protected fun loadRandomFollowingTours(person: ActitoppPerson, randomTargets: List<Int>) {
+        person.weekPattern.days.zip(randomTargets).map { (day, acts) ->
             if(!day.isHomeDay) {
-                repeat(rng.nextInt(0, 5)) {
+                repeat(acts) {
                     day.generateFollowingTour()
                 }
             }
+        }
+    }
+    protected fun generateRandomPrecedingTours(person: ActitoppPerson): List<Int> {
+        val rnd = Random(person.age + 42 * 1337)
+        return person.weekPattern.days.map{ day->
+            val rndNum = if(day.isHomeDay) 0 else rnd.nextInt(0, 5)
+            repeat(rndNum) {
+                day.generatePrecedingTour()
+            }
+            rndNum
+        }
+    }
+    protected fun generateRandomFollowingTours(person: ActitoppPerson) : List<Int>{
+        val rng = Random(person.age - 13 + person.persIndex * 10003)
+        return person.weekPattern.days.map { day ->
+            val rndNum = if(day.isHomeDay) 0 else rng.nextInt(0, 5)
+            repeat(rndNum) {
+                day.generateFollowingTour()
+            }
+            rndNum
         }
     }
 

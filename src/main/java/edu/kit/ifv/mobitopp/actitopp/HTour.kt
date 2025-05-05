@@ -24,7 +24,7 @@ class HTour(parent: HDay, val index: Int) {
 
     val person: ActitoppPerson = day.person
 
-
+    fun mainActivityHasType(): Boolean = betterActivities.containsKey(0) && betterActivities.getValue(0).activityTypeIsSpecified()
 
     fun addActivity(act: HActivity) {
         betterActivities[act.index] = act

@@ -2,13 +2,15 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.DayWithBounds
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursFollowing
-import edu.kit.ifv.mobitopp.actitopp.utils.zip
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.TourSituation
+import edu.kit.ifv.mobitopp.actitopp.steps.step3.step4WithParams
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.DayActivityTracker
 import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import kotlin.test.assertContentEquals
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.SideActivityDeterminer
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.SideTourInput
+import kotlin.test.assertEquals
+
 
 class CoordinatorStep4Test : CoordinatorTestUtilities() {
 
@@ -23,29 +25,74 @@ class CoordinatorStep4Test : CoordinatorTestUtilities() {
                 val activityTypes = randomMainActivityTypes(person) // This is the result of step 2
                 person.weekPattern.loadActivities(activityTypes)
 
+                val randomPreceedingTours = generateRandomPrecedingTours(person)
 
-                val randomPreceedingTours = randomPrecedingTours(person)
+                val randomFollowingTours = generateRandomFollowingTours(person)
+                val generator = SideActivityDeterminer(rngCopy)
+                val tracker = DayActivityTracker(person, weekRoutine)
+                val actual = person.weekPattern.days.map { generator.debugInfo(person, weekRoutine, it, tracker) }
+                val expected = executeStep4("4A",person)
+                assertEquals(expected.size, actual.size)
+                expected.zip(actual).forEach {(a, b) ->
+                    a.zip(b).forEach { (c, d) ->
+                        assertUtilityEquals(c, d)
+                    }
 
-//                val expected = GenerateSideToursFollowing(rngCopy).generate(person, weekRoutine, boundDays)
-//                executeStep4("4A", person)
-//
-//                val test = person.weekPattern.days.map { it.highestTourIndex }
-//
-//
-//
-//
-//                assertContentEquals(expected, test, message = "\nOld:$test\nNew:$expected\n")
+                }
+
+
 
             }
 
         }
     }
-    private fun executeStep4(id: String, person: ActitoppPerson) {
+
+    private fun SideActivityDeterminer.debugInfo(person: ActitoppPerson, weekRoutine: WeekRoutine, day: HDay, tracker: DayActivityTracker): List<UtilityDebug<ActivityType>> {
+        val input = SideTourInput(person, weekRoutine, day, tracker)
+        val tracker = input.tracker
+
+        val output = day.tours.filter{!it.mainActivityHasType()}.map { tour ->
+
+            val availableOptions = step4WithParams.registeredOptions().toMutableSet()
+            tracker.run {
+                val internalDay = tour.day
+
+                if (!input.person.isAllowedToWork) availableOptions.remove(ActivityType.WORK)
+                if (internalDay.shouldNotBeWork()) availableOptions.remove(ActivityType.WORK)
+                if (internalDay.shouldNotBeEducation()) availableOptions.remove(ActivityType.EDUCATION)
+            }
+
+
+            val rnd = rngHelper.randomValue
+            val     converter: (ActivityType) -> TourSituation = {
+                TourSituation(it, input.person, input.routine, input.day, tour)
+            }
+            val selection = step4WithParams.select(availableOptions, rnd, converter)
+            UtilityDebug(
+                availableOptions,
+                step4WithParams.utilities(availableOptions, converter),
+                step4WithParams.probabilities(availableOptions, converter),
+                rnd,
+                selection
+            ).also { when(selection) {
+                ActivityType.WORK -> tracker.addWorkday(day)
+                ActivityType.EDUCATION -> tracker.addEducationDay(day)
+                else -> {}
+            } }
+        }
+        return output
+    }
+    private fun executeStep4(id: String, person: ActitoppPerson): List<List<UtilityDebug<ActivityType>>> {
         val pattern = person.weekPattern
+
+        val stackedOutput = mutableListOf<List<UtilityDebug<ActivityType>>>()
         // STEP 4A Main activity for all other tours
         for (currentDay in pattern.days) {
+            val output = mutableListOf<UtilityDebug<ActivityType>>()
+
             // skip day if person is at home
             if (currentDay.isHomeDay) {
+                stackedOutput.add(output)
                 continue
             }
 
@@ -75,11 +122,21 @@ class CoordinatorStep4Test : CoordinatorTestUtilities() {
                     ) {
                         step.disableAlternative("E")
                     }
-
+                    val rnd = person.personalRNG.randomValue
                     // make selection
-                    val decision = step.doStep()
+                    val decision = step.doStep(rnd)
                     val activityType = getTypeFromChar(step.alternativeChosen[0])
-
+                    val options = step.activeOptions().map { ActivityType.getTypeFromChar(it[0]) }
+                    output.add(
+                        UtilityDebug(
+                            options = options,
+                            utilities = step.utilities {  ActivityType.getTypeFromChar(it[0]) }.filterKeys { it in options },
+                            probabilities = step.probabilities{ ActivityType.getTypeFromChar(it[0])}.filterKeys { it in options },
+                            randomNumber = rnd,
+                            selection = activityType
+                        )
+                    )
+//            print
                     var activity: HActivity? = null
 
                     // if activity already exits, set activity type only
@@ -95,7 +152,9 @@ class CoordinatorStep4Test : CoordinatorTestUtilities() {
                     }
                 }
             }
+            stackedOutput.add(output)
         }
+        return stackedOutput
     }
 
 

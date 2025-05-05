@@ -1,12 +1,20 @@
 package edu.kit.ifv.mobitopp.actitopp.steps.step3
 
+import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
+import edu.kit.ifv.mobitopp.actitopp.HDay
+import edu.kit.ifv.mobitopp.actitopp.HTour
+import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DayAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonAndRoutineAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonAndRoutineFrom
+import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.RoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.steps.step4.TourAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.TourAttributesByElement
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
@@ -161,22 +169,29 @@ data class ParameterStep4(
     val oneTransportDay: Double,
 )
 
-class TourSituation(
+class TourSituation private constructor(
     override val choice: ActivityType, personAndRoutineAttributes: PersonAndRoutineAttributes,
     dayAttributes: DayAttributes, tourAttributes: TourAttributes,
 ) :
     ChoiceSituation<ActivityType>(), TourAttributes by tourAttributes, PersonAttributes by personAndRoutineAttributes,
     RoutineAttributes by personAndRoutineAttributes, DayAttributes by dayAttributes {
 
+        constructor(choice: ActivityType, person: ActitoppPerson, routine: WeekRoutine, day: HDay, tour: HTour): this(
+            choice,
+            PersonAndRoutineFrom(PersonWithRoutine(person, routine)),
+            DayAttributesFromElement(day),
+            TourAttributesByElement(tour)
+        )
+
 }
 
 val step4Model =
     ModifiableDiscreteChoiceModel<ActivityType, TourSituation, ParameterCollectionStep4>(AllocatedLogit.create {
-        option(ActivityType.LEISURE) { 0.0 }
-        option(ActivityType.WORK, parameters = { work }, { standardUtilityFunction(this, it) })
         option(ActivityType.EDUCATION, parameters = { education }, { standardUtilityFunction(this, it) })
+        option(ActivityType.LEISURE) { 0.0 }
         option(ActivityType.SHOPPING, parameters = { shopping }, { standardUtilityFunction(this, it) })
         option(ActivityType.TRANSPORT, parameters = { transport }, { standardUtilityFunction(this, it) })
+        option(ActivityType.WORK, parameters = { work }, { standardUtilityFunction(this, it) })
 
     })
 

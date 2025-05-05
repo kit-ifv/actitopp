@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.DayActivityTracker
 import kotlin.properties.Delegates
 
 class ActitoppPersonModifierFields(val original: ActitoppPerson) {
@@ -37,6 +38,13 @@ data class WeekRoutine(
     val averageAmountOfTours: Int,
     val averageAmountOfActivities: Int,
 ) {
+    /**
+     * Generates a tracker instance, where none of the days are set to be work or education respectively.
+     */
+    fun instantiateTracker() : DayActivityTracker {
+        return DayActivityTracker(amountOfWorkingDays, amountOfEducationDays, emptySet(), emptySet())
+    }
+
     fun similarToAttributeMap(attributeMap: Map<String, Double>): Boolean {
         return amountOfWorkingDays == attributeMap["anztage_w"]?.toInt() &&
                 amountOfEducationDays == attributeMap["anztage_e"]?.toInt() &&

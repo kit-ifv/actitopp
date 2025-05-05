@@ -7,6 +7,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.DayActivityTracker
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
@@ -17,6 +18,15 @@ data class PersonWithRoutine(
     val person: ActitoppPerson,
     val routine: WeekRoutine,
 ) {
+    /**
+     *Once the routine is known, we can instantiate the tracker instance, which keeps track of the days
+     */
+    val tracker = DayActivityTracker(
+        routine.amountOfWorkingDays,
+        routine.amountOfEducationDays,
+        person.weekPattern.days.filter { it.hasActivity(ActivityType.WORK) }.toSet(),
+        person.weekPattern.days.filter { it.hasActivity(ActivityType.EDUCATION) }.toSet(),
+    )
     fun amountOfWorkingDays() = routine.amountOfWorkingDays
     fun amountOfLeisureDays() = routine.amountOfLeisureDays
     fun amountOfEducationDays() = routine.amountOfEducationDays
@@ -25,6 +35,7 @@ data class PersonWithRoutine(
     fun amountOfImmobileDays() = routine.amountOfImmobileDays
     fun has5WorkDays() = routine.amountOfWorkingDays == 5
     fun has5EducationDays() = routine.amountOfEducationDays == 5
+
 }
 
 interface DayAttributes {
