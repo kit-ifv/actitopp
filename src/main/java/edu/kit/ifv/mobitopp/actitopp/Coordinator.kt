@@ -6,8 +6,8 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.generateMainActivities
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.generateMainActivities
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.generatePrecedingTours
@@ -93,7 +93,7 @@ class Coordinator @JvmOverloads constructor(
             GenerateSideToursPreceeding(rngCopy)
         }
         require(precedingTourAmounts.none { it.second.mainTourType == ActivityType.HOME && it.first != 0}) {
-            "Fuckywucky this should not occur"
+            "this should not occur"
         }
         executeStep3("3B")
 
@@ -461,7 +461,9 @@ class Coordinator @JvmOverloads constructor(
 
             for (i in currentDay.lowestTourIndex..currentDay.highestTourIndex) {
                 val currentTour = currentDay.getTour(i)
-
+                require(currentTour.amountOfActivities == 1) {
+                    "Fat assumption, all tours have only their main activity right now. "
+                }
                 // create attribute lookup
                 val lookup = AttributeLookup(person, currentDay, currentTour)
 
@@ -891,7 +893,9 @@ class Coordinator @JvmOverloads constructor(
 
 
             log(id, person, decision.toString())
-
+            require(step.alternativeChosen.toInt() == decision) {
+                "Bold statement, these are identical"
+            }
             person.addAttributetoMap(activitytype.toString() + "budget_category_index", decision.toDouble())
             person.addAttributetoMap(
                 activitytype.toString() + "budget_category_alternative",

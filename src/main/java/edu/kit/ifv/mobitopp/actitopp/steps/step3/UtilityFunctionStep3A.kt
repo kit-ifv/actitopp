@@ -7,11 +7,11 @@ import edu.kit.ifv.mobitopp.actitopp.amountOfLaterTours
 import edu.kit.ifv.mobitopp.actitopp.amountOfPreviousTours
 import edu.kit.ifv.mobitopp.actitopp.hasNoLaterTours
 import edu.kit.ifv.mobitopp.actitopp.hasNoPreviousTours
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DayAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DayAttributesFromElement
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonAndRoutineAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonAndRoutineFrom
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation

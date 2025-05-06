@@ -1,22 +1,14 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.DayWithBounds
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursFollowing
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PrecedingInput
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3BWithParams
 import edu.kit.ifv.mobitopp.actitopp.utils.zip
-import edu.kit.ifv.mobitopp.actitopp.utils.zipWithPrevious
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import kotlin.math.exp
-import kotlin.math.max
-import kotlin.random.Random
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
 
 class CoordinatorStep3BTest: CoordinatorTestUtilities() {
 
@@ -31,7 +23,7 @@ class CoordinatorStep3BTest: CoordinatorTestUtilities() {
                 weekRoutine.loadToAttributeMap(person.getMutableMapForTest())
 
                 val activityTypes = randomMainActivityTypes(person) // This is the result of step 2
-                person.weekPattern.loadActivities(activityTypes)
+                person.weekPattern.loadMainActivities(activityTypes)
 
                 val intArray = random7DaysIntArray(person)
                 val randomPreceedingTours = randomPrecedingTours(person)
@@ -104,12 +96,7 @@ class CoordinatorStep3BTest: CoordinatorTestUtilities() {
         return step3BWithParams.utilities { PreviousDaySituation(it, day,  null, null, person, routine) }
     }
 
-    private fun random7DaysIntArray(person: ActitoppPerson): IntArray {
-        val rng = Random(person.age + 1337)
-        return IntArray(7) {
-            rng.nextInt(0, 5)
-        }
-    }
+
     private fun executeStep3(id: String, person: ActitoppPerson, numberoftoursperday_lowerboundduetojointactions: IntArray = intArrayOf(0, 0, 0, 0, 0, 0, 0)): MutableList<UtilityDebug<Int>> {
 
         val pattern = person.weekPattern

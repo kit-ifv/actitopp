@@ -6,15 +6,15 @@ import edu.kit.ifv.mobitopp.actitopp.HTour
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DayAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DayAttributesFromElement
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonAndRoutineAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonAndRoutineFrom
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.RoutineAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.TourAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.TourAttributesByElement
+import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributesByElement
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
@@ -182,6 +182,21 @@ class TourSituation private constructor(
             DayAttributesFromElement(day),
             TourAttributesByElement(tour)
         )
+
+}
+class TourSituationInt private constructor(
+    override val choice: Int, personAndRoutineAttributes: PersonAndRoutineAttributes,
+    dayAttributes: DayAttributes, tourAttributes: TourAttributes,
+) :
+    ChoiceSituation<Int>(), TourAttributes by tourAttributes, PersonAttributes by personAndRoutineAttributes,
+    RoutineAttributes by personAndRoutineAttributes, DayAttributes by dayAttributes {
+
+    constructor(choice: Int, person: ActitoppPerson, routine: WeekRoutine, day: HDay, tour: HTour): this(
+        choice,
+        PersonAndRoutineFrom(PersonWithRoutine(person, routine)),
+        DayAttributesFromElement(day),
+        TourAttributesByElement(tour)
+    )
 
 }
 

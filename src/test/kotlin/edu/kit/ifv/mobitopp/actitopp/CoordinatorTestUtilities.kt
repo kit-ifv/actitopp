@@ -35,9 +35,7 @@ abstract class CoordinatorTestUtilities {
         return entries.associate { it.key to it.value - (other[it.key] ?: 0.0 )}
     }
     protected fun DCDefaultModelStep.probabilities() = probabilities {it.toInt()}
-    protected fun <T> DCDefaultModelStep.probabilities(converter: (String) -> T): Map<T, Double> {
-        return alternatives.associate { converter(it.name) to it.probability }
-    }
+
 
     protected fun randomWeekRoutine(person: ActitoppPerson): WeekRoutine {
         val rng = Random(person.age * 10000 + person.persIndex)
@@ -62,8 +60,13 @@ abstract class CoordinatorTestUtilities {
         val rng = Random(person.age)
         return (0..<amount).map { rng.nextInt(0, 5) }
     }
-
-    protected fun HWeekPattern.loadActivities(acts: Collection<ActivityType>) {
+    protected fun random7DaysIntArray(person: ActitoppPerson): IntArray {
+        val rng = Random(person.age)
+        return IntArray(7) {
+            rng.nextInt(0, 5)
+        }
+    }
+    protected fun HWeekPattern.loadMainActivities(acts: Collection<ActivityType>) {
         days.zip(acts).forEach { (day, acts) ->
             // Do not load a home activity into a pattern, because old actitopp does not generate a tour for staying home
             if(acts != ActivityType.HOME) {
@@ -92,24 +95,54 @@ abstract class CoordinatorTestUtilities {
             }
         }
     }
-    protected fun generateRandomPrecedingTours(person: ActitoppPerson): List<Int> {
+    protected fun generateRandomPrecedingTours(person: ActitoppPerson): List<HTour> {
         val rnd = Random(person.age + 42 * 1337)
-        return person.weekPattern.days.map{ day->
+        return person.weekPattern.days.flatMap{ day->
             val rndNum = if(day.isHomeDay) 0 else rnd.nextInt(0, 5)
-            repeat(rndNum) {
+            (0..<rndNum).map {
                 day.generatePrecedingTour()
             }
-            rndNum
         }
     }
-    protected fun generateRandomFollowingTours(person: ActitoppPerson) : List<Int>{
+    protected fun generateRandomFollowingTours(person: ActitoppPerson) : List<HTour> {
         val rng = Random(person.age - 13 + person.persIndex * 10003)
-        return person.weekPattern.days.map { day ->
+        return person.weekPattern.days.flatMap { day ->
             val rndNum = if(day.isHomeDay) 0 else rng.nextInt(0, 5)
-            repeat(rndNum) {
+            (0..<rndNum).map {
                 day.generateFollowingTour()
             }
-            rndNum
+        }
+    }
+    private fun HTour.generateAct(spawner: HTour.(ActivityType) -> HActivity): HActivity {
+
+        val activityType = ActivityType.FULLSET.random(internalRng)
+        return spawner(activityType)
+    }
+
+    private val internalRng = Random(1337 + 42 + 9001)
+    protected fun HTour.generateRandomMainActivity(): HActivity = generateAct {
+        generateMainActivity(it)
+    }
+
+    protected fun HTour.generateRandomBeforeSideActivity(): HActivity = generateAct {
+        generatePrecedingActivity(it)
+    }
+    protected fun HTour.generateRandomAfterSideActivity(): HActivity = generateAct {
+        generateFollowingActivity(it)
+    }
+    protected fun HTour.generateRandomSideActivitiesBefore(): List<HActivity> {
+
+        val rndNum = if(day.isHomeDay) 0 else internalRng.nextInt(0, 5)
+        return (0..<rndNum).map {
+            generateRandomBeforeSideActivity()
+        }
+    }
+
+    protected fun HTour.generateRandomSideActivitiesAfter(): List<HActivity> {
+
+        val rndNum = if(day.isHomeDay) 0 else internalRng.nextInt(0, 5)
+        return (0..<rndNum).map {
+            generateRandomAfterSideActivity()
         }
     }
 
@@ -148,7 +181,28 @@ abstract class CoordinatorTestUtilities {
 
     }
 
+    inner class StepUtility(id: String, lookup: () -> AttributeLookup) {
+        val step = DCDefaultModelStep(id, fileBase, lookup(), randomgenerator)
+        fun alternate(conversion: (DCDefaultModelStep) -> Unit) {
+            conversion(step)
+        }
+
+        fun <X> utilities(converter: (String ) -> X): Map<X, Double> {
+            return step.utilities(converter)
+        }
+
+        fun <X> probabilities(converter: (String) -> X): Map<X, Double> {
+            step.doStep()
+            return step.probabilities(converter)
+        }
+
+    }
+
 }
+fun <T> DCDefaultModelStep.probabilities(converter: (String) -> T): Map<T, Double> {
+    return alternatives.associate { converter(it.name) to it.probability }
+}
+
 fun <T> DCDefaultModelStep.utilities(converter: (String) ->T ): Map<T, Double> {
     return alternatives.associate { converter(it.name) to it.utility }
 }

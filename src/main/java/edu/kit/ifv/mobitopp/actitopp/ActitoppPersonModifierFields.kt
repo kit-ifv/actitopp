@@ -1,6 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp
 
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.DayActivityTracker
+import edu.kit.ifv.mobitopp.actitopp.steps.DayActivityTracker
 import kotlin.properties.Delegates
 
 class ActitoppPersonModifierFields(val original: ActitoppPerson) {

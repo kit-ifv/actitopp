@@ -2,10 +2,10 @@ package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.DaySituation
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.GenerateCoordinated
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.scrapPath.coordinatedStep2AWithParams
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.DaySituation
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.coordinatedStep2AWithParams
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import kotlin.test.assertContentEquals
@@ -102,7 +102,6 @@ class CoordinatorStep2Test: CoordinatorTestUtilities() {
                 val decision = step.doStep(rnd)
                 val activityType = getTypeFromChar(step.alternativeChosen[0])
                 val utilities = step.utilities { getTypeFromChar(it[0])}
-
                 if (activityType != ActivityType.HOME) {
                     // add a new tour into the pattern if not existing
                     var mainTour: HTour? = null

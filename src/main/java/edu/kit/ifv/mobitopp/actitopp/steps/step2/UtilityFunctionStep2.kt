@@ -1,18 +1,21 @@
-package edu.kit.ifv.mobitopp.actitopp.steps.scrapPath
+package edu.kit.ifv.mobitopp.actitopp.steps.step2
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.DayActivityTracker
+import edu.kit.ifv.mobitopp.actitopp.steps.DayActivityTracker
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
-import java.time.DayOfWeek
 
 data class PersonWithRoutine(
     val person: ActitoppPerson,
@@ -38,95 +41,6 @@ data class PersonWithRoutine(
 
 }
 
-interface DayAttributes {
-    fun isMonday(): Boolean
-    fun isTuesday(): Boolean
-    fun isWednesday(): Boolean
-    fun isThursday(): Boolean
-    fun isFriday(): Boolean
-    fun isSaturday(): Boolean
-    fun isSunday(): Boolean
-
-    fun amountOfBeforeTours(): Int
-
-    fun mainActivityIsWork(): Boolean
-    fun mainActivityIsEducation(): Boolean
-    fun mainActivityIsShopping(): Boolean
-    fun mainActivityIsTransport(): Boolean
-}
-
-class DayAttributesFromElement(private val element: HDay) : DayAttributes {
-    override fun isMonday() = element.weekday == DayOfWeek.MONDAY
-    override fun isTuesday() = element.weekday == DayOfWeek.TUESDAY
-    override fun isWednesday() = element.weekday == DayOfWeek.WEDNESDAY
-    override fun isThursday() = element.weekday == DayOfWeek.THURSDAY
-    override fun isFriday() = element.weekday == DayOfWeek.FRIDAY
-    override fun isSaturday() = element.weekday == DayOfWeek.SATURDAY
-    override fun isSunday() = element.weekday == DayOfWeek.SUNDAY
-
-    override fun amountOfBeforeTours(): Int = -1 * element.lowestTourIndex
-
-    override fun mainActivityIsWork(): Boolean = element.mainTourType == ActivityType.WORK
-    override fun mainActivityIsEducation(): Boolean = element.mainTourType == ActivityType.EDUCATION
-    override fun mainActivityIsShopping(): Boolean = element.mainTourType == ActivityType.SHOPPING
-    override fun mainActivityIsTransport(): Boolean = element.mainTourType == ActivityType.TRANSPORT
-}
-
-
-interface RoutineAttributes {
-
-    fun amountOfWorkingDays(): Int
-    fun amountOfLeisureDays(): Int
-    fun amountOfEducationDays(): Int
-    fun amountOfShoppingDays(): Int
-    fun amountOfServiceDays(): Int
-    fun amountOfImmobileDays(): Int
-    fun has5WorkDays(): Boolean
-    fun has5EducationDays(): Boolean
-
-    fun averageAmountOfToursIs1(): Boolean
-    fun averageAmountOfToursIs2(): Boolean
-    fun amountOfWorkingDaysIs0(): Boolean
-    fun amountOfLeisureDaysIs0(): Boolean
-    fun amountOfEducationDaysIs0(): Boolean
-    fun amountOfShoppingDaysIs0(): Boolean
-    fun amountOfServiceDaysIs0(): Boolean
-
-    fun amountOfWorkingDaysIs1(): Boolean
-    fun amountOfLeisureDaysIs1(): Boolean
-    fun amountOfEducationDaysIs1(): Boolean
-    fun amountOfShoppingDaysIs1(): Boolean
-    fun amountOfServiceDaysIs1(): Boolean
-
-
-}
-
-class RoutineAttributesFromElement(val element: WeekRoutine) : RoutineAttributes {
-    override fun amountOfWorkingDays() = element.amountOfWorkingDays
-    override fun amountOfLeisureDays() = element.amountOfLeisureDays
-    override fun amountOfEducationDays() = element.amountOfEducationDays
-    override fun amountOfShoppingDays() = element.amountOfShoppingDays
-    override fun amountOfServiceDays() = element.amountOfServiceDays
-    override fun amountOfImmobileDays() = element.amountOfImmobileDays
-    override fun has5WorkDays() = element.amountOfWorkingDays == 5
-    override fun has5EducationDays() = element.amountOfEducationDays == 5
-    override fun averageAmountOfToursIs1(): Boolean = element.averageAmountOfTours == 1
-
-    override fun averageAmountOfToursIs2(): Boolean = element.averageAmountOfTours == 2
-
-    override fun amountOfWorkingDaysIs0(): Boolean = element.amountOfWorkingDays == 0
-    override fun amountOfLeisureDaysIs0(): Boolean = element.amountOfLeisureDays == 0
-    override fun amountOfEducationDaysIs0(): Boolean = element.amountOfEducationDays == 0
-    override fun amountOfShoppingDaysIs0(): Boolean = element.amountOfShoppingDays == 0
-    override fun amountOfServiceDaysIs0(): Boolean = element.amountOfServiceDays == 0
-    override fun amountOfWorkingDaysIs1(): Boolean = element.amountOfWorkingDays == 1
-    override fun amountOfLeisureDaysIs1(): Boolean = element.amountOfLeisureDays == 1
-    override fun amountOfEducationDaysIs1(): Boolean = element.amountOfEducationDays == 1
-    override fun amountOfShoppingDaysIs1(): Boolean = element.amountOfShoppingDays == 1
-    override fun amountOfServiceDaysIs1(): Boolean = element.amountOfServiceDays == 1
-
-
-}
 
 interface PersonAndRoutineAttributes: PersonAttributes, RoutineAttributes
 data class PersonAndRoutineFrom(

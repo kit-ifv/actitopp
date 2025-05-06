@@ -21,16 +21,23 @@ class HTour(parent: HDay, val index: Int) {
     private val betterActivities: NavigableMap<Int, HActivity> = TreeMap()
 
 
-
     val person: ActitoppPerson = day.person
 
-    fun mainActivityHasType(): Boolean = betterActivities.containsKey(0) && betterActivities.getValue(0).activityTypeIsSpecified()
+    fun mainActivityHasType(): Boolean =
+        betterActivities.containsKey(0) && betterActivities.getValue(0).activityTypeIsSpecified()
 
     fun addActivity(act: HActivity) {
         betterActivities[act.index] = act
     }
 
     fun generateMainActivity(activityType: ActivityType) = generateActivity(0, activityType)
+
+    fun generatePrecedingActivity(activityType: ActivityType = ActivityType.UNKNOWN) =
+        generateActivity(lowestActivityIndex - 1, activityType)
+
+    fun generateFollowingActivity(activityType: ActivityType = ActivityType.UNKNOWN) =
+        generateActivity(highestActivityIndex + 1, activityType)
+
     fun generateActivity(activityIndex: Int, activityType: ActivityType): HActivity {
         require(activityIndex !in betterActivities) {
             "Cannot create activity $activityIndex since the index is already found ${betterActivities}for tour $this"
@@ -63,12 +70,10 @@ class HTour(parent: HDay, val index: Int) {
     }
 
 
-
     /**
      * create start times for each activity of a tour
      */
     fun createStartTimesforActivities() {
-
 
 
         for (act in activities) {
@@ -110,7 +115,7 @@ class HTour(parent: HDay, val index: Int) {
          * @return
          */
         get() {
-            return activities.filter{it.durationisScheduled()}.sumOf { it.duration }
+            return activities.filter { it.durationisScheduled() }.sumOf { it.duration }
         }
 
     val tripDuration: Int
@@ -120,8 +125,10 @@ class HTour(parent: HDay, val index: Int) {
          * @return
          */
         get() {
-            val beforeSum = activities.filter{it.tripBeforeActivityisScheduled()}.sumOf { it.estimatedTripTimeBeforeActivity }
-            val afterSum = activities.filter{it.tripAfterActivityisScheduled()}.sumOf { it.estimatedTripTimeAfterActivity }
+            val beforeSum =
+                activities.filter { it.tripBeforeActivityisScheduled() }.sumOf { it.estimatedTripTimeBeforeActivity }
+            val afterSum =
+                activities.filter { it.tripAfterActivityisScheduled() }.sumOf { it.estimatedTripTimeAfterActivity }
             return beforeSum + afterSum
         }
 
@@ -137,18 +144,23 @@ class HTour(parent: HDay, val index: Int) {
         return betterActivities.getValue(index)
     }
 
+    fun mainActivity(): HActivity? = betterActivities[0]
+
     fun getActivityOrNull(index: Int): HActivity? = betterActivities[index]
 
     val lowestActivityIndex: Int
         get() {
-            return activities.minOf { it.index }.also { require(it <= 0){
-                "Apparently bad stuff happens when the index is positive  ¯\\_(ツ)_/¯"
-            } }
+            return activities.minOf { it.index }.also {
+                require(it <= 0) {
+                    "Apparently bad stuff happens when the index is positive  ¯\\_(ツ)_/¯"
+                }
+            }
         }
 
     val highestActivityIndex: Int
         get() {
-            return activities.maxOf{it.index}.also { require(it >= 0) {"Negative index, Actitopp no Like  ¯\\_(ツ)_/¯"} }
+            return activities.maxOf { it.index }
+                .also { require(it >= 0) { "Negative index, Actitopp no Like  ¯\\_(ツ)_/¯" } }
         }
 
 
@@ -243,6 +255,7 @@ class HTour(parent: HDay, val index: Int) {
          * @return the attributes
          */
         get() = attributes
+
     override fun toString(): String {
         var tostring = ""
         tostring = if (this.isScheduled) {

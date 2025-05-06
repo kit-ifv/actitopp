@@ -35,6 +35,7 @@ interface PersonAttributes {
     fun isAged36To50(): Boolean
     fun isAged51To60(): Boolean
     fun isAged61To70(): Boolean
+    fun isAged18To35(): Boolean
     fun areaTypeRural(): Boolean
     fun areaTypeConurbation(): Boolean
     fun hasChildrenInHousehold(): Boolean
@@ -65,6 +66,7 @@ class PersonAttributesFromElement(val person: ActitoppPerson) : PersonAttributes
     override fun isAged36To50() = person.age in 36..50
     override fun isAged51To60() = person.age in 51..60
     override fun isAged61To70() = person.age in 61..70
+    override fun isAged18To35(): Boolean  = person.age in 18..35
     override fun areaTypeRural() = person.areatype == AreaType.RURAL
     override fun areaTypeConurbation() = person.areatype == AreaType.CONURBATION
     override fun hasChildrenInHousehold() = person.children0_10 > 0

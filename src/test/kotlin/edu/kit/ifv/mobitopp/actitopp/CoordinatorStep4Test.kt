@@ -4,11 +4,11 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.TourSituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step4WithParams
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.DayActivityTracker
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.SideActivityDeterminer
-import edu.kit.ifv.mobitopp.actitopp.steps.step4.SideTourInput
+import edu.kit.ifv.mobitopp.actitopp.steps.step4.SubTourMainActivityDeterminer
+import edu.kit.ifv.mobitopp.actitopp.steps.SubTourInput
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import kotlin.test.assertEquals
 
 
@@ -23,14 +23,14 @@ class CoordinatorStep4Test : CoordinatorTestUtilities() {
                 weekRoutine.loadToAttributeMap(person.getMutableMapForTest())
 
                 val activityTypes = randomMainActivityTypes(person) // This is the result of step 2
-                person.weekPattern.loadActivities(activityTypes)
+                person.weekPattern.loadMainActivities(activityTypes)
 
                 val randomPreceedingTours = generateRandomPrecedingTours(person)
 
                 val randomFollowingTours = generateRandomFollowingTours(person)
-                val generator = SideActivityDeterminer(rngCopy)
-                val tracker = DayActivityTracker(person, weekRoutine)
-                val actual = person.weekPattern.days.map { generator.debugInfo(person, weekRoutine, it, tracker) }
+                val generator = SubTourMainActivityDeterminer(rngCopy)
+                val personWithRoutine = PersonWithRoutine(person, weekRoutine)
+                val actual = person.weekPattern.days.map { generator.debugInfo(personWithRoutine, it) }
                 val expected = executeStep4("4A",person)
                 assertEquals(expected.size, actual.size)
                 expected.zip(actual).forEach {(a, b) ->
@@ -47,10 +47,9 @@ class CoordinatorStep4Test : CoordinatorTestUtilities() {
         }
     }
 
-    private fun SideActivityDeterminer.debugInfo(person: ActitoppPerson, weekRoutine: WeekRoutine, day: HDay, tracker: DayActivityTracker): List<UtilityDebug<ActivityType>> {
-        val input = SideTourInput(person, weekRoutine, day, tracker)
-        val tracker = input.tracker
-
+    private fun SubTourMainActivityDeterminer.debugInfo(person: PersonWithRoutine, day: HDay): List<UtilityDebug<ActivityType>> {
+        val input = SubTourInput(person, day)
+        val tracker = input.personWithRoutine.tracker
         val output = day.tours.filter{!it.mainActivityHasType()}.map { tour ->
 
             val availableOptions = step4WithParams.registeredOptions().toMutableSet()
