@@ -23,7 +23,7 @@ import kotlin.math.min
  */
 class Coordinator @JvmOverloads constructor(
     /** ///////////// */
-    private val person: ActitoppPerson,
+    val person: ActitoppPerson,
     val fileBase: ModelFileBase,  private val debugloggers: DebugLoggers? = null,
 ) {
 
@@ -461,8 +461,8 @@ class Coordinator @JvmOverloads constructor(
 
             for (i in currentDay.lowestTourIndex..currentDay.highestTourIndex) {
                 val currentTour = currentDay.getTour(i)
-                require(currentTour.amountOfActivities == 1) {
-                    "Fat assumption, all tours have only their main activity right now. "
+                require(currentTour.amountOfActivities == 1|| id != "5A") {
+                    "Fat assumption, all tours have only their main activity right now. (Holds only for step 5A, but not for 5B"
                 }
                 // create attribute lookup
                 val lookup = AttributeLookup(person, currentDay, currentTour)
@@ -889,14 +889,18 @@ class Coordinator @JvmOverloads constructor(
 
             // create step object
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-            val decision = step.doStep()
-
+            val decisionIndex = step.doStep()
+            val decision = step.alternativeChosen.toInt()
 
             log(id, person, decision.toString())
-            require(step.alternativeChosen.toInt() == decision) {
-                "Bold statement, these are identical"
-            }
-            person.addAttributetoMap(activitytype.toString() + "budget_category_index", decision.toDouble())
+            /* This is insanity, the budget_category_index only exists to map to the file, because someone has managed
+               to mismatch the indices of the files 0..n-1 and categories in the model file 1..n Given that this entire
+               project is based on convoluted indices bullshittery (which in itself is criminally bad) it is even worse
+               to see that whoever did this managed to fuck up their own index magic and required a software crutch.
+
+               Failing at failing is not a double negative.
+             */
+            person.addAttributetoMap(activitytype.toString() + "budget_category_index", decisionIndex.toDouble())
             person.addAttributetoMap(
                 activitytype.toString() + "budget_category_alternative",
                 step.alternativeChosen.toDouble()
@@ -905,6 +909,8 @@ class Coordinator @JvmOverloads constructor(
 
         // special case: if there is exactly no activity allocated for work, than we must set cat to 0
         // needed to achieve value for Attribute zeitbudget_work_ueber_kat2
+
+        // TODO figure out why this line of code could cause issues when missing (Assumption: The entry won't be in the map)
         if (activitytype == ActivityType.WORK && pattern.countActivitiesPerWeek(activitytype) == 0) {
             person.addAttributetoMap(activitytype.toString() + "budget_category_alternative", 0.0)
         }

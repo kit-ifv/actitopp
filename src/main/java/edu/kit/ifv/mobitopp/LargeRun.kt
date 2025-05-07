@@ -62,6 +62,6 @@ fun Collection<ActitoppPerson>.generateSchedules() {
     withIndex().forEach { (index, person) -> person.generateSchedule(fileBase, randomgenerator, debugloggers).also { if(index % 100 == 0)println("Working on person $index done") } }
 }
 fun main() {
-    val targets = generateHouseholds(10000).flatMap { it.generatePersons(5) }
+    val targets = generateHouseholds(1000).flatMap { it.generatePersons(5) }
     targets.generateSchedules()
 }

@@ -75,14 +75,28 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
         val oldvalue = histogram[slot]!!
         val newvalue = oldvalue + (0.5 * sum()).toInt()
         histogram[slot] = newvalue
+
     }
 
+
+    var theModifiee: ActitoppPerson? = null
+        set(value) {
+            if(field != null) {
+                require(field == value) {
+                    "ohnononononon"
+                }
+            }
+            field = value
+        }
+    fun getRandomPickFromDistribution(bounds: IntRange, randomgenerator: RNGHelper): Int {
+        return getRandomPickFromDistribution(bounds, randomgenerator.randomValue)
+    }
     /**
      * returns an element from the distribution based on a random number
      * WRD = weighted random draw - the selection of the element is dependent on their share within the distribution
      *
      */
-    fun getRandomPickFromDistribution(bounds: IntRange, randomgenerator: RNGHelper): Int {
+    fun getRandomPickFromDistribution(bounds: IntRange, rand : Double): Int {
         //Phase1: check and apply bounds
         /*Issue 1) The assignment to usedLowerBound /upperbound can be solved via max/min, instead of assignment -> if
           Issue 2) Assert statements have two effects: Disabled -> Useless, Enabled -> Error. Why can we pass lowerbound
@@ -100,7 +114,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
 
         //Phase2: get random value
-        val rand = randomgenerator.randomValue
+
 
         //Phase 3: create a map with valid elements (within the boundaries) and their accumulated share (according to all valid elements)
         /* Issue 4) The sum of valid distribution elements, and the check if the slot from the histogram lies within the
@@ -112,7 +126,8 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
         // if all element values are equal to zero, choose one of them randomly
         if (sumofvalidelements == 0) {
-            return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound)
+            return (usedLowerBound..usedUpperBound).random()
+//            return randomgenerator.getRandomValueBetween(usedLowerBound, usedUpperBound)
         }
         var acc = 0.0
         //TODO big Idea, if we know the first and last element in the range, and cumulate beforehand, we can translate the random number

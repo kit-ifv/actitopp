@@ -27,8 +27,6 @@ class WRDDefaultModelStep(
     private var modifydistribution = false
 
 
-
-
     private var bounds: IntRange = Int.MIN_VALUE..Int.MAX_VALUE
 
 
@@ -42,6 +40,7 @@ class WRDDefaultModelStep(
 
         if (modifydistribution) {
             weightedDistribution.modifydistributionelement(selection)
+            weightedDistribution.theModifiee = modelCoordinator.person
         }
 
         return selection.also { chosenDistributionElement = selection }

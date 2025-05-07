@@ -61,6 +61,7 @@ class HActivity @JvmOverloads constructor(
      * @param tripafteractivity the tripafteractivity to set
      */
     var tripafteractivity: HTrip? = null
+    private set
 
 
     private var jointParticipants: MutableList<ActitoppPerson> = ArrayList()
@@ -270,6 +271,8 @@ class HActivity @JvmOverloads constructor(
 
     /**
      * mean time calculation
+     * TODO why is this located on the object?, just to get the activity Type? There is no reason why this method should
+     *   be specific to each activity. Every activity of the same type will produce the same result, when in the same pattern
      *
      * @return
      */

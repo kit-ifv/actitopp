@@ -23,6 +23,8 @@ class ActitoppPerson@JvmOverloads constructor(
     val commutingdistance_work: Double = 0.0,
     val commutingdistance_education: Double = .0,
 ) {
+
+     val id: Int = ActitoppPerson.idCounter
     private val attributes: MutableMap<String, Double> = mutableMapOf()
     @TestOnly
     internal fun getMutableMapForTest(): MutableMap<String, Double> = attributes
@@ -414,6 +416,8 @@ class ActitoppPerson@JvmOverloads constructor(
             }
         }
 
+        private var idCounter = 0
+            get() = field.also { field++ }
 
         @JvmOverloads
         operator fun invoke(
