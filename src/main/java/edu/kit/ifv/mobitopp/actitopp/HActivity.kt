@@ -298,8 +298,9 @@ class HActivity @JvmOverloads constructor(
         val meantime = calculateMeanTime()
         var meantimecategory = -99
         for (i in 0..<Configuration.NUMBER_OF_ACT_DURATION_CLASSES) {
-            if (meantime >= Configuration.ACT_TIME_TIMECLASSES_LB[i] && meantime <= Configuration.ACT_TIME_TIMECLASSES_UB[i]) meantimecategory =
-                i
+            if (meantime >= Configuration.ACT_TIME_TIMECLASSES_LB[i] &&
+                meantime <= Configuration.ACT_TIME_TIMECLASSES_UB[i])
+                meantimecategory = i
         }
         assert(meantimecategory != -99) { "could not determine category!" }
         return meantimecategory

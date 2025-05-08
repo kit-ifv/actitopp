@@ -112,7 +112,7 @@ class Coordinator @JvmOverloads constructor(
         if (Configuration.modelJointActions) {
             placeJointActivitiesIntoPattern()
         }
-
+        // TODO don't build this new every time.
         val hiPer = HistogramPerActivity()
 
         val randomNumbers = (0..9).map{randomGenerator.randomValue}
@@ -959,7 +959,9 @@ class Coordinator @JvmOverloads constructor(
 
             for (currentTour in currentDay.tours) {
                 val currentActivity = currentTour.getActivity(0)
-
+                require(!currentActivity.durationisScheduled()) {
+                    "Fat statement, there should never ever be a scheduled duration in this step"
+                }
                 if (!currentActivity.durationisScheduled()) {
                     // create attribute lookup
                     val lookup = AttributeLookup(person, currentDay, currentTour, currentActivity)
@@ -1013,6 +1015,9 @@ class Coordinator @JvmOverloads constructor(
                      * DC-step (8B, 8D)
                      *
                      */
+                    require(!currentActivity.durationisScheduled()) {
+                        "Can this line happen?"
+                    }
                     if (!currentActivity.durationisScheduled()) {
                         // create attribute lookup
                         val lookup = AttributeLookup(person, currentDay, currentTour, currentActivity)

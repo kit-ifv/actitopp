@@ -128,17 +128,19 @@ object Configuration {
      * activity durations - categories
      */
     // activity durations - categories - Lower Bounds
-    
+    // TODO these bounds are completely equal to the histogram data from all 8X tables, thus they should be
+    //   an attribute of these classe s instead of being coded into the configuration :eyeroll:
+    @Deprecated("This should never be referenced, but rather the histograms should hold this data.")
     val ACT_TIME_TIMECLASSES_LB: IntArray =
         intArrayOf(1, 15, 30, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720)
 
     // activity durations - categories - Upper Bounds
-    
+    @Deprecated("This should never be referenced, but rather the histograms should hold this data.")
     val ACT_TIME_TIMECLASSES_UB: IntArray =
         intArrayOf(14, 29, 59, 119, 179, 239, 299, 359, 419, 479, 539, 599, 659, 719, 1440)
 
     // activity durations - number of categories
-    
+    @Deprecated("This should never be referenced, but rather the histograms should hold this data.")
     val NUMBER_OF_ACT_DURATION_CLASSES: Int = ACT_TIME_TIMECLASSES_LB.size
 
 
