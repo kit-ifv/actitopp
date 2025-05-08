@@ -11,6 +11,8 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step2.generateMainActivities
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.generatePrecedingTours
+import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
+import edu.kit.ifv.mobitopp.actitopp.steps.step7.HistogramPerActivity
 import kotlin.math.max
 import kotlin.math.min
 
@@ -111,20 +113,29 @@ class Coordinator @JvmOverloads constructor(
             placeJointActivitiesIntoPattern()
         }
 
-        executeStep7DC("7A", ActivityType.WORK)
-        executeStep7WRD("7B", ActivityType.WORK)
+        val hiPer = HistogramPerActivity()
 
-        executeStep7DC("7C", ActivityType.EDUCATION)
-        executeStep7WRD("7D", ActivityType.EDUCATION)
+        val randomNumbers = (0..9).map{randomGenerator.randomValue}
+        val output = hiPer.determineTimeBudgets(randomNumbers, FinalizedActivityPattern(person, pattern))
 
-        executeStep7DC("7E", ActivityType.LEISURE)
-        executeStep7WRD("7F", ActivityType.LEISURE)
+        executeStep7DC("7A", ActivityType.WORK, randomNumbers[0])
+        executeStep7WRD("7B", ActivityType.WORK, randomNumbers[1])
 
-        executeStep7DC("7G", ActivityType.SHOPPING)
-        executeStep7WRD("7H", ActivityType.SHOPPING)
+        executeStep7DC("7C", ActivityType.EDUCATION, randomNumbers[2])
+        executeStep7WRD("7D", ActivityType.EDUCATION, randomNumbers[3])
 
-        executeStep7DC("7I", ActivityType.TRANSPORT)
-        executeStep7WRD("7J", ActivityType.TRANSPORT)
+        executeStep7DC("7E", ActivityType.LEISURE, randomNumbers[4])
+        executeStep7WRD("7F", ActivityType.LEISURE, randomNumbers[5])
+
+        executeStep7DC("7G", ActivityType.SHOPPING, randomNumbers[6])
+        executeStep7WRD("7H", ActivityType.SHOPPING, randomNumbers[7])
+
+        executeStep7DC("7I", ActivityType.TRANSPORT, randomNumbers[8])
+        executeStep7WRD("7J", ActivityType.TRANSPORT, randomNumbers[9])
+
+
+
+
 
         executeStep8A("8A")
         executeStep8_MainAct("8B", "8C")
@@ -882,14 +893,14 @@ class Coordinator @JvmOverloads constructor(
      * @param id
      * @param variablenname
      */
-    private fun executeStep7DC(id: String, activitytype: ActivityType) {
+    private fun executeStep7DC(id: String, activitytype: ActivityType, randomNumber: Double? = null) {
         if (pattern.countActivitiesPerWeek(activitytype) > 0) {
             // create attribute lookup
             val lookup = AttributeLookup(person)
 
             // create step object
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-            val decisionIndex = step.doStep()
+            val decisionIndex = randomNumber?.let{step.doStep(it) } ?: step.doStep()
             val decision = step.alternativeChosen.toInt()
 
             log(id, person, decision.toString())
@@ -920,13 +931,13 @@ class Coordinator @JvmOverloads constructor(
      * @param id
      * @param activitytype
      */
-    private fun executeStep7WRD(id: String, activitytype: ActivityType) {
+    private fun executeStep7WRD(id: String, activitytype: ActivityType, randomNumber: Double? = null) {
         if (pattern.countActivitiesPerWeek(activitytype) > 0) {
             // get decision from step 7 DC
             val chosenIndex = person.getAttributefromMap(activitytype.toString() + "budget_category_index")
             //TODO why is get Attribute returning a double, which is then cast to an int. Skip the intermediate step
             val step = WRDDefaultModelStep(id, Category(chosenIndex.toInt()), activitytype, this)
-            val chosenTime = step.doStep()
+            val chosenTime = randomNumber?.let{step.doStep(it)}?: step.doStep()
 
             log(id, person, chosenTime.toString())
 

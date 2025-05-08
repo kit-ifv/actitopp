@@ -47,6 +47,18 @@ class WRDDefaultModelStep(
         return selection.also { chosenDistributionElement = selection }
     }
 
+    fun doStep(randomNumber: Double) : Int{
+        val selection = weightedDistribution.getRandomPickFromDistribution(
+            this.bounds, randomNumber
+        )
+
+        if (modifydistribution) {
+            weightedDistribution.modifydistributionelement(selection)
+        }
+
+        return selection.also { chosenDistributionElement = selection }
+    }
+
     @Deprecated("Only used in the print method below")
     private var chosenDistributionElement = 0
 

@@ -91,6 +91,7 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
     fun getRandomPickFromDistribution(bounds: IntRange, randomgenerator: RNGHelper): Int {
         return getRandomPickFromDistribution(bounds, randomgenerator.randomValue)
     }
+
     /**
      * returns an element from the distribution based on a random number
      * WRD = weighted random draw - the selection of the element is dependent on their share within the distribution

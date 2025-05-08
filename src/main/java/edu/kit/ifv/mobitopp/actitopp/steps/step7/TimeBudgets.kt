@@ -51,9 +51,21 @@ class HistogramPerActivity(
             transportBudget = transportHistograms.select(rngHelper, finalizedActivityPattern)
         )
     }
-
+    fun determineTimeBudgets(randomValues: List<Double>, finalizedActivityPattern: FinalizedActivityPattern): TimeBudgets {
+        return TimeBudgets(
+            workBudget = workHistograms.select(randomValues[0], randomValues[1], finalizedActivityPattern),
+            educationBudget = educationHistograms.select(randomValues[2], randomValues[3], finalizedActivityPattern),
+            leisureBudget = leisureHistograms.select(randomValues[4], randomValues[5], finalizedActivityPattern),
+            shoppingBudget = shoppingHistograms.select(randomValues[6], randomValues[7], finalizedActivityPattern),
+            transportBudget = transportHistograms.select(randomValues[8], randomValues[9], finalizedActivityPattern)
+        )
+    }
     private fun HistogramSelection.select(rngHelper: RNGHelper, finalizedActivityPattern: FinalizedActivityPattern): Int {
         return select(rngHelper.randomValue, finalizedActivityPattern).select(rngHelper.randomValue)
+    }
+
+    private fun HistogramSelection.select(firstRnd: Double, secondRnd: Double, finalizedActivityPattern: FinalizedActivityPattern): Int {
+        return select(firstRnd, finalizedActivityPattern).select(secondRnd)
     }
 }
 
