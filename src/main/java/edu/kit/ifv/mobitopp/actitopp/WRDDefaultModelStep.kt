@@ -40,6 +40,7 @@ class WRDDefaultModelStep(
 
         if (modifydistribution) {
             weightedDistribution.modifydistributionelement(selection)
+            //TODO remove theModifiee and make person in coordinator private again
             weightedDistribution.theModifiee = modelCoordinator.person
         }
 

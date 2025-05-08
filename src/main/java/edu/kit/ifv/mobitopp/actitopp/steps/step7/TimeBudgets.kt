@@ -2,24 +2,20 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step7
 
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HWeekPattern
+import edu.kit.ifv.mobitopp.actitopp.RNGHelper
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 
 data class TimeBudgets(
 
-    val workCategory: Category,
     val workBudget: Int,
 
-    val educationCategory: Category,
     val educationBudget: Int,
 
-    val leisureCategory: Category,
     val leisureBudget: Int,
 
-    val shoppingCategory: Category,
     val shoppingBudget: Int,
 
-    val transportCategory: Category,
     val transportBudget: Int,
 ) {
     fun calculateMeanTime(day: HDay, activityType: ActivityType): Int {
@@ -37,4 +33,33 @@ data class TimeBudgets(
 
         return (factor.toDouble() / daysWithActivity / activitiesForThisDay).toInt()
     }
+}
+
+class HistogramPerActivity(
+    val workHistograms: WorkHistograms = WorkHistograms.fromResourcePath(),
+    val educationHistograms: EducationHistograms = EducationHistograms.fromResourcePath(),
+    val leisureHistograms: LeisureHistograms = LeisureHistograms.fromResourcePath(),
+    val shoppingHistograms: ShoppingHistograms = ShoppingHistograms.fromResourcePath(),
+    val transportHistograms: TransportHistograms = TransportHistograms.fromResourcePath(),
+) {
+    fun determineTimeBudgets(finalizedActivityPattern: FinalizedActivityPattern, rngHelper: RNGHelper): TimeBudgets {
+        return TimeBudgets(
+            workBudget = workHistograms.select(rngHelper, finalizedActivityPattern),
+            educationBudget = educationHistograms.select(rngHelper, finalizedActivityPattern),
+            leisureBudget = leisureHistograms.select(rngHelper, finalizedActivityPattern),
+            shoppingBudget = shoppingHistograms.select(rngHelper, finalizedActivityPattern),
+            transportBudget = transportHistograms.select(rngHelper, finalizedActivityPattern)
+        )
+    }
+
+    private fun HistogramSelection.select(rngHelper: RNGHelper, finalizedActivityPattern: FinalizedActivityPattern): Int {
+        return select(rngHelper.randomValue, finalizedActivityPattern).select(rngHelper.randomValue)
+    }
+}
+
+fun main() {
+
+    val histogramPerActivity = HistogramPerActivity()
+
+    println("HGe3")
 }

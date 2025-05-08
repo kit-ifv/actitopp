@@ -10,36 +10,14 @@ import kotlin.math.min
 import kotlin.random.Random
 
 /**
- * Using an array rather than a map allows quicker access and calculation. In particular because all histogram entries
- * in actiTopp are formulated over a range.
+ * Original actitopp modified the distribution, it could do so because for every person the histogram was reconstructed
+ * from file. Since we would like to perform the parsing process only once, we need some form of modifcation protection
+ * so that the read content remain the same.
  */
-class ArrayHistogram private constructor(
-    private val offset: Int = 0,
-    private val probabilities: DoubleArray = doubleArrayOf(0.0),
+class ModifiableArrayHistogram (offset: Int = 0, probabilities: DoubleArray) : ArrayHistogram(
+    offset,
+    probabilities
 ) {
-    constructor(offset: Int, values: Collection<Number>): this(offset, values.map { it.toDouble() / values.sumOf { it.toDouble() } }.toDoubleArray())
-    private val size = probabilities.size
-    private val _cumulativeSum: DoubleArray = DoubleArray(probabilities.size)
-
-    val start = offset
-    val end = probabilities.size + offset - 1
-    val cumulativeSum get() = _cumulativeSum.asList()
-    init {
-        cumulate()
-    }
-
-
-
-    private fun cumulate() {
-        var counter = 0.0
-        probabilities.withIndex().forEach { (index, probability) ->
-            _cumulativeSum[index] = probability + counter
-            counter += probability
-        }
-    }
-    operator fun contains(position: Int): Boolean {
-        return position in offset..offset + size
-    }
     fun modify(position: Int) {
         require(position in this) {
             "Cannot update a position that is not present in the histogram. $position  ${offset}..${offset + size - 1}"
@@ -61,18 +39,64 @@ class ArrayHistogram private constructor(
             "Somehow the sum of probabilities is not 1.0 ${probabilities.sum()}"
         }
     }
+}
+
+/**
+ * Using an array rather than a map allows quicker access and calculation. In particular because all histogram entries
+ * in actiTopp are formulated over a range.
+ */
+open class ArrayHistogram protected constructor(
+    protected val offset: Int = 0,
+    protected val probabilities: DoubleArray = doubleArrayOf(0.0),
+) {
+    constructor(offset: Int, values: Collection<Number>) : this(
+        offset,
+        values.map { it.toDouble() / values.sumOf { it.toDouble() } }.toDoubleArray()
+    )
+
+    protected val size = probabilities.size
+    private val _cumulativeSum: DoubleArray = DoubleArray(probabilities.size)
+
+    val start = offset
+    val end = probabilities.size + offset - 1
+    val cumulativeSum get() = _cumulativeSum.asList()
+
+    init {
+        cumulate()
+    }
+
+
+    protected fun cumulate() {
+        var counter = 0.0
+        probabilities.withIndex().forEach { (index, probability) ->
+            _cumulativeSum[index] = probability + counter
+            counter += probability
+        }
+    }
+
+    operator fun contains(position: Int): Boolean {
+        return position in offset..offset + size
+    }
+
+    /**
+     * Once copied, you may start modifying to your hearts content, but until then the histogram stays readonly.
+     */
+    fun copy(): ModifiableArrayHistogram = ModifiableArrayHistogram(offset, probabilities)
     fun trim(): ArrayHistogram {
-        val trimmedStartIndex = probabilities.withIndex().takeWhile{it.value == 0.0}.lastOrNull()?.let{it.index +1 } ?: 0
-        val trimmedEndIndex = probabilities.withIndex().reversed().takeWhile{it.value == 0.0}.lastOrNull()?.index ?: size
+        val trimmedStartIndex =
+            probabilities.withIndex().takeWhile { it.value == 0.0 }.lastOrNull()?.let { it.index + 1 } ?: 0
+        val trimmedEndIndex =
+            probabilities.withIndex().reversed().takeWhile { it.value == 0.0 }.lastOrNull()?.index ?: size
         return ArrayHistogram(
             offset = offset + trimmedStartIndex,
             probabilities = probabilities.copyOfRange(trimmedStartIndex, trimmedEndIndex)
         )
     }
+
     operator fun get(index: Int): Double {
         val relativeIndex = index - offset
         return if (relativeIndex in 0..<size) probabilities[relativeIndex] else 0.0.also {
-            println("Cannot access probability for $index, since this histogram has only values for ${offset}..${offset  + size - 1}")
+            println("Cannot access probability for $index, since this histogram has only values for ${offset}..${offset + size - 1}")
         }
     }
 
@@ -80,7 +104,7 @@ class ArrayHistogram private constructor(
      * Instead of passing absolute bounds, you can also specify relative bounds. The result will however still be absolute
      */
     fun selectRelative(randomNumber: Double, lowerBoundRelative: Int? = null, upperBoundRelative: Int? = null): Int {
-        return select(randomNumber, lowerBoundRelative?.let{ it + offset}, upperBoundRelative?.let{ it + offset })
+        return select(randomNumber, lowerBoundRelative?.let { it + offset }, upperBoundRelative?.let { it + offset })
     }
 
     /**
@@ -89,19 +113,20 @@ class ArrayHistogram private constructor(
      * the
      */
     fun select(randomNumber: Double, lowerBoundInclusive: Int? = null, upperBoundInclusive: Int? = null): Int {
-        val lb = lowerBoundInclusive?.let { val index = it - offset
-            if(index > 0) index - 1 else null
+        val lb = lowerBoundInclusive?.let {
+            val index = it - offset
+            if (index > 0) index - 1 else null
         }
         val ub = upperBoundInclusive?.let { it - offset } ?: (size - 1)
 
         require(randomNumber in 0.0..1.0) {
             "Input is not a probability as random Number $randomNumber"
         }
-        val lowerCumulativeProbability = lb?.let{_cumulativeSum[it]}?:0.0
+        val lowerCumulativeProbability = lb?.let { _cumulativeSum[it] } ?: 0.0
         val upperCumulativeProbability = _cumulativeSum[ub]
         val affineRandomNumber = randomNumber.affineTransform(lowerCumulativeProbability, upperCumulativeProbability)
 
-        return _cumulativeSum.indexBinarySearch(affineRandomNumber, lb?:0, ub) + offset
+        return _cumulativeSum.indexBinarySearch(affineRandomNumber, lb ?: 0, ub) + offset
     }
 
     /**
@@ -110,18 +135,23 @@ class ArrayHistogram private constructor(
     private fun Double.affineTransform(lower: Double, upper: Double): Double {
         return (upper - lower) * this + lower
     }
+
     override fun toString(): String {
         return "Histogram[$offset, ${offset + size - 1}]"
     }
+
     companion object {
 
-        fun fromPath(path: Path) = fromWRDDistribution(loadDistributionInformationFromFile(path))
+        fun fromPath(path: Path) = fromWRDDistribution(loadDistributionInformationFromFile(path)).trim()
         fun fromWRDDistribution(modelDistribution: WRDModelDistributionInformation): ArrayHistogram {
             require(modelDistribution.keys.size == modelDistribution.keys.max() - modelDistribution.keys.min() + 1) {
                 "Mismatch in the construction, some entries maybe missing?"
             }
             val sum = modelDistribution.values.sum()
-            return ArrayHistogram(modelDistribution.keys.min(), modelDistribution.values.map{it.toDouble() / sum}.toDoubleArray())
+            return ArrayHistogram(
+                modelDistribution.keys.min(),
+                modelDistribution.values.map { it.toDouble() / sum }.toDoubleArray()
+            )
         }
     }
 }
@@ -136,11 +166,12 @@ fun DoubleArray.indexBinarySearch(element: Double, fromIndex: Int = 0, toIndex: 
 
 fun main() {
 
-    val wrdDistribution = loadDistributionInformationFromFile(Path("src/main/resources/edu/kit/ifv/mobitopp/actitopp/mopv14_withpkwhh/7B_KAT_0.csv"))
+    val wrdDistribution =
+        loadDistributionInformationFromFile(Path("src/main/resources/edu/kit/ifv/mobitopp/actitopp/mopv14_withpkwhh/7B_KAT_0.csv"))
     val distribution = WRDDiscreteDistribution(wrdDistribution)
     val arrayHistogram = ArrayHistogram.fromWRDDistribution(wrdDistribution)
     val rng = Random(1)
-    for(i in 0..1000) {
+    for (i in 0..1000) {
         val range = arrayHistogram.start..arrayHistogram.end
         val first = range.random()
         val second = range.random()
