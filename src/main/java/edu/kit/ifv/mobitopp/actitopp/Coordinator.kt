@@ -1076,7 +1076,7 @@ class Coordinator @JvmOverloads constructor(
                         val decision = step_dc.doStep()
 
                         log(id_dc, currentActivity, decision.toString())
-
+                        // TODO, why is actdurcat_index added to the map, and read 2 lines down, and never used at any other location?.
                         currentActivity.addAttributetoMap("actdurcat_index", decision.toDouble())
 
                         /*
@@ -1754,11 +1754,7 @@ class Coordinator @JvmOverloads constructor(
      */
     private fun countActivityDurationsbetweenActivitiesofOneDay(actfrom: HActivity?, actto: HActivity?): Int {
         var result = 0
-        val listofdayactivities = if (actfrom == null) {
-            actto!!.day.allActivitiesoftheDay
-        } else {
-            actfrom.day.allActivitiesoftheDay
-        }
+        val listofdayactivities = actfrom?.day?.allActivitiesoftheDay ?: actto!!.day.allActivitiesoftheDay
 
         for (tmpact in listofdayactivities) {
             if ((actfrom == null && actto != null && actto.compareTo(tmpact) < 0)

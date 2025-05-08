@@ -29,6 +29,10 @@ class HActivity @JvmOverloads constructor(
     var creatorPersonIndex: Int = parent.day.person.persIndex
 
     val tour: HTour = parent
+
+    /**
+     * Start Time is a field that is badly set to -1 as invalid point, I have yet to figure out what it means
+     */
     var startTime: Int = starttime
         set(starttime) {
             require(starttime >= 0) { "starttime is not >0: $starttime" }
@@ -46,12 +50,8 @@ class HActivity @JvmOverloads constructor(
         }
 
 
-
     /**
-     * @return the tripbeforeactivity
-     */
-    /**
-     * @param tripbeforeactivity the tripbeforeactivity to set
+     * A nullable field for some reason, it is set if joint modelling is active
      */
     var tripbeforeactivity: HTrip? = null
     /**
@@ -157,7 +157,7 @@ class HActivity @JvmOverloads constructor(
      *
      * @return
      */
-    fun hasWorkCommutingTripbeforeActivity(): Boolean {
+    fun hasWorkCommutingTripAsFirstActivity(): Boolean {
         return (isActivityFirstinTour && activityType == ActivityType.WORK && (person.commutingdistance_work != 0.0))
     }
 
@@ -168,7 +168,7 @@ class HActivity @JvmOverloads constructor(
      *
      * @return
      */
-    fun hasWorkCommutingTripafterActivity(): Boolean {
+    fun hasWorkCommutingTripAsLastActivity(): Boolean {
         return (isActivityLastinTour && activityType == ActivityType.WORK && (person.commutingdistance_work != 0.0))
     }
 
@@ -179,7 +179,7 @@ class HActivity @JvmOverloads constructor(
      *
      * @return
      */
-    fun hasEducationCommutingTripbeforeActivity(): Boolean {
+    fun hasEducationCommutingTripAsFirstActivity(): Boolean {
         return (isActivityFirstinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0))
     }
 
@@ -190,8 +190,8 @@ class HActivity @JvmOverloads constructor(
      *
      * @return
      */
-    fun hasEducationCommutingTripafterActivity(): Boolean {
-        return (if (isActivityLastinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0)) true else false)
+    fun hasEducationCommutingTripAsLastActivity(): Boolean {
+        return (isActivityLastinTour && activityType == ActivityType.EDUCATION && (person.commutingdistance_education != 0.0))
     }
 
     val isHomeActivity: Boolean
@@ -310,38 +310,35 @@ class HActivity @JvmOverloads constructor(
      * calculates trip times (default or based on commuting distances)
      */
     fun createTripsforActivity() {
-        /*
-                 * trip BEFORE activity
-                 */
 
-        // default
-
-        var actualTripTime_beforeTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR
-        // better than default if we have commuting information
-        if (hasWorkCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person.commutingDuration_work
-        if (hasEducationCommutingTripbeforeActivity()) actualTripTime_beforeTrip = person.commutingDuration_education
-
-        if (tripbeforeactivity == null) {
-            tripbeforeactivity = HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime_beforeTrip)
-        } else {
-            tripbeforeactivity!!.duration = (actualTripTime_beforeTrip)
+        require(tripbeforeactivity == null) {
+            "Fat statement, assume that tripbeforeactivity has never been set before"
         }
+
+        val actualTripTime = when {
+            hasWorkCommutingTripAsFirstActivity() -> person.commutingDuration_work
+            hasEducationCommutingTripAsFirstActivity() -> person.commutingDuration_education
+            else -> Configuration.FIXED_TRIP_TIME_ESTIMATOR
+        }
+        tripbeforeactivity = HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime)
 
         /*
          * trip AFTER activity
          */
+        // TODO solve the modelling of beforeactivity/afteractivity by removing the concept: An activity has a preceding
+        //   trip and a postceding trip, irregards of the position in the activity plan. :O
         if (isActivityLastinTour) {
-            // default
-            var actualTripTime_afterTrip = Configuration.FIXED_TRIP_TIME_ESTIMATOR
-            // better than default if we have commuting information
-            if (hasWorkCommutingTripafterActivity()) actualTripTime_afterTrip = person.commutingDuration_work
-            if (hasEducationCommutingTripafterActivity()) actualTripTime_afterTrip =
-                person.commutingDuration_education
-            if (tripafteractivity == null) {
-                tripafteractivity = HTrip(this, TripStatus.TRIP_AFTER_ACT, actualTripTime_afterTrip)
-            } else {
-                tripafteractivity!!.duration = (actualTripTime_afterTrip)
+
+            val badModelingTripTime = when {
+                hasWorkCommutingTripAsLastActivity() -> person.commutingDuration_work
+                hasEducationCommutingTripAsLastActivity() -> person.commutingDuration_education
+                else -> Configuration.FIXED_TRIP_TIME_ESTIMATOR
             }
+            require(tripafteractivity == null) {
+                "Fat statement, I claim that this field is always null when we get here."
+            }
+            tripafteractivity = HTrip(this, TripStatus.TRIP_AFTER_ACT, badModelingTripTime)
+
         }
     }
 
@@ -564,6 +561,10 @@ class HActivity @JvmOverloads constructor(
          */
         fun createPossibleStarttimes(actliste: Collection<HActivity>) {
             for (act in actliste) {
+                require(!act.startTimeisScheduled()) {
+                    "Here I am uncertain - The code should trigger sometimes I hope"
+                }
+
                 if (!act.startTimeisScheduled()) {
                     /*
                  * if the previous activity in the tour has a determined startime time and duration,
