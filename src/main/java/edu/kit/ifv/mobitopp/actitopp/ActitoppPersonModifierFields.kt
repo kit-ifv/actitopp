@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.steps.DayActivityTracker
+import org.jetbrains.annotations.TestOnly
 import kotlin.properties.Delegates
 
 class ActitoppPersonModifierFields(val original: ActitoppPerson) {
@@ -26,7 +27,7 @@ class ActitoppPersonModifierFields(val original: ActitoppPerson) {
         )
     }
 }
-
+fun ActitoppPerson.toModifiable() = ActitoppPersonModifierFields(this)
 
 data class WeekRoutine(
     val amountOfWorkingDays: Int,
@@ -44,7 +45,7 @@ data class WeekRoutine(
     fun instantiateTracker() : DayActivityTracker {
         return DayActivityTracker(amountOfWorkingDays, amountOfEducationDays, emptySet(), emptySet())
     }
-
+    // TODO this is only required for testing against the legacy code base, once established this can be removed.
     fun similarToAttributeMap(attributeMap: Map<String, Double>): Boolean {
         return amountOfWorkingDays == attributeMap["anztage_w"]?.toInt() &&
                 amountOfEducationDays == attributeMap["anztage_e"]?.toInt() &&
@@ -59,6 +60,8 @@ data class WeekRoutine(
     /**
      * To enable testing, we need to be able to load the person attributes based on the Person Week Routine.
      */
+    @TestOnly
+    // TODO this is only required for testing against the legacy code base, once established this can be removed.
     fun loadToAttributeMap(attributeMap: MutableMap<String, Double>) {
         attributeMap["anztage_w"] = amountOfWorkingDays.toDouble()
         attributeMap["anztage_e"] = amountOfEducationDays.toDouble()
@@ -71,5 +74,5 @@ data class WeekRoutine(
     }
 }
 
-fun ActitoppPerson.toModifiable() = ActitoppPersonModifierFields(this)
+
 
