@@ -8,6 +8,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.DayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
@@ -186,10 +187,11 @@ class TourSituation private constructor(
 }
 class TourSituationInt private constructor(
     override val choice: Int, personAndRoutineAttributes: PersonAndRoutineAttributes,
-    dayAttributes: DayAttributes, tourAttributes: TourAttributes,
-) :
+    dayAttributes: DayStructureAttributes, tourAttributes: TourAttributes,
+
+    ) :
     ChoiceSituation<Int>(), TourAttributes by tourAttributes, PersonAttributes by personAndRoutineAttributes,
-    RoutineAttributes by personAndRoutineAttributes, DayAttributes by dayAttributes {
+    RoutineAttributes by personAndRoutineAttributes, DayStructureAttributes by dayAttributes {
 
     constructor(choice: Int, person: ActitoppPerson, routine: WeekRoutine, day: HDay, tour: HTour): this(
         choice,

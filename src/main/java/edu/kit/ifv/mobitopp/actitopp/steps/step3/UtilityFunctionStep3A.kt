@@ -1,20 +1,14 @@
 package edu.kit.ifv.mobitopp.actitopp.steps.step3
 
-import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
-import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
-import edu.kit.ifv.mobitopp.actitopp.amountOfLaterTours
-import edu.kit.ifv.mobitopp.actitopp.amountOfPreviousTours
-import edu.kit.ifv.mobitopp.actitopp.hasNoLaterTours
-import edu.kit.ifv.mobitopp.actitopp.hasNoPreviousTours
+import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.PlannedTourAmounts
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAndTourPlanAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromStructure
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
-import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
@@ -26,29 +20,48 @@ interface PreviousDayAttributes : DayAttributes {
     fun previousDayHasOneAfterTour(): Boolean
 }
 
-class PreviousDayAttributesFromElement(
-    val day: HDay,
-    private val previousDay: HDay?,
-    private val dayAttributesFromElement: DayAttributesFromElement = DayAttributesFromElement(day),
-) : PreviousDayAttributes, DayAttributes by dayAttributesFromElement {
-
-    override fun previousDayHasNoBeforeTour(): Boolean = (previousDay?.hasNoPreviousTours()) ?: false
-
-    override fun previousDayHasOneBeforeTour(): Boolean = (previousDay?.amountOfPreviousTours() == 1)
-
-    override fun previousDayHasNoAfterTour(): Boolean = previousDay?.hasNoLaterTours() ?: false
-
-    override fun previousDayHasOneAfterTour(): Boolean = previousDay?.amountOfLaterTours() == 1
-}
+//class PreviousDayAttributesFromElement(
+//    val day: HDay,
+//    private val previousDay: HDay?,
+//    private val dayAttributesFromElement: DayAttributesFromElement = DayAttributesFromElement(day),
+//) : PreviousDayAttributes, DayAttributes by dayAttributesFromElement {
+//
+//    override fun previousDayHasNoBeforeTour(): Boolean = (previousDay?.hasNoPreviousTours()) ?: false
+//
+//    override fun previousDayHasOneBeforeTour(): Boolean = (previousDay?.amountOfPreviousTours() == 1)
+//
+//    override fun previousDayHasNoAfterTour(): Boolean = previousDay?.hasNoLaterTours() ?: false
+//
+//    override fun previousDayHasOneAfterTour(): Boolean = previousDay?.amountOfLaterTours() == 1
+//}
 
 class PreviousDayAttributesNumeric(
-    val day: HDay,
+    val dayAttributes: DayAndTourPlanAttributes,
     val previousDayBeforeTours: Int?,
     val previousDayAfterTours: Int?,
-    private val dayAttributesFromElement: DayAttributesFromElement = DayAttributesFromElement(
-        day
-    ),
-) : PreviousDayAttributes, DayAttributes by dayAttributesFromElement {
+) : DayTourPlanAndPreviousTourPlan, DayAndTourPlanAttributes by dayAttributes {
+
+
+    constructor(
+        day: HDay,
+        previousDayBeforeTours: Int?,
+        previousDayAfterTours: Int?,
+
+    ): this(
+        DayAttributesFromElement(day),
+        previousDayBeforeTours,
+        previousDayAfterTours
+    )
+
+    constructor(
+        dayStructure: DayStructure,
+        plannedTourAmounts: PlannedTourAmounts?,
+
+    ):this(
+        dayAttributes = DayAttributesFromStructure(dayStructure),
+        previousDayBeforeTours = plannedTourAmounts?.precursorAmount,
+        previousDayAfterTours = plannedTourAmounts?.successorAmount,
+    )
     override fun previousDayHasNoBeforeTour(): Boolean = previousDayBeforeTours == 0
 
     override fun previousDayHasOneBeforeTour(): Boolean = previousDayBeforeTours == 1
@@ -57,6 +70,23 @@ class PreviousDayAttributesNumeric(
 
     override fun previousDayHasOneAfterTour(): Boolean = previousDayAfterTours == 1
 
+}
+
+/**
+ * TODO, this class can only be used when step 3 & 4 are combined and executed for each day separately.
+ */
+class PreviousDayFromStructure private constructor(
+    val previousDayStructure: DayStructure?,
+    val dayAttributes: DayAttributes,
+): DayAttributes by dayAttributes, PreviousDayAttributes{
+    constructor(currentDay: DayStructure,  previousDay: DayStructure? = null): this(previousDay, DayAttributesFromStructure(currentDay))
+
+    override fun previousDayHasNoBeforeTour(): Boolean = (previousDayStructure?.amountOfPrecursorElements() == 0) ?: false
+
+    override fun previousDayHasOneBeforeTour(): Boolean = (previousDayStructure?.amountOfPrecursorElements() == 1) ?: false
+    override fun previousDayHasNoAfterTour(): Boolean = (previousDayStructure?.amountOfSuccessorElements() == 0)?: false
+
+    override fun previousDayHasOneAfterTour(): Boolean = (previousDayStructure?.amountOfSuccessorElements() == 1)?: false
 }
 
 data class ParameterCollectionStep3A(
@@ -86,25 +116,6 @@ data class ParameterStep3A(
     val previousDayHas0TourBeforeMainAct: Double,
     val previousDayHas1TourBeforeMainAct: Double,
 )
-
-class PreviousDaySituation private constructor(
-    override val choice: Int,
-    val previousDayAttributes: PreviousDayAttributes,
-    val pAttr: PersonAndRoutineAttributes,
-) : ChoiceSituation<Int>(), PreviousDayAttributes by previousDayAttributes, PersonAndRoutineAttributes by pAttr {
-    constructor(
-        choice: Int,
-        day: HDay,
-        previousDayBeforeTours: Int?,
-        previousDayAfterTours: Int?,
-        person: ActitoppPerson,
-        weekRoutine: WeekRoutine,
-    ) : this(
-        choice, PreviousDayAttributesNumeric(day, previousDayBeforeTours, previousDayAfterTours), PersonAndRoutineFrom(
-            PersonWithRoutine(person, weekRoutine)
-        )
-    )
-}
 
 val ParameterSet3A = ParameterCollectionStep3A(
     one = ParameterStep3A(

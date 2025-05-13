@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp.steps.step1
 
+import edu.kit.ifv.mobitopp.actitopp.ActiToppHousehold
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
@@ -8,7 +9,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.PersonSituation
 import edu.kit.ifv.mobitopp.actitopp.toModifiable
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ParametrizedDiscreteChoiceModel
 
-fun ActitoppPerson.assignWeekRoutine(rng: RNGHelper): WeekRoutine {
+fun ActitoppPerson.assignWeekRoutine(rng: RNGHelper = this.personalRNG): WeekRoutine {
     return toModifiable().run {
         amountOfWorkingDays = step1AWithParams.select(rng.randomValue, this)
         amountOfEducationDays = step1BWithParams.select(rng.randomValue, this)

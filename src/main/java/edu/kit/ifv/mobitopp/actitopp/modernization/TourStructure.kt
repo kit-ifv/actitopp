@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
 
 /**
  * A tour structure is only the ordering of activity types taken during a tour, but not fully qualified activities, as
@@ -13,34 +14,38 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
  */
 class TourStructure(
     mainActivityType: ActivityType,
-) {
-    private val queue : ArrayDeque<ActivityType> = ArrayDeque()
-    private var offset = 0
-    init {
-        queue.add(mainActivityType)
-    }
+):BidirectionalQueue<ActivityType>(mainActivityType) {
+//    private val queue: ArrayDeque<ActivityType> = ArrayDeque()
+//    private var offset = 0
 
-    fun addPrecursor(activityType: ActivityType) {
-        queue.addFirst(activityType)
-        offset++
-    }
-    fun addSuccessor(activityType: ActivityType) {
-        queue.addLast(activityType)
-    }
-    fun mainActivityType(): ActivityType {
-        return queue[offset]
-    }
 
-    fun withIndex() = queue.withIndex()
-    /**
-     * Access the activity type by index relative to the position of the main activity
-     */
-    operator fun get(index: Int): ActivityType {
-        return queue[offset + index]
-    }
+//    fun mainActivityType(): ActivityType {
+//        return queue[offset]
+//    }
+//
+//    fun amountOfPrecursors() = offset
+//    fun amountOfActivities() = queue.size
+
 
     fun toTour() {
 
     }
+
+}
+
+
+/**
+ * We add a simple class without activity type that behaves similar to tour structure but lacks a main activity
+ */
+class PreliminaryTourStructure() {
+
+}
+
+data class IndexedActivityType(
+    val activityType: ActivityType,
+    val activityPosition: Position,
+    val absoluteIndex: Int,
+) : ActivityAttributes {
+    override fun isBeforeMainActivity(): Boolean = activityPosition == Position.BEFORE
 
 }

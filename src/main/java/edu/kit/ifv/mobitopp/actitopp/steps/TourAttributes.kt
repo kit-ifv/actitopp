@@ -8,7 +8,8 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import org.jetbrains.annotations.TestOnly
 
-interface TourAttributes {
+interface TourAttributes: PlannedTourAttributes {
+    // These are all day attributes
     fun isFirstTourOfDay(): Boolean
     fun isSecondTourOfDay(): Boolean
     fun isThirdTourOfDay(): Boolean
@@ -47,6 +48,21 @@ class TourAttributesByElement(val element: HTour) : TourAttributes {
     override fun tourHas2Activities(): Boolean = element.amountOfActivities == 2
     override fun tourHas3Activities(): Boolean = element.amountOfActivities == 3
     override fun tourHas4Activities(): Boolean = element.amountOfActivities == 4
+    override fun mainActivityIsWork(): Boolean {
+        return element.mainActivity()?.activityType == ActivityType.WORK
+    }
+
+    override fun mainActivityIsEducation(): Boolean {
+        return element.mainActivity()?.activityType == ActivityType.EDUCATION
+    }
+
+    override fun mainActivityIsShopping(): Boolean {
+        return element.mainActivity()?.activityType == ActivityType.SHOPPING
+    }
+
+    override fun mainActivityIsTransport(): Boolean {
+        return element.mainActivity()?.activityType == ActivityType.TRANSPORT
+    }
 }
 
 data class SubTourInput(

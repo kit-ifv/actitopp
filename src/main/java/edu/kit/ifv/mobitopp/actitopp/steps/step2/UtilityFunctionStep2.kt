@@ -4,6 +4,7 @@ import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
@@ -12,10 +13,13 @@ import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.steps.DayActivityTracker
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromStructure
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromWeekday
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
+import java.time.DayOfWeek
 
 data class PersonWithRoutine(
     val person: ActitoppPerson,
@@ -30,6 +34,8 @@ data class PersonWithRoutine(
         person.weekPattern.days.filter { it.hasActivity(ActivityType.WORK) }.toSet(),
         person.weekPattern.days.filter { it.hasActivity(ActivityType.EDUCATION) }.toSet(),
     )
+    fun nextRandom() = person.personalRNG.randomValue
+
     fun amountOfWorkingDays() = routine.amountOfWorkingDays
     fun amountOfLeisureDays() = routine.amountOfLeisureDays
     fun amountOfEducationDays() = routine.amountOfEducationDays
@@ -49,18 +55,25 @@ data class PersonAndRoutineFrom(
     private val person: PersonAttributes = PersonAttributesFromElement(element.person)
 ):PersonAndRoutineAttributes,  RoutineAttributes by routine, PersonAttributes by person
 
-class DaySituation(
+class DaySituation private constructor(
     override val choice: ActivityType,
-    private val personRoutine: PersonWithRoutine,
-    val day: HDay,
-    private val personAttributesFromElement: PersonAndRoutineFrom = PersonAndRoutineFrom(
-        personRoutine
-    ),
-    private val dayAttributesFromElement: DayAttributesFromElement = DayAttributesFromElement(day),
+
+    private val personAttributesFromElement: PersonAndRoutineAttributes,
+    private val dayAttributesFromElement: DayAttributes,
 ) :
     ChoiceSituation<ActivityType>(), PersonAttributes by personAttributesFromElement, RoutineAttributes by personAttributesFromElement,
     DayAttributes by dayAttributesFromElement {
+    constructor(choice: ActivityType, personRoutine: PersonWithRoutine, structure: DayStructure): this(
+        choice, PersonAndRoutineFrom(personRoutine), DayAttributesFromStructure(structure)
+    )
 
+    constructor(choice: ActivityType, personRoutine: PersonWithRoutine, day: HDay): this(
+        choice, PersonAndRoutineFrom(personRoutine), DayAttributesFromElement(day)
+    )
+
+    constructor(choice: ActivityType, personRoutine: PersonWithRoutine, week: DayOfWeek): this(
+        choice, PersonAndRoutineFrom(personRoutine), DayAttributesFromWeekday(week)
+    )
 
 }
 
@@ -236,7 +249,7 @@ val step2AModel =
 val coordinatedStep2AModel =
     ModifiableDiscreteChoiceModel<ActivityType, DaySituation, ParameterCollectionStep2A>(AllocatedLogit.create {
         option(ActivityType.EDUCATION, parameters = { education }, {
-            (if (it.isStudentOrAzubi() && it.day.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
+            (if (it.isStudentOrAzubi() && it.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
                 this,
                 it
             )
@@ -248,7 +261,7 @@ val coordinatedStep2AModel =
         option(ActivityType.SHOPPING, parameters = { shopping }, { standardUtilityFunction(this, it) })
         option(ActivityType.TRANSPORT, parameters = { transport }, { standardUtilityFunction(this, it) })
         option(ActivityType.WORK, parameters = { work }, {
-            (if (it.isEmployedAnywhere() && it.day.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
+            (if (it.isEmployedAnywhere() && it.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
                 this,
                 it
             )

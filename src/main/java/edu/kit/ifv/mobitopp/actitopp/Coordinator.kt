@@ -6,9 +6,13 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.UtilityFunctionCalculator
+import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.generateMainActivities
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.generatePrecedingTours
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
@@ -16,6 +20,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step7.HistogramPerActivity
 import kotlin.math.max
 import kotlin.math.min
 
+val STATIC_HISTOGRAMS = HistogramPerActivity()
 /**
  * @author Tim Hilgert
  *
@@ -31,6 +36,8 @@ class Coordinator @JvmOverloads constructor(
 
     val randomGenerator = person.personalRNG
     val rngCopy = randomGenerator.copy()
+    // TODO remove once tested and confirmed identical
+    val rngCopy2 = rngCopy.copy()
     /**///////////// */ //	declaration of variables
     private val pattern: HWeekPattern = person.weekPattern
 
@@ -81,16 +88,30 @@ class Coordinator @JvmOverloads constructor(
         require(weekRoutine.similarToAttributeMap(person.attributesMap)) {
             "Mismatch between week routine and person map \n$weekRoutine \n${person.attributesMap}"
         }
-
+        repeat(8) {
+            rngCopy2.randomValue
+        }
+        val patternStructure = PatternStructure(PersonWithRoutine(person, weekRoutine))
 
         executeStep2("2A")
+
+        val mainActivitiesNew = (0..6).map {
+            patternStructure.determineNextMainActivity(rngHelper = rngCopy2)
+        }
+
         val mainActivities = person.generateMainActivities(weekRoutine) {
             GenerateCoordinated(rngCopy)
         }.map { it.first }
         val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
 //        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
+        val rngValues = rngCopy2.getRandomValues(14)
+        val tourAmounts = patternStructure.calculateTourAmounts(UtilityFunctionCalculator, rngValues)
         executeStep3("3A")
-
+        val modernizedAmountPrecursors = tourAmounts.output().map { it.plannedAmounts.precursorAmount }
+        val legacyAmountPrecursors = pattern.days.filter { !it.isHomeDay }.map { it.amountOfPreviousTours() }
+        require(legacyAmountPrecursors.zip(modernizedAmountPrecursors).all { (a, b) -> a == b }) {
+            "Output mismatch you cannot"
+        }
         val precedingTourAmounts = person.generatePrecedingTours(weekRoutine, numberoftoursperday_lowerboundduetojointactions.toList()) {
             GenerateSideToursPreceeding(rngCopy)
         }
@@ -112,11 +133,10 @@ class Coordinator @JvmOverloads constructor(
         if (Configuration.modelJointActions) {
             placeJointActivitiesIntoPattern()
         }
-        // TODO don't build this new every time.
-        val hiPer = HistogramPerActivity()
+
 
         val randomNumbers = (0..9).map{randomGenerator.randomValue}
-        val output = hiPer.determineTimeBudgets(randomNumbers, FinalizedActivityPattern(person, pattern))
+        val output = STATIC_HISTOGRAMS.determineTimeBudgets(randomNumbers, FinalizedActivityPattern(person, pattern))
 
         executeStep7DC("7A", ActivityType.WORK, randomNumbers[0])
         executeStep7WRD("7B", ActivityType.WORK, randomNumbers[1])
@@ -376,10 +396,10 @@ class Coordinator @JvmOverloads constructor(
                 if (maxnumberoftours != -1) step.limitUpperBoundOnly((if (maxnumberoftours >= minnumberoftours) maxnumberoftours else minnumberoftours))
             }
 
-
             // make selection
             val decision = step.doStep()
-
+            println("Old: ${step.utilities { it }}")
+            println("Old: ${step.activeOptions()}")
             log(id, currentDay, decision.toString())
 
             // create tours based on the decision and add them to the pattern
@@ -2219,6 +2239,7 @@ class Coordinator @JvmOverloads constructor(
 
                         // add activity to the other member's schedule
                         val otherperson = otherunmodeledpersinhh[randomkey]
+                        // TODO remember to add joint activities into step 2 & 3 because right now they are ignored
                         otherperson!!.addJointActivityforConsideration(tmpactivity)
 
                         // add other person as participant for the actual person

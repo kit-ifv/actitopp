@@ -41,7 +41,6 @@ class GenerateCoordinated(private val rngHelper: RNGHelper): GenerateMainActivit
                 if (!input.person.isAllowedToWork) availableOptions.remove(ActivityType.WORK)
                 if (day.shouldNotBeWork() && person.isAnywayEmployed()) availableOptions.remove(ActivityType.WORK)
                 if (day.shouldNotBeEducation() && person.isinEducation()) availableOptions.remove(ActivityType.EDUCATION)
-
                 val converter: (ActivityType) -> DaySituation = { DaySituation(it, input, day) }
                 val randomNumber = rngHelper.randomValue
                 coordinatedStep2AWithParams.select(availableOptions, randomNumber, converter).also {

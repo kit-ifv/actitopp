@@ -11,25 +11,37 @@ import edu.kit.ifv.mobitopp.actitopp.enums.isStudentOrAzubi
 import org.jetbrains.annotations.TestOnly
 import java.util.Collections
 import kotlin.math.max
-
+// TODO once refactored, rename or remove
+interface IPerson {
+    val children0_10: Int
+    val children_u18: Int
+    val employment: Employment
+    val age: Int
+    val areatype: AreaType
+    val gender: Gender
+    val maxCommute: Double
+    val numberofcarsinhousehold: Int
+}
 
 class ActitoppPerson@JvmOverloads constructor(
     val household: ActiToppHousehold,
     val persNrinHousehold: Int,
     val persIndex: Int,
-    val age: Int,
+    override val age: Int,
     employmentCode: Int,
     genderCode: Int,
     val commutingdistance_work: Double = 0.0,
     val commutingdistance_education: Double = .0,
-) {
+) :IPerson {
+    override val maxCommute: Double =
+            max(commutingdistance_work, commutingdistance_education)
 
      val id: Int = ActitoppPerson.idCounter
     private val attributes: MutableMap<String, Double> = mutableMapOf()
     @TestOnly
     internal fun getMutableMapForTest(): MutableMap<String, Double> = attributes
-    val gender: Gender = Gender.fromCode(genderCode)
-    val employment: Employment = Employment.fromInt(employmentCode)
+    override val gender: Gender = Gender.fromCode(genderCode)
+    override val employment: Employment = Employment.fromInt(employmentCode)
     val isAllowedToWork: Boolean = true
     var weekPattern: HWeekPattern = HWeekPattern(this)
     // TODO make RNG a bit more random, there could be overlaps in the hash generation.
@@ -84,27 +96,27 @@ class ActitoppPerson@JvmOverloads constructor(
 
 
 
-    val children0_10: Int
+    override val children0_10: Int
         /**
          * @return the children0_10
          */
         get() = household.children0_10
 
-    val children_u18: Int
+    override val children_u18: Int
         /**
          * @return the children_u18
          */
         get() = household.children_u18
 
 
-    val areatype: AreaType
+    override val areatype: AreaType
         /**
          * @return the areatype
          */
         get() = household.areatype
 
 
-    val numberofcarsinhousehold: Int
+    override val numberofcarsinhousehold: Int
         /**
          * @return the numberofcarsinhousehold
          */

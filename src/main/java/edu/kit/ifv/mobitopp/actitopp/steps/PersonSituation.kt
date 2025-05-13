@@ -2,6 +2,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPersonModifierFields
+import edu.kit.ifv.mobitopp.actitopp.IPerson
 import edu.kit.ifv.mobitopp.actitopp.enums.AreaType
 import edu.kit.ifv.mobitopp.actitopp.enums.Employment
 import edu.kit.ifv.mobitopp.actitopp.enums.Gender
@@ -51,7 +52,7 @@ interface PersonAttributes {
     fun amountOfPKW(): Int
 }
 
-class PersonAttributesFromElement(val person: ActitoppPerson) : PersonAttributes {
+class PersonAttributesFromElement(val person: IPerson) : PersonAttributes {
     override fun householdHasChildrenBelow10() = person.children0_10 > 0
     override fun isFulltimeEmployee() = person.employment == Employment.FULLTIME
     override fun isParttimeEmployee() = person.employment.isParttime()
@@ -129,7 +130,3 @@ open class PersonSituation(
     }
 }
 
-val ActitoppPerson.maxCommute: Double
-    get() {
-        return max(commutingdistance_work, commutingdistance_education)
-    }
