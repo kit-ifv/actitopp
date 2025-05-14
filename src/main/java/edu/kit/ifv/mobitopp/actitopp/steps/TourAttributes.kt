@@ -29,7 +29,9 @@ interface TourAttributes: PlannedTourAttributes {
     fun tourHas3Activities(): Boolean
     fun tourHas4Activities(): Boolean
 }
+class TourAttributesByStructure(): TourAttributes {
 
+}
 class TourAttributesByElement(val element: HTour) : TourAttributes {
     override fun isFirstTourOfDay(): Boolean = element.index == element.day.lowestTourIndex
     override fun isSecondTourOfDay(): Boolean = element.index == element.day.lowestTourIndex + 1

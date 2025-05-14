@@ -92,6 +92,9 @@ abstract class BidirectionalQueue<T>(mainElement: T) : BidirectionalCollection<T
 
 }
 // TODO seal interface once HDay is killed
+/**
+ * The day structure contains the current tour structures that will be present on a given day, this is a readonly view.
+ */
 interface DayStructure {
     val startTimeDay: DurationDay
     val weekday: DayOfWeek

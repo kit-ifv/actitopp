@@ -5,9 +5,11 @@ import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HTour
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromWeekday
 import edu.kit.ifv.mobitopp.actitopp.steps.DayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
@@ -183,6 +185,13 @@ class TourSituation private constructor(
             DayAttributesFromElement(day),
             TourAttributesByElement(tour)
         )
+
+    constructor(choice: ActivityType, person: ActitoppPerson, routine: WeekRoutine, day: DurationDay, tour: HTour): this(
+        choice,
+        PersonAndRoutineFrom(PersonWithRoutine(person, routine)),
+        DayAttributesFromWeekday(day),
+        TourAttributesByElement(tour)
+    )
 
 }
 class TourSituationInt private constructor(

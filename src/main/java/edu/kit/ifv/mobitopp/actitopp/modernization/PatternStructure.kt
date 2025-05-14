@@ -27,6 +27,14 @@ class PatternStructure(
     fun mobileDays(): List<ModifiableDayStructure> {
         return activeDays
     }
+    fun generateTrackedActivity(day: DurationDay lambda: PatternStructure.() -> ActivityType): ActivityType {
+        val activityType = lambda()
+        activityTracker.add(activityType)
+    }
+
+    fun amountOfDaysWith(activityType: ActivityType): Int {
+        return activityTracker.plannedDaysFor(activityType)
+    }
 
     fun determineNextMainActivity(
         activityTypeFilter: ActivityTypeFilter = Step2Tracking,
@@ -162,14 +170,3 @@ class DurationDay private constructor(
         return timePoint.hashCode()
     }
 }
-
-/**
- * Keep track of side tour results, but do not immediately spawn anything to be used in later calculations.
- */
-class SideTourResults(
-    var amountOfPrecursorTours: Int = 0,
-    var amountOfSuccessorTours: Int = 0,
-) {
-
-}
-
