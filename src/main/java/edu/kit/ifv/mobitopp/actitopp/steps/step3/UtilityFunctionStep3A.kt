@@ -2,11 +2,13 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step3
 
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.PlannedTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAndTourPlanAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromStructure
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromWeekday
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
@@ -62,6 +64,7 @@ class PreviousDayAttributesNumeric(
         previousDayBeforeTours = plannedTourAmounts?.precursorAmount,
         previousDayAfterTours = plannedTourAmounts?.successorAmount,
     )
+
     override fun previousDayHasNoBeforeTour(): Boolean = previousDayBeforeTours == 0
 
     override fun previousDayHasOneBeforeTour(): Boolean = previousDayBeforeTours == 1

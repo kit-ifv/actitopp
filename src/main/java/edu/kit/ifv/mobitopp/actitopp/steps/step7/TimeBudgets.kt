@@ -68,10 +68,3 @@ class HistogramPerActivity(
         return select(firstRnd, finalizedActivityPattern).select(secondRnd)
     }
 }
-
-fun main() {
-
-    val histogramPerActivity = HistogramPerActivity()
-
-    println("HGe3")
-}

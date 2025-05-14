@@ -4,6 +4,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributes
 
 import java.time.DayOfWeek
+import kotlin.time.Duration
 
 class DayLayout(val mainActivity: ActivityType): BidirectionalQueue<UninitializedTour>(UninitializedTour()) {
     lateinit var main: ActivityType
@@ -90,14 +91,44 @@ abstract class BidirectionalQueue<T>(mainElement: T) : BidirectionalCollection<T
 
 
 }
+// TODO seal interface once HDay is killed
+interface DayStructure {
+    val startTimeDay: DurationDay
+    val weekday: DayOfWeek
+    val duration : Duration
 
-class DayStructure(startTimeDay: DurationDay, mainTourStructure: TourStructure) :
-    BidirectionalQueue<TourStructure>(mainTourStructure) {
+    fun previousDaytime(): DurationDay {
+        return startTimeDay.previous()
+    }
+    fun mainActivityType(): ActivityType
+    fun amountOfPrecursorElements(): Int
+    fun amountOfSuccessorElements(): Int
+    fun amountOfElements(): Int
+    fun getPlannedTourAmounts():PlannedTourAmounts = PlannedTourAmounts(amountOfPrecursorElements(), amountOfSuccessorElements())
+    val minimumAmountOfToursByJointActions: Int get() {throw UnsupportedOperationException("Nope")}
+}
+
+class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
+    override val weekday: DayOfWeek = startTimeDay.weekday
+    override val duration: Duration = startTimeDay.timePoint
+    override fun mainActivityType(): ActivityType = ActivityType.HOME
+
+    override fun amountOfPrecursorElements(): Int = 0
+
+    override fun amountOfSuccessorElements(): Int = 0
+    override fun amountOfElements(): Int = 0
+    override fun getPlannedTourAmounts(): PlannedTourAmounts = PlannedTourAmounts.NONE
+    override val minimumAmountOfToursByJointActions: Int = 0
+}
+
+class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStructure: TourStructure) :
+    BidirectionalQueue<TourStructure>(mainTourStructure), DayStructure {
     constructor(dayIndex: Int, mainTourStructure: TourStructure) : this(DurationDay(dayIndex), mainTourStructure)
 
-    val weekday: DayOfWeek = startTimeDay.weekday
-    val duration = startTimeDay.timePoint
-
+    override val weekday: DayOfWeek = startTimeDay.weekday
+    override val duration = startTimeDay.timePoint
+    // TODO maybe protect this field from modification, right now it is just a template holder for 3A
+    override var minimumAmountOfToursByJointActions: Int = 0
     fun loadPrecursors(activityTypes: Collection<ActivityType>) {
         activityTypes.reversed().forEach {
             addPrecursor(TourStructure(it))
@@ -110,6 +141,7 @@ class DayStructure(startTimeDay: DurationDay, mainTourStructure: TourStructure) 
         }
     }
 
+    override fun mainActivityType(): ActivityType = mainTourActivityType()
     fun mainTourActivityType(): ActivityType {
         return this[0][0]
 //        if (queue.isEmpty()) {

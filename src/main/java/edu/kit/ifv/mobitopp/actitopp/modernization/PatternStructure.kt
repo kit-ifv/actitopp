@@ -16,12 +16,20 @@ import kotlin.time.Duration.Companion.days
 class PatternStructure(
     val weekRoutine: PersonWithRoutine,
 ) {
+    private val activeDays: MutableList<ModifiableDayStructure> = mutableListOf()
     private val days: MutableCollection<DurationDay> = mutableListOf()
-    private val dayStructure: MutableList<DayStructure> = mutableListOf()
+    private val dayStructure: MutableMap<DurationDay, DayStructure> = mutableMapOf()
     private val activityTracker: ActivityDayTracker = ActivityDayTracker()
 
-    fun mobileDays(): List<DayStructure> {
-        return dayStructure
+    fun allDays(): Collection<DayStructure> {
+        return dayStructure.values
+    }
+    fun mobileDays(): List<ModifiableDayStructure> {
+        return activeDays
+    }
+
+    fun mobileDaysWithPredecessor(): List<ModifiableStructureWithPreviousDay> {
+        return activeDays.map { ModifiableStructureWithPreviousDay(it ,dayStructure[it.previousDaytime()]) }
     }
 
     fun determineNextMainActivity(
@@ -48,16 +56,20 @@ class PatternStructure(
 
         val randomNumber = rngHelper.randomValue
 
-        val activityType = coordinatedStep2AWithParams.select(options = availableOptions, randomNumber = randomNumber) {
+        val converter: (ActivityType) -> DaySituation = {
             DaySituation(
                 it,
                 weekRoutine,
                 day.weekday
             )
         }
+        val activityType = coordinatedStep2AWithParams.select(options = availableOptions, randomNumber = randomNumber,
+            converter = converter
+        )
         activityTracker.add(activityType, day)
-        if (activityType != ActivityType.HOME) {
-            dayStructure.add(day.spawnDayStructure(activityType))
+        dayStructure[day] = when (activityType) {
+            ActivityType.HOME -> HomeDay(day)
+            else -> day.spawnDayStructure(activityType).also { activeDays.add(it) }
         }
         return activityType
     }
@@ -65,7 +77,15 @@ class PatternStructure(
     fun determineAmountOfSideTours(previousDayStructure: DayStructure, dayStructure: DayStructure) {
 
     }
+
+    fun getActiveDays() = activeDays
+    fun getActiveDaysWithPreviousDayPlan(): List<Pair<PlannedTourAmounts, ModifiableDayStructure>> {
+        return activeDays.map {
+            (dayStructure[it.startTimeDay.previous()]?.getPlannedTourAmounts() ?: PlannedTourAmounts.NONE) to it
+        }
+    }
 }
+
 
 fun interface ActivityTypeFilter {
     fun determineAvailableOptions(
@@ -95,16 +115,21 @@ object Step2Tracking : ActivityTypeFilter {
 
 class ActivityDayTracker {
     private val daysWithActivities: MutableMap<ActivityType, MutableSet<DurationDay>> =
-        mutableMapOf<ActivityType, MutableSet<DurationDay>>().withDefault { mutableSetOf() }
+        mutableMapOf<ActivityType, MutableSet<DurationDay>>()
 
     fun add(activityType: ActivityType, day: DurationDay) {
-        daysWithActivities.getValue(activityType).add(day)
+        daysWithActivities.getOrPut(activityType){
+          mutableSetOf()
+        }.add(day)
     }
 
     fun plannedDaysFor(activityType: ActivityType): Int = daysWithActivities[activityType]?.size ?: 0
 
 }
-
+fun Int.positiveModulus(modulo: Int): Int {
+    val result  = this % modulo
+    return if (result < 0) result + modulo else result
+}
 /**
  * A wrapper class around duration that holds both the exact duration start point when a day starts and the information
  * which weekday is represented. Once sufficient refactors have been done, this class could probably be removed and simply
@@ -112,21 +137,36 @@ class ActivityDayTracker {
  */
 class DurationDay private constructor(
     val timePoint: Duration,
+    var lowerBoundJointTours: Int = 0,
+    var lowerBoundJointActivities: Int = 0,
 ) {
     constructor(dayIndex: Int) : this(dayIndex.days)
 
-    val weekday: DayOfWeek = DayOfWeek.of(timePoint.inWholeDays.toInt() % 7 + 1)
+    val weekday: DayOfWeek = DayOfWeek.of(timePoint.inWholeDays.toInt().positiveModulus(7) + 1)
 
     fun next(): DurationDay {
         return DurationDay(timePoint + 1.days)
     }
 
-    fun spawnDayStructure(mainActivityType: ActivityType): DayStructure {
-        return DayStructure(this, TourStructure(mainActivityType))
+    fun previous(): DurationDay {
+        return DurationDay(timePoint - 1.days)
+    }
+
+    fun spawnDayStructure(mainActivityType: ActivityType): ModifiableDayStructure {
+        return ModifiableDayStructure(this, TourStructure(mainActivityType))
     }
 
     companion object {
         val FIRST: DurationDay = DurationDay(0)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is DurationDay) return false
+        return timePoint == other.timePoint
+    }
+
+    override fun hashCode(): Int {
+        return timePoint.hashCode()
     }
 }
 

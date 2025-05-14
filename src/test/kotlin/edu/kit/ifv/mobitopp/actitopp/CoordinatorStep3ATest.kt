@@ -59,11 +59,11 @@ class CoordinatorStep3ATest : CoordinatorTestUtilities() {
 
             days.map { day ->
 
-                val availableOptions = determineAvailableOptions(day, precedingInput.input.routine)
+                val availableOptions = determineAvailableOptions(day, precedingInput.personInfo.routine)
 
                 val rnd = rngHelper.randomValue
                 val converter: (Int) -> PreviousDaySituation = {
-                    createChoiceSituation(it, day, previousResult, precedingInput.input)
+                    createChoiceSituation(it, day, previousResult, precedingInput.personInfo)
 
                 }
                 val selection = choiceModel.select(availableOptions, rnd, converter)

@@ -5,31 +5,33 @@ import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HTour
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
+import edu.kit.ifv.mobitopp.actitopp.modernization.ModifiableDayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.ModifiablePlannedTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ParametrizedDiscreteChoiceModel
 
 class GenerateSideToursFollowing(
     rngHelper: RNGHelper,
     choiceModel: ParametrizedDiscreteChoiceModel<Int, PreviousDaySituation, ParameterCollectionStep3B> = step3BWithParams,
-) : DefaultSideTourDeterminer<ParameterCollectionStep3B>(rngHelper, choiceModel) {
-    override fun createChoiceSituation(
-        choice: Int,
-        day: DayWithBounds,
-        previousResult: Int?,
-        personWithRoutine: PersonWithRoutine,
-    ): PreviousDaySituation {
-        return PreviousDaySituation(
-            choice,
-            day.day,
-            day.amountOfTours - 1,
-            previousResult,
-            personWithRoutine.person,
-            personWithRoutine.routine
-        )
-    }
 
-    fun generate(person: ActitoppPerson, routine: WeekRoutine, days: List<DayWithBounds>): List<Int> =
-        generate(PrecedingInput(PersonWithRoutine(person, routine),days ))
+) : DefaultSideTourDeterminer<ParameterCollectionStep3B>(rngHelper, choiceModel) {
+//    override fun createChoiceSituation(
+//        choice: Int,
+//        day: DayWithBounds,
+//        previousResult: Int?,
+//        personWithRoutine: PersonWithRoutine,
+//    ): PreviousDaySituation {
+//        return PreviousDaySituation(
+//            choice,
+//            day.day,
+//            plannedTourMap.getPreviousPlannedTourAmounts(day.day),
+//            personWithRoutine,
+//            plannedTourMap.getCurrentPlannedPrecursorTours(day.day),
+//        )
+//    }
+
+//    fun generate(person: ActitoppPerson, routine: WeekRoutine, days: List<DayWithBounds>): List<Int> =
+//        generate(PrecedingInput(PersonWithRoutine(person, routine),days ))
 
     override fun determineMinimumAmountOfTours(remainingNumberOfTours: Int): Int {
         return remainingNumberOfTours
@@ -37,5 +39,9 @@ class GenerateSideToursFollowing(
 
     override fun spawnTour(day: HDay): HTour {
         return day.generateFollowingTour()
+    }
+
+    override fun update(day: ModifiablePlannedTourAmounts, result: Int) {
+        day.successorAmount = result
     }
 }

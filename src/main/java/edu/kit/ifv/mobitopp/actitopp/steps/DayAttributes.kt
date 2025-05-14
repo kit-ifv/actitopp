@@ -3,6 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDayAttributes
 import java.time.DayOfWeek
 
@@ -36,8 +37,6 @@ interface PlannedTourAttributes {
     fun mainActivityIsEducation(): Boolean
     fun mainActivityIsShopping(): Boolean
     fun mainActivityIsTransport(): Boolean
-
-
 }
 
 interface DayAndTourPlanAttributes: DayAttributes, PlannedTourAttributes
@@ -84,13 +83,15 @@ class DayAttributesFromStructure(private val element: DayStructure): DayAndTourP
     override fun amountOfBeforeTours(): Int = element.amountOfPrecursorElements()
     override fun amountOfToursIs1(): Boolean = element.amountOfElements() ==1
     override fun amountOfToursIs2(): Boolean = element.amountOfElements() ==2
-    override fun mainActivityIsWork(): Boolean = element.mainTourActivityType() == ActivityType.WORK
-    override fun mainActivityIsEducation(): Boolean = element.mainTourActivityType() == ActivityType.EDUCATION
-    override fun mainActivityIsShopping(): Boolean = element.mainTourActivityType() == ActivityType.SHOPPING
-    override fun mainActivityIsTransport(): Boolean = element.mainTourActivityType() == ActivityType.TRANSPORT
+    override fun mainActivityIsWork(): Boolean = element.mainActivityType() == ActivityType.WORK
+    override fun mainActivityIsEducation(): Boolean = element.mainActivityType() == ActivityType.EDUCATION
+    override fun mainActivityIsShopping(): Boolean = element.mainActivityType() == ActivityType.SHOPPING
+    override fun mainActivityIsTransport(): Boolean = element.mainActivityType() == ActivityType.TRANSPORT
 }
 
 class DayAttributesFromWeekday(private val element: DayOfWeek): DayAttributes {
+
+    constructor(element: DurationDay) : this(element.weekday)
     override fun isMonday(): Boolean = element == DayOfWeek.MONDAY
     override fun isTuesday(): Boolean = element == DayOfWeek.TUESDAY
     override fun isWednesday(): Boolean = element == DayOfWeek.WEDNESDAY

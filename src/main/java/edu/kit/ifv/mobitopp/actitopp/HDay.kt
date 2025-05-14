@@ -1,11 +1,14 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import java.time.DayOfWeek
 import java.util.NavigableMap
 import java.util.SortedMap
 import java.util.TreeMap
+import kotlin.time.Duration
 
 // TODO move these extension functions to something called utils, they should not loiter here
 fun <K, V> SortedMap<K, V>.lastValue(): V = this.getValue(lastKey())
@@ -14,11 +17,23 @@ fun <K, V> SortedMap<K, V>.firstValue(): V = this.getValue(firstKey())
 /**
  * @author Tim Hilgert
  */
-class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
+class HDay(parent: HWeekPattern, override val weekday: DayOfWeek) : DayStructure {
     //stores all attributes that are not directly accessible by variables
     private val attributes: MutableMap<String, Double> = mutableMapOf()
 
     val pattern: HWeekPattern = parent
+    override val startTimeDay: DurationDay = DurationDay(weekday.value)
+    override val duration: Duration = startTimeDay.timePoint
+
+    override fun mainActivityType() = this.mainTourType
+
+    override fun amountOfPrecursorElements(): Int = this.amountOfPreviousTours()
+
+    override fun amountOfSuccessorElements(): Int = this.amountOfLaterTours()
+
+    override fun amountOfElements(): Int {
+        TODO("Not yet implemented")
+    }
 
     private val mappedTours: NavigableMap<Int, HTour> = TreeMap()
     val tours: Collection<HTour> get() = mappedTours.values
@@ -26,6 +41,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     // Does not need to be get() method if person never changes
     val person: ActitoppPerson = pattern.person
     val mainActivity: HActivity? get() = getTourOrNull(0)?.getActivityOrNull(0)
+
     /**
      * Does not need to be get(). Returns the index of the Day similar to DayOfWeek.oridnal()
      * Mo = 0, So = 6
@@ -113,6 +129,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      */
     fun generatePrecedingTour() = generateTour(lowestTourIndex - 1)
     fun generateFollowingTour() = generateTour(highestTourIndex + 1)
+
     /**
      * Generate an empty tour for the day, with the specified tour index.
      */
@@ -124,9 +141,10 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
         addTour(tour)
         return tour
     }
+
     // TODO when activitytypeIsScheduled() is just a comparision against activityType Unknown the expression would collapse.
     fun getTotalNumberOfActivitites(acttype: ActivityType): Int {
-        return tours.sumOf { it.activities.count { act -> act.activityType == acttype&& act.activityTypeIsSpecified()   } }
+        return tours.sumOf { it.activities.count { act -> act.activityType == acttype && act.activityTypeIsSpecified() } }
     }
 
     fun getTour(index: Int): HTour = mappedTours.getValue(index)
@@ -155,7 +173,8 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @param activityindex
      * @return
      */
-    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean  = mappedTours[tourindex]?.getActivityOrNull(activityindex)?.activityTypeIsSpecified() ?: false
+    fun existsActivityTypeforActivity(tourindex: Int, activityindex: Int): Boolean =
+        mappedTours[tourindex]?.getActivityOrNull(activityindex)?.activityTypeIsSpecified() ?: false
 
 
     /**
@@ -176,7 +195,7 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
      * @return
      */
     fun getTotalAmountOfActivityTimeUntilMainTour(referencePoint: HTour): Int {
-        if(referencePoint.index > -1) {
+        if (referencePoint.index > -1) {
             return 0
         }
         return mappedTours.subMap(referencePoint.index, true, -1, true).values.sumOf { it.actDuration }
@@ -250,11 +269,12 @@ class HDay(parent: HWeekPattern, val weekday: DayOfWeek) {
     }
 
 }
+
 // TODO find out whether a home day could feasibly generate a previous tour somehow, otherwise these methods are irrelevant
 fun HDay.hasPreviousTours() = !isHomeDay && lowestTourIndex != 0
 fun HDay.hasNoPreviousTours() = !hasPreviousTours()
-fun HDay.amountOfPreviousTours() = !isHomeDay * -lowestTourIndex
+fun HDay.amountOfPreviousTours() = if (isHomeDay) 0 else -lowestTourIndex
 
 fun HDay.hasLaterTours() = !isHomeDay && highestTourIndex != 0
 fun HDay.hasNoLaterTours() = !hasLaterTours()
-fun HDay.amountOfLaterTours() = !isHomeDay * highestTourIndex
+fun HDay.amountOfLaterTours() = if (isHomeDay) 0 else highestTourIndex

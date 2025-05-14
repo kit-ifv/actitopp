@@ -13,8 +13,6 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.generateMainActivities
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.generatePrecedingTours
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.HistogramPerActivity
 import kotlin.math.max
@@ -91,7 +89,8 @@ class Coordinator @JvmOverloads constructor(
         repeat(8) {
             rngCopy2.randomValue
         }
-        val patternStructure = PatternStructure(PersonWithRoutine(person, weekRoutine))
+        val personWithRoutine = PersonWithRoutine(person, weekRoutine)
+        val patternStructure = PatternStructure(personWithRoutine)
 
         executeStep2("2A")
 
@@ -103,23 +102,29 @@ class Coordinator @JvmOverloads constructor(
             GenerateCoordinated(rngCopy)
         }.map { it.first }
         val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
+
+        require(legacyMainActivities.zip(mainActivitiesNew).all { (a, b) -> a == b }) {
+            "Mismatch between generated activity schedules"
+        }
 //        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
         val rngValues = rngCopy2.getRandomValues(14)
-        val tourAmounts = patternStructure.calculateTourAmounts(UtilityFunctionCalculator, rngValues)
+        val tourAmounts = patternStructure.calculateTourAmounts(
+            person = personWithRoutine,
+            rngCopy
+        )
         executeStep3("3A")
-        val modernizedAmountPrecursors = tourAmounts.output().map { it.plannedAmounts.precursorAmount }
-        val legacyAmountPrecursors = pattern.days.filter { !it.isHomeDay }.map { it.amountOfPreviousTours() }
+        val modernizedAmountPrecursors = tourAmounts.map { it.value.precursorAmount }
+        val legacyAmountPrecursors = pattern.days.map { it.amountOfPreviousTours() }
         require(legacyAmountPrecursors.zip(modernizedAmountPrecursors).all { (a, b) -> a == b }) {
-            "Output mismatch you cannot"
+            "Output mismatch between predecessor tour amounts ${person.id}"
         }
-        val precedingTourAmounts = person.generatePrecedingTours(weekRoutine, numberoftoursperday_lowerboundduetojointactions.toList()) {
-            GenerateSideToursPreceeding(rngCopy)
-        }
-        require(precedingTourAmounts.none { it.second.mainTourType == ActivityType.HOME && it.first != 0}) {
-            "this should not occur"
-        }
-        executeStep3("3B")
 
+        executeStep3("3B")
+        val legacyAmountSuccessors = pattern.days.map { it.amountOfLaterTours() }
+        val modernizedAmountSuccessors = tourAmounts.map { it.value.successorAmount }
+        require(legacyAmountSuccessors.zip(modernizedAmountSuccessors).all { (a, b) ->a ==b  }) {
+            "Mismatch between successor tour amounts ${person.id}"
+        }
         executeStep4("4A")
 
         executeStep5("5A") // Create Activities before main activity (?)
@@ -398,8 +403,6 @@ class Coordinator @JvmOverloads constructor(
 
             // make selection
             val decision = step.doStep()
-            println("Old: ${step.utilities { it }}")
-            println("Old: ${step.activeOptions()}")
             log(id, currentDay, decision.toString())
 
             // create tours based on the decision and add them to the pattern

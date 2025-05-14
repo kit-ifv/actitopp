@@ -5,6 +5,11 @@ import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HTour
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
+import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.ModifiableDayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.ModifiablePlannedTourAmounts
+import edu.kit.ifv.mobitopp.actitopp.modernization.ModifiableStructureWithPreviousDay
+import edu.kit.ifv.mobitopp.actitopp.modernization.PlannedTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ParametrizedDiscreteChoiceModel
 
@@ -12,24 +17,25 @@ import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ParametrizedDiscreteChoice
 class GenerateSideToursPreceeding(rngHelper: RNGHelper,
                                   choiceModel: ParametrizedDiscreteChoiceModel<Int, PreviousDaySituation, ParameterCollectionStep3A> = step3AWithParams,
 ) : DefaultSideTourDeterminer<ParameterCollectionStep3A>(rngHelper, choiceModel) {
-    override fun createChoiceSituation(
-        choice: Int,
-        day: DayWithBounds,
-        previousResult: Int?,
-        personWithRoutine: PersonWithRoutine,
-    ): PreviousDaySituation {
-        return PreviousDaySituation(
-            choice,
-            day.day,
-            previousResult,
-            null,
-            personWithRoutine.person,
-            personWithRoutine.routine
-        )
-    }
+//    override fun createChoiceSituation(
+//        choice: Int,
+//        day: DayWithBounds,
+//        previousResult: Int?,
+//        personWithRoutine: PersonWithRoutine,
+//    ): PreviousDaySituation {
+//        return PreviousDaySituation(
+//            choice,
+//            day.day,
+//            PlannedTourAmounts(previousResult ?: -99, 0),
+//            personWithRoutine,
+//            0
+//
+//        )
+//    }
+
     // FOr the preceding tours we can define this utility function to help create the inputs.
-    fun generate(person: ActitoppPerson, routine: WeekRoutine, intArray: Collection<Int>, days: List<HDay>): List<Int> =
-        generate(PrecedingInput(PersonWithRoutine(person, routine), intArray, days))
+//    fun generate(person: ActitoppPerson, routine: WeekRoutine, intArray: Collection<Int>, days: List<DayStructure>): List<Int> =
+//        generate(PrecedingInput(PersonWithRoutine(person, routine), intArray, days))
 
     override fun determineMinimumAmountOfTours(remainingNumberOfTours: Int): Int {
         return remainingNumberOfTours / 2
@@ -37,5 +43,9 @@ class GenerateSideToursPreceeding(rngHelper: RNGHelper,
 
     override fun spawnTour(day: HDay): HTour {
         return day.generatePrecedingTour()
+    }
+
+    override fun update(day: ModifiablePlannedTourAmounts, result: Int) {
+        day.precursorAmount = result
     }
 }
