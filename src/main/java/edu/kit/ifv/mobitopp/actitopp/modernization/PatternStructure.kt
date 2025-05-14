@@ -28,10 +28,6 @@ class PatternStructure(
         return activeDays
     }
 
-    fun mobileDaysWithPredecessor(): List<ModifiableStructureWithPreviousDay> {
-        return activeDays.map { ModifiableStructureWithPreviousDay(it ,dayStructure[it.previousDaytime()]) }
-    }
-
     fun determineNextMainActivity(
         activityTypeFilter: ActivityTypeFilter = Step2Tracking,
         rngHelper: RNGHelper? = null,
@@ -74,15 +70,8 @@ class PatternStructure(
         return activityType
     }
 
-    fun determineAmountOfSideTours(previousDayStructure: DayStructure, dayStructure: DayStructure) {
+    fun determineSideTourActivities() {
 
-    }
-
-    fun getActiveDays() = activeDays
-    fun getActiveDaysWithPreviousDayPlan(): List<Pair<PlannedTourAmounts, ModifiableDayStructure>> {
-        return activeDays.map {
-            (dayStructure[it.startTimeDay.previous()]?.getPlannedTourAmounts() ?: PlannedTourAmounts.NONE) to it
-        }
     }
 }
 
@@ -113,6 +102,10 @@ object Step2Tracking : ActivityTypeFilter {
     }
 }
 
+/**
+ * Track the days that have one or more of a planned activity with a given type, so that the activity determiner can
+ * check how many days are already assigned to say work: (Like 5 Work days for a regular week)
+ */
 class ActivityDayTracker {
     private val daysWithActivities: MutableMap<ActivityType, MutableSet<DurationDay>> =
         mutableMapOf<ActivityType, MutableSet<DurationDay>>()

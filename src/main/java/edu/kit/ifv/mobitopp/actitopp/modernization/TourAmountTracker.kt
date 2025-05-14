@@ -11,10 +11,6 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3AWithParams
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3BWithParams
 
-data class DayPlannedTourAmounts(
-    val dayStructure: DayStructure,
-    val plannedAmounts: PlannedTourAmounts,
-)
 
 interface PlannedTourAmounts {
     val precursorAmount: Int
@@ -51,24 +47,16 @@ data class ModifiableStructureWithPreviousDay(
  *   may use completely new attributes to determine the number of tours.
  */
 class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val person: PersonWithRoutine, val rngHelper: RNGHelper = person.person.personalRNG) {
-    // Irealy wish that I could find a better solution than to allow every field to be modifiable
+    // Irealy wish that I could find a better solution than to allow every field to be modifiable, because home activities
+    // should not have a modifiable field for tour amounts, but since it is private whatever
     private val map: PlannedTourMap = PlannedTourMap(initialDayStructures)
 
 
     fun output(): Set<Map.Entry<DurationDay, PlannedTourAmounts>> {
         return map.readOnly().entries
     }
-    private fun calculateFor(
-        person: PersonWithRoutine,
-        day: DayStructure,
-        calculation: CalculatePlannedTourAmounts,
-        randomNumber: Double,
-        randomNumber2: Double,
-    ) {
-        val predecessor = map[day] ?: PlannedTourAmounts.NONE
-        GenerateSideToursPreceeding(person.person.personalRNG)
-    }
-    fun generateSideTours(targets: List<ModifiableStructureWithPreviousDay>): Map<DurationDay, PlannedTourAmounts> {
+
+    fun generateSideTours(targets: List<ModifiableDayStructure>): Map<DurationDay, PlannedTourAmounts> {
         generatePredecessorTourAmounts(targets)
         generateSuccessorTourAmounts(targets)
         return map.readOnly()
@@ -76,13 +64,13 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
     /** step 3A
      *
      */
-    fun generatePredecessorTourAmounts(targets: List<ModifiableStructureWithPreviousDay>): List<Int> {
+    private fun generatePredecessorTourAmounts(targets: List<ModifiableDayStructure>): List<Int> {
         val generator = GenerateSideToursPreceeding(rngHelper)
         return targets.map {
-            val currentPlan = map.getModifiablePlannedTourAmounts(it.currentDay)
-            val previousDayPlan = map.getPreviousPlannedTourAmounts(it.currentDay)
+            val currentPlan = map.getModifiablePlannedTourAmounts(it)
+            val previousDayPlan = map.getPreviousPlannedTourAmounts(it)
             val result = generator.generate(PrecedingInput(person,
-                it.currentDay,
+                it,
                 currentPlan,
                 previousDayPlan))
             generator.update(currentPlan, result)
@@ -93,13 +81,13 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
     /**
      * Step 3B
      */
-    fun generateSuccessorTourAmounts(targets: List<ModifiableStructureWithPreviousDay>): List<Int> {
+    private fun generateSuccessorTourAmounts(targets: List<ModifiableDayStructure>): List<Int> {
         val generator = GenerateSideToursFollowing(rngHelper)
         return targets.map {
-            val currentPlan = map.getModifiablePlannedTourAmounts(it.currentDay)
-            val previousDayPlan = map.getPreviousPlannedTourAmounts(it.currentDay)
+            val currentPlan = map.getModifiablePlannedTourAmounts(it)
+            val previousDayPlan = map.getPreviousPlannedTourAmounts(it)
             val result = generator.generate(PrecedingInput(person,
-                it.currentDay,
+                it,
                 currentPlan,
                 previousDayPlan))
             generator.update(currentPlan, result)
@@ -107,26 +95,11 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
         }
     }
 
-    fun calculateFor(
-        patternStructure: PatternStructure,
-        calculation: CalculatePlannedTourAmounts,
-        randomValues: List<Double>,
-    ) {
-        patternStructure.allDays().withIndex().forEach { (index, dayStructure) ->
-            calculateFor(
-                patternStructure.weekRoutine,
-                dayStructure,
-                calculation,
-                randomValues[index],
-                randomValues[7 + index]
-            )
-        }
-    }
 }
 
 fun PatternStructure.calculateTourAmounts(person: PersonWithRoutine, rngHelper: RNGHelper = person.person.personalRNG): Set<Map.Entry<DurationDay, PlannedTourAmounts>> {
     val tracker = TourAmountTracker(allDays(), person = person, rngHelper = rngHelper)
-    tracker.generateSideTours(mobileDaysWithPredecessor())
+    tracker.generateSideTours(mobileDays())
     return tracker.output()
 
 }

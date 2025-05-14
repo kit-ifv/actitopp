@@ -34,13 +34,6 @@ class TourStructure(
 }
 
 
-/**
- * We add a simple class without activity type that behaves similar to tour structure but lacks a main activity
- */
-class PreliminaryTourStructure() {
-
-}
-
 data class IndexedActivityType(
     val activityType: ActivityType,
     val activityPosition: Position,

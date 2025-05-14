@@ -142,12 +142,8 @@ class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStr
     }
 
     override fun mainActivityType(): ActivityType = mainTourActivityType()
-    fun mainTourActivityType(): ActivityType {
+    private fun mainTourActivityType(): ActivityType {
         return this[0][0]
-//        if (queue.isEmpty()) {
-//            return ActivityType.HOME
-//        }
-//        return queue[0].mainActivityType()
     }
 
     override fun toString(): String {

@@ -89,6 +89,7 @@ class Coordinator @JvmOverloads constructor(
         repeat(8) {
             rngCopy2.randomValue
         }
+
         val personWithRoutine = PersonWithRoutine(person, weekRoutine)
         val patternStructure = PatternStructure(personWithRoutine)
 
@@ -107,7 +108,7 @@ class Coordinator @JvmOverloads constructor(
             "Mismatch between generated activity schedules"
         }
 //        pattern.assignMainActivityCoordinated(PersonWithRoutine(person, weekRoutine), rngCopy)
-        val rngValues = rngCopy2.getRandomValues(14)
+
         val tourAmounts = patternStructure.calculateTourAmounts(
             person = personWithRoutine,
             rngCopy
