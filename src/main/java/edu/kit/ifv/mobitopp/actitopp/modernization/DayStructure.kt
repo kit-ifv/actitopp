@@ -1,7 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
-import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributes
 
 import java.time.DayOfWeek
 import kotlin.time.Duration
@@ -53,7 +52,11 @@ interface BidirectionalCollection<T> {
 
     operator fun get(index: Int = 0): T
     fun mainElement() = get(0)
-    fun elements(): Collection<BidirectionalIndexedValue<T>>
+    fun indexedElements(): Collection<BidirectionalIndexedValue<T>>
+
+    fun elements(): Collection<T>
+    fun precursors(): Collection<T>
+    fun successors(): Collection<T>
 
 }
 
@@ -85,8 +88,19 @@ abstract class BidirectionalQueue<T>(mainElement: T) : BidirectionalCollection<T
      */
     override operator fun get(index: Int) = queue[index + offset]
 
-    override fun elements(): Collection<BidirectionalIndexedValue<T>> {
+    override fun indexedElements(): Collection<BidirectionalIndexedValue<T>> {
         return queue.withIndex().map { (index, value) -> BidirectionalIndexedValue(index, offset, value) }
+    }
+
+    override fun precursors(): Collection<T> {
+        return queue.subList(0, offset)
+    }
+    override fun successors(): Collection<T> {
+        return queue.subList(offset + 1, queue.size)
+    }
+
+    override fun elements(): Collection<T> {
+        return queue
     }
 
 
@@ -107,6 +121,8 @@ interface DayStructure {
     fun amountOfPrecursorElements(): Int
     fun amountOfSuccessorElements(): Int
     fun amountOfElements(): Int
+
+    fun elements(): Collection<TourStructure>
     fun getPlannedTourAmounts():PlannedTourAmounts = PlannedTourAmounts(amountOfPrecursorElements(), amountOfSuccessorElements())
     val minimumAmountOfToursByJointActions: Int get() {throw UnsupportedOperationException("Nope")}
 }
@@ -122,6 +138,7 @@ class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
     override fun amountOfElements(): Int = 0
     override fun getPlannedTourAmounts(): PlannedTourAmounts = PlannedTourAmounts.NONE
     override val minimumAmountOfToursByJointActions: Int = 0
+    override fun elements(): Collection<TourStructure> = emptySet()
 }
 
 class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStructure: TourStructure) :
@@ -152,7 +169,7 @@ class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStr
     override fun toString(): String {
         return "Week (${duration.inWholeDays / 7}) Main Act: [${mainTourActivityType()}] ${
             weekday.toString().substring(0, 3)
-        } Planned Tours: (${amountOfElements()})"
+        } Planned Tours: (${elements().joinToString()})"
     }
 }
 
@@ -171,53 +188,6 @@ enum class Position {
     }
 }
 
-data class IndexedTourStructure(
-    val tour: BidirectionalIndexedValue<TourStructure>,
 
-    ) : TourAttributes {
-    override fun isFirstTourOfDay(): Boolean = tour.absoluteIndex == 0
-
-    override fun isSecondTourOfDay(): Boolean = tour.absoluteIndex == 1
-
-    override fun isThirdTourOfDay(): Boolean = tour.absoluteIndex == 2
-
-    override fun isBeforeMainTour(): Boolean = tour.position == Position.BEFORE
-
-    override fun isAfterMainTour(): Boolean = tour.position == Position.AFTER
-
-    override fun tourMainActivityIsWork(): Boolean = tour.element[0] == ActivityType.WORK
-
-    override fun tourMainActivityIsEducation(): Boolean = tour.element[0] == ActivityType.EDUCATION
-
-    override fun tourMainActivityIsShopping(): Boolean = tour.element[0] == ActivityType.SHOPPING
-
-    override fun tourMainActivityIsTransport(): Boolean = tour.element[0] == ActivityType.TRANSPORT
-    override fun numActivitiesBeforeMainActivityIs1(): Boolean = tour.element.amountOfPrecursorElements() == 1
-
-    override fun numActivitiesBeforeMainActivityIs2(): Boolean = tour.element.amountOfPrecursorElements() == 2
-
-    override fun numActivitiesBeforeMainActivityIs3(): Boolean = tour.element.amountOfPrecursorElements() == 3
-
-    override fun tourHas2Activities(): Boolean = tour.element.amountOfElements() == 2
-
-    override fun tourHas3Activities(): Boolean = tour.element.amountOfElements() == 3
-
-    override fun tourHas4Activities(): Boolean = tour.element.amountOfElements() == 4
-    override fun mainActivityIsWork(): Boolean {
-        return tour.element.mainElement() == ActivityType.WORK
-    }
-
-    override fun mainActivityIsEducation(): Boolean {
-        return tour.element.mainElement() == ActivityType.EDUCATION
-    }
-
-    override fun mainActivityIsShopping(): Boolean {
-        return tour.element.mainElement() == ActivityType.SHOPPING
-    }
-
-    override fun mainActivityIsTransport(): Boolean {
-        return tour.element.mainElement() == ActivityType.TRANSPORT
-    }
-}
 
 

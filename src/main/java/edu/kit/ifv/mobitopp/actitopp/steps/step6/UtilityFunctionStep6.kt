@@ -10,6 +10,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributesByElement
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.FullyQualifiedDayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributes
@@ -182,10 +183,10 @@ data class ParameterStep6(
     )
 class ActivitySituation private constructor(
     override val choice: ActivityType, personAndRoutineAttributes: PersonAndRoutineAttributes,
-    dayAttributes: DayAttributes, tourAttributes: TourAttributes, activityAttributes: ActivityAttributes
+    dayAttributes: FullyQualifiedDayStructureAttributes, tourAttributes: TourAttributes, activityAttributes: ActivityAttributes
 ) :
     ChoiceSituation<ActivityType>(), TourAttributes by tourAttributes, PersonAttributes by personAndRoutineAttributes,
-    RoutineAttributes by personAndRoutineAttributes, DayAttributes by dayAttributes, ActivityAttributes by activityAttributes {
+    RoutineAttributes by personAndRoutineAttributes, FullyQualifiedDayStructureAttributes by dayAttributes, ActivityAttributes by activityAttributes {
 
     constructor(choice: ActivityType, person: ActitoppPerson, routine: WeekRoutine, day: HDay, tour: HTour, activity: HActivity): this(
         choice,

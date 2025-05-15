@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
+import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.DaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
@@ -27,13 +28,25 @@ class PatternStructure(
     fun mobileDays(): List<ModifiableDayStructure> {
         return activeDays
     }
-    fun generateTrackedActivity(day: DurationDay lambda: PatternStructure.() -> ActivityType): ActivityType {
-        val activityType = lambda()
-        activityTracker.add(activityType)
+    fun generateTrackedActivity(day: DurationDay, lambda: PatternStructure.(DurationDay) -> ActivityType): ActivityType {
+        val activityType = lambda(day)
+        activityTracker.add(
+            activityType,
+            day = day
+        )
+        return activityType
+    }
+
+    fun DurationDay.shouldNotBeEducationDay(weekRoutine: WeekRoutine): Boolean {
+        return activityTracker.amountOfDaysWithActivity(ActivityType.EDUCATION) >= weekRoutine.amountOfEducationDays && this !in activityTracker.daysWithActivity(ActivityType.EDUCATION)
+    }
+
+    fun DurationDay.shouldNotBeWorkDay(weekRoutine: WeekRoutine): Boolean {
+        return activityTracker.amountOfDaysWithActivity(ActivityType.WORK) >= weekRoutine.amountOfWorkingDays && this !in activityTracker.daysWithActivity(ActivityType.WORK)
     }
 
     fun amountOfDaysWith(activityType: ActivityType): Int {
-        return activityTracker.plannedDaysFor(activityType)
+        return activityTracker.amountOfDaysWithActivity(activityType)
     }
 
     fun determineNextMainActivity(
@@ -78,12 +91,27 @@ class PatternStructure(
         return activityType
     }
 
-    fun determineSideTourActivities() {
 
-    }
 }
 
+class Generator(private val patternStructure: PatternStructure, private val personWithRoutine: PersonWithRoutine, val rngHelper: RNGHelper = personWithRoutine.person.personalRNG) {
 
+    val mainActivityOfSideTours: AssignMainActivities = AssignByUtilityFunction(patternStructure, rngHelper)
+    fun generateSideTours(tourAmounts: Map<DurationDay, PlannedTourAmounts>): Map<ModifiableDayStructure, Pair<List<ActivityType>, List<ActivityType>>> {
+        return patternStructure.mobileDays().associateWith {
+            val input = DayWithPlans(it, personWithRoutine, tourAmounts[it.startTimeDay] ?: PlannedTourAmounts.NONE)
+            mainActivityOfSideTours.generateSideTourActivities(input)
+        }
+    }
+
+    fun loadSideTours(tourAmounts: Map<DurationDay, PlannedTourAmounts>) {
+        val targets = generateSideTours(tourAmounts)
+        targets.forEach { dayStructure, (prec, succ) ->
+            dayStructure.loadPrecursors(prec)
+            dayStructure.loadSuccessors(succ)
+        }
+    }
+}
 fun interface ActivityTypeFilter {
     fun determineAvailableOptions(
         tracker: ActivityDayTracker,
@@ -100,10 +128,10 @@ object Step2Tracking : ActivityTypeFilter {
     ): Set<ActivityType> {
         val (person, routine) = personWithRoutine
         val availableOptions = initialOptions.toMutableSet()
-        if (tracker.plannedDaysFor(ActivityType.WORK) >= routine.amountOfWorkingDays && person.isAnywayEmployed()) availableOptions.remove(
+        if (tracker.amountOfDaysWithActivity(ActivityType.WORK) >= routine.amountOfWorkingDays && person.isAnywayEmployed()) availableOptions.remove(
             ActivityType.WORK
         )
-        if (tracker.plannedDaysFor(ActivityType.EDUCATION) >= routine.amountOfEducationDays && person.isinEducation()) availableOptions.remove(
+        if (tracker.amountOfDaysWithActivity(ActivityType.EDUCATION) >= routine.amountOfEducationDays && person.isinEducation()) availableOptions.remove(
             ActivityType.EDUCATION
         )
         return availableOptions
@@ -124,8 +152,8 @@ class ActivityDayTracker {
         }.add(day)
     }
 
-    fun plannedDaysFor(activityType: ActivityType): Int = daysWithActivities[activityType]?.size ?: 0
-
+    fun amountOfDaysWithActivity(activityType: ActivityType): Int = daysWithActivities[activityType]?.size ?: 0
+    fun daysWithActivity(activityType: ActivityType): Set<DurationDay> = daysWithActivities[activityType] ?: emptySet()
 }
 fun Int.positiveModulus(modulo: Int): Int {
     val result  = this % modulo

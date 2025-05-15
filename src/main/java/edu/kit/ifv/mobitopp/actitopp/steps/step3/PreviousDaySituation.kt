@@ -8,14 +8,16 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.ModifiablePlannedTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.modernization.PlannedTourAmounts
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
+import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromStructure
+import edu.kit.ifv.mobitopp.actitopp.steps.DayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.PartialTourLayoutAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.PlannedTourAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 
-interface DayTourPlanAndPreviousTourPlan : PreviousDayAttributes, PlannedTourAttributes
+
 
 class PlannedTourMap(
     private val mapping : Map<DurationDay, ModifiablePlannedTourAmounts>
@@ -40,11 +42,12 @@ class PlannedTourMap(
 
 class PreviousDaySituation private constructor(
     override val choice: Int,
-    val previousDayAttributes: DayTourPlanAndPreviousTourPlan,
+    val previousDayAttributes: PreviousDayAttributes,
     val pAttr: PersonAndRoutineAttributes,
     val plannedTourAttributes: PartialTourLayoutAttributes,
-) : ChoiceSituation<Int>(), DayTourPlanAndPreviousTourPlan by previousDayAttributes,
-    PersonAndRoutineAttributes by pAttr, PartialTourLayoutAttributes by plannedTourAttributes {
+    val structureAttributes: DayStructureAttributes,
+) : ChoiceSituation<Int>(), PreviousDayAttributes by previousDayAttributes,
+    PersonAndRoutineAttributes by pAttr, PartialTourLayoutAttributes by plannedTourAttributes, DayStructureAttributes by structureAttributes {
     constructor(
         choice: Int,
         day: HDay,
@@ -56,8 +59,10 @@ class PreviousDaySituation private constructor(
         choice, PreviousDayAttributesNumeric(day, previousDayBeforeTours, previousDayAfterTours), PersonAndRoutineFrom(
             PersonWithRoutine(person, weekRoutine),
 
+
         ),
-        PartialTourLayoutAttributes{day.amountOfPreviousTours()}
+        PartialTourLayoutAttributes{day.amountOfPreviousTours()},
+        DayAttributesFromElement(day)
     )
 
     constructor(
@@ -73,7 +78,8 @@ class PreviousDaySituation private constructor(
             plannedTourAmounts = previousResults
         ),
         pAttr = PersonAndRoutineFrom(personWithRoutine),
-        plannedTourAttributes = PartialTourLayoutAttributes {plannedPrecursorTours}
+        plannedTourAttributes = PartialTourLayoutAttributes {plannedPrecursorTours},
+        structureAttributes = DayAttributesFromStructure(day),
     )
 
 

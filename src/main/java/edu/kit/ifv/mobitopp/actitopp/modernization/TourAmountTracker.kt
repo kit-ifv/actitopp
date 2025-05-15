@@ -52,8 +52,8 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
     private val map: PlannedTourMap = PlannedTourMap(initialDayStructures)
 
 
-    fun output(): Set<Map.Entry<DurationDay, PlannedTourAmounts>> {
-        return map.readOnly().entries
+    fun output(): Map<DurationDay, PlannedTourAmounts> {
+        return map.readOnly()
     }
 
     fun generateSideTours(targets: List<ModifiableDayStructure>): Map<DurationDay, PlannedTourAmounts> {
@@ -97,7 +97,7 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
 
 }
 
-fun PatternStructure.calculateTourAmounts(person: PersonWithRoutine, rngHelper: RNGHelper = person.person.personalRNG): Set<Map.Entry<DurationDay, PlannedTourAmounts>> {
+fun PatternStructure.calculateTourAmounts(person: PersonWithRoutine, rngHelper: RNGHelper = person.person.personalRNG): Map<DurationDay, PlannedTourAmounts> {
     val tracker = TourAmountTracker(allDays(), person = person, rngHelper = rngHelper)
     tracker.generateSideTours(mobileDays())
     return tracker.output()

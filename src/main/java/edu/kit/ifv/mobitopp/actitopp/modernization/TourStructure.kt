@@ -27,8 +27,8 @@ class TourStructure(
 //    fun amountOfActivities() = queue.size
 
 
-    fun toTour() {
-
+    override fun toString(): String {
+        return "${precursors().joinToString { it.typeasChar.toString() }} [${mainElement().typeasChar}] ${successors().joinToString { it.typeasChar.toString() }}"
     }
 
 }

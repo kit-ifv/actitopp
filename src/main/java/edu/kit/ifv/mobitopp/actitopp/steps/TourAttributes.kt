@@ -5,16 +5,24 @@ import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HTour
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
+import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.Position
+import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import org.jetbrains.annotations.TestOnly
+import kotlin.math.abs
 
-interface TourAttributes: PlannedTourAttributes {
+interface TourPositionAttributes {
     // These are all day attributes
     fun isFirstTourOfDay(): Boolean
     fun isSecondTourOfDay(): Boolean
     fun isThirdTourOfDay(): Boolean
     fun isBeforeMainTour(): Boolean
     fun isAfterMainTour(): Boolean
+}
+
+interface TourAttributes: TourPositionAttributes {
 
     fun tourMainActivityIsWork(): Boolean
     fun tourMainActivityIsEducation(): Boolean
@@ -29,10 +37,93 @@ interface TourAttributes: PlannedTourAttributes {
     fun tourHas3Activities(): Boolean
     fun tourHas4Activities(): Boolean
 }
-class TourAttributesByStructure(): TourAttributes {
+
+class TourPositionAttributesByIndex(val absoluteIndex: Int, val position: Position): TourPositionAttributes {
+    override fun isFirstTourOfDay(): Boolean {
+        return absoluteIndex == 0
+    }
+
+    override fun isSecondTourOfDay(): Boolean {
+        return absoluteIndex == 1
+    }
+
+    override fun isThirdTourOfDay(): Boolean {
+        return absoluteIndex == 2
+    }
+
+    override fun isBeforeMainTour(): Boolean {
+        return position == Position.BEFORE
+    }
+
+    override fun isAfterMainTour(): Boolean {
+        return position == Position.AFTER
+    }
+}
+
+class TourAttributesByIndexedStructure(private val indexedTour: BidirectionalIndexedValue<TourStructure>): TourAttributes, TourPositionAttributes {
+
+    override fun isFirstTourOfDay(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun isSecondTourOfDay(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun isThirdTourOfDay(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun isBeforeMainTour(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun isAfterMainTour(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourMainActivityIsWork(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourMainActivityIsEducation(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourMainActivityIsShopping(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourMainActivityIsTransport(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun numActivitiesBeforeMainActivityIs1(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun numActivitiesBeforeMainActivityIs2(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun numActivitiesBeforeMainActivityIs3(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourHas2Activities(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourHas3Activities(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun tourHas4Activities(): Boolean {
+        TODO("Not yet implemented")
+    }
 
 }
-class TourAttributesByElement(val element: HTour) : TourAttributes {
+class TourAttributesByElement(val element: HTour) : TourAttributes, TourPositionAttributes {
     override fun isFirstTourOfDay(): Boolean = element.index == element.day.lowestTourIndex
     override fun isSecondTourOfDay(): Boolean = element.index == element.day.lowestTourIndex + 1
     override fun isThirdTourOfDay(): Boolean = element.index == element.day.lowestTourIndex + 2
@@ -50,21 +141,21 @@ class TourAttributesByElement(val element: HTour) : TourAttributes {
     override fun tourHas2Activities(): Boolean = element.amountOfActivities == 2
     override fun tourHas3Activities(): Boolean = element.amountOfActivities == 3
     override fun tourHas4Activities(): Boolean = element.amountOfActivities == 4
-    override fun mainActivityIsWork(): Boolean {
-        return element.mainActivity()?.activityType == ActivityType.WORK
-    }
-
-    override fun mainActivityIsEducation(): Boolean {
-        return element.mainActivity()?.activityType == ActivityType.EDUCATION
-    }
-
-    override fun mainActivityIsShopping(): Boolean {
-        return element.mainActivity()?.activityType == ActivityType.SHOPPING
-    }
-
-    override fun mainActivityIsTransport(): Boolean {
-        return element.mainActivity()?.activityType == ActivityType.TRANSPORT
-    }
+//    override fun mainActivityIsWork(): Boolean {
+//        return element.mainActivity()?.activityType == ActivityType.WORK
+//    }
+//
+//    override fun mainActivityIsEducation(): Boolean {
+//        return element.mainActivity()?.activityType == ActivityType.EDUCATION
+//    }
+//
+//    override fun mainActivityIsShopping(): Boolean {
+//        return element.mainActivity()?.activityType == ActivityType.SHOPPING
+//    }
+//
+//    override fun mainActivityIsTransport(): Boolean {
+//        return element.mainActivity()?.activityType == ActivityType.TRANSPORT
+//    }
 }
 
 data class SubTourInput(

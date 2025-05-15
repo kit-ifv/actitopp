@@ -24,6 +24,17 @@ interface DayAttributes {
 }
 
 interface DayStructureAttributes : DayAttributes {
+
+    fun mainActivityIsWork(): Boolean
+    fun mainActivityIsEducation(): Boolean
+    fun mainActivityIsShopping(): Boolean
+    fun mainActivityIsTransport(): Boolean
+}
+
+/**
+ * When the day is completely structured, we can determine the amount of tours.
+ */
+interface FullyQualifiedDayStructureAttributes : DayStructureAttributes {
     fun amountOfToursIs1():Boolean
     fun amountOfToursIs2():Boolean
 }
@@ -32,27 +43,9 @@ fun interface PartialTourLayoutAttributes {
     fun amountOfBeforeTours():Int
 }
 
-interface PlannedTourAttributes {
-    fun mainActivityIsWork(): Boolean
-    fun mainActivityIsEducation(): Boolean
-    fun mainActivityIsShopping(): Boolean
-    fun mainActivityIsTransport(): Boolean
-}
-
-interface DayAndTourPlanAttributes: DayAttributes, PlannedTourAttributes
-
-interface DayAndPartialTourLayout: DayAttributes, PartialTourLayoutAttributes
 
 
-class PartialLayout private constructor(val previousDayAttributes: PreviousDayAttributes,
-    val plannedPrecursorTours:Int): DayAndPartialTourLayout, PreviousDayAttributes by previousDayAttributes   {
-    override fun amountOfBeforeTours(): Int {
-        return plannedPrecursorTours
-    }
-
-}
-
-class DayAttributesFromElement(private val element: HDay) : DayAndTourPlanAttributes, PartialTourLayoutAttributes, DayStructureAttributes {
+class DayAttributesFromElement(private val element: HDay) :  PartialTourLayoutAttributes, DayStructureAttributes, FullyQualifiedDayStructureAttributes {
     override fun isMonday() = element.weekday == DayOfWeek.MONDAY
     override fun isTuesday() = element.weekday == DayOfWeek.TUESDAY
     override fun isWednesday() = element.weekday == DayOfWeek.WEDNESDAY
@@ -70,7 +63,7 @@ class DayAttributesFromElement(private val element: HDay) : DayAndTourPlanAttrib
     override fun mainActivityIsTransport(): Boolean = element.mainTourType == ActivityType.TRANSPORT
 }
 
-class DayAttributesFromStructure(private val element: DayStructure): DayAndTourPlanAttributes, PartialTourLayoutAttributes, DayStructureAttributes {
+class DayAttributesFromStructure(private val element: DayStructure):  PartialTourLayoutAttributes, DayStructureAttributes, FullyQualifiedDayStructureAttributes {
 
     override fun isMonday() = element.weekday == DayOfWeek.MONDAY
     override fun isTuesday() = element.weekday == DayOfWeek.TUESDAY

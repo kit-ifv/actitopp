@@ -3,6 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
+import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import java.time.DayOfWeek
 import java.util.NavigableMap
@@ -34,6 +35,11 @@ class HDay(parent: HWeekPattern, override val weekday: DayOfWeek) : DayStructure
     override fun amountOfElements(): Int {
         TODO("Not yet implemented")
     }
+
+    override fun elements(): Collection<TourStructure> {
+        TODO("Not yet implemented")
+    }
+
 
     private val mappedTours: NavigableMap<Int, HTour> = TreeMap()
     val tours: Collection<HTour> get() = mappedTours.values

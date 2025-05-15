@@ -2,46 +2,30 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step3
 
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
-import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.PlannedTourAmounts
-import edu.kit.ifv.mobitopp.actitopp.steps.DayAndTourPlanAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromStructure
-import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromWeekday
+import edu.kit.ifv.mobitopp.actitopp.steps.DayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 
 
-interface PreviousDayAttributes : DayAttributes {
+interface PreviousDayAttributes  {
     fun previousDayHasNoBeforeTour(): Boolean
     fun previousDayHasOneBeforeTour(): Boolean
     fun previousDayHasNoAfterTour(): Boolean
     fun previousDayHasOneAfterTour(): Boolean
 }
 
-//class PreviousDayAttributesFromElement(
-//    val day: HDay,
-//    private val previousDay: HDay?,
-//    private val dayAttributesFromElement: DayAttributesFromElement = DayAttributesFromElement(day),
-//) : PreviousDayAttributes, DayAttributes by dayAttributesFromElement {
-//
-//    override fun previousDayHasNoBeforeTour(): Boolean = (previousDay?.hasNoPreviousTours()) ?: false
-//
-//    override fun previousDayHasOneBeforeTour(): Boolean = (previousDay?.amountOfPreviousTours() == 1)
-//
-//    override fun previousDayHasNoAfterTour(): Boolean = previousDay?.hasNoLaterTours() ?: false
-//
-//    override fun previousDayHasOneAfterTour(): Boolean = previousDay?.amountOfLaterTours() == 1
-//}
 
 class PreviousDayAttributesNumeric(
-    val dayAttributes: DayAndTourPlanAttributes,
+    val dayAttributes: DayStructureAttributes,
     val previousDayBeforeTours: Int?,
     val previousDayAfterTours: Int?,
-) : DayTourPlanAndPreviousTourPlan, DayAndTourPlanAttributes by dayAttributes {
+) : PreviousDayAttributes, DayStructureAttributes by dayAttributes {
 
 
     constructor(

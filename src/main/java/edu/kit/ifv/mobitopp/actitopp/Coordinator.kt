@@ -6,6 +6,7 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.modernization.Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.UtilityFunctionCalculator
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
@@ -127,7 +128,14 @@ class Coordinator @JvmOverloads constructor(
             "Mismatch between successor tour amounts ${person.id}"
         }
         executeStep4("4A")
+        val generator = Generator(patternStructure, personWithRoutine, rngCopy)
+        generator.loadSideTours(tourAmounts)
 
+        val legacyActivityTypes = pattern.days.map { it.tours.map { it.activities.map { it.activityType } } }
+        val moderniedSideAc = patternStructure.allDays().map { it.elements().map { it.elements() } }
+        require(legacyActivityTypes.flatten().flatten().zip(moderniedSideAc.flatten().flatten()).all { (a, b) -> a == b }) {
+            "There are some activities that did not get the correct assignment :/"
+        }
         executeStep5("5A") // Create Activities before main activity (?)
         executeStep5("5B") // Create Activities after  main activity (?)
 
