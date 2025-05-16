@@ -2,7 +2,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps
 
 import edu.kit.ifv.mobitopp.actitopp.HActivity
 
-interface ActivityAttributes {
+fun interface ActivityAttributes {
     fun isBeforeMainActivity(): Boolean
 }
 

@@ -96,7 +96,7 @@ class PatternStructure(
 
 class Generator(private val patternStructure: PatternStructure, private val personWithRoutine: PersonWithRoutine, val rngHelper: RNGHelper = personWithRoutine.person.personalRNG) {
 
-    val mainActivityOfSideTours: AssignMainActivities = AssignByUtilityFunction(patternStructure, rngHelper)
+    val mainActivityOfSideTours: AssignMainActivityOfSideTour = AssignByUtilityFunction(patternStructure, rngHelper)
     fun generateSideTours(tourAmounts: Map<DurationDay, PlannedTourAmounts>): Map<ModifiableDayStructure, Pair<List<ActivityType>, List<ActivityType>>> {
         return patternStructure.mobileDays().associateWith {
             val input = DayWithPlans(it, personWithRoutine, tourAmounts[it.startTimeDay] ?: PlannedTourAmounts.NONE)

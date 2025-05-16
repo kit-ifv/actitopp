@@ -14,11 +14,13 @@ class DayWithPlans(
 )
 
 
-fun interface AssignMainActivities {
+fun interface AssignMainActivityOfSideTour {
     fun generateSideTourActivities(input: DayWithPlans): Pair<List<ActivityType>, List<ActivityType>>
 }
 
-class AssignByUtilityFunction(private val patternStructure: PatternStructure, val rngHelper: RNGHelper) : AssignMainActivities {
+
+
+class AssignByUtilityFunction(private val patternStructure: PatternStructure, val rngHelper: RNGHelper) : AssignMainActivityOfSideTour {
     override fun generateSideTourActivities(input: DayWithPlans): Pair<List<ActivityType>, List<ActivityType>> {
         val plannedPrecursors = input.plannedTourAmounts.precursorAmount
         val plannedSuccessors = input.plannedTourAmounts.successorAmount
@@ -58,6 +60,5 @@ class AssignByUtilityFunction(private val patternStructure: PatternStructure, va
                 }
             }
         }
-
     }
 }

@@ -6,8 +6,10 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType.Companion.getTypeFromChar
 import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
+import edu.kit.ifv.mobitopp.actitopp.modernization.ExampleAssign
 import edu.kit.ifv.mobitopp.actitopp.modernization.Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.Step5Generator
 
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
@@ -139,19 +141,28 @@ class Coordinator @JvmOverloads constructor(
         }
         executeStep5("5A") // Create Activities before main activity (?)
         executeStep5("5B") // Create Activities after  main activity (?)
-        val trackers = patternStructure.mobileDays().map {
-            DayAmountTracker(it, rngCopy, personWithRoutine)
-        }
 
-        val pred = trackers.map { it.generatePredecessors() }
-        val succ = trackers.map {
-            it.generateSuccessors()
-        }
+        val step5Gen = Step5Generator(patternStructure, personWithRoutine, rngCopy)
+        step5Gen.calculate()
+
+//        val trackers = patternStructure.mobileDays().associateWith {
+//            DayAmountTracker(it, rngCopy, personWithRoutine)
+//        }
+
+//        val pred = trackers.values.map { it.generatePredecessors() }
+//        val succ = trackers.values.map {
+//            it.generateSuccessors()
+//        }
+
+        val pred = step5Gen.output().values.flatMap { it.values.map { it.precursorAmount } }
+        val succ = step5Gen.output().values.flatMap { it.values.map { it.successorAmount } }
 
         val legacyTourActivitiesPred = pattern.allTours.map{ it.activities.filter { it.index < 0 }.count()}
         val legacyTourActivitiesSucc = pattern.allTours.map{ it.activities.filter { it.index > 0 }.count()}
-        val modernizedTourActivitiesPred = pred.flatMap { it.values }
-        val modernizedTourActivitiesSucc = succ.flatMap { it.values }
+        val modernizedTourActivitiesPred = pred
+//        val modernizedTourActivitiesPred = pred.flatMap { it.values }
+        val modernizedTourActivitiesSucc = succ
+//        val modernizedTourActivitiesSucc = succ.flatMap { it.values }
         require(legacyTourActivitiesPred.zip(modernizedTourActivitiesPred).all { (a, b) -> a == b }) {
             "Misaligned amount of tour pred activity counts ${person.id}"
         }
@@ -160,6 +171,9 @@ class Coordinator @JvmOverloads constructor(
             "Misaligned amount of tour succ activity counts ${person.id}"
         }
         executeStep6("6A") // Determine Activity Type for all non main activities (?)
+
+        val nextStep = ExampleAssign(patternStructure, personWithRoutine, rngCopy)
+//        nextStep.generateSecondaryActivityTypes()
 
         createTripTimesforActivities()
 
@@ -560,10 +574,7 @@ class Coordinator @JvmOverloads constructor(
 
                 // make selection
                 val decision = step.doStep()
-//                // TODO remove
-//                if(id == "5B") {
-//                     step.printUtilities()
-//                }
+
 
 
 

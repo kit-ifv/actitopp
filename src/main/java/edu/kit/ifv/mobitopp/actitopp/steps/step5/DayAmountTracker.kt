@@ -19,9 +19,9 @@ class DayAmountTracker(val day: DayStructure, val rngHelper: RNGHelper, val pers
     private val predecessorGenerator = PrecedingSpawns(rngHelper)
 
     private val map: MutableMap<BidirectionalIndexedValue<TourStructure>, Int> = mutableMapOf()
-    private val indexedTours = day.indexedElements()
+//    private val indexedTours = day.indexedElements()
 
-    fun generatePredecessors(): Map<BidirectionalIndexedValue<TourStructure>, Int> {
+    fun generatePredecessors(indexedTours: Collection<BidirectionalIndexedValue<TourStructure>>): Map<BidirectionalIndexedValue<TourStructure>, Int> {
         val predecessorActivityAmounts = indexedTours.associateWith {
             generatePredecessorActivityAmounts(it, calculateMinimumAmount()).also { amount ->
                 remainingPlacements -= amount
@@ -33,7 +33,7 @@ class DayAmountTracker(val day: DayStructure, val rngHelper: RNGHelper, val pers
         return predecessorActivityAmounts
     }
 
-    fun generateSuccessors(): Map<BidirectionalIndexedValue<TourStructure>, Int> {
+    fun generateSuccessors(indexedTours: Collection<BidirectionalIndexedValue<TourStructure>>): Map<BidirectionalIndexedValue<TourStructure>, Int> {
         val successorActivityAmounts = indexedTours.associateWith {
             generateSuccessorActivityAmounts(it, calculateMinimumAmount()).also { amount ->
                 remainingPlacements -= amount
