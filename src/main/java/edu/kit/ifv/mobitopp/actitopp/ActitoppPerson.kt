@@ -379,26 +379,14 @@ class ActitoppPerson@JvmOverloads constructor(
         return employment.isStudentOrAzubi()
     }
 
-    //TODO why is "AndMainToursAreScheduled" Part of this field, because that is absolutely not accessed
-    val isPersonWorkorSchoolCommuterAndMainToursAreScheduled: Boolean
-        /**
-         * @return
-         */
+
+    val isCommuterWithAtLeastOneMatchingTour: Boolean
         get() {
-            if (isAnywayEmployed() || isinEducation()) {
-                for (day in weekPattern.days) {
-                    for (tour in day.tours) {
-                        if (tour.getActivity(0).activityType == ActivityType.WORK || tour.getActivity(0)
-                                .activityType == ActivityType.EDUCATION
-                        ) {
-                            return true
-                        }
-                    }
-                }
-            } else {
-                return false
-            }
-            return false
+            if(!isAnywayEmployed() && !isinEducation()) return false
+            return weekPattern.days.any { day -> day.tours.any { tour ->
+                val mainActivityType = tour.getActivity(0).activityType
+                mainActivityType == ActivityType.WORK || mainActivityType == ActivityType.EDUCATION
+            } }
         }
 
 
