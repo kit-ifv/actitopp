@@ -556,7 +556,7 @@ class HActivity @JvmOverloads constructor(
 
         /**
          * create start times for activities in list when they can be determined
-         *
+         * (Spoiler: They can never be determined)
          * @param actliste
          */
         @Deprecated("This method does absolutely nothing...")

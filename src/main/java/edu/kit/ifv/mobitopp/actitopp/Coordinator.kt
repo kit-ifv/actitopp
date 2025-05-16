@@ -214,11 +214,11 @@ class Coordinator @JvmOverloads constructor(
 
 
         executeStep8A("8A") // This step only determines whether the histogram will be shifted after a selection has been made
-        executeStep8_MainAct("8B", "8C") // The first tour of each day is assigned a
-        executeStep8_MainAct("8D", "8E")
-        executeStep8_NonMainAct("8J", "8K")
+        executeStep8_MainAct("8B", "8C") // The first tour main activity is assigned a duration
+        executeStep8_MainAct("8D", "8E") // The main activity of the other tours is assigned a duration
+        executeStep8_NonMainAct("8J", "8K") // All other activities are assigned a duration
 
-        executeStep9A("9A")
+        executeStep9A("9A") // This is just a binary decision (yes/no) whether
 
         executeStep10A("10A") // Appears to be a fixed start for work/edu first tours ?/
 

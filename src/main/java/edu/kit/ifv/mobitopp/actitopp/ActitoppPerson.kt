@@ -379,7 +379,7 @@ class ActitoppPerson@JvmOverloads constructor(
         return employment.isStudentOrAzubi()
     }
 
-
+    //TODO why is "AndMainToursAreScheduled" Part of this field, because that is absolutely not accessed
     val isPersonWorkorSchoolCommuterAndMainToursAreScheduled: Boolean
         /**
          * @return
