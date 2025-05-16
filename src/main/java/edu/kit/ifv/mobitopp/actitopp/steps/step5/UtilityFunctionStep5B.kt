@@ -1,7 +1,6 @@
 package edu.kit.ifv.mobitopp.actitopp.steps.step5
 
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.TourSituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.TourSituationInt
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
@@ -165,8 +164,8 @@ private val standardUtilityFunction: ParameterStep5B.(TourSituationInt) -> Doubl
                 (it.numActivitiesBeforeMainActivityIs1()) * anzaktvorhauptaktist1+
                 (it.numActivitiesBeforeMainActivityIs2()) * anzaktvorhauptaktist2+
                 (it.numActivitiesBeforeMainActivityIs3()) * anzaktvorhauptaktist3+
-                (it.mainActivityIsWork()) * tourtyp_work+
-                (it.mainActivityIsEducation()) * tourtyp_education+
+                (it.tourMainActivityIsWork()) * tourtyp_work+
+                (it.tourMainActivityIsEducation()) * tourtyp_education+
                 (it.isSaturday()) * tag_sa+
                 (it.isSunday()) * tag_so+
                 (it.isAged18To35()) * alter_18bis35+

@@ -8,12 +8,13 @@ import edu.kit.ifv.mobitopp.actitopp.enums.JointStatus
 import edu.kit.ifv.mobitopp.actitopp.enums.TripStatus
 import edu.kit.ifv.mobitopp.actitopp.modernization.Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
-import edu.kit.ifv.mobitopp.actitopp.modernization.UtilityFunctionCalculator
+
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.generateMainActivities
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step5.DayAmountTracker
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.HistogramPerActivity
 import kotlin.math.max
@@ -138,7 +139,26 @@ class Coordinator @JvmOverloads constructor(
         }
         executeStep5("5A") // Create Activities before main activity (?)
         executeStep5("5B") // Create Activities after  main activity (?)
+        val trackers = patternStructure.mobileDays().map {
+            DayAmountTracker(it, rngCopy, personWithRoutine)
+        }
 
+        val pred = trackers.map { it.generatePredecessors() }
+        val succ = trackers.map {
+            it.generateSuccessors()
+        }
+
+        val legacyTourActivitiesPred = pattern.allTours.map{ it.activities.filter { it.index < 0 }.count()}
+        val legacyTourActivitiesSucc = pattern.allTours.map{ it.activities.filter { it.index > 0 }.count()}
+        val modernizedTourActivitiesPred = pred.flatMap { it.values }
+        val modernizedTourActivitiesSucc = succ.flatMap { it.values }
+        require(legacyTourActivitiesPred.zip(modernizedTourActivitiesPred).all { (a, b) -> a == b }) {
+            "Misaligned amount of tour pred activity counts ${person.id}"
+        }
+
+        require(legacyTourActivitiesSucc.zip(modernizedTourActivitiesSucc).all { (a, b) -> a == b }) {
+            "Misaligned amount of tour succ activity counts ${person.id}"
+        }
         executeStep6("6A") // Determine Activity Type for all non main activities (?)
 
         createTripTimesforActivities()
@@ -540,6 +560,12 @@ class Coordinator @JvmOverloads constructor(
 
                 // make selection
                 val decision = step.doStep()
+//                // TODO remove
+//                if(id == "5B") {
+//                     step.printUtilities()
+//                }
+
+
 
                 log(id, currentTour, decision.toString())
 

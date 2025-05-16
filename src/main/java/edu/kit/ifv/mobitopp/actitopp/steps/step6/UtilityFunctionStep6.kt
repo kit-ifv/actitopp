@@ -8,7 +8,6 @@ import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributesByElement
-import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.FullyQualifiedDayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
@@ -19,8 +18,6 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.TourSituation
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.TourSituationInt
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ModifiableDiscreteChoiceModel
@@ -220,10 +217,10 @@ private val standardUtilityFunction: ParameterStep6.(ActivitySituation) -> Doubl
                 (it.isFriday()) * tag_fr+
                 (it.isSaturday()) * tag_sa+
                 (it.isSunday()) * tag_so+
-                (it.mainActivityIsWork()) * haupttour_work+
-                (it.mainActivityIsEducation()) * haupttour_education+
-                (it.mainActivityIsShopping()) * haupttour_shopping+
-                (it.mainActivityIsTransport()) * haupttour_transport+
+                (it.dayMainActivityIsWork()) * haupttour_work+
+                (it.dayMainActivityIsEducation()) * haupttour_education+
+                (it.dayMainActivityIsShopping()) * haupttour_shopping+
+                (it.dayMainActivityIsTransport()) * haupttour_transport+
                 (it.tourHas2Activities()) * tourhat2akt+
                 (it.tourHas3Activities()) * tourhat3akt+
                 (it.tourHas4Activities()) * tourhat4akt+

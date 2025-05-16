@@ -156,10 +156,10 @@ private val standardUtilityFunction: ParameterStep5A.(TourSituationInt) -> Doubl
 
     (it.isBeforeMainTour()) * tourliegtvorhaupttour+
         (it.isAfterMainTour()) * tourliegtnachhaupttour+
-        (it.mainActivityIsWork()) * tourtyp_work+
-        (it.mainActivityIsEducation()) * tourtyp_education+
-        (it.mainActivityIsShopping()) * tourtyp_shopping+
-        (it.mainActivityIsTransport()) * tourtyp_transport+
+        (it.tourMainActivityIsWork()) * tourtyp_work+
+        (it.tourMainActivityIsEducation()) * tourtyp_education+
+        (it.tourMainActivityIsShopping()) * tourtyp_shopping+
+        (it.tourMainActivityIsTransport()) * tourtyp_transport+
         (it.isSaturday()) * tag_sa+
         (it.isSunday()) * tag_so+
         (it.isAged18To35()) * alter_18bis35+

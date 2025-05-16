@@ -1,6 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
@@ -37,6 +38,10 @@ class HDay(parent: HWeekPattern, override val weekday: DayOfWeek) : DayStructure
     }
 
     override fun elements(): Collection<TourStructure> {
+        TODO("Not yet implemented")
+    }
+
+    override fun indexedElements(): Collection<BidirectionalIndexedValue<TourStructure>> {
         TODO("Not yet implemented")
     }
 

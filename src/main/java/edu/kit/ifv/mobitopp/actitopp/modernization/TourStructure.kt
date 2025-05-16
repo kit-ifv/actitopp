@@ -15,13 +15,13 @@ import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
 class TourStructure(
     mainActivityType: ActivityType,
 ):BidirectionalQueue<ActivityType>(mainActivityType) {
-//    private val queue: ArrayDeque<ActivityType> = ArrayDeque()
-//    private var offset = 0
 
 
-//    fun mainActivityType(): ActivityType {
-//        return queue[offset]
-//    }
+
+
+    fun mainActivityType(): ActivityType {
+        return get(0)
+    }
 //
 //    fun amountOfPrecursors() = offset
 //    fun amountOfActivities() = queue.size

@@ -67,5 +67,5 @@ fun Collection<ActitoppPerson>.generateSchedules() {
 }
 fun main() {
     val targets = generateHouseholds(1000).flatMap { it.generatePersons(5) }
-    targets.generateSchedules()
+    targets.drop(38).generateSchedules()
 }

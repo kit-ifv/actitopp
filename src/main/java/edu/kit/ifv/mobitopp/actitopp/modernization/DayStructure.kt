@@ -39,6 +39,10 @@ class BidirectionalIndexedValue<T>(
     val element: T,
 ) {
     val position = Position.fromRelativeIndex(absoluteIndex - offset)
+
+    override fun toString(): String {
+        return "($element, $position indices = [$absoluteIndex, $offset])"
+    }
 }
 
 /**
@@ -49,7 +53,7 @@ interface BidirectionalCollection<T> {
     fun amountOfElements(): Int
     fun amountOfPrecursorElements(): Int
     fun amountOfSuccessorElements(): Int
-
+    val size: Int
     operator fun get(index: Int = 0): T
     fun mainElement() = get(0)
     fun indexedElements(): Collection<BidirectionalIndexedValue<T>>
@@ -103,6 +107,8 @@ abstract class BidirectionalQueue<T>(mainElement: T) : BidirectionalCollection<T
         return queue
     }
 
+    override val size: Int
+        get() = queue.size
 
 }
 // TODO seal interface once HDay is killed
@@ -123,8 +129,11 @@ interface DayStructure {
     fun amountOfElements(): Int
 
     fun elements(): Collection<TourStructure>
+    fun indexedElements(): Collection<BidirectionalIndexedValue<TourStructure>>
+    fun amountOfActivities() = elements().sumOf { it.size }
     fun getPlannedTourAmounts():PlannedTourAmounts = PlannedTourAmounts(amountOfPrecursorElements(), amountOfSuccessorElements())
     val minimumAmountOfToursByJointActions: Int get() {throw UnsupportedOperationException("Nope")}
+    val minimumAmountOfActivitiesByJointActions: Int get() {throw UnsupportedOperationException("Nope")}
 }
 
 class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
@@ -139,6 +148,7 @@ class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
     override fun getPlannedTourAmounts(): PlannedTourAmounts = PlannedTourAmounts.NONE
     override val minimumAmountOfToursByJointActions: Int = 0
     override fun elements(): Collection<TourStructure> = emptySet()
+    override fun indexedElements(): Collection<BidirectionalIndexedValue<TourStructure>> = emptySet()
 }
 
 class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStructure: TourStructure) :
@@ -149,6 +159,8 @@ class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStr
     override val duration = startTimeDay.timePoint
     // TODO maybe protect this field from modification, right now it is just a template holder for 3A
     override var minimumAmountOfToursByJointActions: Int = 0
+    // TODO, joint action modelling should not be interweaved with normal structures.
+    override val minimumAmountOfActivitiesByJointActions: Int = 0
     fun loadPrecursors(activityTypes: Collection<ActivityType>) {
         activityTypes.reversed().forEach {
             addPrecursor(TourStructure(it))

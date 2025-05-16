@@ -5,14 +5,14 @@ import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HTour
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
-import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
+import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
+import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAmountAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAmountByNumber
 import edu.kit.ifv.mobitopp.actitopp.steps.PersonAttributes
-import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromElement
 import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromStructure
-import edu.kit.ifv.mobitopp.actitopp.steps.DayAttributesFromWeekday
-import edu.kit.ifv.mobitopp.actitopp.steps.DayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.FullyQualifiedDayStructureAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
@@ -21,6 +21,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributesByElement
+import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributesByIndexedStructure
 import edu.kit.ifv.mobitopp.actitopp.steps.TourPositionAttributes
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.AllocatedLogit
 import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.ChoiceSituation
@@ -201,17 +202,29 @@ class TourSituation private constructor(
 class TourSituationInt private constructor(
     override val choice: Int, personAndRoutineAttributes: PersonAndRoutineAttributes,
     dayAttributes: FullyQualifiedDayStructureAttributes, tourAttributes: TourAttributes,
+    activityAmountAttributes: ActivityAmountAttributes,
 
     ) :
     ChoiceSituation<Int>(), TourAttributes by tourAttributes, PersonAttributes by personAndRoutineAttributes,
-    RoutineAttributes by personAndRoutineAttributes, FullyQualifiedDayStructureAttributes by dayAttributes {
+    RoutineAttributes by personAndRoutineAttributes, FullyQualifiedDayStructureAttributes by dayAttributes, ActivityAmountAttributes by activityAmountAttributes {
 
     constructor(choice: Int, person: ActitoppPerson, routine: WeekRoutine, day: HDay, tour: HTour): this(
         choice,
         PersonAndRoutineFrom(PersonWithRoutine(person, routine)),
         DayAttributesFromElement(day),
+        TourAttributesByElement(tour),
         TourAttributesByElement(tour)
     )
+
+    constructor(choice: Int, person: ActitoppPerson, routine: WeekRoutine, day: DayStructure, tour: BidirectionalIndexedValue<TourStructure>, amountOfPrecursorActivities: Int): this(
+        choice,
+        PersonAndRoutineFrom(PersonWithRoutine(person, routine)),
+        DayAttributesFromStructure(day),
+        TourAttributesByIndexedStructure(tour),
+        ActivityAmountByNumber(amountOfPrecursorActivities),
+    )
+
+
 
 }
 
@@ -233,10 +246,10 @@ private val standardUtilityFunction: ParameterStep4.(TourSituation) -> Double = 
             (it.isNotEarningMoney()) * employmentNotEarning +
             (it.isStudent()) * employmentStudent +
             (it.isVocational()) * employmentVocational +
-            (it.mainActivityIsWork()) * mainTourWork +
-            (it.mainActivityIsEducation()) * mainTourEducation +
-            (it.mainActivityIsShopping()) * mainTourShopping +
-            (it.mainActivityIsTransport()) * mainTourTransport +
+            (it.dayMainActivityIsWork()) * mainTourWork +
+            (it.dayMainActivityIsEducation()) * mainTourEducation +
+            (it.dayMainActivityIsShopping()) * mainTourShopping +
+            (it.dayMainActivityIsTransport()) * mainTourTransport +
             (it.isFriday()) * friday +
             (it.isSaturday()) * saturday +
             (it.isSunday()) * sunday +

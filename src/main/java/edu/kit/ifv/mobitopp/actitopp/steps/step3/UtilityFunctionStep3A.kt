@@ -220,9 +220,9 @@ val step3AWithParams = step3AModel.initializeWithParameters(ParameterSet3A)
 private val standardUtilityFunction: ParameterStep3A.(PreviousDaySituation) -> Double = {
     base +
             (it.isFulltimeEmployee()) * employmentFullTime +
-            (it.mainActivityIsWork()) * mainActivityIsWork +
-            (it.mainActivityIsEducation()) * mainActivityIsEducation +
-            (it.mainActivityIsShopping()) * mainActivityIsShopping +
+            (it.dayMainActivityIsWork()) * mainActivityIsWork +
+            (it.dayMainActivityIsEducation()) * mainActivityIsEducation +
+            (it.dayMainActivityIsShopping()) * mainActivityIsShopping +
             (it.isSaturday()) * saturday +
             (it.isSunday()) * sunday +
             (it.isMale()) * male +

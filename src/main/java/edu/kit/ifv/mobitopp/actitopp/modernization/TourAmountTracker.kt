@@ -2,14 +2,10 @@ package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.DayWithBounds
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursFollowing
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.GenerateSideToursPreceeding
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PlannedTourMap
 import edu.kit.ifv.mobitopp.actitopp.steps.step3.PrecedingInput
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDaySituation
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3AWithParams
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.step3BWithParams
 
 
 interface PlannedTourAmounts {
@@ -27,7 +23,7 @@ interface PlannedTourAmounts {
         }
     }
 }
-
+// TODO rename, since this is now used in both day -> tour prec/succ and in tour -> act prec&succ
 data class ModifiablePlannedTourAmounts(
     override var precursorAmount: Int = 0,
     override var successorAmount: Int = 0,
@@ -56,6 +52,9 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
         return map.readOnly()
     }
 
+    /**
+     * Use ModifiableDayStructure as input to prevent home days to sneak into this calculation.
+     */
     fun generateSideTours(targets: List<ModifiableDayStructure>): Map<DurationDay, PlannedTourAmounts> {
         generatePredecessorTourAmounts(targets)
         generateSuccessorTourAmounts(targets)
@@ -64,7 +63,7 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
     /** step 3A
      *
      */
-    private fun generatePredecessorTourAmounts(targets: List<ModifiableDayStructure>): List<Int> {
+    private fun generatePredecessorTourAmounts(targets: List<DayStructure>): List<Int> {
         val generator = GenerateSideToursPreceeding(rngHelper)
         return targets.map {
             val currentPlan = map.getModifiablePlannedTourAmounts(it)
@@ -81,7 +80,7 @@ class TourAmountTracker(initialDayStructures: Collection<DayStructure>, val pers
     /**
      * Step 3B
      */
-    private fun generateSuccessorTourAmounts(targets: List<ModifiableDayStructure>): List<Int> {
+    private fun generateSuccessorTourAmounts(targets: List<DayStructure>): List<Int> {
         val generator = GenerateSideToursFollowing(rngHelper)
         return targets.map {
             val currentPlan = map.getModifiablePlannedTourAmounts(it)
@@ -114,27 +113,3 @@ fun interface CalculatePlannedTourAmounts {
     ): PlannedTourAmounts
 }
 
-object UtilityFunctionCalculator : CalculatePlannedTourAmounts {
-    override fun plannedTourAmounts(
-        person: PersonWithRoutine,
-        day: DayStructure,
-        previousPlannedAmounts: PlannedTourAmounts?,
-        randomNumber: Double,
-        randomNumber2: Double,
-    ): PlannedTourAmounts {
-        println("$randomNumber $randomNumber2")
-        println(step3AWithParams.registeredOptions())
-        val plannedPrecursorTours =
-            step3AWithParams.select(randomNumber) { PreviousDaySituation(it, day, previousPlannedAmounts, person, 0) }
-        val plannedSuccessorTours = step3BWithParams.select(randomNumber2) {
-            PreviousDaySituation(
-                it,
-                day,
-                previousPlannedAmounts,
-                person,
-                plannedPrecursorTours
-            )
-        }
-        return ModifiablePlannedTourAmounts(plannedPrecursorTours, plannedSuccessorTours)
-    }
-}

@@ -4,7 +4,6 @@ import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
-import edu.kit.ifv.mobitopp.actitopp.steps.step3.PreviousDayAttributes
 import java.time.DayOfWeek
 
 interface DayAttributes {
@@ -25,10 +24,10 @@ interface DayAttributes {
 
 interface DayStructureAttributes : DayAttributes {
 
-    fun mainActivityIsWork(): Boolean
-    fun mainActivityIsEducation(): Boolean
-    fun mainActivityIsShopping(): Boolean
-    fun mainActivityIsTransport(): Boolean
+    fun dayMainActivityIsWork(): Boolean
+    fun dayMainActivityIsEducation(): Boolean
+    fun dayMainActivityIsShopping(): Boolean
+    fun dayMainActivityIsTransport(): Boolean
 }
 
 /**
@@ -57,10 +56,10 @@ class DayAttributesFromElement(private val element: HDay) :  PartialTourLayoutAt
     override fun amountOfBeforeTours(): Int = -1 * element.lowestTourIndex
     override fun amountOfToursIs1(): Boolean = element.amountOfTours == 1
     override fun amountOfToursIs2(): Boolean = element.amountOfTours == 2
-    override fun mainActivityIsWork(): Boolean = element.mainTourType == ActivityType.WORK
-    override fun mainActivityIsEducation(): Boolean = element.mainTourType == ActivityType.EDUCATION
-    override fun mainActivityIsShopping(): Boolean = element.mainTourType == ActivityType.SHOPPING
-    override fun mainActivityIsTransport(): Boolean = element.mainTourType == ActivityType.TRANSPORT
+    override fun dayMainActivityIsWork(): Boolean = element.mainTourType == ActivityType.WORK
+    override fun dayMainActivityIsEducation(): Boolean = element.mainTourType == ActivityType.EDUCATION
+    override fun dayMainActivityIsShopping(): Boolean = element.mainTourType == ActivityType.SHOPPING
+    override fun dayMainActivityIsTransport(): Boolean = element.mainTourType == ActivityType.TRANSPORT
 }
 
 class DayAttributesFromStructure(private val element: DayStructure):  PartialTourLayoutAttributes, DayStructureAttributes, FullyQualifiedDayStructureAttributes {
@@ -76,10 +75,10 @@ class DayAttributesFromStructure(private val element: DayStructure):  PartialTou
     override fun amountOfBeforeTours(): Int = element.amountOfPrecursorElements()
     override fun amountOfToursIs1(): Boolean = element.amountOfElements() ==1
     override fun amountOfToursIs2(): Boolean = element.amountOfElements() ==2
-    override fun mainActivityIsWork(): Boolean = element.mainActivityType() == ActivityType.WORK
-    override fun mainActivityIsEducation(): Boolean = element.mainActivityType() == ActivityType.EDUCATION
-    override fun mainActivityIsShopping(): Boolean = element.mainActivityType() == ActivityType.SHOPPING
-    override fun mainActivityIsTransport(): Boolean = element.mainActivityType() == ActivityType.TRANSPORT
+    override fun dayMainActivityIsWork(): Boolean = element.mainActivityType() == ActivityType.WORK
+    override fun dayMainActivityIsEducation(): Boolean = element.mainActivityType() == ActivityType.EDUCATION
+    override fun dayMainActivityIsShopping(): Boolean = element.mainActivityType() == ActivityType.SHOPPING
+    override fun dayMainActivityIsTransport(): Boolean = element.mainActivityType() == ActivityType.TRANSPORT
 }
 
 class DayAttributesFromWeekday(private val element: DayOfWeek): DayAttributes {
