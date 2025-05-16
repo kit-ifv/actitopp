@@ -213,19 +213,19 @@ class Coordinator @JvmOverloads constructor(
 
 
 
-        executeStep8A("8A")
-        executeStep8_MainAct("8B", "8C")
+        executeStep8A("8A") // This step only determines whether the histogram will be shifted after a selection has been made
+        executeStep8_MainAct("8B", "8C") // The first tour of each day is assigned a
         executeStep8_MainAct("8D", "8E")
         executeStep8_NonMainAct("8J", "8K")
 
         executeStep9A("9A")
 
-        executeStep10A("10A")
+        executeStep10A("10A") // Appears to be a fixed start for work/edu first tours ?/
 
         createTourStartTimesDueToScheduledActivities()
 
-        executeStep10("10M", "10N", 1)
-        executeStep10("10O", "10P", 2)
+        executeStep10("10M", "10N", 1) // Calculates start time for tour number 1 per day
+        executeStep10("10O", "10P", 2) // Calculates start time for tour number 2 per day
 
         executeStep10ST()
 
@@ -1320,7 +1320,7 @@ class Coordinator @JvmOverloads constructor(
                     val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
                     val decision = step.doStep()
 
-                    log(id, currentTour, step.alternativeChosen.toString())
+                    log(id, currentTour, step.alternativeChosen)
 
                     currentTour.addAttributetoMap(
                         "default_start_cat_yes",
@@ -1333,8 +1333,9 @@ class Coordinator @JvmOverloads constructor(
 
 
     /**
-     * determine tour start times for tours where start time is known because of joint activities originating from other household members
-     *
+     * determine tour start times for tours where start time is known because of joint activities originating from other
+     * household members
+     * TODO the approach of scheduling joint actions can be done more efficiently, when using finalizedpattern
      * @throws InvalidPatternException
      */
     @Throws(InvalidPatternException::class)
@@ -1630,14 +1631,18 @@ class Coordinator @JvmOverloads constructor(
 
             if (act < tmpact) {
                 //System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
-                if (tmpact.startTimeisScheduled() && (last_act_scheduled == null || tmpact.startTime > last_act_scheduled.startTime)) last_act_scheduled =
+                if (tmpact.startTimeisScheduled() && (last_act_scheduled == null ||
+                            tmpact.startTime > last_act_scheduled.startTime))
+                    last_act_scheduled =
                     tmpact
             }
 
             // Search for later activity with determined starting time
             if (act > tmpact) {
                 //System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
-                if (tmpact.startTimeisScheduled() && (next_act_scheduled == null || tmpact.startTime < next_act_scheduled.startTime)) next_act_scheduled =
+                if (tmpact.startTimeisScheduled() && (next_act_scheduled == null
+                            || tmpact.startTime < next_act_scheduled.startTime))
+                    next_act_scheduled =
                     tmpact
             }
         }

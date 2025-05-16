@@ -559,6 +559,7 @@ class HActivity @JvmOverloads constructor(
          *
          * @param actliste
          */
+        @Deprecated("This method does absolutely nothing...")
         fun createPossibleStarttimes(actliste: Collection<HActivity>) {
             for (act in actliste) {
                 require(!act.startTimeisScheduled()) {
@@ -573,6 +574,9 @@ class HActivity @JvmOverloads constructor(
                     if (!act.isActivityFirstinTour && act.previousActivityinTour!!.startTimeisScheduled()
                         && act.previousActivityinTour!!.durationisScheduled()
                     ) {
+                        require(false) {
+                            "I hereby proclaim, this cannot happen"
+                        }
                         act.startTime = act.previousActivityinTour!!.endTime + act.estimatedTripTimeBeforeActivity
                     }
 
@@ -583,6 +587,9 @@ class HActivity @JvmOverloads constructor(
                     if (!act.isActivityLastinTour && act.durationisScheduled()
                         && act.nextActivityinTour!!.startTimeisScheduled()
                     ) {
+                        require(false) {
+                            "I hereby proclaim, this cannot happen"
+                        }
                         act.startTime = act.nextActivityinTour!!.tripStartTimeBeforeActivity - act.duration
                     }
                 }

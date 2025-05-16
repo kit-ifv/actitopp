@@ -43,11 +43,15 @@ class ModernizedActivity(
 }
 class LinkedActivity(val original: ModernizedActivity, var previousTrip: ModernizedTrip? = null, var nextTrip: ModernizedTrip? = null): Activity by original {
 
+    fun linkAfter(other: ModernizedActivity): LinkedActivity {
+        val next = LinkedActivity(other)
+        TODO()
+    }
 }
 class ModernizedTrip(
     val duration: Duration,
-    var previousActivity: ModernizedActivity? = null,
-    val nextActivity: ModernizedActivity? = null,
+    var previousActivity: ModernizedActivity,
+    val nextActivity: ModernizedActivity,
 )
 
 class ModernizedTour() {
