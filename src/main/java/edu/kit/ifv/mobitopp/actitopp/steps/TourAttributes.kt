@@ -19,6 +19,7 @@ interface TourPositionAttributes {
     fun isBeforeMainTour(): Boolean
     fun isAfterMainTour(): Boolean
 }
+
 interface ActivityAmountAttributes {
     fun numActivitiesBeforeMainActivityIs1(): Boolean
     fun numActivitiesBeforeMainActivityIs2(): Boolean
@@ -39,7 +40,7 @@ class ActivityAmountByNumber(val element: Int) : ActivityAmountAttributes {
     }
 }
 
-interface TourAttributes: TourPositionAttributes {
+interface TourAttributes : TourPositionAttributes {
 
     fun tourMainActivityIsWork(): Boolean
     fun tourMainActivityIsEducation(): Boolean
@@ -47,13 +48,12 @@ interface TourAttributes: TourPositionAttributes {
     fun tourMainActivityIsTransport(): Boolean
 
 
-
     fun tourHas2Activities(): Boolean
     fun tourHas3Activities(): Boolean
     fun tourHas4Activities(): Boolean
 }
 
-class TourPositionAttributesByIndex(val absoluteIndex: Int, val position: Position): TourPositionAttributes {
+class TourPositionAttributesByIndex(val absoluteIndex: Int, val position: Position) : TourPositionAttributes {
     override fun isFirstTourOfDay(): Boolean {
         return absoluteIndex == 0
     }
@@ -75,7 +75,75 @@ class TourPositionAttributesByIndex(val absoluteIndex: Int, val position: Positi
     }
 }
 
-class TourAttributesByIndexedStructure(private val indexedTour: BidirectionalIndexedValue<TourStructure>): TourAttributes, TourPositionAttributes, ActivityAmountAttributes {
+class TourAttributesByStructAndNumbers(
+    private val indexedTour: BidirectionalIndexedValue<TourStructure>,
+    val precursorActivityCount: Int,
+    val successorActivityCount:Int ,
+
+) : TourAttributes, TourPositionAttributes,  ActivityAmountAttributes{
+    override fun tourMainActivityIsWork(): Boolean {
+        return indexedTour.element.mainActivityType() == ActivityType.WORK
+    }
+
+    override fun tourMainActivityIsEducation(): Boolean {
+        return indexedTour.element.mainActivityType() == ActivityType.EDUCATION
+    }
+
+    override fun tourMainActivityIsShopping(): Boolean {
+        return indexedTour.element.mainActivityType() == ActivityType.SHOPPING
+    }
+
+    override fun tourMainActivityIsTransport(): Boolean {
+        return indexedTour.element.mainActivityType() == ActivityType.TRANSPORT
+    }
+
+    override fun tourHas2Activities(): Boolean {
+        return indexedTour.element.elements().size + precursorActivityCount + successorActivityCount == 2
+    }
+
+    override fun tourHas3Activities(): Boolean {
+        return indexedTour.element.elements().size + precursorActivityCount + successorActivityCount == 3
+    }
+
+    override fun tourHas4Activities(): Boolean {
+        return indexedTour.element.elements().size + precursorActivityCount + successorActivityCount == 4
+    }
+
+    override fun isFirstTourOfDay(): Boolean {
+        return indexedTour.absoluteIndex == 0
+    }
+
+    override fun isSecondTourOfDay(): Boolean {
+        return indexedTour.absoluteIndex == 1
+    }
+
+    override fun isThirdTourOfDay(): Boolean {
+        return indexedTour.absoluteIndex == 2
+    }
+
+    override fun isBeforeMainTour(): Boolean {
+        return indexedTour.position == Position.BEFORE
+    }
+
+    override fun isAfterMainTour(): Boolean {
+        return indexedTour.position == Position.AFTER
+    }
+
+    override fun numActivitiesBeforeMainActivityIs1(): Boolean {
+        return indexedTour.element.amountOfPrecursorElements() + precursorActivityCount == 1
+    }
+
+    override fun numActivitiesBeforeMainActivityIs2(): Boolean {
+        return indexedTour.element.amountOfPrecursorElements() + precursorActivityCount == 2
+    }
+
+    override fun numActivitiesBeforeMainActivityIs3(): Boolean {
+        return indexedTour.element.amountOfPrecursorElements() + precursorActivityCount ==3
+    }
+}
+
+class TourAttributesByIndexedStructure(private val indexedTour: BidirectionalIndexedValue<TourStructure>) :
+    TourAttributes, TourPositionAttributes, ActivityAmountAttributes {
 
     override fun isFirstTourOfDay(): Boolean {
         return indexedTour.absoluteIndex == 0
@@ -124,6 +192,7 @@ class TourAttributesByIndexedStructure(private val indexedTour: BidirectionalInd
     override fun numActivitiesBeforeMainActivityIs3(): Boolean {
         return indexedTour.element.amountOfPrecursorElements() == 3
     }
+
     override fun tourHas2Activities(): Boolean {
         return indexedTour.element.amountOfElements() == 2
     }
@@ -137,6 +206,7 @@ class TourAttributesByIndexedStructure(private val indexedTour: BidirectionalInd
     }
 
 }
+
 class TourAttributesByElement(val element: HTour) : TourAttributes, TourPositionAttributes, ActivityAmountAttributes {
     override fun isFirstTourOfDay(): Boolean = element.index == element.day.lowestTourIndex
     override fun isSecondTourOfDay(): Boolean = element.index == element.day.lowestTourIndex + 1
@@ -179,6 +249,7 @@ data class SubTourInput(
     val person = personWithRoutine.person
     val routine = personWithRoutine.routine
     val tracker = personWithRoutine.tracker
+
     constructor(
         person: ActitoppPerson,
         routine: WeekRoutine, day: HDay,

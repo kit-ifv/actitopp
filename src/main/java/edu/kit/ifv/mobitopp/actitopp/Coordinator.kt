@@ -10,6 +10,7 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.ExampleAssign
 import edu.kit.ifv.mobitopp.actitopp.modernization.Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.Step5Generator
+import edu.kit.ifv.mobitopp.actitopp.modernization.assignDirectly
 
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
@@ -154,8 +155,9 @@ class Coordinator @JvmOverloads constructor(
 //            it.generateSuccessors()
 //        }
 
-        val pred = step5Gen.output().values.flatMap { it.values.map { it.precursorAmount } }
-        val succ = step5Gen.output().values.flatMap { it.values.map { it.successorAmount } }
+        val step5output = step5Gen.output()
+        val pred = step5output.values.flatMap { it.values.map { it.precursorAmount } }
+        val succ = step5output.values.flatMap { it.values.map { it.successorAmount } }
 
         val legacyTourActivitiesPred = pattern.allTours.map{ it.activities.filter { it.index < 0 }.count()}
         val legacyTourActivitiesSucc = pattern.allTours.map{ it.activities.filter { it.index > 0 }.count()}
@@ -173,8 +175,14 @@ class Coordinator @JvmOverloads constructor(
         executeStep6("6A") // Determine Activity Type for all non main activities (?)
 
         val nextStep = ExampleAssign(patternStructure, personWithRoutine, rngCopy)
+        step5output.assignDirectly(nextStep)
 //        nextStep.generateSecondaryActivityTypes()
 
+        val allLegacyActivities = pattern.days.flatMap { it.allActivitiesoftheDay.map { it.activityType } }
+        val allModernizedActivity = patternStructure.allDays().flatMap { it.elements().flatMap { it.elements() } }
+        require(allLegacyActivities.zip(allModernizedActivity).all { (a, b) -> a == b}) {
+            "Activity list mismatch for person ${person.id}"
+        }
         createTripTimesforActivities()
 
         // joint activities

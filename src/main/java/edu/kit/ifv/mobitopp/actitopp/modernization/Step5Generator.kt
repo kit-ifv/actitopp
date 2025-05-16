@@ -45,7 +45,7 @@ class Step5Generator(
     fun output(): Map<DayStructure, Map<BidirectionalIndexedValue<TourStructure>, PlannedTourAmounts>> {
         return output
     }
-
-
 }
+
+
 

@@ -8,6 +8,7 @@ import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.PlannedTourAmounts
 import edu.kit.ifv.mobitopp.actitopp.modernization.Position
 import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
 import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
@@ -20,6 +21,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.RoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributesByElement
 import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributesByIndexedStructure
+import edu.kit.ifv.mobitopp.actitopp.steps.TourAttributesByStructAndNumbers
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineAttributes
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonAndRoutineFrom
@@ -216,11 +218,12 @@ class ActivitySituation private constructor(
         dayStructure: DayStructure,
         tourStructure: BidirectionalIndexedValue<TourStructure>,
         position: Position,
+        plannedTourAmounts: PlannedTourAmounts,
     ) : this(
         choice,
         PersonAndRoutineFrom(personWithRoutine),
         DayAttributesFromStructure(dayStructure),
-        TourAttributesByIndexedStructure(tourStructure),
+        TourAttributesByStructAndNumbers(tourStructure, plannedTourAmounts.precursorAmount, plannedTourAmounts.successorAmount),
         ActivityAttributes { position == Position.BEFORE }
     )
 
@@ -228,11 +231,11 @@ class ActivitySituation private constructor(
 
 val step6Model =
     ModifiableDiscreteChoiceModel<ActivityType, ActivitySituation, ParameterCollectionStep6>(AllocatedLogit.create {
-        option(ActivityType.LEISURE) { 0.0 }
-        option(ActivityType.WORK, parameters = { work }) { standardUtilityFunction(this, it) }
         option(ActivityType.EDUCATION, parameters = { education }) { standardUtilityFunction(this, it) }
+        option(ActivityType.LEISURE) { 0.0 }
         option(ActivityType.SHOPPING, parameters = { shopping }) { standardUtilityFunction(this, it) }
         option(ActivityType.TRANSPORT, parameters = { transport }) { standardUtilityFunction(this, it) }
+        option(ActivityType.WORK, parameters = { work }) { standardUtilityFunction(this, it) }
     })
 
 val step6WithParams = step6Model.initializeWithParameters(ParameterSet6)

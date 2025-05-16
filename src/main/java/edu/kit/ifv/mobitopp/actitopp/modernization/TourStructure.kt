@@ -17,7 +17,17 @@ class TourStructure(
 ):BidirectionalQueue<ActivityType>(mainActivityType) {
 
 
+    fun loadPrecursors(activityTypes: Collection<ActivityType>) {
+        activityTypes.reversed().forEach {
+            addPrecursor(it)
+        }
+    }
 
+    fun loadSuccessors(activityTypes: Collection<ActivityType>) {
+        activityTypes.forEach {
+            addSuccessor(it)
+        }
+    }
 
     fun mainActivityType(): ActivityType {
         return get(0)

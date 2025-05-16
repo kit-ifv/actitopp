@@ -9,14 +9,34 @@ import edu.kit.ifv.mobitopp.actitopp.steps.step6.step6WithParams
 data class SecondaryActInput(
     val dayStructure: DayStructure,
     val tourStructure: BidirectionalIndexedValue<TourStructure>,
-    val plannedTourAmounts: PlannedTourAmounts
+    val plannedTourAmounts: PlannedTourAmounts,
 )
 
 interface AssignSecondaryActivityTypes {
     fun generateSecondaryActivityTypes(input: SecondaryActInput): Pair<List<ActivityType>, List<ActivityType>>
+
+    fun assignDirectly(input: SecondaryActInput) {
+        val (predecessors, successors) = generateSecondaryActivityTypes(input)
+        val tour = input.tourStructure.element
+        tour.loadPrecursors(predecessors)
+        tour.loadSuccessors(successors)
+    }
 }
 
-class ExampleAssign(val patternStructure: PatternStructure, val personWithRoutine: PersonWithRoutine, val rngHelper: RNGHelper): AssignSecondaryActivityTypes {
+fun Map<DayStructure, Map<BidirectionalIndexedValue<TourStructure>, PlannedTourAmounts>>.assignDirectly(strategy: AssignSecondaryActivityTypes) {
+    entries.forEach { (day, tourMap) ->
+        tourMap.forEach { (tour, plannedTourAmounts) ->
+            strategy.assignDirectly(SecondaryActInput(day, tour, plannedTourAmounts))
+        }
+    }
+
+}
+
+class ExampleAssign(
+    val patternStructure: PatternStructure,
+    val personWithRoutine: PersonWithRoutine,
+    val rngHelper: RNGHelper,
+) : AssignSecondaryActivityTypes {
     override fun generateSecondaryActivityTypes(input: SecondaryActInput): Pair<List<ActivityType>, List<ActivityType>> {
         val precursors = input.plannedTourAmounts.precursorAmount
         val successors = input.plannedTourAmounts.successorAmount
@@ -37,10 +57,13 @@ class ExampleAssign(val patternStructure: PatternStructure, val personWithRoutin
                 if (day.shouldNotBeEducationDay(routine)) availableOptions.remove(
                     ActivityType.EDUCATION
                 )
-                step6WithParams.select(availableOptions, rngHelper.randomValue) {
-                    ActivitySituation(it, personWithRoutine, input.dayStructure, input.tourStructure, position)
+                val converter: (ActivityType) -> ActivitySituation = {
+                    ActivitySituation(it, personWithRoutine, input.dayStructure, input.tourStructure, position, input.plannedTourAmounts)
                 }
+                step6WithParams.select(availableOptions, rngHelper.randomValue, converter)
             }
         }
     }
+
+
 }
