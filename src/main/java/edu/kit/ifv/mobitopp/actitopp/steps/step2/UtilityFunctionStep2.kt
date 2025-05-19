@@ -2,6 +2,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step2
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
+import edu.kit.ifv.mobitopp.actitopp.IPerson
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
@@ -22,19 +23,19 @@ import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.initializeWithParameters
 import java.time.DayOfWeek
 
 data class PersonWithRoutine(
-    val person: ActitoppPerson,
+    val person: IPerson,
     val routine: WeekRoutine,
-) {
+): IPerson by person{
     /**
      *Once the routine is known, we can instantiate the tracker instance, which keeps track of the days
      */
-    val tracker = DayActivityTracker(
-        routine.amountOfWorkingDays,
-        routine.amountOfEducationDays,
-        person.weekPattern.days.filter { it.hasActivity(ActivityType.WORK) }.toSet(),
-        person.weekPattern.days.filter { it.hasActivity(ActivityType.EDUCATION) }.toSet(),
-    )
-    fun nextRandom() = person.personalRNG.randomValue
+//    val tracker = DayActivityTracker(
+//        routine.amountOfWorkingDays,
+//        routine.amountOfEducationDays,
+//        person.weekPattern.days.filter { it.hasActivity(ActivityType.WORK) }.toSet(),
+//        person.weekPattern.days.filter { it.hasActivity(ActivityType.EDUCATION) }.toSet(),
+//    )
+
 
     fun amountOfWorkingDays() = routine.amountOfWorkingDays
     fun amountOfLeisureDays() = routine.amountOfLeisureDays

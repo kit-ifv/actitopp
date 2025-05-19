@@ -1,5 +1,8 @@
 package edu.kit.ifv.mobitopp.actitopp
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+
 /**
  * @author Tim Hilgert
  */
@@ -198,8 +201,7 @@ object Configuration {
     /*
      * trip time constant - default time occupation of a trip
      */
-    const val FIXED_TRIP_TIME_ESTIMATOR: Int = 15
-
+    val FIXED_TRIP_TIME_ESTIMATOR: Duration = 15.minutes
 
     /*
      * ONLY FOR DEBUG ON CONSOLE

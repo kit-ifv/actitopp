@@ -4,54 +4,53 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import java.util.NavigableSet
 import java.util.TreeSet
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 
 interface Activity {
-    val startTime: Duration
-    val duration: Duration
-    val endTime: Duration
+    val startTime: Duration?
+    val duration: Duration?
+    val endTime: Duration?
     val activityType: ActivityType
 }
 /**
  *
  */
+
+operator fun Duration.plus(nullable: Duration?): Duration {
+    return nullable?.let { it + this } ?: this
+}
 class ModernizedActivity(
-    override val startTime: Duration,
-    override val duration: Duration,
-    override val activityType: ActivityType = ActivityType.UNKNOWN,
-) : Activity, Comparable<ModernizedActivity> {
+    override val activityType: ActivityType,
+    override var startTime: Duration? = null,
+    override var duration: Duration? = null,
+) : Activity {
 
-    init {
-        // TODO maybe guard duration via a class wrapper that only allows positive durations, if we later want to make duration "var"
-        require(duration >= Duration.ZERO) {
-            "duration must be positive"
-        }
-    }
 
-    override val endTime get() = startTime + duration
 
-    /**
-     * We can use interval comparisons to determine whether an interval is before, overlapping with, or after another
-     * activity. This is also the encoding that we will use for comparisons:
-     * -1
-     */
-    override fun compareTo(other: ModernizedActivity): Int {
-        if (this.endTime < other.startTime) return -1
-        if (this.startTime > other.endTime) return 1
-        return 0 // We can assume that if neither interval is before nor after the other, that they must overlap.
-    }
+    override val endTime get() = startTime?.let { it + duration }
+
+
 }
 class LinkedActivity(val original: ModernizedActivity, var previousTrip: ModernizedTrip? = null, var nextTrip: ModernizedTrip? = null): Activity by original {
+    constructor(activityType: ActivityType) : this(ModernizedActivity(activityType = activityType))
+    fun link(other: LinkedActivity, duration: Duration = 15.minutes) {
+        val trip = ModernizedTrip(
+            duration = duration,
+            previousActivity = this,
+            nextActivity = other
+        )
 
-    fun linkAfter(other: ModernizedActivity): LinkedActivity {
-        val next = LinkedActivity(other)
-        TODO()
+        this.nextTrip = trip
+        other.previousTrip = trip
     }
+
+
 }
 class ModernizedTrip(
     val duration: Duration,
-    var previousActivity: ModernizedActivity,
-    val nextActivity: ModernizedActivity,
+    var previousActivity: LinkedActivity,
+    val nextActivity: LinkedActivity,
 )
 
 class ModernizedTour() {

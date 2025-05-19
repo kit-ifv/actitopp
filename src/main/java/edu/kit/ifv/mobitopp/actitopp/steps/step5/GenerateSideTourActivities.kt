@@ -3,6 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step5
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson
 import edu.kit.ifv.mobitopp.actitopp.HDay
 import edu.kit.ifv.mobitopp.actitopp.HTour
+import edu.kit.ifv.mobitopp.actitopp.IPerson
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
@@ -14,7 +15,7 @@ fun interface GenerateSideTourActivities {
 }
 
 data class SideTourActivityInput(
-    val person: ActitoppPerson,
+    val person: IPerson,
     val routine: WeekRoutine,
     val currentDay: DayStructure,
     val tour: BidirectionalIndexedValue<TourStructure>,

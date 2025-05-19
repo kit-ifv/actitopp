@@ -51,7 +51,7 @@ class PatternStructure(
 
     fun determineNextMainActivity(
         activityTypeFilter: ActivityTypeFilter = Step2Tracking,
-        rngHelper: RNGHelper? = null,
+        rngHelper: RNGHelper,
     ): ActivityType {
         val currentDay = days.lastOrNull()?.next() ?: DurationDay.FIRST
         days.add(currentDay)
@@ -61,7 +61,7 @@ class PatternStructure(
                 weekRoutine,
                 coordinatedStep2AWithParams.registeredOptions()
             )
-        val rng = rngHelper ?: weekRoutine.person.personalRNG
+        val rng = rngHelper
         return determineActivityFor(activeOptions, currentDay, rng)
     }
 
@@ -94,9 +94,9 @@ class PatternStructure(
 
 }
 
-class Generator(private val patternStructure: PatternStructure, private val personWithRoutine: PersonWithRoutine, val rngHelper: RNGHelper = personWithRoutine.person.personalRNG) {
+class Generator(private val patternStructure: PatternStructure, private val personWithRoutine: PersonWithRoutine, val rngHelper: RNGHelper) {
 
-    val mainActivityOfSideTours: AssignMainActivityOfSideTour = AssignByUtilityFunction(patternStructure, rngHelper)
+    private val mainActivityOfSideTours: AssignMainActivityOfSideTour = AssignByUtilityFunction(patternStructure, rngHelper)
     fun generateSideTours(tourAmounts: Map<DurationDay, PlannedTourAmounts>): Map<ModifiableDayStructure, Pair<List<ActivityType>, List<ActivityType>>> {
         return patternStructure.mobileDays().associateWith {
             val input = DayWithPlans(it, personWithRoutine, tourAmounts[it.startTimeDay] ?: PlannedTourAmounts.NONE)

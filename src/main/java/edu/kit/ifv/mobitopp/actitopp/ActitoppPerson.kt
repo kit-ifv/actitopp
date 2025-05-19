@@ -21,6 +21,12 @@ interface IPerson {
     val gender: Gender
     val maxCommute: Double
     val numberofcarsinhousehold: Int
+    val isAllowedToWork: Boolean
+    val commutingdistance_work: Double
+    val commutingdistance_education : Double
+
+    fun isAnywayEmployed(): Boolean
+    fun isinEducation(): Boolean
 }
 
 class ActitoppPerson@JvmOverloads constructor(
@@ -30,8 +36,8 @@ class ActitoppPerson@JvmOverloads constructor(
     override val age: Int,
     employmentCode: Int,
     genderCode: Int,
-    val commutingdistance_work: Double = 0.0,
-    val commutingdistance_education: Double = .0,
+    override val commutingdistance_work: Double = 0.0,
+    override val commutingdistance_education: Double = .0,
 ) :IPerson {
     override val maxCommute: Double =
             max(commutingdistance_work, commutingdistance_education)
@@ -42,7 +48,7 @@ class ActitoppPerson@JvmOverloads constructor(
     internal fun getMutableMapForTest(): MutableMap<String, Double> = attributes
     override val gender: Gender = Gender.fromCode(genderCode)
     override val employment: Employment = Employment.fromInt(employmentCode)
-    val isAllowedToWork: Boolean = true
+    override val isAllowedToWork: Boolean = true
     var weekPattern: HWeekPattern = HWeekPattern(this)
     // TODO make RNG a bit more random, there could be overlaps in the hash generation.
     val personalRNG: RNGHelper = RNGHelper((household.householdIndex.hashCode() + persNrinHousehold.hashCode()).toLong())
@@ -366,7 +372,7 @@ class ActitoppPerson@JvmOverloads constructor(
      *
      * @return
      */
-    fun isAnywayEmployed(): Boolean {
+    override fun isAnywayEmployed(): Boolean {
         return employment.isEmployedAnywhere()
     }
 
@@ -375,7 +381,7 @@ class ActitoppPerson@JvmOverloads constructor(
      *
      * @return
      */
-    fun isinEducation(): Boolean {
+    override fun isinEducation(): Boolean {
         return employment.isStudentOrAzubi()
     }
 

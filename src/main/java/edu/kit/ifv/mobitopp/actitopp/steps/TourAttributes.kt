@@ -248,7 +248,7 @@ data class SubTourInput(
 ) {
     val person = personWithRoutine.person
     val routine = personWithRoutine.routine
-    val tracker = personWithRoutine.tracker
+//    val tracker = personWithRoutine.tracker
 
     constructor(
         person: ActitoppPerson,

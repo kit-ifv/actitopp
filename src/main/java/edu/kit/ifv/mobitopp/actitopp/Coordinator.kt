@@ -11,13 +11,9 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.Step5Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.assignDirectly
-
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.GenerateCoordinated
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.generateMainActivities
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.step5.DayAmountTracker
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.HistogramPerActivity
 import kotlin.math.max
@@ -104,9 +100,6 @@ class Coordinator @JvmOverloads constructor(
             patternStructure.determineNextMainActivity(rngHelper = rngCopy2)
         }
 
-        val mainActivities = person.generateMainActivities(weekRoutine) {
-            GenerateCoordinated(rngCopy)
-        }.map { it.first }
         val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
 
         require(legacyMainActivities.zip(mainActivitiesNew).all { (a, b) -> a == b }) {
@@ -1285,7 +1278,7 @@ class Coordinator @JvmOverloads constructor(
     private fun executeStep9A(id: String) {
         // Step 9A: standard start time category for fist tours during the week
 
-        if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled) {
+        if (person.isCommuterWithAtLeastOneMatchingTour) {
             // create attribute lookup
             val lookup = AttributeLookup(person)
 
@@ -1305,7 +1298,7 @@ class Coordinator @JvmOverloads constructor(
      */
     private fun executeStep10A(id: String) {
         // Step 10a: check if first tour is work/edu lies within standard start time (applies only to work/edu persons)
-        if (person.isPersonWorkorSchoolCommuterAndMainToursAreScheduled) {
+        if (person.isCommuterWithAtLeastOneMatchingTour) {
             for (currentDay in pattern.days) {
                 if (currentDay.isHomeDay) {
                     continue

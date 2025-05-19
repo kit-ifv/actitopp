@@ -318,7 +318,7 @@ class HActivity @JvmOverloads constructor(
         val actualTripTime = when {
             hasWorkCommutingTripAsFirstActivity() -> person.commutingDuration_work
             hasEducationCommutingTripAsFirstActivity() -> person.commutingDuration_education
-            else -> Configuration.FIXED_TRIP_TIME_ESTIMATOR
+            else -> Configuration.FIXED_TRIP_TIME_ESTIMATOR.inWholeMinutes.toInt()
         }
         tripbeforeactivity = HTrip(this, TripStatus.TRIP_BEFORE_ACT, actualTripTime)
 
@@ -332,7 +332,7 @@ class HActivity @JvmOverloads constructor(
             val badModelingTripTime = when {
                 hasWorkCommutingTripAsLastActivity() -> person.commutingDuration_work
                 hasEducationCommutingTripAsLastActivity() -> person.commutingDuration_education
-                else -> Configuration.FIXED_TRIP_TIME_ESTIMATOR
+                else -> Configuration.FIXED_TRIP_TIME_ESTIMATOR.inWholeMinutes.toInt()
             }
             require(tripafteractivity == null) {
                 "Fat statement, I claim that this field is always null when we get here."
