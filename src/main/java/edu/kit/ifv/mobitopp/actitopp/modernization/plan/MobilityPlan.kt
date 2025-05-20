@@ -8,6 +8,8 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.linkByHomeActivity
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.TimeBudgets
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
 class MobilityPlan(
     val dayPlans: Collection<MutableDayPlan>,
@@ -16,7 +18,15 @@ class MobilityPlan(
     val person: IPerson,
 ) {
 
+    val startHomeAnchor = LinkedActivity(ActivityType.HOME).apply {
+        startTime = 0.minutes
+        duration = 1.minutes
+    }
 
+    val endHomeAnchor = LinkedActivity(ActivityType.HOME).apply {
+        startTime = dayPlans.size.days - 1.minutes
+        duration = 1.minutes
+    }
 
     fun amountOfDaysWithActivity(activityType: ActivityType): Int {
         TODO()
