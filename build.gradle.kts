@@ -23,6 +23,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("edu.kit.ifv.mobitopp:kotlin-units:1.2.4")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testImplementation(kotlin("test"))

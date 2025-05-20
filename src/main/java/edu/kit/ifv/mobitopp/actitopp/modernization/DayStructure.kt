@@ -1,6 +1,14 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DayPlan
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.HomeDayPlan
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MovingDayPlan
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MovingDayPlanInput
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MutableDayPlan
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step7.TimeBudgets
 
 import java.time.DayOfWeek
 import kotlin.time.Duration
@@ -127,13 +135,21 @@ interface DayStructure {
     fun amountOfPrecursorElements(): Int
     fun amountOfSuccessorElements(): Int
     fun amountOfElements(): Int
-
+    // TODO elements could probably be an iterator
     fun elements(): Collection<TourStructure>
     fun indexedElements(): Collection<BidirectionalIndexedValue<TourStructure>>
     fun amountOfActivities() = elements().sumOf { it.size }
     fun getPlannedTourAmounts():PlannedTourAmounts = PlannedTourAmounts(amountOfPrecursorElements(), amountOfSuccessorElements())
+
+    operator fun contains(activityType: ActivityType): Boolean {
+        return elements().any { activityType in it }
+    }
     val minimumAmountOfToursByJointActions: Int get() {throw UnsupportedOperationException("Nope")}
     val minimumAmountOfActivitiesByJointActions: Int get() {throw UnsupportedOperationException("Nope")}
+
+
+
+    fun toDayPlan(movingDayPlanInput: MovingDayPlanInput): MutableDayPlan
 }
 
 class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
@@ -149,6 +165,10 @@ class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
     override val minimumAmountOfToursByJointActions: Int = 0
     override fun elements(): Collection<TourStructure> = emptySet()
     override fun indexedElements(): Collection<BidirectionalIndexedValue<TourStructure>> = emptySet()
+
+    override fun toDayPlan(movingDayPlanInput: MovingDayPlanInput): MutableDayPlan {
+        return HomeDayPlan()
+    }
 }
 
 class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStructure: TourStructure) :
@@ -182,6 +202,13 @@ class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStr
         return "Week (${duration.inWholeDays / 7}) Main Act: [${mainTourActivityType()}] ${
             weekday.toString().substring(0, 3)
         } Planned Tours: (${elements().joinToString()})"
+    }
+
+    override fun toDayPlan(movingDayPlanInput: MovingDayPlanInput): MutableDayPlan {
+        return MovingDayPlan.create(
+            elements(),
+            movingDayPlanInput
+        )
     }
 }
 

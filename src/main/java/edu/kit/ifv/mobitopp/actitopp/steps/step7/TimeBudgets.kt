@@ -5,35 +5,51 @@ import edu.kit.ifv.mobitopp.actitopp.HWeekPattern
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
 import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 data class TimeBudgets(
 
-    val workBudget: Int,
+    val workBudget: Duration,
+    val educationBudget: Duration,
+    val leisureBudget: Duration,
+    val shoppingBudget: Duration,
+    val transportBudget: Duration,
 
-    val educationBudget: Int,
-
-    val leisureBudget: Int,
-
-    val shoppingBudget: Int,
-
-    val transportBudget: Int,
+    val workCategory: Int,
+    val educationCategory: Int,
+    val leisureCategory: Int,
+    val shoppingCategory: Int,
+    val transportCategory: Int,
 ) {
-    fun calculateMeanTime(day: HDay, activityType: ActivityType): Int {
-        val daysWithActivity = day.pattern.countDaysWithSpecificActivity(activityType)
-        val activitiesForThisDay = day.getTotalNumberOfActivitites(activityType)
+    fun toDayTimeBudget(dailyOccurrences: Map<ActivityType, Int>): TimeBudgets {
+        return TimeBudgets(
+            workBudget = workBudget / dailyOccurrences.getOrDefault(ActivityType.WORK, 0),
+            educationBudget = educationBudget / dailyOccurrences.getOrDefault(ActivityType.EDUCATION, 0),
+            leisureBudget = leisureBudget / dailyOccurrences.getOrDefault(ActivityType.LEISURE, 0),
+            shoppingBudget = shoppingBudget / dailyOccurrences.getOrDefault(ActivityType.SHOPPING, 0),
+            transportBudget = transportBudget / dailyOccurrences.getOrDefault(ActivityType.TRANSPORT, 0),
+            workCategory = workCategory,
+            educationCategory = educationCategory,
+            leisureCategory = leisureCategory,
+            shoppingCategory = shoppingCategory,
+            transportCategory = transportCategory,
+        )
+    }
 
-        val factor = when(activityType) {
+    operator fun get(activityType: ActivityType): Duration {
+        return when (activityType) {
             ActivityType.WORK -> workBudget
             ActivityType.EDUCATION -> educationBudget
             ActivityType.LEISURE -> leisureBudget
             ActivityType.SHOPPING -> shoppingBudget
             ActivityType.TRANSPORT -> transportBudget
-            else -> throw NotImplementedError("There is no way to calculate the mean time for an activity of the type $activityType")
+            ActivityType.HOME -> 0.minutes
+            else -> throw NoSuchElementException("activityType $activityType not supported")
         }
-
-        return (factor.toDouble() / daysWithActivity / activitiesForThisDay).toInt()
     }
 }
+
 
 class HistogramPerActivity(
     val workHistograms: WorkHistograms = WorkHistograms.fromResourcePath(),
@@ -43,28 +59,46 @@ class HistogramPerActivity(
     val transportHistograms: TransportHistograms = TransportHistograms.fromResourcePath(),
 ) {
     fun determineTimeBudgets(finalizedActivityPattern: FinalizedActivityPattern, rngHelper: RNGHelper): TimeBudgets {
-        return TimeBudgets(
-            workBudget = workHistograms.select(rngHelper, finalizedActivityPattern),
-            educationBudget = educationHistograms.select(rngHelper, finalizedActivityPattern),
-            leisureBudget = leisureHistograms.select(rngHelper, finalizedActivityPattern),
-            shoppingBudget = shoppingHistograms.select(rngHelper, finalizedActivityPattern),
-            transportBudget = transportHistograms.select(rngHelper, finalizedActivityPattern)
-        )
-    }
-    fun determineTimeBudgets(randomValues: List<Double>, finalizedActivityPattern: FinalizedActivityPattern): TimeBudgets {
-        return TimeBudgets(
-            workBudget = workHistograms.select(randomValues[0], randomValues[1], finalizedActivityPattern),
-            educationBudget = educationHistograms.select(randomValues[2], randomValues[3], finalizedActivityPattern),
-            leisureBudget = leisureHistograms.select(randomValues[4], randomValues[5], finalizedActivityPattern),
-            shoppingBudget = shoppingHistograms.select(randomValues[6], randomValues[7], finalizedActivityPattern),
-            transportBudget = transportHistograms.select(randomValues[8], randomValues[9], finalizedActivityPattern)
-        )
-    }
-    private fun HistogramSelection.select(rngHelper: RNGHelper, finalizedActivityPattern: FinalizedActivityPattern): Int {
-        return select(rngHelper.randomValue, finalizedActivityPattern).select(rngHelper.randomValue)
+        return determineTimeBudgets((0..<10).map { rngHelper.randomValue }, finalizedActivityPattern)
     }
 
-    private fun HistogramSelection.select(firstRnd: Double, secondRnd: Double, finalizedActivityPattern: FinalizedActivityPattern): Int {
-        return select(firstRnd, finalizedActivityPattern).select(secondRnd)
+    fun determineTimeBudgets(
+        randomValues: List<Double>,
+        finalizedActivityPattern: FinalizedActivityPattern,
+    ): TimeBudgets {
+        val workSelection = workHistograms.select(randomValues[0], randomValues[1], finalizedActivityPattern)
+        val educationSelection = educationHistograms.select(randomValues[2], randomValues[3], finalizedActivityPattern)
+        val leisureSelection = leisureHistograms.select(randomValues[4], randomValues[5], finalizedActivityPattern)
+        val shoppingSelection = shoppingHistograms.select(randomValues[6], randomValues[7], finalizedActivityPattern)
+        val transportSelection = transportHistograms.select(randomValues[8], randomValues[9], finalizedActivityPattern)
+        return TimeBudgets(
+            workBudget = workSelection.first,
+            workCategory = workSelection.second,
+            educationBudget = educationSelection.first,
+            leisureBudget = leisureSelection.first,
+            shoppingBudget = shoppingSelection.first,
+            transportBudget = transportSelection.first,
+            educationCategory = educationSelection.second,
+            leisureCategory = leisureSelection.second,
+            shoppingCategory = shoppingSelection.second,
+            transportCategory = transportSelection.second,
+        )
+    }
+
+    private fun HistogramSelection.select(
+        rngHelper: RNGHelper,
+        finalizedActivityPattern: FinalizedActivityPattern,
+    ): Pair<Duration, Int> {
+        val histogram = select(rngHelper.randomValue, finalizedActivityPattern)
+        return histogram.select(rngHelper.randomValue) to histogram.categoryIndex
+    }
+
+    private fun HistogramSelection.select(
+        firstRnd: Double,
+        secondRnd: Double,
+        finalizedActivityPattern: FinalizedActivityPattern,
+    ): Pair<Duration, Int> {
+        val histogram = select(firstRnd, finalizedActivityPattern)
+        return histogram.select(secondRnd) to histogram.categoryIndex
     }
 }

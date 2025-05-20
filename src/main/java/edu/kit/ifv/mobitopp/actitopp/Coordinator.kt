@@ -12,6 +12,7 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.Step5Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.assignDirectly
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.StandardCommuteDurations
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
@@ -97,7 +98,7 @@ class Coordinator @JvmOverloads constructor(
         executeStep2("2A")
 
         val mainActivitiesNew = (0..6).map {
-            patternStructure.determineNextMainActivity(rngHelper = rngCopy2)
+            patternStructure.determineNextMainActivity(rngHelper = rngCopy)
         }
 
         val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
@@ -183,9 +184,10 @@ class Coordinator @JvmOverloads constructor(
             placeJointActivitiesIntoPattern()
         }
 
-
         val randomNumbers = (0..9).map{randomGenerator.randomValue}
+
         val output = STATIC_HISTOGRAMS.determineTimeBudgets(randomNumbers, FinalizedActivityPattern(person, pattern))
+        val mobilityPlan = patternStructure.toPlan(personWithRoutine, StandardCommuteDurations.STANDARD_ASSIGNMENT, output)
 
         executeStep7DC("7A", ActivityType.WORK, randomNumbers[0])
         executeStep7WRD("7B", ActivityType.WORK, randomNumbers[1])
@@ -982,10 +984,15 @@ class Coordinator @JvmOverloads constructor(
                Failing at failing is not a double negative.
              */
             person.addAttributetoMap(activitytype.toString() + "budget_category_index", decisionIndex.toDouble())
+            val value = step.alternativeChosen.toDouble()
             person.addAttributetoMap(
                 activitytype.toString() + "budget_category_alternative",
-                step.alternativeChosen.toDouble()
+                value
             )
+            require(person.attributesMap.get(activitytype.toString() + "budget_category_alternative") -1 ==
+            person.attributesMap.get(activitytype.toString() + "budget_category_index")) {
+                "I proclaim, index is always one less than alternative"
+            }
         }
 
         // special case: if there is exactly no activity allocated for work, than we must set cat to 0
@@ -1018,6 +1025,8 @@ class Coordinator @JvmOverloads constructor(
     /**
      * @param id
      */
+    @Deprecated("This method does not utilize the result of the discrete choice model, it forcefully sets " +
+            "purely based on configuration and activity type")
     private fun executeStep8A(id: String) {
         // STEP8a: yes/no decision for "activity is in average time class xyz".
         // only applies to main activities
@@ -1041,7 +1050,7 @@ class Coordinator @JvmOverloads constructor(
                     val decision = step.doStep()
 
                     log(id, currentActivity, step.alternativeChosen.toString())
-
+                    // TODO this does not need to be passed onto the activity, since it is globally active.
                     // save attribute for work and education activities if coordinated modeling is enabled
                     if (Configuration.coordinated_modelling && (currentActivity.activityType == ActivityType.WORK || currentActivity.activityType == ActivityType.EDUCATION)) {
                         currentActivity.addAttributetoMap(

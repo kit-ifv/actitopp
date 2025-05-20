@@ -7,6 +7,8 @@ import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 
 /**
  * The activity synthesis is done, the tours are fixed, and so are the activities. They do not change anymore.
+ *
+ * this could be used in the daily time activity calculation.
  */
 class FinalizedActivityPattern(
     val person: ActitoppPerson,

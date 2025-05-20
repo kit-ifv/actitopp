@@ -3,9 +3,12 @@ package edu.kit.ifv.mobitopp.actitopp.modernization
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper
 import edu.kit.ifv.mobitopp.actitopp.WeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MobilityPlan
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.DaySituation
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.coordinatedStep2AWithParams
+import edu.kit.ifv.mobitopp.actitopp.steps.step7.TimeBudgets
 import java.time.DayOfWeek
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -91,6 +94,15 @@ class PatternStructure(
         return activityType
     }
 
+    /**
+     * Since absolutely no decision in Step 8+ checks whether the previous day is a Home Day and the home day just
+     * complicates the legacy counting, we can drop these days, since these days will be modelled exclusively by the
+     * spawned Home Activity spanning between the previous day and the next day.
+     */
+    fun toPlan(personWithRoutine: PersonWithRoutine, tripDuration: DetermineTripDuration, timeBudgets: TimeBudgets) : MobilityPlan? {
+        if(mobileDays().isEmpty()) return null // TODO handle pattern with no activity somewhere
+        return MobilityPlan.create(mobileDays(), timeBudgets, personWithRoutine, tripDuration)
+    }
 
 }
 

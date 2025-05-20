@@ -15,7 +15,7 @@ class ActitoppPersonModifierFields(val original: ActitoppPerson) {
     var averageAmountOfActivities: Int by Delegates.notNull()
 
     fun toWeekRoutine(): WeekRoutine {
-        return WeekRoutine(
+        return WeekRoutineImpl(
             amountOfWorkingDays = amountOfWorkingDays,
             amountOfEducationDays = amountOfEducationDays,
             amountOfLeisureDays = amountOfLeisureDays,
@@ -29,22 +29,16 @@ class ActitoppPersonModifierFields(val original: ActitoppPerson) {
 }
 fun ActitoppPerson.toModifiable() = ActitoppPersonModifierFields(this)
 
-data class WeekRoutine(
-    val amountOfWorkingDays: Int,
-    val amountOfEducationDays: Int,
-    val amountOfLeisureDays: Int,
-    val amountOfShoppingDays: Int,
-    val amountOfServiceDays: Int,
-    val amountOfImmobileDays: Int,
-    val averageAmountOfTours: Int,
-    val averageAmountOfActivities: Int,
-) {
-    /**
-     * Generates a tracker instance, where none of the days are set to be work or education respectively.
-     */
-    fun instantiateTracker() : DayActivityTracker {
-        return DayActivityTracker(amountOfWorkingDays, amountOfEducationDays, emptySet(), emptySet())
-    }
+interface WeekRoutine {
+    val amountOfWorkingDays: Int
+    val amountOfEducationDays: Int
+    val amountOfLeisureDays: Int
+    val amountOfShoppingDays: Int
+    val amountOfServiceDays: Int
+    val amountOfImmobileDays: Int
+    val averageAmountOfTours: Int
+    val averageAmountOfActivities: Int
+
     // TODO this is only required for testing against the legacy code base, once established this can be removed.
     fun similarToAttributeMap(attributeMap: Map<String, Double>): Boolean {
         return amountOfWorkingDays == attributeMap["anztage_w"]?.toInt() &&
@@ -56,6 +50,25 @@ data class WeekRoutine(
                 averageAmountOfTours == attributeMap["anztourentag_mean"]?.toInt() &&
                 averageAmountOfActivities == attributeMap["anzakttag_mean"]?.toInt()
     }
+}
+
+data class WeekRoutineImpl(
+    override val amountOfWorkingDays: Int,
+    override val amountOfEducationDays: Int,
+    override val amountOfLeisureDays: Int,
+    override val amountOfShoppingDays: Int,
+    override val amountOfServiceDays: Int,
+    override val amountOfImmobileDays: Int,
+    override val averageAmountOfTours: Int,
+    override val averageAmountOfActivities: Int,
+): WeekRoutine {
+    /**
+     * Generates a tracker instance, where none of the days are set to be work or education respectively.
+     */
+    fun instantiateTracker() : DayActivityTracker {
+        return DayActivityTracker(amountOfWorkingDays, amountOfEducationDays, emptySet(), emptySet())
+    }
+
 
     /**
      * To enable testing, we need to be able to load the person attributes based on the Person Week Routine.

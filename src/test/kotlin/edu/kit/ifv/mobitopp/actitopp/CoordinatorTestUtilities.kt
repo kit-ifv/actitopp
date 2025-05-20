@@ -37,9 +37,9 @@ abstract class CoordinatorTestUtilities {
     protected fun DCDefaultModelStep.probabilities() = probabilities {it.toInt()}
 
 
-    protected fun randomWeekRoutine(person: ActitoppPerson): WeekRoutine {
+    protected fun randomWeekRoutine(person: ActitoppPerson): WeekRoutineImpl {
         val rng = Random(person.age * 10000 + person.persIndex)
-        return WeekRoutine(
+        return WeekRoutineImpl(
             amountOfWorkingDays = rng.nextInt(0, 7),
             amountOfEducationDays = rng.nextInt(0, 7),
             amountOfLeisureDays = rng.nextInt(0, 7),

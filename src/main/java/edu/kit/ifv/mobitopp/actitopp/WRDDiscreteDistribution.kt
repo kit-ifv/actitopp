@@ -78,16 +78,9 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
 
     }
 
-
-    var theModifiee: ActitoppPerson? = null
-        set(value) {
-            if(field != null) {
-                require(field == value) {
-                    "ohnononononon"
-                }
-            }
-            field = value
-        }
+    // TODO this field only exists to debug actitopp code and should be removed
+    var theModifiee: MutableList<Int> = mutableListOf()
+    val id = Companion.idCounter
     fun getRandomPickFromDistribution(bounds: IntRange, randomgenerator: RNGHelper): Int {
         return getRandomPickFromDistribution(bounds, randomgenerator.randomValue)
     }
@@ -143,5 +136,12 @@ class WRDDiscreteDistribution(private val histogram: NavigableMap<Int, Int>) {
         val selectedElement = normalizedValues.entries.firstOrNull{it.value > rand}?.key ?: normalizedValues.keys.last()
         return selectedElement
 
+    }
+
+    companion object {
+        private var idCounter = 0
+            get() {
+                return field.also{field++}
+            }
     }
 }

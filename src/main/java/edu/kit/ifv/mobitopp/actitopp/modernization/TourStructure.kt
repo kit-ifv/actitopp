@@ -1,7 +1,11 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.StandardCommuteDurations
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.TourPlan
 import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 
 /**
  * A tour structure is only the ordering of activity types taken during a tour, but not fully qualified activities, as
@@ -14,7 +18,7 @@ import edu.kit.ifv.mobitopp.actitopp.steps.ActivityAttributes
  */
 class TourStructure(
     mainActivityType: ActivityType,
-):BidirectionalQueue<ActivityType>(mainActivityType) {
+) : BidirectionalQueue<ActivityType>(mainActivityType) {
 
 
     fun loadPrecursors(activityTypes: Collection<ActivityType>) {
@@ -36,9 +40,17 @@ class TourStructure(
 //    fun amountOfPrecursors() = offset
 //    fun amountOfActivities() = queue.size
 
+    operator fun contains(activityType: ActivityType) = elements().contains(activityType)
 
     override fun toString(): String {
         return "${precursors().joinToString { it.typeasChar.toString() }} [${mainElement().typeasChar}] ${successors().joinToString { it.typeasChar.toString() }}"
+    }
+
+    fun toPlan(
+        personWithRoutine: PersonWithRoutine,
+        tripDuration: DetermineTripDuration = StandardCommuteDurations.STANDARD_ASSIGNMENT,
+    ): TourPlan {
+        return TourPlan.create(this, personWithRoutine, tripDuration)
     }
 
 }

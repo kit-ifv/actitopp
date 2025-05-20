@@ -1,6 +1,9 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
+import edu.kit.ifv.mobitopp.actitopp.IPerson
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import java.util.NavigableSet
 import java.util.TreeSet
 import kotlin.time.Duration
@@ -34,6 +37,8 @@ class ModernizedActivity(
 }
 class LinkedActivity(val original: ModernizedActivity, var previousTrip: ModernizedTrip? = null, var nextTrip: ModernizedTrip? = null): Activity by original {
     constructor(activityType: ActivityType) : this(ModernizedActivity(activityType = activityType))
+
+
     fun link(other: LinkedActivity, duration: Duration = 15.minutes) {
         val trip = ModernizedTrip(
             duration = duration,
@@ -45,30 +50,24 @@ class LinkedActivity(val original: ModernizedActivity, var previousTrip: Moderni
         other.previousTrip = trip
     }
 
+    override fun toString(): String {
+        return "$activityType start=($startTime) duration=($duration)"
+    }
+}
 
+fun Collection<LinkedActivity>.linkByHomeActivity(other: Collection<LinkedActivity>, person: PersonWithRoutine, tripDuration: DetermineTripDuration): List<LinkedActivity> {
+    val homeActivity = LinkedActivity(ActivityType.HOME)
+    val lastElement = this.last()
+    val nextElement = other.first()
+    lastElement.link(homeActivity, tripDuration.lastTourTrip(
+        person = person,
+        activityType = lastElement.activityType
+    ))
+    homeActivity.link(nextElement, tripDuration.firstTourTrip(person, nextElement.activityType))
+    return this + homeActivity
 }
 class ModernizedTrip(
     val duration: Duration,
     var previousActivity: LinkedActivity,
-    val nextActivity: LinkedActivity,
+    var nextActivity: LinkedActivity,
 )
-
-class ModernizedTour() {
-    // Activities within a tour are ordered
-    private val activities: NavigableSet<LinkedActivity> = TreeSet()
-
-    fun add(activity: ModernizedActivity): Boolean {
-
-        val element = LinkedActivity(activity)
-        if (element in activities) {
-            return false // TODO maybe even throw, in regular program flow this should not occur
-        }
-
-        activities.add(element)
-        val pred = activities.lower(element)
-        val succ = activities.higher(element)
-
-//        pred.
-        return true
-    }
-}

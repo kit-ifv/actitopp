@@ -5,7 +5,12 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MovingDayPlanInput
+import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MutableDayPlan
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
+import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
+import edu.kit.ifv.mobitopp.actitopp.steps.step7.TimeBudgets
 import java.time.DayOfWeek
 import java.util.NavigableMap
 import java.util.SortedMap
@@ -45,6 +50,9 @@ class HDay(parent: HWeekPattern, override val weekday: DayOfWeek) : DayStructure
         TODO("Not yet implemented")
     }
 
+    override fun toDayPlan(movingDayPlanInput: MovingDayPlanInput): MutableDayPlan {
+        TODO("Not yet implemented")
+    }
 
     private val mappedTours: NavigableMap<Int, HTour> = TreeMap()
     val tours: Collection<HTour> get() = mappedTours.values
