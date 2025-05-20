@@ -10,6 +10,9 @@ import edu.kit.ifv.mobitopp.actitopp.utilityFunctions.times
 import java.nio.file.Path
 import kotlin.io.path.Path
 
+/**
+ * Basically the same as step 7B, but reasonable
+ */
 class WorkHistograms(
     val histogram1: ArrayHistogram,
     val histogram2: ArrayHistogram,
@@ -284,9 +287,4 @@ class WorkChoiceSituation private constructor(override val choice: ArrayHistogra
     ChoiceSituation<ArrayHistogram>(), PersonAttributes by personAttributes, FinalizedPatternAttributes by patternAttributes {
         constructor(choice: ArrayHistogram, finalizedPattern: FinalizedActivityPattern): this(choice, PersonAttributesFromElement(finalizedPattern.person), PatternAttributesByElement(finalizedPattern))
 
-}
-
-fun main() {
-    val workHistogram = WorkHistograms.fromResourcePath()
-    println(workHistogram)
 }

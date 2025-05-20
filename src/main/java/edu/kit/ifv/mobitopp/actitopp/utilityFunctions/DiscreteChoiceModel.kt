@@ -7,8 +7,8 @@ fun interface SelectionFunction<X> {
 }
 
 open class DiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
-    protected open val distributionFunction: ExtractableDistributionFunction<X, SIT, P>,
-    protected open val selectionFunction: SelectionFunction<SIT> = SelectionFunction {
+    open val distributionFunction: ExtractableDistributionFunction<X, SIT, P>,
+    open val selectionFunction: SelectionFunction<SIT> = SelectionFunction {
         it.select(
             GlobalRandomizer.nextDouble()
         )
@@ -132,6 +132,10 @@ class ModifiableDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
     }
 
     fun registeredOptions() = distributionFunction.options
+
+    fun utilityFunction(option: X): UtilityFunction<SIT, P> {
+        return distributionFunction.translation.getValue(option)
+    }
 }
 
 class KnownDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
@@ -166,6 +170,8 @@ class ParametrizedDiscreteChoiceModel<X : Any, SIT : ChoiceSituation<X>, P>(
     fun probabilities(options: Set<X>, converter: (X) -> SIT) = original.probabilities(options, parameters, converter)
     fun selectInjected(situation: (X) -> SIT, injections: Map<X, (Double) -> Double>): X = original.selectInjected(parameters, situation, injections)
     fun registeredOptions() = original.registeredOptions()
+
+    fun utilityFunction(option:X) = original.utilityFunction(option)
 }
 
 fun <X : Any, SIT : ChoiceSituation<X>, PARAMS> ModifiableDiscreteChoiceModel<X, SIT, PARAMS>.initializeWithParameters(

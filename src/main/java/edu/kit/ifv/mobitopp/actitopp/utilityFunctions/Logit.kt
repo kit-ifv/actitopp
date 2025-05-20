@@ -1,5 +1,4 @@
 package edu.kit.ifv.mobitopp.actitopp.utilityFunctions
-import jdk.jshell.execution.Util
 import kotlin.math.exp
 
 class Logit<X, P> : DistributionFunction<X, P> {
@@ -35,7 +34,7 @@ class AllocatedLogit<X : Any, SIT : ChoiceSituation<X>, P>(
 
 ) : RuleBasedAssociation<X, SIT, P>, ModifiableDistributionFunction<X, SIT, P> {
     override val options = optionsMap.keys
-    override val translation: Map<X, UtilityFunction<SIT, P>> = emptyMap()
+    override val translation: Map<X, UtilityFunction<SIT, P>> = optionsMap
 
     override fun calculateProbabilities(evaluators: Map<SIT, Double>, parameters: P): Map<SIT, Double> {
         return Logit<SIT, P>().calculateProbabilities(evaluators, parameters)
@@ -87,4 +86,13 @@ class AllocatedLogit<X : Any, SIT : ChoiceSituation<X>, P>(
             lambda: LogitBuilder<X, SIT, PARAMS>.() -> Unit
         ): AllocatedLogit<X, SIT, PARAMS> = create(emptySet(), name, lambda)
     }
+}
+
+
+fun <SIT, PARAMS> DistributionFunction<SIT, PARAMS>.calculateProbability(map: Map<SIT, UtilityFunction<SIT, PARAMS>>, params: PARAMS): Map<SIT, Double> {
+    return this.calculateProbabilities(map.mapValues { it.value.calculateUtility(it.key, params) }, params)
+}
+
+fun <SIT, PARAMS> UtilityFunction<SIT, PARAMS>.modifyTemporary(lambda: (UtilityFunction<SIT, PARAMS>) -> UtilityFunction<SIT, PARAMS>): UtilityFunction<SIT, PARAMS> {
+    return lambda(this)
 }

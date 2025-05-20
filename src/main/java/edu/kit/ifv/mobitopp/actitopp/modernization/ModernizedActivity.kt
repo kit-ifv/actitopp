@@ -19,7 +19,10 @@ interface Activity {
 /**
  *
  */
-
+interface MutableActivity : Activity {
+    override var startTime: Duration?
+    override var duration: Duration?
+}
 operator fun Duration.plus(nullable: Duration?): Duration {
     return nullable?.let { it + this } ?: this
 }
@@ -27,7 +30,7 @@ class ModernizedActivity(
     override val activityType: ActivityType,
     override var startTime: Duration? = null,
     override var duration: Duration? = null,
-) : Activity {
+) : MutableActivity {
 
 
 
@@ -35,7 +38,7 @@ class ModernizedActivity(
 
 
 }
-class LinkedActivity(val original: ModernizedActivity, var previousTrip: ModernizedTrip? = null, var nextTrip: ModernizedTrip? = null): Activity by original {
+class LinkedActivity(val original: ModernizedActivity, var previousTrip: ModernizedTrip? = null, var nextTrip: ModernizedTrip? = null): MutableActivity by original {
     constructor(activityType: ActivityType) : this(ModernizedActivity(activityType = activityType))
 
 

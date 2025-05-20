@@ -1648,7 +1648,13 @@ class Coordinator @JvmOverloads constructor(
                     tmpact
             }
         }
+        require(last_act_scheduled == null) {
+            "Fat statement, there should never be a scheduled activity before, since that takes place in step 10"
+        }
 
+        require(next_act_scheduled == null) {
+            "Fat statement, there should never be a scheduled activity after, since that takes place in step 10"
+        }
         /*
          * starting point for lower bound
          */
@@ -1672,7 +1678,9 @@ class Coordinator @JvmOverloads constructor(
                 }
             }
         }
-
+        require(startingpointlowerbound == 1) {
+            "Not entirely sure about that statement, but it could be true, and that is all that matters"
+        }
         /*
          * starting point for upper bound
          */

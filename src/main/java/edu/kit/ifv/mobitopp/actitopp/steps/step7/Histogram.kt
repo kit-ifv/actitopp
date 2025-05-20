@@ -4,6 +4,7 @@ import edu.kit.ifv.mobitopp.actitopp.IO.loadDistributionInformationFromFile
 import edu.kit.ifv.mobitopp.actitopp.WRDDiscreteDistribution
 import edu.kit.ifv.mobitopp.actitopp.WRDModelDistributionInformation
 import java.nio.file.Path
+import java.util.Comparator
 import kotlin.io.path.Path
 import kotlin.io.path.name
 import kotlin.math.max
@@ -53,7 +54,7 @@ open class ArrayHistogram protected constructor(
     protected val offset: Int = 0,
     protected val probabilities: DoubleArray = doubleArrayOf(0.0),
     val categoryIndex: Int, // TODO the category index from legacy code should maybe be added somewhere else
-) {
+): Comparable<Int> {
     constructor(offset: Int, values: Collection<Number>, categoryIndex: Int) : this(
         offset,
         values.map { it.toDouble() / values.sumOf { it.toDouble() } }.toDoubleArray(),
@@ -143,6 +144,17 @@ open class ArrayHistogram protected constructor(
         return (upper - lower) * this + lower
     }
 
+    /**
+     * Compares this object with the specified object for order. Returns zero if this object is equal
+     * to the specified [other] object, a negative number if it's less than [other], or a positive number
+     * if it's greater than [other].
+     */
+    override fun compareTo(other: Int): Int {
+        if(end < other) return -1
+        if(start > other) return 1
+        return 0
+    }
+
     override fun toString(): String {
         return "Histogram[$offset, ${offset + size - 1}]"
     }
@@ -171,9 +183,12 @@ open class ArrayHistogram protected constructor(
  */
 fun DoubleArray.indexBinarySearch(element: Double, fromIndex: Int = 0, toIndex: Int = size): Int {
     val binarySearch = binarySearch(element, fromIndex, toIndex)
-    return if (binarySearch < 0) -binarySearch - 1 else binarySearch
+    return binarySearch.indexOfSearch()
 }
 
+fun Int.indexOfSearch(): Int {
+    return if (this < 0) -this - 1 else this
+}
 fun main() {
 
     val wrdDistribution =

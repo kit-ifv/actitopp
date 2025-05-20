@@ -14,8 +14,10 @@ interface OptionDistributionFunction<X : Any, SIT : ChoiceSituation<X>, PARAMS> 
     ExtractableDistributionFunction<X, SIT, PARAMS> {
     val options: Set<X> get() = translation.keys
     val translation: Map<X, UtilityFunction<SIT, PARAMS>>
-    override fun translation(target: SIT): UtilityFunction<SIT, PARAMS> = translation.getOrElse(target.choice) {
-        throw NoSuchElementException("There is no utility function for $target in this distribution function")
+    override fun translation(target: SIT): UtilityFunction<SIT, PARAMS> = translation(target.choice)
+
+    fun translation(target: X): UtilityFunction<SIT, PARAMS> = translation.getOrElse(target) {
+        throw NoSuchElementException("There is no utility function for $target")
     }
 }
 
@@ -110,4 +112,49 @@ interface RuleBasedAssociation<X : Any, SIT : ChoiceSituation<X>, PARAMS> :
     override fun translation(target: SIT): UtilityFunction<SIT, PARAMS> {
         return associateFunction(target)
     }
+}
+
+class UtilityCollector<X: Any, SIT:ChoiceSituation<X>, PARAMS>(
+    val originalFunctions: (X) -> UtilityFunction<SIT, PARAMS>,
+) {
+    val registeredUtilityFunctions = mutableMapOf<X, UtilityFunction<SIT, PARAMS>>()
+
+    fun option(option: X) {
+        registeredUtilityFunctions[option] = originalFunctions(option)
+    }
+    fun option(option: X, modification: (UtilityFunction<SIT, PARAMS>) -> UtilityFunction<SIT, PARAMS>) {
+        registeredUtilityFunctions[option] = modification(originalFunctions(option))
+    }
+}
+fun <X: Any, SIT:ChoiceSituation<X>, PARAMS> OptionDistributionFunction<X, SIT, PARAMS>.selectNew(
+    converter: (X) -> SIT,
+    parameters: PARAMS,
+    lambda: UtilityCollector<X, SIT, PARAMS>.() -> Unit): Map<SIT, Double> {
+    val collector = UtilityCollector(::translation)
+    collector.apply(lambda)
+
+
+    return calculateProbabilities(collector.registeredUtilityFunctions.entries.associate {
+        val situation = converter(it.key)
+        situation to it.value.calculateUtility(situation, parameters)
+    }, parameters)
+
+}
+
+fun <X: Any, SIT:ChoiceSituation<X>, PARAMS> ModifiableDiscreteChoiceModel<X, SIT, PARAMS>.selectNew(
+    randomNumber: Double,
+    converter: (X) -> SIT,
+    parameters: PARAMS,
+    collector: UtilityCollector<X, SIT, PARAMS>.() -> Unit
+): X {
+    return SelectionFunction<SIT> { it.select(randomNumber) }.calculateSelection(distributionFunction.selectNew(converter, parameters, collector)).choice
+
+}
+
+fun <X: Any, SIT:ChoiceSituation<X>, PARAMS> ParametrizedDiscreteChoiceModel<X, SIT, PARAMS>.selectNew(
+    randomNumber: Double,
+    converter: (X) -> SIT,
+    collector: UtilityCollector<X, SIT, PARAMS>.() -> Unit
+): X {
+    return original.selectNew(randomNumber, converter, parameters, collector)
 }

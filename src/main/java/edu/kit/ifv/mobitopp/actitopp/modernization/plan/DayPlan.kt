@@ -14,12 +14,14 @@ import kotlin.time.Duration.Companion.minutes
 interface DayPlan: List<LinkedActivity> {
     val firstHomeActivity: LinkedActivity
     val lastHomeActivity: LinkedActivity
-
+    val tourPlans: List<TourPlan>
     fun numberOfActivities(activityType: ActivityType): Int
 
     fun mainActivities(): List<LinkedActivity>
 
     val activityBudget: Map<ActivityType, Duration>
+
+    fun getBudget(activityType: ActivityType): Duration = activityBudget[activityType]?: throw NoSuchElementException("No budget found for activity $activityType")
 }
 
 interface MutableDayPlan : DayPlan {
@@ -34,7 +36,7 @@ data class MovingDayPlanInput(
 )
 class MovingDayPlan(
     val activities: List<LinkedActivity>,
-    val tourPlans: List<TourPlan>,
+    override val tourPlans: List<TourPlan>,
     timeBudgets: TimeBudgets,
     val durationDay: DurationDay,
 ): MutableDayPlan, List<LinkedActivity> by activities {
@@ -76,6 +78,8 @@ class MovingDayPlan(
 class HomeDayPlan: MutableDayPlan, List<LinkedActivity> by emptyList() {
     override var firstHomeActivity: LinkedActivity = LinkedActivity(activityType = ActivityType.HOME)
     override var lastHomeActivity: LinkedActivity = firstHomeActivity
+    override val tourPlans: List<TourPlan> = emptyList()
+
     override fun numberOfActivities(activityType: ActivityType): Int = 0
     override fun mainActivities(): List<LinkedActivity> {
         return emptyList()

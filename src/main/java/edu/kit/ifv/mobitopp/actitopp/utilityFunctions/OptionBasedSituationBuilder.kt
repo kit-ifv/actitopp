@@ -34,7 +34,22 @@ interface OptionBasedSituationBuilder<X : Any, SIT : ChoiceSituation<X>, PARAMS>
         }
         addUtilityFunctionByIdentifier(option, internalUtilityFunction)
     }
+    /**
+     * Add the convenience method to add a bunch of options, zipped with the parameters when referencing the same utility function
+     */
 
+    fun <P> bulk(options: List<X>, parameterConversions: List<PARAMS.() -> P>, utilityFunction: P.(SIT) -> Double) {
+        options.zip(parameterConversions).forEach { (option, conversion) ->
+            val internalUtilityFunction = UtilityFunction { alternative: SIT, parameterObject: PARAMS ->
+                utilityFunction.invoke(
+                    parameterObject.conversion(),
+                    alternative
+                )
+            }
+            addUtilityFunctionByIdentifier(option, internalUtilityFunction)
+        }
+
+    }
     /**
      * Theoretically you can also specify options via their Situation instantiations, but that seems weird
      */
