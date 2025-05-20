@@ -21,6 +21,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 val STATIC_HISTOGRAMS = HistogramPerActivity()
+
 /**
  * @author Tim Hilgert
  *
@@ -31,13 +32,15 @@ val STATIC_HISTOGRAMS = HistogramPerActivity()
 class Coordinator @JvmOverloads constructor(
     /** ///////////// */
     val person: ActitoppPerson,
-    val fileBase: ModelFileBase,  private val debugloggers: DebugLoggers? = null,
+    val fileBase: ModelFileBase, private val debugloggers: DebugLoggers? = null,
 ) {
 
     val randomGenerator = person.personalRNG
     val rngCopy = randomGenerator.copy()
+
     // TODO remove once tested and confirmed identical
     val rngCopy2 = rngCopy.copy()
+
     /**///////////// */ //	declaration of variables
     private val pattern: HWeekPattern = person.weekPattern
 
@@ -101,7 +104,8 @@ class Coordinator @JvmOverloads constructor(
             patternStructure.determineNextMainActivity(rngHelper = rngCopy)
         }
 
-        val legacyMainActivities = pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
+        val legacyMainActivities =
+            pattern.days.map { it.getTourOrNull(0)?.getActivity(0)?.activityType ?: ActivityType.HOME }
 
         require(legacyMainActivities.zip(mainActivitiesNew).all { (a, b) -> a == b }) {
             "Mismatch between generated activity schedules"
@@ -122,7 +126,7 @@ class Coordinator @JvmOverloads constructor(
         executeStep3("3B")
         val legacyAmountSuccessors = pattern.days.map { it.amountOfLaterTours() }
         val modernizedAmountSuccessors = tourAmounts.map { it.value.successorAmount }
-        require(legacyAmountSuccessors.zip(modernizedAmountSuccessors).all { (a, b) ->a ==b  }) {
+        require(legacyAmountSuccessors.zip(modernizedAmountSuccessors).all { (a, b) -> a == b }) {
             "Mismatch between successor tour amounts ${person.id}"
         }
         executeStep4("4A")
@@ -131,7 +135,8 @@ class Coordinator @JvmOverloads constructor(
 
         val legacyActivityTypes = pattern.days.map { it.tours.map { it.activities.map { it.activityType } } }
         val moderniedSideAc = patternStructure.allDays().map { it.elements().map { it.elements() } }
-        require(legacyActivityTypes.flatten().flatten().zip(moderniedSideAc.flatten().flatten()).all { (a, b) -> a == b }) {
+        require(
+            legacyActivityTypes.flatten().flatten().zip(moderniedSideAc.flatten().flatten()).all { (a, b) -> a == b }) {
             "There are some activities that did not get the correct assignment :/"
         }
         executeStep5("5A") // Create Activities before main activity (?)
@@ -153,8 +158,8 @@ class Coordinator @JvmOverloads constructor(
         val pred = step5output.values.flatMap { it.values.map { it.precursorAmount } }
         val succ = step5output.values.flatMap { it.values.map { it.successorAmount } }
 
-        val legacyTourActivitiesPred = pattern.allTours.map{ it.activities.filter { it.index < 0 }.count()}
-        val legacyTourActivitiesSucc = pattern.allTours.map{ it.activities.filter { it.index > 0 }.count()}
+        val legacyTourActivitiesPred = pattern.allTours.map { it.activities.filter { it.index < 0 }.count() }
+        val legacyTourActivitiesSucc = pattern.allTours.map { it.activities.filter { it.index > 0 }.count() }
         val modernizedTourActivitiesPred = pred
 //        val modernizedTourActivitiesPred = pred.flatMap { it.values }
         val modernizedTourActivitiesSucc = succ
@@ -174,7 +179,7 @@ class Coordinator @JvmOverloads constructor(
 
         val allLegacyActivities = pattern.days.flatMap { it.allActivitiesoftheDay.map { it.activityType } }
         val allModernizedActivity = patternStructure.allDays().flatMap { it.elements().flatMap { it.elements() } }
-        require(allLegacyActivities.zip(allModernizedActivity).all { (a, b) -> a == b}) {
+        require(allLegacyActivities.zip(allModernizedActivity).all { (a, b) -> a == b }) {
             "Activity list mismatch for person ${person.id}"
         }
         createTripTimesforActivities()
@@ -184,10 +189,11 @@ class Coordinator @JvmOverloads constructor(
             placeJointActivitiesIntoPattern()
         }
 
-        val randomNumbers = (0..9).map{randomGenerator.randomValue}
+        val randomNumbers = (0..9).map { randomGenerator.randomValue }
 
         val output = STATIC_HISTOGRAMS.determineTimeBudgets(randomNumbers, FinalizedActivityPattern(person, pattern))
-        val mobilityPlan = patternStructure.toPlan(personWithRoutine, StandardCommuteDurations.STANDARD_ASSIGNMENT, output)
+        val mobilityPlan =
+            patternStructure.toPlan(personWithRoutine, StandardCommuteDurations.STANDARD_ASSIGNMENT, output)
 
         executeStep7DC("7A", ActivityType.WORK, randomNumbers[0])
         executeStep7WRD("7B", ActivityType.WORK, randomNumbers[1])
@@ -287,8 +293,10 @@ class Coordinator @JvmOverloads constructor(
      * @param id
      * @param variablenname
      */
-    private fun executeStep1(id: String,
-                             variablenname: String) {
+    private fun executeStep1(
+        id: String,
+        variablenname: String,
+    ) {
         // create attribute lookup
         val lookup = AttributeLookup(person)
 
@@ -357,7 +365,8 @@ class Coordinator @JvmOverloads constructor(
 
                     // utility bonus for alternative W if person is employed and day is from Monday to Friday
                     if (person.isAnywayEmployed() && currentDay.isStandardWorkingDay()
-                        && step.alternativeisEnabled("W")) {
+                        && step.alternativeisEnabled("W")
+                    ) {
                         step.adaptUtilityFactor("W", 1.3)
                     }
                     // utility bonus for alternative E if person is in Education and day is from Monday to Friday
@@ -541,7 +550,7 @@ class Coordinator @JvmOverloads constructor(
 
             for (i in currentDay.lowestTourIndex..currentDay.highestTourIndex) {
                 val currentTour = currentDay.getTour(i)
-                require(currentTour.amountOfActivities == 1|| id != "5A") {
+                require(currentTour.amountOfActivities == 1 || id != "5A") {
                     "Fat assumption, all tours have only their main activity right now. (Holds only for step 5A, but not for 5B"
                 }
                 // create attribute lookup
@@ -972,7 +981,7 @@ class Coordinator @JvmOverloads constructor(
 
             // create step object
             val step = DCDefaultModelStep(id, fileBase, lookup, randomGenerator)
-            val decisionIndex = randomNumber?.let{step.doStep(it) } ?: step.doStep()
+            val decisionIndex = randomNumber?.let { step.doStep(it) } ?: step.doStep()
             val decision = step.alternativeChosen.toInt()
 
             log(id, person, decision.toString())
@@ -989,8 +998,10 @@ class Coordinator @JvmOverloads constructor(
                 activitytype.toString() + "budget_category_alternative",
                 value
             )
-            require(person.attributesMap.get(activitytype.toString() + "budget_category_alternative") -1 ==
-            person.attributesMap.get(activitytype.toString() + "budget_category_index")) {
+            require(
+                person.attributesMap.get(activitytype.toString() + "budget_category_alternative") - 1 ==
+                        person.attributesMap.get(activitytype.toString() + "budget_category_index")
+            ) {
                 "I proclaim, index is always one less than alternative"
             }
         }
@@ -1014,7 +1025,7 @@ class Coordinator @JvmOverloads constructor(
             val chosenIndex = person.getAttributefromMap(activitytype.toString() + "budget_category_index")
             //TODO why is get Attribute returning a double, which is then cast to an int. Skip the intermediate step
             val step = WRDDefaultModelStep(id, Category(chosenIndex.toInt()), activitytype, this)
-            val chosenTime = randomNumber?.let{step.doStep(it)}?: step.doStep()
+            val chosenTime = randomNumber?.let { step.doStep(it) } ?: step.doStep()
 
             log(id, person, chosenTime.toString())
 
@@ -1025,8 +1036,10 @@ class Coordinator @JvmOverloads constructor(
     /**
      * @param id
      */
-    @Deprecated("This method does not utilize the result of the discrete choice model, it forcefully sets " +
-            "purely based on configuration and activity type")
+    @Deprecated(
+        "This method does not utilize the result of the discrete choice model, it forcefully sets " +
+                "purely based on configuration and activity type"
+    )
     private fun executeStep8A(id: String) {
         // STEP8a: yes/no decision for "activity is in average time class xyz".
         // only applies to main activities
@@ -1634,18 +1647,20 @@ class Coordinator @JvmOverloads constructor(
             if (act < tmpact) {
                 //System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
                 if (tmpact.startTimeisScheduled() && (last_act_scheduled == null ||
-                            tmpact.startTime > last_act_scheduled.startTime))
+                            tmpact.startTime > last_act_scheduled.startTime)
+                )
                     last_act_scheduled =
-                    tmpact
+                        tmpact
             }
 
             // Search for later activity with determined starting time
             if (act > tmpact) {
                 //System.out.println(tmpact.getTour().getIndex() + "/" + tmpact.getIndex());
                 if (tmpact.startTimeisScheduled() && (next_act_scheduled == null
-                            || tmpact.startTime < next_act_scheduled.startTime))
+                            || tmpact.startTime < next_act_scheduled.startTime)
+                )
                     next_act_scheduled =
-                    tmpact
+                        tmpact
             }
         }
         require(last_act_scheduled == null) {
@@ -1872,29 +1887,21 @@ class Coordinator @JvmOverloads constructor(
      * @return
      */
     private fun countTripDurationsbetweenActivitiesofOneDay(actfrom: HActivity?, actto: HActivity?): Int {
-        var result = 0
-        val listofdayactivities = if (actfrom == null) {
-            actto!!.day.allActivitiesoftheDay
-        } else {
-            actfrom.day.allActivitiesoftheDay
+        val listofdayactivities = when {
+            actfrom != null -> actfrom.day.allActivitiesoftheDay
+            actto != null -> actto.day.allActivitiesoftheDay
+            else -> throw IllegalArgumentException("You managed to call this method with two null values actfrom=$actfrom actto=$actto")
         }
+        return listofdayactivities.filter {
+            if (actfrom == null) true else
+                actfrom >= it
+        }.filter {
+            if(actto == null) true else
+                actto <= it
+        }.sumOf {
+            it.estimatedTripTimeBeforeActivity + if (it.isActivityLastinTour) it.estimatedTripTimeAfterActivity else 0
+        } - (actfrom?.estimatedTripTimeBeforeActivity ?: 0) - (if(actto?.isActivityLastinTour == true) actto.estimatedTripTimeAfterActivity else 0)
 
-        for (tmpact in listofdayactivities) {
-            if ((actfrom == null && actto != null && actto.compareTo(tmpact) <= 0)
-                || (actfrom != null && actto != null && actfrom.compareTo(tmpact) >= 0 && actto.compareTo(tmpact) <= 0)
-                || (actfrom != null && actto == null && actfrom.compareTo(tmpact) >= 0)
-            ) {
-                if (actto != null && actto.compareTo(tmpact) == 0) {
-                    result += tmpact.estimatedTripTimeBeforeActivity
-                } else if (actfrom != null && actfrom.compareTo(tmpact) == 0) {
-                    if (tmpact.isActivityLastinTour) result += tmpact.estimatedTripTimeAfterActivity
-                } else {
-                    result += tmpact.estimatedTripTimeBeforeActivity
-                    if (tmpact.isActivityLastinTour) result += tmpact.estimatedTripTimeAfterActivity
-                }
-            }
-        }
-        return result
     }
 
 
@@ -2007,8 +2014,8 @@ class Coordinator @JvmOverloads constructor(
         } else {
             tourday.highestTourIndex
         }
-        val other = (tour.index..tourindexforsearch).map{tourday.getTour(it)}
-        val otherDur = other.sumOf{it.tourDuration}
+        val other = (tour.index..tourindexforsearch).map { tourday.getTour(it) }
+        val otherDur = other.sumOf { it.tourDuration }
         val homeDurs = other.size
         for (i in tour.index..tourindexforsearch) {
             val tmptour = tourday.getTour(i)
