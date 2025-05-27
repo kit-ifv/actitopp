@@ -10,12 +10,14 @@ fun interface SelectMainActivityDuration {
     fun getDuration(input: Step8BInput): Duration
 }
 
-object StandardStep8B : SelectMainActivityDuration {
-    val histogram = MajorDurationHistograms.DEFAULT
-    val rng = RNGHelper(1)
+class StandardStep8B<P>(
+    val rng: RNGHelper,
+    histogram: ActivityDurationHistograms<P>,
+) : SelectMainActivityDuration, SelectMajorActivityDuration {
+    private val taintedHistograms = histogram.taint()
     override fun getDuration(input: Step8BInput): Duration {
         input.run {
-            return when(activityType) {
+            return when (tourMainActivityType) {
                 ActivityType.WORK -> calculateFixed(this)
                 ActivityType.EDUCATION -> calculateFixed(this)
                 else -> calculateDefault(this)
@@ -25,17 +27,33 @@ object StandardStep8B : SelectMainActivityDuration {
 
     fun calculateFixed(input: Step8BInput): Duration {
         return input.run {
-            val meanActivityDuration = dayPlan.getBudget(activityType)
-            histogram.chooseWithinNeighbors(rng, meanActivityDuration) {
-                MainDurationSituation(it)
+            val meanActivityDuration = dayPlan.getBudget(tourMainActivityType)
+            taintedHistograms.selectAndTaint(rng, meanActivityDuration) {
+                MainDurationSituation(
+                    it, mobilityPlan, dayPlan, tourPlan, tourPlan.mainActivity, mobilityPlan.timeBudgets, person,
+                    isLastTourOfDay = isLastTourOfDay
+                )
             }
 
         }
     }
 
     fun calculateDefault(input: Step8BInput): Duration {
-        return histogram.select(rng) {
-            MainDurationSituation(it)
+
+        return input.run {
+            val bounds = dayPlan.boundsFor(tourPlan.mainActivity)
+            taintedHistograms.select(rng, bounds) {
+                MainDurationSituation(
+                    it,
+                    mobilityPlan,
+                    dayPlan,
+                    tourPlan,
+                    tourPlan.mainActivity,
+                    mobilityPlan.timeBudgets,
+                    person,
+                    isLastTourOfDay
+                )
+            }
         }
     }
 }

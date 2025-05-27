@@ -224,7 +224,8 @@ enum class HActivityParameters
      */
     anzaktwieanztagemitzweck{
         override fun getAttribute(act: HActivity): Double {
-            return (if (act.weekPattern.countActivitiesPerWeek(act.activityType) == act.weekPattern.countDaysWithSpecificActivity(
+            return (if (act.weekPattern.countActivitiesPerWeek(act.activityType) ==
+                act.weekPattern.countDaysWithSpecificActivity(
                     act.activityType
                 )
             ) 1.0 else 0.0)

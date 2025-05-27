@@ -7,7 +7,7 @@ import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
-
+// TODO mention somewhere that the categories are indexed starting from 1 isntead of 0, and eventually change the index t 0based.
 data class TimeBudgets(
 
     val workBudget: Duration,
@@ -16,11 +16,11 @@ data class TimeBudgets(
     val shoppingBudget: Duration,
     val transportBudget: Duration,
 
-    val workCategory: Int,
-    val educationCategory: Int,
-    val leisureCategory: Int,
-    val shoppingCategory: Int,
-    val transportCategory: Int,
+    val workCategory: Category,
+    val educationCategory: Category,
+    val leisureCategory: Category,
+    val shoppingCategory: Category,
+    val transportCategory: Category,
 ) {
     fun toDayTimeBudget(dailyOccurrences: Map<ActivityType, Int>): TimeBudgets {
         return TimeBudgets(
@@ -46,6 +46,18 @@ data class TimeBudgets(
             ActivityType.TRANSPORT -> transportBudget
             ActivityType.HOME -> 0.minutes
             else -> throw NoSuchElementException("activityType $activityType not supported")
+        }
+    }
+    fun getCategory(activityType: ActivityType): Category {
+        return when(activityType) {
+            ActivityType.WORK -> workCategory
+            ActivityType.EDUCATION -> educationCategory
+            ActivityType.LEISURE -> leisureCategory
+            ActivityType.SHOPPING -> shoppingCategory
+            ActivityType.TRANSPORT -> transportCategory
+
+            else -> throw NoSuchElementException("activityType $activityType not supported")
+
         }
     }
 }
@@ -88,7 +100,7 @@ class HistogramPerActivity(
     private fun HistogramSelection.select(
         rngHelper: RNGHelper,
         finalizedActivityPattern: FinalizedActivityPattern,
-    ): Pair<Duration, Int> {
+    ): Pair<Duration, Category> {
         val histogram = select(rngHelper.randomValue, finalizedActivityPattern)
         return histogram.select(rngHelper.randomValue) to histogram.categoryIndex
     }
@@ -97,7 +109,7 @@ class HistogramPerActivity(
         firstRnd: Double,
         secondRnd: Double,
         finalizedActivityPattern: FinalizedActivityPattern,
-    ): Pair<Duration, Int> {
+    ): Pair<Duration, Category> {
         val histogram = select(firstRnd, finalizedActivityPattern)
         return histogram.select(secondRnd) to histogram.categoryIndex
     }

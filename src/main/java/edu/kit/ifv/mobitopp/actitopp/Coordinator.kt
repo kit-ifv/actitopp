@@ -12,13 +12,22 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.PatternStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.Step5Generator
 import edu.kit.ifv.mobitopp.actitopp.modernization.assignDirectly
 import edu.kit.ifv.mobitopp.actitopp.modernization.calculateTourAmounts
+import edu.kit.ifv.mobitopp.actitopp.modernization.foldUntil
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.StandardCommuteDurations
 import edu.kit.ifv.mobitopp.actitopp.steps.step1.assignWeekRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.FinalizedActivityPattern
 import edu.kit.ifv.mobitopp.actitopp.steps.step7.HistogramPerActivity
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.AssignMinorActivityDuration
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.LEAD
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.MAJOR
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.StandardStep8B
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.assignFirstMainActivities
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.assignMinorActivities
+import edu.kit.ifv.mobitopp.actitopp.steps.step8.assignSecondaryMainActivities
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration.Companion.minutes
 
 val STATIC_HISTOGRAMS = HistogramPerActivity()
 
@@ -192,8 +201,7 @@ class Coordinator @JvmOverloads constructor(
         val randomNumbers = (0..9).map { randomGenerator.randomValue }
 
         val output = STATIC_HISTOGRAMS.determineTimeBudgets(randomNumbers, FinalizedActivityPattern(person, pattern))
-        val mobilityPlan =
-            patternStructure.toPlan(personWithRoutine, StandardCommuteDurations.STANDARD_ASSIGNMENT, output)
+
 
         executeStep7DC("7A", ActivityType.WORK, randomNumbers[0])
         executeStep7WRD("7B", ActivityType.WORK, randomNumbers[1])
@@ -211,7 +219,12 @@ class Coordinator @JvmOverloads constructor(
         executeStep7WRD("7J", ActivityType.TRANSPORT, randomNumbers[9])
 
 
+//        val mobilityPlan =
+//            patternStructure.toPlan(personWithRoutine, StandardCommuteDurations.STANDARD_ASSIGNMENT, output)
 
+//        mobilityPlan.assignFirstMainActivities(StandardStep8B(rngCopy, LEAD))
+//        mobilityPlan.assignSecondaryMainActivities(StandardStep8B(rngCopy, MAJOR))
+//        mobilityPlan.assignMinorActivities(AssignMinorActivityDuration(rngCopy))
 
 
         executeStep8A("8A") // This step only determines whether the histogram will be shifted after a selection has been made
@@ -1782,7 +1795,7 @@ class Coordinator @JvmOverloads constructor(
          * if activity already has a determined starting time, this is the lower bound
          */
         if (act.startTimeisScheduled()) lowerbound = act.startTime
-
+        // THIS LINE, THIS PARTICULAR LINE IS A DECIDING FACTOR IN WHICH THE TIME IS Not
         var maxduration = upperbound - lowerbound
         var minduration = 1
 
@@ -1812,6 +1825,9 @@ class Coordinator @JvmOverloads constructor(
             val nextact = act.nextActivityinTour
 
             if (lastact!!.startTimeisScheduled() && lastact!!.durationisScheduled() && nextact!!.startTimeisScheduled()) {
+                require(false) {
+                    "I believe that this code snippet can never trigger"
+                }
                 minduration = maxduration
             }
         }
@@ -1820,6 +1836,9 @@ class Coordinator @JvmOverloads constructor(
          * If so, duration and thus bounds are fixed.
          */
         if (act.startTimeisScheduled() && !act.isActivityLastinTour) {
+            require(false) {
+                "Nor do I believe that this code snippet can trigger."
+            }
             if (act.nextActivityinTour!!.startTimeisScheduled()) minduration = maxduration
         }
 
@@ -1937,8 +1956,7 @@ class Coordinator @JvmOverloads constructor(
 
         val tourday = tour.day
 
-        var lowercat = -1
-        var uppercat = -1
+
 
         /*
          *
@@ -1958,7 +1976,8 @@ class Coordinator @JvmOverloads constructor(
                 if (lastactpreviousday.startTimeisScheduled()) {
                     val endlastactpreviousday = lastactpreviousday.startTime +
                             (if (lastactpreviousday.durationisScheduled()) lastactpreviousday.duration else 0) +
-                            (if (lastactpreviousday.tripAfterActivityisScheduled()) lastactpreviousday.estimatedTripTimeAfterActivity else 0)
+                            (if (lastactpreviousday.tripAfterActivityisScheduled())
+                                lastactpreviousday.estimatedTripTimeAfterActivity else 0)
                     if (endlastactpreviousday > 1440) {
                         // +1 to allow at least one minute home time
                         startingpointlowerbound = endlastactpreviousday - 1440 + 1
@@ -1994,7 +2013,8 @@ class Coordinator @JvmOverloads constructor(
                 val firstactnextday = nextday.firstTourOfDay.firstActivityInTour
                 if (firstactnextday.startTimeisScheduled()) {
                     val startfirstactnextday = firstactnextday.startTime -
-                            (if (firstactnextday.tripBeforeActivityisScheduled()) firstactnextday.estimatedTripTimeBeforeActivity else 0)
+                            (if (firstactnextday.tripBeforeActivityisScheduled())
+                                firstactnextday.estimatedTripTimeBeforeActivity else 0)
                     if (startfirstactnextday < (startingpointupperbound - 1440)) {
                         startingpointupperbound = 1439 + startfirstactnextday
                     }
@@ -2014,9 +2034,9 @@ class Coordinator @JvmOverloads constructor(
         } else {
             tourday.highestTourIndex
         }
-        val other = (tour.index..tourindexforsearch).map { tourday.getTour(it) }
-        val otherDur = other.sumOf { it.tourDuration }
-        val homeDurs = other.size
+//        val other = (tour.index..tourindexforsearch).map { tourday.getTour(it) }
+//        val otherDur = other.sumOf { it.tourDuration }
+//        val homeDurs = other.size
         for (i in tour.index..tourindexforsearch) {
             val tmptour = tourday.getTour(i)
             tmptourdurations += tmptour.tourDuration
@@ -2044,14 +2064,17 @@ class Coordinator @JvmOverloads constructor(
             throw InvalidPatternException("Person", pattern, errorMsg)
         }
 
-
+        var lowercat = -1
+        var uppercat = -1
         // time classes for first tours of the day
         if (categories && tour.index == tourday.lowestTourIndex) {
             for (i in 0..<Configuration.NUMBER_OF_FIRST_START_TIME_CLASSES) {
-                if (lowerbound >= Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] && lowerbound <= Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i]) {
+                if (lowerbound >= Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] &&
+                    lowerbound <= Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i]) {
                     lowercat = i
                 }
-                if (upperbound >= Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] && upperbound <= Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i]) {
+                if (upperbound >= Configuration.FIRST_TOUR_START_TIMECLASSES_LB[i] &&
+                    upperbound <= Configuration.FIRST_TOUR_START_TIMECLASSES_UB[i]) {
                     uppercat = i
                 }
             }
@@ -2060,10 +2083,12 @@ class Coordinator @JvmOverloads constructor(
         // time classes for all other tours of the day
         if (categories && tour.index != tourday.lowestTourIndex) {
             for (i in 0..<Configuration.NUMBER_OF_SECTHR_START_TIME_CLASSES) {
-                if (lowerbound >= Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] && lowerbound <= Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i]) {
+                if (lowerbound >= Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] &&
+                    lowerbound <= Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i]) {
                     lowercat = i
                 }
-                if (upperbound >= Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] && upperbound <= Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i]) {
+                if (upperbound >= Configuration.SECTHR_TOUR_START_TIMECLASSES_LB[i] &&
+                    upperbound <= Configuration.SECTHR_TOUR_START_TIMECLASSES_UB[i]) {
                     uppercat = i
                 }
             }
@@ -2131,7 +2156,9 @@ class Coordinator @JvmOverloads constructor(
                 val ersteaktfolgetag = folgetag.firstTourOfDay.firstActivityInTour
                 if (ersteaktfolgetag.startTimeisScheduled()) {
                     val startersteaktfolgetag = ersteaktfolgetag.startTime -
-                            (if (ersteaktfolgetag.tripBeforeActivityisScheduled()) ersteaktfolgetag.estimatedTripTimeBeforeActivity else 0)
+                            (if (ersteaktfolgetag.tripBeforeActivityisScheduled())
+                                ersteaktfolgetag.estimatedTripTimeBeforeActivity else 0
+                                    )
                     if (startersteaktfolgetag < 180) {
                         starttime_nexttourscheduled = 1439 + startersteaktfolgetag
                     }

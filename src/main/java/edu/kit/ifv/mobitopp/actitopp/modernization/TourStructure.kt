@@ -48,9 +48,10 @@ class TourStructure(
 
     fun toPlan(
         personWithRoutine: PersonWithRoutine,
+        position: Position,
         tripDuration: DetermineTripDuration = StandardCommuteDurations.STANDARD_ASSIGNMENT,
     ): TourPlan {
-        return TourPlan.create(this, personWithRoutine, tripDuration)
+        return TourPlan.create(this, personWithRoutine, position, tripDuration)
     }
 
 }

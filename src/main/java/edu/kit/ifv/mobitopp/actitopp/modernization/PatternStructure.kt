@@ -99,8 +99,10 @@ class PatternStructure(
      * complicates the legacy counting, we can drop these days, since these days will be modelled exclusively by the
      * spawned Home Activity spanning between the previous day and the next day.
      */
-    fun toPlan(personWithRoutine: PersonWithRoutine, tripDuration: DetermineTripDuration, timeBudgets: TimeBudgets) : MobilityPlan? {
-        if(mobileDays().isEmpty()) return null // TODO handle pattern with no activity somewhere
+    fun toPlan(personWithRoutine: PersonWithRoutine, tripDuration: DetermineTripDuration, timeBudgets: TimeBudgets) : MobilityPlan {
+        if(mobileDays().isEmpty()) {
+            throw IllegalArgumentException("Cannot create mobility plan with no mobility")
+        }
         return MobilityPlan.create(mobileDays(), timeBudgets, personWithRoutine, tripDuration)
     }
 
@@ -175,22 +177,23 @@ fun Int.positiveModulus(modulo: Int): Int {
  * A wrapper class around duration that holds both the exact duration start point when a day starts and the information
  * which weekday is represented. Once sufficient refactors have been done, this class could probably be removed and simply
  * replaced with an extension function that determines the weekday from a duration.
+ * TODO note that [startOfDay] is absolute.
  */
 class DurationDay private constructor(
-    val timePoint: Duration,
+    val startOfDay: Duration,
     var lowerBoundJointTours: Int = 0,
     var lowerBoundJointActivities: Int = 0,
 ) {
     constructor(dayIndex: Int) : this(dayIndex.days)
 
-    val weekday: DayOfWeek = DayOfWeek.of(timePoint.inWholeDays.toInt().positiveModulus(7) + 1)
+    val weekday: DayOfWeek = DayOfWeek.of(startOfDay.inWholeDays.toInt().positiveModulus(7) + 1)
 
     fun next(): DurationDay {
-        return DurationDay(timePoint + 1.days)
+        return DurationDay(startOfDay + 1.days)
     }
 
     fun previous(): DurationDay {
-        return DurationDay(timePoint - 1.days)
+        return DurationDay(startOfDay - 1.days)
     }
 
     fun spawnDayStructure(mainActivityType: ActivityType): ModifiableDayStructure {
@@ -203,10 +206,10 @@ class DurationDay private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (other !is DurationDay) return false
-        return timePoint == other.timePoint
+        return startOfDay == other.startOfDay
     }
 
     override fun hashCode(): Int {
-        return timePoint.hashCode()
+        return startOfDay.hashCode()
     }
 }

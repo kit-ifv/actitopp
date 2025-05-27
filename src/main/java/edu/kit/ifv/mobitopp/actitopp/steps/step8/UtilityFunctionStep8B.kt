@@ -548,47 +548,49 @@ val ParametersStep8B = ParameterCollectionStep8B(
  * parameter collection attributes.
  */
 data class ParameterCollectionStep8B(
-    val first: ParameterStep8B,
-    val second: ParameterStep8B,
-    val third: ParameterStep8B,
-    val fourth: ParameterStep8B,
-    val fifth: ParameterStep8B,
-    val sixth: ParameterStep8B,
-    val seventh: ParameterStep8B,
-    val eighth: ParameterStep8B,
-    val ninth: ParameterStep8B,
-    val tenth: ParameterStep8B,
-    val eleventh: ParameterStep8B,
-    val twelfth: ParameterStep8B,
-    val thirteenth: ParameterStep8B,
-    val fourteenth: ParameterStep8B,
-    val fifteenth: ParameterStep8B,
+    val parameters: List<ParameterStep8B>,
 ) {
 
-
-}
-
-fun collections(): List<ParameterCollectionStep8B.() -> ParameterStep8B> {
-    return listOf(
-        {this.component1()},
-        {this.component2()},
-        {this.component3()},
-        {this.component4()},
-        {this.component5()},
-        {this.component6()},
-        {this.component7()},
-        {this.component8()},
-        {this.component9()},
-        {this.component10()},
-        {this.component11()},
-        {this.component12()},
-        {this.component13()},
-        {this.component14()},
-        {this.component15()},
+    operator fun get(index: Int): ParameterStep8B = parameters[index]
+    constructor(
+        first: ParameterStep8B,
+        second: ParameterStep8B,
+        third: ParameterStep8B,
+        fourth: ParameterStep8B,
+        fifth: ParameterStep8B,
+        sixth: ParameterStep8B,
+        seventh: ParameterStep8B,
+        eighth: ParameterStep8B,
+        ninth: ParameterStep8B,
+        tenth: ParameterStep8B,
+        eleventh: ParameterStep8B,
+        twelfth: ParameterStep8B,
+        thirteenth: ParameterStep8B,
+        fourteenth: ParameterStep8B,
+        fifteenth: ParameterStep8B,
+    ) : this(
+        listOf(
+            first,
+            second,
+            third,
+            fourth,
+            fifth,
+            sixth,
+            seventh,
+            eighth,
+            ninth,
+            tenth,
+            eleventh,
+            twelfth,
+            thirteenth,
+            fourteenth,
+            fifteenth
+        )
     )
-}
+    }
 
-data class ParameterStep8B (
+
+data class ParameterStep8B(
     val base: Double,
     val mittl_zeit_akt_60bis119min: Double,
     val mittl_zeit_akt_120bis179min: Double,

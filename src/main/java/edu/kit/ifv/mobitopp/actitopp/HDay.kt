@@ -5,12 +5,8 @@ import edu.kit.ifv.mobitopp.actitopp.modernization.BidirectionalIndexedValue
 import edu.kit.ifv.mobitopp.actitopp.modernization.DayStructure
 import edu.kit.ifv.mobitopp.actitopp.modernization.DurationDay
 import edu.kit.ifv.mobitopp.actitopp.modernization.TourStructure
-import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MovingDayPlanInput
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MutableDayPlan
-import edu.kit.ifv.mobitopp.actitopp.steps.step1.times
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.step7.TimeBudgets
 import java.time.DayOfWeek
 import java.util.NavigableMap
 import java.util.SortedMap
@@ -30,7 +26,7 @@ class HDay(parent: HWeekPattern, override val weekday: DayOfWeek) : DayStructure
 
     val pattern: HWeekPattern = parent
     override val startTimeDay: DurationDay = DurationDay(weekday.value)
-    override val duration: Duration = startTimeDay.timePoint
+    override val duration: Duration = startTimeDay.startOfDay
 
     override fun mainActivityType() = this.mainTourType
 

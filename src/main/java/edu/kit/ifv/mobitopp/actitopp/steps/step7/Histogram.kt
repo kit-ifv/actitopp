@@ -3,6 +3,7 @@ package edu.kit.ifv.mobitopp.actitopp.steps.step7
 import edu.kit.ifv.mobitopp.actitopp.IO.loadDistributionInformationFromFile
 import edu.kit.ifv.mobitopp.actitopp.WRDDiscreteDistribution
 import edu.kit.ifv.mobitopp.actitopp.WRDModelDistributionInformation
+import edu.kit.ifv.mobitopp.actitopp.changes.Category
 import java.nio.file.Path
 import java.util.Comparator
 import kotlin.io.path.Path
@@ -18,7 +19,7 @@ import kotlin.time.Duration.Companion.minutes
  * from file. Since we would like to perform the parsing process only once, we need some form of modifcation protection
  * so that the read content remain the same.
  */
-class ModifiableArrayHistogram (offset: Int = 0, probabilities: DoubleArray, categoryIndex: Int) : ArrayHistogram(
+class ModifiableArrayHistogram (offset: Int = 0, probabilities: DoubleArray, categoryIndex: Category) : ArrayHistogram(
     offset,
     probabilities,
     categoryIndex
@@ -40,7 +41,7 @@ class ModifiableArrayHistogram (offset: Int = 0, probabilities: DoubleArray, cat
 
         cumulate()
 
-        require(probabilities.sum() == 1.0) {
+        require(probabilities.sum() in 0.99999..1.00001) {
             "Somehow the sum of probabilities is not 1.0 ${probabilities.sum()}"
         }
     }
@@ -53,9 +54,9 @@ class ModifiableArrayHistogram (offset: Int = 0, probabilities: DoubleArray, cat
 open class ArrayHistogram protected constructor(
     protected val offset: Int = 0,
     protected val probabilities: DoubleArray = doubleArrayOf(0.0),
-    val categoryIndex: Int, // TODO the category index from legacy code should maybe be added somewhere else
+    val categoryIndex: Category,
 ): Comparable<Int> {
-    constructor(offset: Int, values: Collection<Number>, categoryIndex: Int) : this(
+    constructor(offset: Int, values: Collection<Number>, categoryIndex: Category) : this(
         offset,
         values.map { it.toDouble() / values.sumOf { it.toDouble() } }.toDoubleArray(),
         categoryIndex
@@ -64,8 +65,8 @@ open class ArrayHistogram protected constructor(
     protected val size = probabilities.size
     private val _cumulativeSum: DoubleArray = DoubleArray(probabilities.size)
 
-    val start = offset
-    val end = probabilities.size + offset - 1
+    val start = offset.minutes
+    val end = (probabilities.size + offset - 1).minutes
     val cumulativeSum get() = _cumulativeSum.asList()
 
     init {
@@ -125,7 +126,7 @@ open class ArrayHistogram protected constructor(
             val index = it - offset
             if (index > 0) index - 1 else null
         }
-        val ub = upperBoundInclusive?.let { it - offset } ?: (size - 1)
+        val ub = upperBoundInclusive?.let { min(it - offset, size -1) } ?: (size - 1)
 
         require(randomNumber in 0.0..1.0) {
             "Input is not a probability as random Number $randomNumber"
@@ -150,8 +151,8 @@ open class ArrayHistogram protected constructor(
      * if it's greater than [other].
      */
     override fun compareTo(other: Int): Int {
-        if(end < other) return -1
-        if(start > other) return 1
+        if(end < other.minutes) return -1
+        if(start > other.minutes) return 1
         return 0
     }
 
@@ -171,7 +172,7 @@ open class ArrayHistogram protected constructor(
             return ArrayHistogram(
                 modelDistribution.keys.min(),
                 modelDistribution.values.map { it.toDouble() / sum }.toDoubleArray(),
-                categoryIndex
+                Category(categoryIndex)
 
             )
         }
@@ -188,28 +189,4 @@ fun DoubleArray.indexBinarySearch(element: Double, fromIndex: Int = 0, toIndex: 
 
 fun Int.indexOfSearch(): Int {
     return if (this < 0) -this - 1 else this
-}
-fun main() {
-
-    val wrdDistribution =
-        loadDistributionInformationFromFile(Path("src/main/resources/edu/kit/ifv/mobitopp/actitopp/mopv14_withpkwhh/7B_KAT_0.csv"))
-    val distribution = WRDDiscreteDistribution(wrdDistribution)
-    val arrayHistogram = ArrayHistogram.fromWRDDistribution(wrdDistribution, 1)
-    val rng = Random(1)
-    for (i in 0..1000) {
-        val range = arrayHistogram.start..arrayHistogram.end
-        val first = range.random()
-        val second = range.random()
-        val bounds = min(first, second)..max(first, second)
-        println("Running i$i $bounds")
-        for (j in 0..10000) {
-            val randomNumber = rng.nextDouble()
-            val b = arrayHistogram.select(randomNumber, bounds.first, bounds.last).inWholeMinutes.toInt()
-            val a = distribution.getRandomPickFromDistribution(bounds, randomNumber)
-            if (a != b) {
-                println("Big error i$i j$j")
-            }
-        }
-    }
-
 }

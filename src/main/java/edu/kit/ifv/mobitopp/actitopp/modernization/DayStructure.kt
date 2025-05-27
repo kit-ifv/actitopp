@@ -1,14 +1,10 @@
 package edu.kit.ifv.mobitopp.actitopp.modernization
 
 import edu.kit.ifv.mobitopp.actitopp.enums.ActivityType
-import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DayPlan
-import edu.kit.ifv.mobitopp.actitopp.modernization.plan.DetermineTripDuration
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.HomeDayPlan
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MovingDayPlan
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MovingDayPlanInput
 import edu.kit.ifv.mobitopp.actitopp.modernization.plan.MutableDayPlan
-import edu.kit.ifv.mobitopp.actitopp.steps.step2.PersonWithRoutine
-import edu.kit.ifv.mobitopp.actitopp.steps.step7.TimeBudgets
 
 import java.time.DayOfWeek
 import kotlin.time.Duration
@@ -154,7 +150,7 @@ interface DayStructure {
 
 class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
     override val weekday: DayOfWeek = startTimeDay.weekday
-    override val duration: Duration = startTimeDay.timePoint
+    override val duration: Duration = startTimeDay.startOfDay
     override fun mainActivityType(): ActivityType = ActivityType.HOME
 
     override fun amountOfPrecursorElements(): Int = 0
@@ -167,7 +163,7 @@ class HomeDay(override val startTimeDay: DurationDay) : DayStructure {
     override fun indexedElements(): Collection<BidirectionalIndexedValue<TourStructure>> = emptySet()
 
     override fun toDayPlan(movingDayPlanInput: MovingDayPlanInput): MutableDayPlan {
-        return HomeDayPlan()
+        return HomeDayPlan(startTimeDay)
     }
 }
 
@@ -176,7 +172,7 @@ class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStr
     constructor(dayIndex: Int, mainTourStructure: TourStructure) : this(DurationDay(dayIndex), mainTourStructure)
 
     override val weekday: DayOfWeek = startTimeDay.weekday
-    override val duration = startTimeDay.timePoint
+    override val duration = startTimeDay.startOfDay
     // TODO maybe protect this field from modification, right now it is just a template holder for 3A
     override var minimumAmountOfToursByJointActions: Int = 0
     // TODO, joint action modelling should not be interweaved with normal structures.
@@ -206,7 +202,7 @@ class ModifiableDayStructure(override val startTimeDay: DurationDay, mainTourStr
 
     override fun toDayPlan(movingDayPlanInput: MovingDayPlanInput): MutableDayPlan {
         return MovingDayPlan.create(
-            elements(),
+            indexedElements(),
             movingDayPlanInput
         )
     }

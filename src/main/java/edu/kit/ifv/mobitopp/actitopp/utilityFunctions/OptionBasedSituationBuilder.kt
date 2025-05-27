@@ -37,12 +37,14 @@ interface OptionBasedSituationBuilder<X : Any, SIT : ChoiceSituation<X>, PARAMS>
     /**
      * Add the convenience method to add a bunch of options, zipped with the parameters when referencing the same utility function
      */
-
-    fun <P> bulk(options: List<X>, parameterConversions: List<PARAMS.() -> P>, utilityFunction: P.(SIT) -> Double) {
-        options.zip(parameterConversions).forEach { (option, conversion) ->
+    fun <P> bulk(options: Map<X, (PARAMS) -> P>, utilityFunction: P.(SIT) -> Double) {
+        bulk(options.entries.map{it.key to it.value}, utilityFunction)
+    }
+    fun <P> bulk(options: Collection<Pair<X, (PARAMS) -> P>>, utilityFunction: P.(SIT) -> Double) {
+        options.forEach { (option, conversion) ->
             val internalUtilityFunction = UtilityFunction { alternative: SIT, parameterObject: PARAMS ->
                 utilityFunction.invoke(
-                    parameterObject.conversion(),
+                    conversion(parameterObject),
                     alternative
                 )
             }

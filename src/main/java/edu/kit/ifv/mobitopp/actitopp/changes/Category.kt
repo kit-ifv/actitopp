@@ -8,4 +8,8 @@ package edu.kit.ifv.mobitopp.actitopp.changes
  */
 @JvmInline
 value class Category(val category: Int) {
+    // To collect all comparisons against the category to simplify changing to a 0 based index sometime
+    fun matches(index: Int): Boolean {
+        return category == index
+    }
 }

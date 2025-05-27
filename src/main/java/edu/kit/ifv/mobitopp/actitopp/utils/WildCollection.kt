@@ -1,5 +1,7 @@
 package edu.kit.ifv.mobitopp.actitopp.utils
 
+import kotlin.time.Duration
+
 fun <T> Iterable<T>.zipWithPrevious(): List<Pair<T?, T>> {
     val result = mutableListOf<Pair<T?, T>>()
     var previous: T? = null
@@ -25,3 +27,4 @@ fun <A, B, C> Iterable<A>.zip(
     }
     return result
 }
+

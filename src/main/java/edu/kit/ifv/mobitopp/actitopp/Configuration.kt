@@ -151,11 +151,11 @@ object Configuration {
      * activity durations for home activity - categories
      */
     // activity durations for home activity - categories - Lower Bounds
-    
+    @Deprecated("Is exactly the same as the bounds of the arrays in 10T")
     val HOME_TIME_TIMECLASSES_LB: IntArray = intArrayOf(0, 15, 30, 60, 120, 180, 240, 300, 360, 420)
 
     // activity durations for home activity - categories - Upper Bounds
-    
+    @Deprecated("Is exactly the same as the bounds of the arrays in 10T")
     val HOME_TIME_TIMECLASSES_UB: IntArray = intArrayOf(14, 29, 59, 119, 179, 239, 299, 359, 419, 1440)
 
     // activity durations for home activity - number of categories
@@ -167,12 +167,12 @@ object Configuration {
      * start time for first tour of the day - categories
      */
     // start time for first tour of the day  - Lower Bounds
-    
+    @Deprecated("Is exactly the same as the bounds of the arrays in 10N")
     val FIRST_TOUR_START_TIMECLASSES_LB: IntArray =
         intArrayOf(0, 120, 240, 360, 420, 480, 540, 600, 660, 780, 900, 960, 1020, 1080, 1200, 1320)
 
     // start time for first tour of the day  - Upper Bounds
-    
+    @Deprecated("Is exactly the same as the bounds of the arrays in 10N")
     val FIRST_TOUR_START_TIMECLASSES_UB: IntArray =
         intArrayOf(119, 239, 359, 419, 479, 539, 599, 659, 779, 899, 959, 1019, 1079, 1199, 1319, 1439)
 
@@ -185,11 +185,11 @@ object Configuration {
      * start time for second and third tour of the day
      */
     // start time for second and third tour of the day - Lower Bounds
-    
+    @Deprecated("Is exactly the same as the bounds of the arrays in 10P")
     val SECTHR_TOUR_START_TIMECLASSES_LB: IntArray = intArrayOf(0, 540, 660, 780, 840, 900, 960, 1020, 1080, 1140, 1200)
 
     // start time for second and third tour of the day - Upper Bounds
-    
+    @Deprecated("Is exactly the same as the bounds of the arrays in 10P")
     val SECTHR_TOUR_START_TIMECLASSES_UB: IntArray =
         intArrayOf(539, 659, 779, 839, 899, 959, 1019, 1079, 1139, 1199, 1439)
 

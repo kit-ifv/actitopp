@@ -236,7 +236,6 @@ val step4Model =
         option(ActivityType.SHOPPING, parameters = { shopping }, { standardUtilityFunction(this, it) })
         option(ActivityType.TRANSPORT, parameters = { transport }, { standardUtilityFunction(this, it) })
         option(ActivityType.WORK, parameters = { work }, { standardUtilityFunction(this, it) })
-
     })
 
 val step4WithParams = step4Model.initializeWithParameters(ParameterSet4)

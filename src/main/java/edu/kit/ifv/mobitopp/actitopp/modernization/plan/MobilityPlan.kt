@@ -16,16 +16,27 @@ class MobilityPlan(
     val activities: Collection<LinkedActivity>,
     val timeBudgets: TimeBudgets,
     val person: IPerson,
+    tripDuration: DetermineTripDuration = StandardCommuteDurations(),
 ) {
-
-    val startHomeAnchor = LinkedActivity(ActivityType.HOME).apply {
+    // Assume that the agent starts their plan at home.
+    val startHomeAnchor = LinkedActivity.homeDay().apply {
         startTime = 0.minutes
         duration = 1.minutes
     }
 
-    val endHomeAnchor = LinkedActivity(ActivityType.HOME).apply {
+    // And ends their mobility pattern at home.
+    val endHomeAnchor = LinkedActivity.homeDay().apply {
         startTime = dayPlans.size.days - 1.minutes
         duration = 1.minutes
+    }
+
+    init {
+        startHomeAnchor.link(
+            activities.first(),
+            duration = tripDuration.firstTourTrip(person, activities.first().activityType)
+        )
+        activities.last()
+            .link(endHomeAnchor, duration = tripDuration.lastTourTrip(person, activities.last().activityType))
     }
 
     fun amountOfDaysWithActivity(activityType: ActivityType): Int {
@@ -34,6 +45,17 @@ class MobilityPlan(
 
     val activityMap: Map<ActivityType, List<LinkedActivity>> = activities.groupBy { it.activityType }
 
+    /**
+     * An activity is regular, if the amount of activities per week is equal to the number of days with said activity
+     */
+    val regularActivities: Map<ActivityType, Boolean> by lazy {
+        val dayMap = ActivityType.OUTOFHOMEACTIVITY.associateWith { actType ->
+            dayPlans.count { it.hasActivity(actType) }
+        }
+        activities.groupBy { it.activityType }.mapValues { (key, value) ->
+            value.size == dayMap[key]
+        }
+    }
 
     fun calculateMeanTime(dayPlan: MutableDayPlan, activityType: ActivityType): Duration {
         TODO()
