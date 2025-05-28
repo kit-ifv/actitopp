@@ -249,18 +249,7 @@ val step2AModel =
 
 val coordinatedStep2AModel =
     ModifiableDiscreteChoiceModel<ActivityType, DaySituation, ParameterCollectionStep2A>(AllocatedLogit.create {
-        option(ActivityType.EDUCATION, parameters = { education }, {
-            (if (it.isStudentOrAzubi() && it.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
-                this,
-                it
-            )
-        })
-        option(ActivityType.HOME) {
-            0.0
-        }
-        option(ActivityType.LEISURE, parameters = { leisure }, { standardUtilityFunction(this, it) })
-        option(ActivityType.SHOPPING, parameters = { shopping }, { standardUtilityFunction(this, it) })
-        option(ActivityType.TRANSPORT, parameters = { transport }, { standardUtilityFunction(this, it) })
+
         option(ActivityType.WORK, parameters = { work }, {
             (if (it.isEmployedAnywhere() && it.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
                 this,
@@ -268,6 +257,21 @@ val coordinatedStep2AModel =
             )
         }
         )
+        option(ActivityType.EDUCATION, parameters = { education }, {
+            (if (it.isStudentOrAzubi() && it.isStandardWorkingDay()) 1.3 else 1.0) * standardUtilityFunction(
+                this,
+                it
+            )
+        })
+        option(ActivityType.LEISURE, parameters = { leisure }, { standardUtilityFunction(this, it) })
+        option(ActivityType.SHOPPING, parameters = { shopping }, { standardUtilityFunction(this, it) })
+        option(ActivityType.TRANSPORT, parameters = { transport }, { standardUtilityFunction(this, it) })
+        option(ActivityType.HOME) {
+            0.0
+        }
+
+
+
 
 
     })

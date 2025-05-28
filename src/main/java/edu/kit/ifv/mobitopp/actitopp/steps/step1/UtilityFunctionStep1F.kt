@@ -117,9 +117,7 @@ data class ParametersStep1F(
 
 
 val step1FModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterCollectionStep1F>(AllocatedLogit.create {
-    option(0) {
-        0.0
-    }
+
     option(1, parameters = {option1}) { standardUtilityFunction(this, it) }
     option(2, parameters = {option2}) { standardUtilityFunction(this, it) }
     option(3, parameters = {option3}) { standardUtilityFunction(this, it) }
@@ -128,6 +126,9 @@ val step1FModel = ModifiableDiscreteChoiceModel<Int, PersonSituation, ParameterC
     option(6, parameters = {option6}) { standardUtilityFunction(this, it) }
     option(7, parameters = {option7}) {
         standardUtilityFunction(this, it)
+    }
+    option(0) {
+        0.0
     }
 }
 )

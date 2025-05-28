@@ -57,6 +57,11 @@ class MovingDayPlan(
     override val durationDay: DurationDay,
 ) : MutableDayPlan, List<LinkedActivity> by activities {
     private val _mainActivities by lazy {tourPlans.map { it.mainActivity }}
+
+
+    init {
+        println("Creating Day with $activities")
+    }
     override fun mainActivities(): List<LinkedActivity> {
         return _mainActivities
     }
@@ -68,8 +73,8 @@ class MovingDayPlan(
     override var firstActivity: LinkedActivity = activities.first()
     override var lastActivity: LinkedActivity = activities.last()
 
-    val startHomeActivityDay get() = firstActivity.previousTrip?.previousActivity
-    val endHomeActivityDay get() = lastActivity.nextTrip?.nextActivity
+    val startHomeActivityDay by lazy { firstActivity.previousTrip?.previousActivity }
+    val endHomeActivityDay by lazy { lastActivity.nextTrip?.nextActivity}
 
     override fun numberOfActivities(activityType: ActivityType): Int {
         return activities.count { it.activityType == activityType }
@@ -101,7 +106,7 @@ class MovingDayPlan(
         // Potentially locate a successor activity with a fixed start time in this day, and track the sum of
         // durations until either a successor is found or the end of the day is reached (checked by comparing against end
         // home activity)
-        val (fixedSuccessor, durationToSuccessor) = linkedActivity.iterator().takeWhile { it != endHomeActivityDay }
+        val (fixedSuccessor, durationToSuccessor) = linkedActivity.iterator().drop(1).takeWhile { it != endHomeActivityDay }
             .foldUntil({ it.startTime != null }, Duration.ZERO) { acc, action ->
                 acc + (action.estimatedDuration(estimatedActivityDurations))
             }
@@ -109,7 +114,7 @@ class MovingDayPlan(
             Similarly, locate a precursor activity with a fixed end time. And track the sum of durations either to the
             fixec element or the sum of durations up to the start of the day.
          */
-        val (fixedPrecursor, durationToPrecursor) = linkedActivity.backwardIterator()
+        val (fixedPrecursor, durationToPrecursor) = linkedActivity.backwardIterator().drop(1)
             .takeWhile { it != startHomeActivityDay }.foldUntil({ it.endTime != null }, Duration.ZERO) { acc, action ->
             acc + (action.estimatedDuration(estimatedActivityDurations))
         }
@@ -120,6 +125,11 @@ class MovingDayPlan(
         // has a fixed time, the end of the day is the fallback.
         val latestEndTime = (fixedSuccessor?.startTime ?: (durationDay.startOfDay + 1.days)) - durationToSuccessor
         val maximumDuration = latestEndTime - earliestStartTime
+
+        val successorElements = linkedActivity.iterator().drop(1).takeWhile { it != endHomeActivityDay }.count()
+        val predecessorElements =  linkedActivity.backwardIterator().drop(1)
+            .takeWhile { it != startHomeActivityDay }.count()
+
         require(maximumDuration in 1.minutes..1.days) {
             "This duration is not reasonable."
         }

@@ -42,8 +42,8 @@ class WRDDefaultModelStep(
             weightedDistribution.modifydistributionelement(selection)
             //TODO remove theModifiee and make person in coordinator private again
             weightedDistribution.theModifiee.add(modelCoordinator.person.id)
-            println("WRD ${weightedDistribution.id} ($category) for $activityType modified by ${weightedDistribution.theModifiee.size}" +
-                    " persons ${weightedDistribution.theModifiee}")
+//            println("WRD ${weightedDistribution.id} ($category) for $activityType modified by ${weightedDistribution.theModifiee.size}" +
+//                    " persons ${weightedDistribution.theModifiee}")
 
         }
 

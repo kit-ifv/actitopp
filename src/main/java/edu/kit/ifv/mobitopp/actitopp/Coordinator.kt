@@ -221,10 +221,10 @@ class Coordinator @JvmOverloads constructor(
 
 //        val mobilityPlan =
 //            patternStructure.toPlan(personWithRoutine, StandardCommuteDurations.STANDARD_ASSIGNMENT, output)
-
-//        mobilityPlan.assignFirstMainActivities(StandardStep8B(rngCopy, LEAD))
-//        mobilityPlan.assignSecondaryMainActivities(StandardStep8B(rngCopy, MAJOR))
-//        mobilityPlan.assignMinorActivities(AssignMinorActivityDuration(rngCopy))
+//
+//        mobilityPlan?.assignFirstMainActivities(StandardStep8B(rngCopy, LEAD))
+//        mobilityPlan?.assignSecondaryMainActivities(StandardStep8B(rngCopy, MAJOR))
+//        mobilityPlan?.assignMinorActivities(AssignMinorActivityDuration(rngCopy))
 
 
         executeStep8A("8A") // This step only determines whether the histogram will be shifted after a selection has been made
@@ -232,9 +232,9 @@ class Coordinator @JvmOverloads constructor(
         executeStep8_MainAct("8D", "8E") // The main activity of the other tours is assigned a duration
         executeStep8_NonMainAct("8J", "8K") // All other activities are assigned a duration
 
-        executeStep9A("9A") // This is just a binary decision (yes/no) whether
+        executeStep9A("9A") // Determines the start time category of the first tour of the day, if working or education
 
-        executeStep10A("10A") // Appears to be a fixed start for work/edu first tours ?/
+        executeStep10A("10A") // This is a yes no decision, it sets a field called "default_start_cat_yes"
 
         createTourStartTimesDueToScheduledActivities()
 
@@ -1454,9 +1454,13 @@ class Coordinator @JvmOverloads constructor(
                 step_dc.limitUpperandLowerBound(lowerbound, upperbound)
 
                 if (Configuration.coordinated_modelling) {
+                    // Get whether the person starts their day in the same category.
                     if (currentTour.existsAttributeinMap("default_start_cat_yes") && currentTour.getAttributefromMap("default_start_cat_yes") == 1.0) {
                         val defaultcat = person.getAttributefromMap("first_tour_default_start_cat").toInt()
+                        //And if the category fits within the bounds, use the standard category as only option.
                         if (defaultcat >= lowerbound && defaultcat <= upperbound) step_dc.limitUpperandLowerBound(
+
+
                             defaultcat,
                             defaultcat
                         )
@@ -1467,7 +1471,7 @@ class Coordinator @JvmOverloads constructor(
                 val decision = step_dc.doStep()
 
                 log(id_dc, currentTour, decision.toString())
-
+                // TODO this field is never used in any calculation whatsoever, except the calculation below.
                 currentTour.addAttributetoMap("tourStartCat_index", decision.toDouble())
 
 

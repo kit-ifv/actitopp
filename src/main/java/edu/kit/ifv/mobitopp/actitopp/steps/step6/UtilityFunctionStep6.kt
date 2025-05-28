@@ -231,11 +231,12 @@ class ActivitySituation private constructor(
 
 val step6Model =
     ModifiableDiscreteChoiceModel<ActivityType, ActivitySituation, ParameterCollectionStep6>(AllocatedLogit.create {
+        option(ActivityType.WORK, parameters = { work }) { standardUtilityFunction(this, it) }
         option(ActivityType.EDUCATION, parameters = { education }) { standardUtilityFunction(this, it) }
         option(ActivityType.LEISURE) { 0.0 }
         option(ActivityType.SHOPPING, parameters = { shopping }) { standardUtilityFunction(this, it) }
         option(ActivityType.TRANSPORT, parameters = { transport }) { standardUtilityFunction(this, it) }
-        option(ActivityType.WORK, parameters = { work }) { standardUtilityFunction(this, it) }
+
     })
 
 val step6WithParams = step6Model.initializeWithParameters(ParameterSet6)

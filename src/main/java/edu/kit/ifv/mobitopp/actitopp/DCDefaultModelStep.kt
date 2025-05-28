@@ -32,7 +32,7 @@ class DCDefaultModelStep(
 */
     private val modelinfo: DCModelSteplnformation = modelFileBase.getModelInformationforDCStep(id)
 
-    val alternatives: List<DCAlternative> = modelinfo.alternativesList.map { DCAlternative(it) }.sortedBy { it.name }
+    val alternatives: List<DCAlternative> = modelinfo.alternativesList.map { DCAlternative(it) }
 
     fun getProbability(alternativeName: String): Double {
         return alternatives.first { it.name == alternativeName }.probability

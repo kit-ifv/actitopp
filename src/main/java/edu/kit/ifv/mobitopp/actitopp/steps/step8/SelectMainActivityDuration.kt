@@ -27,6 +27,8 @@ class StandardStep8B<P>(
 
     fun calculateFixed(input: Step8BInput): Duration {
         return input.run {
+            val bounds = dayPlan.boundsFor(tourPlan.mainActivity)
+            println(bounds)
             val meanActivityDuration = dayPlan.getBudget(tourMainActivityType)
             taintedHistograms.selectAndTaint(rng, meanActivityDuration) {
                 MainDurationSituation(

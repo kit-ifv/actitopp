@@ -99,9 +99,9 @@ class PatternStructure(
      * complicates the legacy counting, we can drop these days, since these days will be modelled exclusively by the
      * spawned Home Activity spanning between the previous day and the next day.
      */
-    fun toPlan(personWithRoutine: PersonWithRoutine, tripDuration: DetermineTripDuration, timeBudgets: TimeBudgets) : MobilityPlan {
+    fun toPlan(personWithRoutine: PersonWithRoutine, tripDuration: DetermineTripDuration, timeBudgets: TimeBudgets) : MobilityPlan? {
         if(mobileDays().isEmpty()) {
-            throw IllegalArgumentException("Cannot create mobility plan with no mobility")
+            return null
         }
         return MobilityPlan.create(mobileDays(), timeBudgets, personWithRoutine, tripDuration)
     }
