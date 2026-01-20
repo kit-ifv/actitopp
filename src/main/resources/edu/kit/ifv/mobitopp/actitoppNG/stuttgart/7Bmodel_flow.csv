@@ -1,0 +1,12 @@
+paramname;in;out;alternative;contextIdentifier
+eakt_prowoche_1bis3;yes;no;no;person
+zeitbudget_work_ueber_kat2;yes;no;no;person
+alter_10bis17;yes;no;no;default
+beruf_schueler;yes;no;no;default
+beruf_azubi;yes;no;no;default
+tagemit_eakt_3;yes;no;no;person
+tagemit_eakt_4;yes;no;no;person
+1;no;yes;yes;person
+2;no;yes;yes;person
+3;no;yes;yes;person
+4;no;yes;yes;person

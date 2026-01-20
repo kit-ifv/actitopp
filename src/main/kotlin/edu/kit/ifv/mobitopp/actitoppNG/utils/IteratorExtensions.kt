@@ -1,0 +1,76 @@
+package edu.kit.ifv.mobitopp.actitoppNG.utils
+
+fun <T, R> Iterator<T>.foldUntil(
+    predicate: (T) -> Boolean,
+    initial: R,
+    operation: (acc: R, T) -> R,
+): Pair<T?, R> {
+    var acc = initial
+    while (hasNext()) {
+        val current = next()
+        if (predicate(current)) {
+            return current to acc
+        }
+        acc = operation(acc, current)
+    }
+    return null to acc
+}
+
+
+fun <T> Iterator<T>.takeUntil(predicate: (T) -> Boolean): List<T> {
+    val list = ArrayList<T>()
+    for (item in this) {
+        list.add(item)
+        if (predicate(item)) {
+            break
+        }
+    }
+    return list
+}
+
+fun <T> Sequence<T>.takeUntil(predicate: (T) -> Boolean): Sequence<T> {
+    return sequence {
+        for (item in this@takeUntil) {
+            yield(item)
+            if (predicate(item)) {
+                break
+            }
+        }
+    }
+
+}
+
+fun <T, R> Sequence<T>.foldUntil(
+    predicate: (T) -> Boolean,
+    initial: R,
+    operation: (acc: R, T) -> R,
+): Pair<
+        T?, R> = iterator().foldUntil(predicate, initial, operation)
+
+
+fun <T> Iterable<T>.zipWithPrevious(): List<Pair<T?, T>> {
+    val result = mutableListOf<Pair<T?, T>>()
+    var previous: T? = null
+    for (current in this) {
+        result.add(previous to current)
+        previous = current
+    }
+    return result
+}
+
+fun <A, B, C> Iterable<A>.zip(
+
+    second: Iterable<B>,
+    third: Iterable<C>,
+): List<Triple<A, B, C>> {
+    val iterator1 = iterator()
+    val iterator2 = second.iterator()
+    val iterator3 = third.iterator()
+
+    val result = mutableListOf<Triple<A, B, C>>()
+    while (iterator1.hasNext() && iterator2.hasNext() && iterator3.hasNext()) {
+        result.add(Triple(iterator1.next(), iterator2.next(), iterator3.next()))
+    }
+    return result
+}
+

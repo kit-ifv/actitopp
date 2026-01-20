@@ -1,0 +1,82 @@
+# The .gitlab-ci.yml makes use of some variables stored in repositories config:
+#
+#  MAJOR: the current releases major version number
+#   - automatically incremented after each major-release-job
+#
+#  MINOR: the current releases minor version number
+#   - automatically incremented after each minor-release-job
+#   - reset to 0 after each major-release-job
+#
+# BUILD_NUMBER: the current releases build number, suffix of the version string
+#  - automatically incremented after each deploy-job
+#  - reset to 0 after each major-release-job and minor-release-job
+#
+# CI_JOB_TOKEN: token to update version and build numbers in GitLab variables, must be activated in CI/CD settings
+# GITLAB_API_URL: url pointing to the variables endpoint, to update version and build number variables
+#  - e.g. https://gitlab.example.server.com/api/v4/projects/$CI_PROJECT_ID/variables
+#
+# LOCAL_REPO_URL: repository url for hosting local (non-public) artifacts: deploy-job
+# LOCAL_REPO_USERNAME: username for publishing to local (non-public) artifact repository: deploy-job
+# LOCAL_REPO_PASSWORD: password for publishing to local (non-public) artifact repository: deploy-job
+#
+# PUBLIC_REPO_URL: repository url for hosting public artifacts: major-release-job, minor-release-job
+# PUBLIC_REPO_USERNAME: username for publishing to public artifact repository: major-release-job, minor-release-job
+# PUBLIC_REPO_PASSWORD: password for publishing to public artifact repository: major-release-job, minor-release-job
+
+variables:
+  BUILD_VERSION: "$MAJOR.$MINOR.$BUILD_NUMBER"
+
+stages: # List of stages for jobs, and their order of execution
+  - build
+  - test
+  - deploy
+
+
+build-job:
+  stage: build
+  image: amazoncorretto:21
+  script:
+    - ./gradlew compileJava
+  artifacts:
+    when: always
+    paths:
+      - build/
+
+unit-test-job:
+  stage: test
+  image: amazoncorretto:21
+  needs: ["build-job"]
+  script:
+    - ./gradlew test
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+
+#code-style:
+#  stage: test
+#  needs: ["build-job"]
+#  image: amazoncorretto:21
+#  script:
+#    - ./gradlew detektGenerateConfig
+#    - ./gradlew detekt
+
+deploy-job:
+  stage: deploy
+  only:
+    - master
+  needs: [ "build-job", "unit-test-job" ]
+  image: amazoncorretto:21
+  resource_group: production #only one deploy job at a time
+  script:
+    - echo "Publish local release $BUILD_VERSION"
+    - |
+      ./gradlew publish -PbuildVersion=$BUILD_VERSION \
+      -PdoPublish=true \
+      -PisRelease=false \
+      -PlocalUrl=$LOCAL_REPO_URL \
+      -PlocalRepoUser=$LOCAL_REPO_USERNAME \
+      -PlocalRepoPassword=$LOCAL_REPO_PASSWORD
+    - export NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+    - echo "Update BUILD_NUMBER to $NEW_BUILD_NUMBER"
+    - curl --request PUT --header "PRIVATE-TOKEN:$API_TOKEN" --form "value=$NEW_BUILD_NUMBER" "$GITLAB_API_URL/BUILD_NUMBER"
